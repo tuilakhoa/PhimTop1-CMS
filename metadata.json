@@ -1,0 +1,8 @@
+{
+  "name": "KKPhim Clone",
+  "description": "Web xem phim tự động lấy dữ liệu từ API phimapi.com với cơ chế setup ban đầu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

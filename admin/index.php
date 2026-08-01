@@ -1,0 +1,188 @@
+<?php
+require_once __DIR__ . '/../includes/db.php';
+requireAdmin();
+
+$settings = getSettings();
+$successMsg = '';
+$errorMsg = '';
+
+// Handle Settings Update (Shared across seo and settings pages)
+if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
+    $updates = [];
+    if (isset($_POST['displayMode'])) $updates['displayMode'] = $_POST['displayMode'];
+    if (isset($_POST['tmdbApiKey'])) $updates['tmdbApiKey'] = $_POST['tmdbApiKey'];
+    if (isset($_POST['siteName'])) $updates['siteName'] = $_POST['siteName'];
+    if (isset($_POST['seoTitle'])) $updates['seoTitle'] = $_POST['seoTitle'];
+    if (isset($_POST['seoDesc'])) $updates['seoDesc'] = $_POST['seoDesc'];
+    if (isset($_POST['seoKeywords'])) $updates['seoKeywords'] = $_POST['seoKeywords'];
+    if (isset($_POST['verifyGoogle'])) $updates['verifyGoogle'] = $_POST['verifyGoogle'];
+    if (isset($_POST['verifyBing'])) $updates['verifyBing'] = $_POST['verifyBing'];
+    if (isset($_POST['verifyYandex'])) $updates['verifyYandex'] = $_POST['verifyYandex'];
+    if (isset($_POST['customHead'])) $updates['customHead'] = $_POST['customHead'];
+    if (isset($_POST['customBody'])) $updates['customBody'] = $_POST['customBody'];
+    
+    // Security & Analytics
+    if (isset($_POST['cfTurnstileKey'])) $updates['cfTurnstileKey'] = $_POST['cfTurnstileKey'];
+    if (isset($_POST['cfTurnstileSecret'])) $updates['cfTurnstileSecret'] = $_POST['cfTurnstileSecret'];
+    if (isset($_POST['cfAnalyticsToken'])) $updates['cfAnalyticsToken'] = $_POST['cfAnalyticsToken'];
+    if (isset($_POST['cfApiToken'])) $updates['cfApiToken'] = $_POST['cfApiToken'];
+    if (isset($_POST['cfAccountId'])) $updates['cfAccountId'] = $_POST['cfAccountId'];
+    if (isset($_POST['cfZoneId'])) $updates['cfZoneId'] = $_POST['cfZoneId'];
+    if (isset($_POST['gaMeasurementId'])) $updates['gaMeasurementId'] = $_POST['gaMeasurementId'];
+
+    // Indexing APIs
+    if (isset($_POST['googleIndexJson'])) $updates['googleIndexJson'] = $_POST['googleIndexJson'];
+    if (isset($_POST['indexNowKey'])) {
+        $updates['indexNowKey'] = $_POST['indexNowKey'];
+        // Generate IndexNow key file
+        if (!empty($_POST['indexNowKey'])) {
+            $key = trim($_POST['indexNowKey']);
+            file_put_contents(__DIR__ . "/../{$key}.txt", $key);
+        }
+    }
+
+    // Footer & Social
+    if (isset($_POST['footerText'])) $updates['footerText'] = $_POST['footerText'];
+    if (isset($_POST['socialFacebook'])) $updates['socialFacebook'] = $_POST['socialFacebook'];
+    if (isset($_POST['socialYoutube'])) $updates['socialYoutube'] = $_POST['socialYoutube'];
+    if (isset($_POST['socialTwitter'])) $updates['socialTwitter'] = $_POST['socialTwitter'];
+    if (isset($_POST['socialTelegram'])) $updates['socialTelegram'] = $_POST['socialTelegram'];
+    
+    
+    // Router Slugs
+    if (isset($_POST['slugMovie'])) $updates['slugMovie'] = $_POST['slugMovie'];
+    if (isset($_POST['slugWatch'])) $updates['slugWatch'] = $_POST['slugWatch'];
+    if (isset($_POST['slugList'])) $updates['slugList'] = $_POST['slugList'];
+    if (isset($_POST['slugGenre'])) $updates['slugGenre'] = $_POST['slugGenre'];
+    if (isset($_POST['slugCountry'])) $updates['slugCountry'] = $_POST['slugCountry'];
+    
+    // Sitemap
+    if (isset($_POST['sitemapLimit'])) $updates['sitemapLimit'] = (int)$_POST['sitemapLimit'];
+    if (isset($_POST['sitemapIncludeMovies'])) $updates['sitemapIncludeMovies'] = (int)$_POST['sitemapIncludeMovies'];
+    if (isset($_POST['sitemapIncludeCategories'])) $updates['sitemapIncludeCategories'] = (int)$_POST['sitemapIncludeCategories'];
+    if (isset($_POST['sitemapLinksPerFile'])) $updates['sitemapLinksPerFile'] = (int)$_POST['sitemapLinksPerFile'];
+    
+    // Google OAuth
+    if (isset($_POST['googleClientId'])) $updates['googleClientId'] = $_POST['googleClientId'];
+    if (isset($_POST['googleClientSecret'])) $updates['googleClientSecret'] = $_POST['googleClientSecret'];
+    if (isset($_POST['googleAllowedEmails'])) $updates['googleAllowedEmails'] = $_POST['googleAllowedEmails'];
+
+    // Update Settings
+    if (isset($_POST['updateServerUrl'])) $updates['updateServerUrl'] = $_POST['updateServerUrl'];
+
+    // DB Config
+    if (isset($_POST['dbType'])) {
+        $dbType = $_POST['dbType'];
+        $newDbConfig = ['type' => $dbType];
+        
+        if ($dbType === 'mysql') {
+            $newDbConfig['host'] = $_POST['dbHost'] ?? '127.0.0.1';
+            $newDbConfig['database'] = $_POST['dbName'] ?? '';
+            $newDbConfig['user'] = $_POST['dbUser'] ?? '';
+            $newDbConfig['password'] = $_POST['dbPass'] ?? '';
+        } else if ($dbType === 'firestore') {
+            $newDbConfig['projectId'] = $_POST['projectId'] ?? '';
+            $saStr = $_POST['serviceAccount'] ?? '{}';
+            $newDbConfig['serviceAccount'] = json_decode($saStr, true);
+        }
+        saveDbConfig($newDbConfig);
+    }
+    // Handle Logo Upload
+    if (isset($_FILES['logoFile']) && $_FILES['logoFile']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/../assets/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+        
+        $fileName = 'logo_' . time() . '.' . pathinfo($_FILES['logoFile']['name'], PATHINFO_EXTENSION);
+        $targetPath = $uploadDir . $fileName;
+        
+        if (move_uploaded_file($_FILES['logoFile']['tmp_name'], $targetPath)) {
+            $updates['logoUrl'] = '/assets/' . $fileName;
+        }
+    }
+    
+    updateSettings($updates);
+    $settings = getSettings();
+    
+    // Update .htaccess for SEO Slugs
+    $htaccessPath = __DIR__ . '/../.htaccess';
+    if (file_exists($htaccessPath)) {
+        $htaccessContent = file_get_contents($htaccessPath);
+        
+        $slugMovie = $settings['slugMovie'] ?? 'phim';
+        $slugWatch = $settings['slugWatch'] ?? 'xem-phim';
+        $slugList = $settings['slugList'] ?? 'danh-sach';
+        $slugGenre = $settings['slugGenre'] ?? 'the-loai';
+        $slugCountry = $settings['slugCountry'] ?? 'quoc-gia';
+        
+        $seoBlock = "# SEO URL Rewrites\n";
+        $seoBlock .= "    RewriteRule ^{$slugMovie}/([^/]+)/?$ movie.php?slug=$1 [QSA,L]\n";
+        $seoBlock .= "    RewriteRule ^{$slugWatch}/([^/]+)/([^/]+)/?$ watch.php?slug=$1&ep=$2 [QSA,L]\n";
+        $seoBlock .= "    RewriteRule ^{$slugList}/([^/]+)/?$ category.php?type=$1 [QSA,L]\n";
+        $seoBlock .= "    RewriteRule ^{$slugGenre}/([^/]+)/?$ category.php?slug=$1&type=the-loai [QSA,L]\n";
+        $seoBlock .= "    RewriteRule ^{$slugCountry}/([^/]+)/?$ category.php?slug=$1&type=quoc-gia [QSA,L]\n";
+        
+        // Replace the block dynamically using regex
+        $newHtaccess = preg_replace('/# SEO URL Rewrites.*?(?=(<\/IfModule>|<\/FilesMatch>|$))/is', str_replace(['\\', '$'], ['\\\\', '\$'], $seoBlock), $htaccessContent);
+        if ($newHtaccess && $newHtaccess !== $htaccessContent) {
+            file_put_contents($htaccessPath, $newHtaccess);
+        }
+    }
+    
+    $successMsg = "Đã cập nhật cài đặt thành công!";
+}
+
+// Handle Logout
+if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    session_start();
+    session_destroy();
+    header("Location: /login");
+    exit;
+}
+
+$currentPage = $_GET['page'] ?? 'dashboard';
+
+include __DIR__ . '/includes/header.php';
+include __DIR__ . '/includes/sidebar.php';
+?>
+
+<!-- Main Content -->
+<div class="flex-1 min-h-0 h-full overflow-y-auto bg-gray-950 p-8 custom-scrollbar relative">
+    
+    <?php if ($successMsg): ?>
+        <div class="mb-6 bg-green-500/10 border border-green-500/50 text-green-500 p-4 rounded-lg flex items-center">
+            <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> <?= htmlspecialchars($successMsg) ?>
+        </div>
+    <?php endif; ?>
+
+    <?php
+    $pageFile = __DIR__ . "/pages/{$currentPage}.php";
+    if (file_exists($pageFile)) {
+        include $pageFile;
+    } else {
+        echo "<h2 class='text-xl text-red-500'>Không tìm thấy trang yêu cầu!</h2>";
+    }
+    ?>
+</div>
+
+</div> <!-- Close wrapper from header.php -->
+
+<script>
+    lucide.createIcons();
+    
+    // Mobile Sidebar Toggle Logic
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const adminSidebar = document.getElementById('admin-sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    if (mobileMenuBtn && adminSidebar && sidebarOverlay) {
+        function toggleSidebar() {
+            adminSidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        }
+
+        mobileMenuBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+    }
+</script>
+</body>
+</html>

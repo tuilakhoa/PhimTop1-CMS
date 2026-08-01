@@ -1,0 +1,52 @@
+        <!-- Sidebar Overlay -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden transition-opacity"></div>
+        
+        <!-- Sidebar -->
+        <div id="admin-sidebar" class="fixed top-16 bottom-0 left-0 z-40 w-64 bg-gray-900 border-r border-gray-800 flex flex-col transform -translate-x-full md:relative md:top-0 md:translate-x-0 transition-transform duration-300 ease-in-out overflow-y-auto custom-scrollbar">
+            <div class="p-4 flex-grow space-y-1">
+                <?php 
+                $menuGroups = [
+                    'Quản Lý Nội Dung' => [
+                        'dashboard' => ['icon' => 'layout-dashboard', 'title' => 'Tổng Quan'],
+                        'movies' => ['icon' => 'film', 'title' => 'Quản Lý Phim'],
+                        'categories' => ['icon' => 'list-tree', 'title' => 'Thể Loại & Quốc Gia'],
+                        'comments' => ['icon' => 'message-square', 'title' => 'Quản Lý Bình Luận'],
+                    ],
+                    'Công Cụ' => [
+                        'crawl' => ['icon' => 'download-cloud', 'title' => 'Cào Dữ Liệu'],
+                        'database' => ['icon' => 'database', 'title' => 'Quản Lý Database'],
+                        'theme_editor' => ['icon' => 'file-code', 'title' => 'Sửa Giao Diện'],
+                    ],
+                    'Hệ Thống' => [
+                        'members' => ['icon' => 'users', 'title' => 'Thành Viên'],
+                        'settings' => ['icon' => 'settings', 'title' => 'Cấu Hình Chung'],
+                        'security' => ['icon' => 'shield-check', 'title' => 'Bảo Mật & Đo Lường'],
+                        'indexing' => ['icon' => 'globe', 'title' => 'API Indexing'],
+                        'seo' => ['icon' => 'search', 'title' => 'Cấu Hình SEO'],
+                        'sitemap' => ['icon' => 'map', 'title' => 'Quản Lý Sitemap'],
+                        'themes' => ['icon' => 'palette', 'title' => 'Giao Diện'],
+                        'update' => ['icon' => 'refresh-cw', 'title' => 'Cập Nhật Phiên Bản']
+                    ]
+                ];
+                
+                foreach ($menuGroups as $groupName => $items):
+                ?>
+                <div class="mb-5">
+                    <h3 class="px-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2"><?= $groupName ?></h3>
+                    <div class="space-y-1">
+                        <?php foreach ($items as $key => $item):
+                            $isActive = $currentPage === $key;
+                            $classes = $isActive 
+                                ? "bg-red-600/10 text-red-500" 
+                                : "text-gray-400 hover:text-white hover:bg-gray-800";
+                        ?>
+                        <a href="?page=<?= $key ?>" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl transition-all <?= $classes ?>">
+                            <i data-lucide="<?= $item['icon'] ?>" class="w-5 h-5"></i>
+                            <span class="font-medium text-sm"><?= $item['title'] ?></span>
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>

@@ -1,0 +1,35 @@
+server {
+    listen 80;
+    server_name phim.domain.com;
+    root /www/wwwroot/phim.domain.com; # Thay đổi đường dẫn cho AAPanel
+    
+    index index.html index.php;
+
+    # Chặn truy cập file config và includes
+    location ~* (config\.json|includes/) {
+        deny all;
+    }
+
+    location / {
+        # SEO URL Rewrites
+        rewrite ^/phim/([^/]+)/?$ /movie.php?slug=$1 last;
+        rewrite ^/xem-phim/([^/]+)/([^/]+)/?$ /watch.php?slug=$1&ep=$2 last;
+        rewrite ^/danh-sach/([^/]+)/?$ /category.php?type=$1 last;
+        rewrite ^/the-loai/([^/]+)/?$ /category.php?slug=$1&type=the-loai last;
+        rewrite ^/quoc-gia/([^/]+)/?$ /category.php?slug=$1&type=quoc-gia last;
+        
+        try_files $uri $uri/ $uri.php /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        # AAPanel thường quản lý fastcgi_pass thông qua include file enable-php-xx.conf
+        # include enable-php-81.conf;
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock; 
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+}

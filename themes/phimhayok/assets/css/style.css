@@ -1,0 +1,32 @@
+body { background-color: #000; } /* Pure black background for main sections based on screenshots */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: rgba(31, 41, 55, 0.5); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(75, 85, 99, 0.8); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 1); }
+
+.header-solid {
+    background-color: #000000;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Swiper overrides to match UI */
+.swiper-button-next, .swiper-button-prev {
+    color: white;
+    background: rgba(0,0,0,0.5);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.swiper-button-next:after, .swiper-button-prev:after {
+    font-size: 16px;
+}
+.swiper-button-next { right: 10px; }
+.swiper-button-prev { left: 10px; }
+.swiper-button-disabled { opacity: 0 !important; }
+
+/* Text stroke for Top 10 numbers */
+.text-stroke {
+    -webkit-text-stroke: 2px #fff;
+    color: transparent;
+}

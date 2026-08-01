@@ -1,0 +1,27 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Chặn truy cập trực tiếp vào thư mục includes và file config
+    RewriteRule ^includes/ - [F,L]
+    RewriteRule ^config\.json$ - [F,L]
+    
+    # Ẩn đuôi .php
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}\.php -f
+    RewriteRule ^(.*)$ $1.php [L]
+    
+    # Sitemap
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+    RewriteRule ^sitemap-([0-9]+)\.xml$ sitemap.php?page=$1 [L]
+
+    # SEO URL Rewrites
+    RewriteRule ^phim/([^/]+)/?$ movie.php?slug=$1 [QSA,L]
+    RewriteRule ^xem-phim/([^/]+)/([^/]+)/?$ watch.php?slug=$1&ep=$2 [QSA,L]
+    RewriteRule ^danh-sach/([^/]+)/?$ category.php?type=$1 [QSA,L]
+    RewriteRule ^the-loai/([^/]+)/?$ category.php?slug=$1&type=the-loai [QSA,L]
+    RewriteRule ^quoc-gia/([^/]+)/?$ category.php?slug=$1&type=quoc-gia [QSA,L]
+</IfModule>
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
