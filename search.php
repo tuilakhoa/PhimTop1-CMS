@@ -20,13 +20,10 @@ if (($settings['displayMode'] ?? 'api') === 'crawl') {
     }
 } else {
     if ($keyword) {
-        $res = @file_get_contents("https://phimapi.com/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&limit=50");
-        if ($res) {
-            $data = json_decode($res, true);
-            if (isset($data['data']['items'])) {
-                $movies = $data['data']['items'];
-                $domain = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
-            }
+        $apiResult = fetchApiFilms('search', '', 1, $keyword);
+        if ($apiResult && !empty($apiResult['items'])) {
+            $movies = $apiResult['items'];
+            $domain = $apiResult['domain'];
         }
     }
 }

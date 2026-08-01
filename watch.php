@@ -10,6 +10,8 @@ if (!$slug || !$ep) {
     exit;
 }
 
+$originalSlug = resolveCustomSlug('movie', $slug); // Watch and Movie share the same custom slug mapping
+
 $settings = getSettings();
 $movie = null;
 $episodes = [];
@@ -20,42 +22,37 @@ if (($settings['displayMode'] ?? 'api') === 'crawl') {
     $pdo = getPDO();
     if ($pdo) {
         $stmt = $pdo->prepare("SELECT * FROM movies WHERE slug = ?");
-        $stmt->execute([$slug]);
+        $stmt->execute([$originalSlug]);
         $movie = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($movie) {
             $episodes = [['server_name' => 'VIP', 'server_data' => []]];
+            
+            global $pageTitle, $pageDesc, $pageKeywords;
+            $siteName = $settings['siteName'] ?? 'PhimTop1';
+            $pageTitle = 'Xem Phim ' . ($movie['name'] ?? '') . ' Tập ' . htmlspecialchars($ep) . ' - ' . $siteName;
+            
+            $contentDesc = strip_tags(html_entity_decode($movie['content'] ?? ''));
+            if (mb_strlen($contentDesc) > 160) {
+                $contentDesc = mb_substr($contentDesc, 0, 157) . '...';
+            }
+            $pageDesc = $contentDesc;
         }
     }
 } else {
-    $ch = curl_init("https://phimapi.com/phim/" . urlencode($slug));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
-    $res = curl_exec($ch);
-    curl_close($ch);
-    
-    if ($res) {
-        $data = json_decode($res, true);
+    $apiResult = fetchApiMovieDetail($originalSlug);
+    if ($apiResult && $apiResult['movie']) {
+        $movie = $apiResult['movie'];
+        $episodes = $apiResult['episodes'];
         
-        if ($data && isset($data['data']['item'])) {
-            $movie = $data['data']['item'];
-            $episodes = $movie['episodes'] ?? [];
-            if (isset($data['data']['seoOnPage'])) {
-                global $pageTitle, $pageDesc, $pageKeywords;
-                $siteName = $settings['siteName'] ?? 'PhimTop1';
-                $pageTitle = 'Xem Phim ' . ($movie['name'] ?? $movie['title'] ?? '') . ' Tập ' . htmlspecialchars($ep) . ' - ' . $siteName;
-                
-                $contentDesc = strip_tags(html_entity_decode($movie['content'] ?? ''));
-                if (mb_strlen($contentDesc) > 160) {
-                    $contentDesc = mb_substr($contentDesc, 0, 157) . '...';
-                }
-                $pageDesc = $contentDesc ?: ($data['data']['seoOnPage']['descriptionHead'] ?? null);
-            }
-        } elseif ($data && isset($data['movie'])) {
-            $movie = $data['movie'];
-            $episodes = $data['episodes'] ?? [];
-            global $pageTitle;
-            $pageTitle = 'Xem Phim ' . ($movie['name'] ?? '') . ' Tập ' . htmlspecialchars($ep);
+        global $pageTitle, $pageDesc, $pageKeywords;
+        $siteName = $settings['siteName'] ?? 'PhimTop1';
+        $pageTitle = 'Xem Phim ' . ($movie['name'] ?? $movie['title'] ?? '') . ' Tập ' . htmlspecialchars($ep) . ' - ' . $siteName;
+        
+        $contentDesc = strip_tags(html_entity_decode($movie['content'] ?? ''));
+        if (mb_strlen($contentDesc) > 160) {
+            $contentDesc = mb_substr($contentDesc, 0, 157) . '...';
         }
+        $pageDesc = $contentDesc ?: ($apiResult['seoOnPage']['descriptionHead'] ?? null);
     }
 }
 
@@ -92,6 +89,26 @@ $videoUrl = $currentEp['link_m3u8'] ?? $currentEp['link_embed'] ?? '';
 $isM3U8 = strpos($videoUrl, '.m3u8') !== false;
 // If link_m3u8 is empty but link_embed exists, we use iframe.
 // If link_m3u8 exists, we check if it actually contains .m3u8 to use HLS.js
+
+// Apply SEO Overrides if they exist (using type 'watch' or fallback to 'movie')
+$seoOverride = getSeoMetadata('watch', $originalSlug);
+if (!$seoOverride) {
+    // If no specific watch page SEO, fallback to movie page SEO
+    $seoOverride = getSeoMetadata('movie', $originalSlug);
+}
+
+if ($seoOverride) {
+    if (!empty($seoOverride['seo_title'])) {
+        // Allow dynamic injection of episode number if {ep} is in the string
+        $pageTitle = str_replace('{ep}', htmlspecialchars($ep), $seoOverride['seo_title']);
+    }
+    if (!empty($seoOverride['seo_desc'])) {
+        $pageDesc = str_replace('{ep}', htmlspecialchars($ep), $seoOverride['seo_desc']);
+    }
+    if (!empty($seoOverride['seo_keywords'])) {
+        $pageKeywords = str_replace('{ep}', htmlspecialchars($ep), $seoOverride['seo_keywords']);
+    }
+}
 
 $theme = $settings['theme'] ?? 'dark';
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);

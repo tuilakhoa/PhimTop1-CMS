@@ -9,7 +9,7 @@
             <i data-lucide="layout-template" class="w-4 h-4 inline-block mr-2"></i>Footer & Mạng Xã Hội
         </button>
         <button type="button" onclick="switchTab('oauth')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="oauth">
-            <i data-lucide="shield-check" class="w-4 h-4 inline-block mr-2"></i>Google OAuth
+            <i data-lucide="shield-check" class="w-4 h-4 inline-block mr-2"></i>Đăng Nhập MXH (OAuth)
         </button>
         <button type="button" onclick="switchTab('database')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="database">
             <i data-lucide="database" class="w-4 h-4 inline-block mr-2"></i>Cơ Sở Dữ Liệu
@@ -29,6 +29,16 @@
                 <option value="crawl" <?= $settings['displayMode'] === 'crawl' ? 'selected' : '' ?>>Đọc Từ Database MySQL (Yêu cầu phải cào phim)</option>
             </select>
             <p class="text-xs text-gray-500 mt-2">Chế độ "Database MySQL" giúp load cực nhanh và an toàn khi API gốc chết, nhưng bạn phải vào mục Cào Phim mỗi ngày.</p>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn API (Áp dụng khi dùng "Gọi API Trực Tiếp")</label>
+            <select name="apiSource" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <option value="kkphim" <?= (!isset($settings['apiSource']) || $settings['apiSource'] === 'kkphim') ? 'selected' : '' ?>>KKPhim (phimapi.com)</option>
+                <option value="ophim" <?= (isset($settings['apiSource']) && $settings['apiSource'] === 'ophim') ? 'selected' : '' ?>>Ophim (ophim1.com)</option>
+                <option value="nguonc" <?= (isset($settings['apiSource']) && $settings['apiSource'] === 'nguonc') ? 'selected' : '' ?>>NguonC (phim.nguonc.com)</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-2">Hệ thống sẽ tự động điều chỉnh cấu trúc dữ liệu để giao diện hoạt động bình thường trên mọi nguồn.</p>
         </div>
 
         <div class="mb-6">
@@ -75,11 +85,14 @@
     
     <!-- Tab 3: OAuth -->
     <div id="tab-oauth" class="tab-content hidden animate-fade-in">
+        <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-800 pb-2 flex items-center">
+            <i data-lucide="chrome" class="w-5 h-5 mr-2 text-red-500"></i> Google OAuth 2.0
+        </h3>
         <div class="mb-5 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl flex items-start space-x-3">
             <i data-lucide="info" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
             <div>
                 <p class="text-sm text-blue-300 font-medium mb-1">Authorized redirect URI:</p>
-                <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block"><?= 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=google_callback' ?></code>
+                <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block"><?= 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=google_callback' ?></code>
                 <p class="text-xs text-blue-400/80 mt-2">Copy đường dẫn này dán vào cấu hình OAuth 2.0 Client ID trên Google Cloud Console.</p>
             </div>
         </div>
@@ -88,9 +101,64 @@
             <label class="block text-sm font-medium text-gray-300 mb-1.5">Google Client ID</label>
             <input type="text" name="googleClientId" value="<?= htmlspecialchars($settings['googleClientId'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow" placeholder="Nhập Client ID...">
         </div>
-        <div class="mb-5">
+        <div class="mb-8">
             <label class="block text-sm font-medium text-gray-300 mb-1.5">Google Client Secret</label>
             <input type="text" name="googleClientSecret" value="<?= htmlspecialchars($settings['googleClientSecret'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow" placeholder="Nhập Client Secret...">
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-800 pb-2 flex items-center mt-8">
+            <i data-lucide="layout-grid" class="w-5 h-5 mr-2 text-blue-500"></i> Microsoft OAuth 2.0
+        </h3>
+        <div class="mb-5 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl flex items-start space-x-3">
+            <i data-lucide="info" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
+            <div>
+                <p class="text-sm text-blue-300 font-medium mb-1">Authorized redirect URI:</p>
+                <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block"><?= 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=microsoft_callback' ?></code>
+                <p class="text-xs text-blue-400/80 mt-2">Copy đường dẫn này dán vào Web Redirect URI trên Azure Portal.</p>
+            </div>
+        </div>
+        
+        <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Microsoft Client ID</label>
+            <input type="text" name="msClientId" value="<?= htmlspecialchars($settings['msClientId'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-blue-500 outline-none transition-shadow" placeholder="Nhập Client ID...">
+        </div>
+        <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Microsoft Client Secret</label>
+            <input type="text" name="msClientSecret" value="<?= htmlspecialchars($settings['msClientSecret'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-blue-500 outline-none transition-shadow" placeholder="Nhập Client Secret...">
+        </div>
+        <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Microsoft Tenant ID</label>
+            <input type="text" name="msTenantId" value="<?= htmlspecialchars($settings['msTenantId'] ?? 'common') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-blue-500 outline-none transition-shadow" placeholder="Mặc định: common">
+            <p class="text-xs text-gray-500 mt-2">Nhập `common` nếu cho phép mọi tài khoản, hoặc nhập ID tổ chức của bạn.</p>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-800 pb-2 flex items-center mt-12">
+            <i data-lucide="bot" class="w-5 h-5 mr-2 text-purple-500"></i> Tích hợp Trí Tuệ Nhân Tạo (AI)
+        </h3>
+        <p class="text-sm text-gray-400 mb-5">Cấu hình API Key của các nhà cung cấp AI để sử dụng tính năng "Viết lại Mô tả bằng AI".</p>
+        
+        <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Mô Hình Khuyên Dùng (Mặc định)</label>
+            <select name="aiProvider" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-purple-500 outline-none transition-shadow appearance-none">
+                <option value="gemini" <?= ($settings['aiProvider'] ?? 'gemini') === 'gemini' ? 'selected' : '' ?>>Google Gemini</option>
+                <option value="openai" <?= ($settings['aiProvider'] ?? '') === 'openai' ? 'selected' : '' ?>>OpenAI ChatGPT</option>
+            </select>
+        </div>
+
+        <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5 flex items-center">
+                <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" class="w-4 h-4 mr-1.5" alt="Gemini"> Gemini API Key
+            </label>
+            <input type="password" name="geminiApiKey" value="<?= htmlspecialchars($settings['geminiApiKey'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-purple-500 outline-none transition-shadow" placeholder="AIzaSy...">
+            <p class="text-xs text-gray-500 mt-2">Lấy API Key tại <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-purple-400 hover:underline">Google AI Studio</a>.</p>
+        </div>
+
+        <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5 flex items-center">
+                <i data-lucide="cpu" class="w-4 h-4 mr-1.5"></i> OpenAI API Key
+            </label>
+            <input type="password" name="openaiApiKey" value="<?= htmlspecialchars($settings['openaiApiKey'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-purple-500 outline-none transition-shadow" placeholder="sk-proj-...">
+            <p class="text-xs text-gray-500 mt-2">Lấy API Key tại <a href="https://platform.openai.com/api-keys" target="_blank" class="text-purple-400 hover:underline">OpenAI Platform</a>.</p>
         </div>
     </div>
 

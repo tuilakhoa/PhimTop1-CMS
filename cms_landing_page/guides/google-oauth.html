@@ -1,0 +1,47 @@
+<div class="text-center" style="margin-bottom: 64px;">
+    <h2 class="title-lg">Hướng Dẫn Cấu Hình Google OAuth</h2>
+    <p class="subtitle">Cho phép người dùng đăng nhập bằng tài khoản Google một cách an toàn và nhanh chóng.</p>
+</div>
+
+<div class="grid-3 docs-grid">
+    <!-- Step 1 -->
+    <div class="doc-card step-1">
+        <div class="doc-card-glow"></div>
+        <div class="doc-number">1</div>
+        <h3 class="title-md">Tạo Dự Án Google</h3>
+        <ul class="doc-list">
+            <li>Truy cập <a href="https://console.cloud.google.com/" target="_blank" style="color:var(--color-primary);">Google Cloud Console</a>.</li>
+            <li>Đăng nhập bằng tài khoản Google của bạn.</li>
+            <li>Nhấn vào <strong>Select a project</strong> ở thanh trên cùng và chọn <strong>New Project</strong>.</li>
+            <li>Nhập tên dự án (ví dụ: PhimTop1) và nhấn <strong>Create</strong>.</li>
+        </ul>
+    </div>
+    
+    <!-- Step 2 -->
+    <div class="doc-card step-2">
+        <div class="doc-card-glow"></div>
+        <div class="doc-number">2</div>
+        <h3 class="title-md">Cấu hình OAuth Consent Screen</h3>
+        <ul class="doc-list">
+            <li>Trong thanh tìm kiếm, gõ <strong>OAuth consent screen</strong> và chọn kết quả tương ứng.</li>
+            <li>Chọn <strong>External</strong> và nhấn <strong>Create</strong>.</li>
+            <li>Điền các thông tin bắt buộc: Tên ứng dụng, Email hỗ trợ, và Email liên hệ nhà phát triển.</li>
+            <li>Nhấn <strong>Save and Continue</strong> cho đến khi hoàn thành (không cần thêm scope đặc biệt, mặc định email/profile là đủ).</li>
+            <li>Quay lại màn hình Consent Screen, nhấn <strong>Publish App</strong> để ứng dụng hoạt động public.</li>
+        </ul>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="doc-card step-3">
+        <div class="doc-card-glow"></div>
+        <div class="doc-number">3</div>
+        <h3 class="title-md">Tạo Credentials</h3>
+        <ul class="doc-list">
+            <li>Chuyển sang menu <strong>Credentials</strong> ở thanh bên trái.</li>
+            <li>Nhấn <strong>Create Credentials</strong> > <strong>OAuth client ID</strong>.</li>
+            <li>Application type: chọn <strong>Web application</strong>.</li>
+            <li>Authorized redirect URIs: Điền URL được cấp trong mục Cài Đặt của hệ thống Admin (vd: <code>https://domain.com/api/auth.php?action=google_callback</code>).</li>
+            <li>Nhấn <strong>Create</strong>. Sao chép <strong>Client ID</strong> và <strong>Client Secret</strong> dán vào bảng cấu hình Admin của bạn.</li>
+        </ul>
+    </div>
+</div>

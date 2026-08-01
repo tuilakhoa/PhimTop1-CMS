@@ -65,7 +65,15 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     // Google OAuth
     if (isset($_POST['googleClientId'])) $updates['googleClientId'] = $_POST['googleClientId'];
     if (isset($_POST['googleClientSecret'])) $updates['googleClientSecret'] = $_POST['googleClientSecret'];
+    if (isset($_POST['msClientId'])) $updates['msClientId'] = $_POST['msClientId'];
+    if (isset($_POST['msClientSecret'])) $updates['msClientSecret'] = $_POST['msClientSecret'];
+    if (isset($_POST['msTenantId'])) $updates['msTenantId'] = $_POST['msTenantId'];
     if (isset($_POST['googleAllowedEmails'])) $updates['googleAllowedEmails'] = $_POST['googleAllowedEmails'];
+    
+    // AI Integration
+    if (isset($_POST['geminiApiKey'])) $updates['geminiApiKey'] = $_POST['geminiApiKey'];
+    if (isset($_POST['openaiApiKey'])) $updates['openaiApiKey'] = $_POST['openaiApiKey'];
+    if (isset($_POST['aiProvider'])) $updates['aiProvider'] = $_POST['aiProvider'];
 
     // Update Settings
     if (isset($_POST['allowAutoUpdate'])) $updates['allowAutoUpdate'] = (int)$_POST['allowAutoUpdate'];

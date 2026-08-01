@@ -45,7 +45,7 @@ function getSettings() {
         'adminPath' => '/admin',
         'displayMode' => 'api',
         'theme' => 'dark',
-        'cmsVersion' => '1.0.6',
+        'cmsVersion' => '1.0.7',
         'githubRepo' => 'kkphim/cms-core',
         'githubBranch' => 'main',
         'githubToken' => '',
@@ -89,6 +89,12 @@ function getSettings() {
         'googleClientId' => '',
         'googleClientSecret' => '',
         'googleAllowedEmails' => '',
+        'msClientId' => '',
+        'msClientSecret' => '',
+        'msTenantId' => 'common',
+        'geminiApiKey' => '',
+        'openaiApiKey' => '',
+        'aiProvider' => 'gemini',
         'allowAutoUpdate' => 1
     ];
     
@@ -222,6 +228,26 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN googleAllowedEmails TEXT",
         "ALTER TABLE settings ADD COLUMN updateServerUrl VARCHAR(255) DEFAULT 'tuilakhoa/PhimTop1-CMS'",
         "ALTER TABLE settings ADD COLUMN allowAutoUpdate TINYINT(1) DEFAULT 1",
+        "ALTER TABLE settings ADD COLUMN apiSource VARCHAR(50) DEFAULT 'kkphim'",
+        "ALTER TABLE settings ADD COLUMN msClientId VARCHAR(255) DEFAULT ''",
+        "ALTER TABLE settings ADD COLUMN msClientSecret VARCHAR(255) DEFAULT ''",
+        "ALTER TABLE settings ADD COLUMN msTenantId VARCHAR(255) DEFAULT 'common'",
+        "ALTER TABLE settings ADD COLUMN geminiApiKey VARCHAR(255) DEFAULT ''",
+        "ALTER TABLE settings ADD COLUMN openaiApiKey VARCHAR(255) DEFAULT ''",
+        "ALTER TABLE settings ADD COLUMN aiProvider VARCHAR(50) DEFAULT 'gemini'",
+        "CREATE TABLE IF NOT EXISTS seo_metadata (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            type VARCHAR(50) NOT NULL,
+            item_id VARCHAR(255) NOT NULL,
+            custom_slug VARCHAR(255) NULL,
+            seo_title VARCHAR(255) NULL,
+            seo_desc TEXT NULL,
+            seo_keywords TEXT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY type_item (type, item_id),
+            UNIQUE KEY type_custom_slug (type, custom_slug)
+        )",
         // Cleanup old deprecated columns from original setup
         "ALTER TABLE settings DROP COLUMN githubRepo",
         "ALTER TABLE settings DROP COLUMN cmsVersion",
@@ -273,3 +299,167 @@ function requireAdmin() {
         exit;
     }
 }
+
+// SEO Helper Functions
+function getSeoMetadata($type, $slug) {
+    $pdo = getPDO();
+    if (!$pdo) return null;
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM seo_metadata WHERE type = ? AND item_id = ?");
+        $stmt->execute([$type, $slug]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+function resolveCustomSlug($type, $customSlug) {
+    $pdo = getPDO();
+    if (!$pdo) return $customSlug;
+    try {
+        $stmt = $pdo->prepare("SELECT item_id FROM seo_metadata WHERE type = ? AND custom_slug = ? AND custom_slug IS NOT NULL AND custom_slug != ''");
+        $stmt->execute([$type, $customSlug]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) return $row['item_id'];
+    } catch (Exception $e) {}
+    return $customSlug;
+}
+
+// API Fetch Helper
+function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '') {
+    $settings = getSettings();
+    $apiSource = $settings['apiSource'] ?? 'kkphim';
+    $url = '';
+    
+    if ($apiSource === 'nguonc') {
+        if ($type === 'home') $url = "https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=$page";
+        else if ($type === 'search') $url = "https://phim.nguonc.com/api/films/search?keyword=" . urlencode($keyword) . "&page=$page";
+        else if ($type === 'danh-sach') $url = "https://phim.nguonc.com/api/films/danh-sach/$slug?page=$page";
+        else if ($type === 'the-loai') $url = "https://phim.nguonc.com/api/films/the-loai/$slug?page=$page";
+        else if ($type === 'quoc-gia') $url = "https://phim.nguonc.com/api/films/quoc-gia/$slug?page=$page";
+        else if ($type === 'nam-phat-hanh') $url = "https://phim.nguonc.com/api/films/nam-phat-hanh/$slug?page=$page";
+    } else if ($apiSource === 'ophim') {
+        if ($type === 'home') $url = "https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=$page";
+        else if ($type === 'search') $url = "https://ophim1.com/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&page=$page";
+        else if (in_array($type, ['the-loai', 'quoc-gia'])) $url = "https://ophim1.com/v1/api/$type/$slug?page=$page";
+        else if ($type === 'nam-phat-hanh') $url = "https://ophim1.com/v1/api/nam/$slug?page=$page";
+        else $url = "https://ophim1.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page";
+    } else { // kkphim
+        if ($type === 'home') $url = "https://phimapi.com/v1/api/home?page=$page";
+        else if ($type === 'search') $url = "https://phimapi.com/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&page=$page";
+        else if (in_array($type, ['the-loai', 'quoc-gia'])) $url = "https://phimapi.com/v1/api/$type/$slug?page=$page";
+        else if ($type === 'nam-phat-hanh') $url = "https://phimapi.com/v1/api/nam/$slug?page=$page";
+        else $url = "https://phimapi.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page";
+    }
+    
+    $res = @file_get_contents($url);
+    if (!$res) return null;
+    $data = json_decode($res, true);
+    
+    $result = [
+        'items' => [],
+        'titlePage' => '',
+        'domain' => 'https://phimimg.com/',
+        'seoOnPage' => [],
+        'pagination' => [
+            'totalPages' => 1,
+            'currentPage' => $page
+        ]
+    ];
+    
+    if ($apiSource === 'nguonc') {
+        $result['items'] = $data['items'] ?? [];
+        $result['pagination']['totalPages'] = $data['paginate']['total_page'] ?? 1;
+        $result['pagination']['currentPage'] = $data['paginate']['current_page'] ?? $page;
+        $result['domain'] = ''; // NguonC returns absolute URLs
+    } else {
+        // KKPhim / Ophim
+        if (isset($data['data']['items'])) $result['items'] = $data['data']['items'];
+        else if (isset($data['items'])) $result['items'] = $data['items'];
+        
+        $result['titlePage'] = $data['data']['titlePage'] ?? '';
+        $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? $data['pathImage'] ?? 'https://phimimg.com/';
+        $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
+        
+        if (isset($data['data']['params']['pagination'])) {
+            $result['pagination'] = $data['data']['params']['pagination'];
+        } else if (isset($data['pagination'])) {
+            $result['pagination'] = $data['pagination'];
+        }
+    }
+    
+    return $result;
+}
+
+function fetchApiMovieDetail($slug) {
+    $settings = getSettings();
+    $apiSource = $settings['apiSource'] ?? 'kkphim';
+    
+    $url = '';
+    if ($apiSource === 'nguonc') {
+        $url = "https://phim.nguonc.com/api/film/" . urlencode($slug);
+    } else if ($apiSource === 'ophim') {
+        $url = "https://ophim1.com/phim/" . urlencode($slug);
+    } else { // kkphim
+        $url = "https://phimapi.com/phim/" . urlencode($slug);
+    }
+    
+    $res = @file_get_contents($url);
+    if (!$res) return null;
+    $data = json_decode($res, true);
+    
+    $result = [
+        'movie' => null,
+        'episodes' => [],
+        'seoOnPage' => [],
+        'domain' => 'https://phimimg.com/'
+    ];
+    
+    if ($apiSource === 'nguonc') {
+        if (!isset($data['movie'])) return null;
+        $result['movie'] = $data['movie'];
+        if (isset($result['movie']['episodes'])) {
+            $result['episodes'] = $result['movie']['episodes'];
+            foreach ($result['episodes'] as &$server) {
+                $server['server_data'] = $server['items'] ?? [];
+                foreach ($server['server_data'] as &$ep) {
+                    $ep['link_embed'] = $ep['embed'] ?? '';
+                    $ep['link_m3u8'] = $ep['m3u8'] ?? '';
+                }
+            }
+        }
+        $result['domain'] = ''; // NguonC gives absolute URLs
+        // Format mapping
+        if (isset($result['movie']['original_name']) && !isset($result['movie']['origin_name'])) {
+            $result['movie']['origin_name'] = $result['movie']['original_name'];
+        }
+        if (isset($result['movie']['description']) && !isset($result['movie']['content'])) {
+            $result['movie']['content'] = $result['movie']['description'];
+        }
+    } else {
+        // KKPhim / Ophim
+        if (isset($data['data']['item'])) {
+            $result['movie'] = $data['data']['item'];
+            $result['episodes'] = $result['movie']['episodes'] ?? [];
+            $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
+            $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+        } else if (isset($data['movie'])) {
+            $result['movie'] = $data['movie'];
+            $result['episodes'] = $data['episodes'] ?? [];
+            if (empty($result['episodes']) && isset($result['movie']['episodes'])) {
+                $result['episodes'] = $result['movie']['episodes'];
+            }
+            $result['domain'] = $data['pathImage'] ?? 'https://phimimg.com/';
+        }
+    }
+    
+    if (!empty($result['movie']['thumb_url']) && !preg_match('/^http/', $result['movie']['thumb_url'])) {
+        $result['movie']['thumb_url'] = rtrim($result['domain'], '/') . '/' . ltrim($result['movie']['thumb_url'], '/');
+    }
+    if (!empty($result['movie']['poster_url']) && !preg_match('/^http/', $result['movie']['poster_url'])) {
+        $result['movie']['poster_url'] = rtrim($result['domain'], '/') . '/' . ltrim($result['movie']['poster_url'], '/');
+    }
+    
+    return $result;
+}
+

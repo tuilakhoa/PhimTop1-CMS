@@ -7,11 +7,23 @@ $slug = $_GET['slug'] ?? '';
 $page = (int)($_GET['page'] ?? 1);
 if ($page < 1) $page = 1;
 
+// Resolve Custom Slugs
+$originalType = $type;
+$originalSlug = $slug;
+
+if ($slug) {
+    // If slug is present, it's a genre or country. We use the type as the SEO type (e.g. 'the-loai' or 'quoc-gia')
+    $originalSlug = resolveCustomSlug($type, $slug);
+} else if ($type) {
+    // If no slug, it's a generic list (like phim-bo, phim-le). The $type itself is the identifier.
+    $originalType = resolveCustomSlug('list', $type);
+}
+
 $settings = getSettings();
 $movies = [];
 $title = "Danh sách phim";
 $domain = 'https://phimimg.com/';
-global $pageTitle, $pageDesc;
+global $pageTitle, $pageDesc, $pageKeywords;
 $siteName = $settings['siteName'] ?? 'PhimTop1';
 
 if (($settings['displayMode'] ?? 'api') === 'crawl') {
@@ -19,13 +31,13 @@ if (($settings['displayMode'] ?? 'api') === 'crawl') {
     if ($pdo) {
         $limit = 24;
         $offset = ($page - 1) * $limit;
-        if ($type) {
+        if ($originalType) {
             $stmt = $pdo->prepare("SELECT * FROM movies WHERE type = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?");
-            $stmt->bindValue(1, $type, PDO::PARAM_STR);
+            $stmt->bindValue(1, $originalType, PDO::PARAM_STR);
             $stmt->bindValue(2, $limit, PDO::PARAM_INT);
             $stmt->bindValue(3, $offset, PDO::PARAM_INT);
             $stmt->execute();
-            $title = "Danh sách: " . htmlspecialchars($type);
+            $title = "Danh sách: " . htmlspecialchars($originalType);
             $pageTitle = $title . ' - ' . $siteName;
         } else {
             $stmt = $pdo->prepare("SELECT * FROM movies ORDER BY updated_at DESC LIMIT ? OFFSET ?");
@@ -36,45 +48,46 @@ if (($settings['displayMode'] ?? 'api') === 'crawl') {
         $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 } else {
-    $apiType = in_array($type, ['the-loai', 'quoc-gia']) ? $type : 'the-loai';
-    $url = $slug ? "https://phimapi.com/v1/api/$apiType/$slug" : "https://phimapi.com/v1/api/danh-sach/" . ($type ?: 'phim-le');
+    $apiType = in_array($originalType, ['the-loai', 'quoc-gia', 'danh-sach', 'nam-phat-hanh']) ? $originalType : 'danh-sach';
     
-    if (isset($_GET['sort'])) {
-        $sortParts = explode('-', $_GET['sort']);
-        if (count($sortParts) == 2) {
-            $_GET['sort_field'] = $sortParts[0];
-            $_GET['sort_type'] = $sortParts[1];
-        }
-    }
+    // Convert to NguonC list format if necessary (phim-le, phim-bo, vv)
+    $apiSlug = $originalSlug ?: $originalType;
+    if (!$apiSlug) $apiSlug = 'phim-le';
     
-    $qs = http_build_query(array_diff_key($_GET, array_flip(['type', 'slug', 'sort'])));
-    if ($qs) $url .= "?$qs";
+    $apiResult = fetchApiFilms($apiType, $apiSlug, $page);
     
-    $res = @file_get_contents($url);
-    if ($res) {
-        $data = json_decode($res, true);
-        if (isset($data['data']['titlePage'])) {
-            $title = $data['data']['titlePage'];
+    if ($apiResult) {
+        if (!empty($apiResult['titlePage'])) {
+            $title = $apiResult['titlePage'];
             $pageTitle = $title . ' - ' . $siteName;
         }
-        if (isset($data['data']['items'])) {
-            $movies = $data['data']['items'];
-            $domain = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
-        }
-        $apiParams = $data['data']['params'] ?? [];
-        $seoOnPage = $data['data']['seoOnPage'] ?? [];
-        $breadCrumb = $data['data']['breadCrumb'] ?? [];
+        
+        $movies = $apiResult['items'];
+        $domain = $apiResult['domain'];
+        $seoOnPage = $apiResult['seoOnPage'] ?? [];
+        
         if (!empty($seoOnPage['descriptionHead'])) {
             $pageDesc = $seoOnPage['descriptionHead'];
         } else {
             $pageDesc = "Danh sách phim $title tuyển chọn mới nhất tại $siteName.";
         }
         
-        if (isset($apiParams['pagination'])) {
-            $totalPages = $apiParams['pagination']['totalPages'] ?? 1;
-            $currentPage = $apiParams['pagination']['currentPage'] ?? $page;
-        }
+        $totalPages = $apiResult['pagination']['totalPages'] ?? 1;
+        $currentPage = $apiResult['pagination']['currentPage'] ?? $page;
     }
+}
+
+// Apply SEO Overrides if they exist
+$seoType = $originalType;
+$seoItem = $originalSlug ?: $originalType;
+// Determine if it's generic list or specific genre/country
+$seoCategoryType = $originalSlug ? $originalType : 'list'; 
+
+$seoOverride = getSeoMetadata($seoCategoryType, $seoItem);
+if ($seoOverride) {
+    if (!empty($seoOverride['seo_title'])) $pageTitle = $seoOverride['seo_title'];
+    if (!empty($seoOverride['seo_desc'])) $pageDesc = $seoOverride['seo_desc'];
+    if (!empty($seoOverride['seo_keywords'])) $pageKeywords = $seoOverride['seo_keywords'];
 }
 
 

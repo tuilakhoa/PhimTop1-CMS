@@ -14,6 +14,9 @@ if (isset($_SESSION['admin'])) {
 $error = '';
 $googleClientId = $settings['googleClientId'] ?? '';
 $googleClientSecret = $settings['googleClientSecret'] ?? '';
+$msClientId = $settings['msClientId'] ?? '';
+$msClientSecret = $settings['msClientSecret'] ?? '';
+$msTenantId = $settings['msTenantId'] ?? 'common';
 
 if (isset($_GET['action']) && $_GET['action'] === 'google_login' && $googleClientId) {
     $redirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=google_callback';
@@ -81,6 +84,88 @@ if (isset($_GET['action']) && $_GET['action'] === 'google_callback' && isset($_G
         }
     } else {
         $error = "Lỗi xác thực Google OAuth.";
+    }
+}
+
+if (isset($_GET['action']) && $_GET['action'] === 'microsoft_login' && $msClientId) {
+    $redirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=microsoft_callback';
+    $authUrl = "https://login.microsoftonline.com/{$msTenantId}/oauth2/v2.0/authorize?" . http_build_query([
+        'client_id' => $msClientId,
+        'response_type' => 'code',
+        'redirect_uri' => $redirectUri,
+        'response_mode' => 'query',
+        'scope' => 'User.Read openid profile email',
+        'prompt' => 'select_account'
+    ]);
+    header("Location: " . $authUrl);
+    exit;
+}
+
+if (isset($_GET['action']) && $_GET['action'] === 'microsoft_callback' && isset($_GET['code'])) {
+    $code = $_GET['code'];
+    $redirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=microsoft_callback';
+    
+    $ch = curl_init("https://login.microsoftonline.com/{$msTenantId}/oauth2/v2.0/token");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+        'client_id' => $msClientId,
+        'client_secret' => $msClientSecret,
+        'code' => $code,
+        'redirect_uri' => $redirectUri,
+        'grant_type' => 'authorization_code'
+    ]));
+    $tokenResponse = curl_exec($ch);
+    curl_close($ch);
+    
+    $tokenData = json_decode($tokenResponse, true);
+    if (isset($tokenData['access_token'])) {
+        $ch2 = curl_init("https://graph.microsoft.com/v1.0/me");
+        curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch2, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $tokenData['access_token'],
+            'Accept: application/json'
+        ]);
+        $userResponse = curl_exec($ch2);
+        curl_close($ch2);
+        
+        $userInfo = json_decode($userResponse, true);
+        $email = $userInfo['mail'] ?? $userInfo['userPrincipalName'] ?? '';
+        
+        if ($email) {
+            $pdo = getPDO();
+            if ($pdo) {
+                $stmt = $pdo->prepare("SELECT role, name, avatar FROM members WHERE email = ?");
+                $stmt->execute([$email]);
+                $user = $stmt->fetch();
+            } else {
+                $config = getDbConfig();
+                if ($config && isset($config['type']) && $config['type'] === 'firestore') {
+                    require_once __DIR__ . '/includes/firestore_helper.php';
+                    $fs = new FirestoreClient($config['projectId'], $config['serviceAccount']);
+                    $user = $fs->getDocument('members', md5($email));
+                } else {
+                    $user = null;
+                }
+            }
+
+            if ($user && ($user['role'] ?? 'user') === 'admin') {
+                $_SESSION['admin'] = $email;
+                $_SESSION['user'] = [
+                    'email' => $email,
+                    'name' => $user['name'] ?: ($userInfo['displayName'] ?? 'Admin'),
+                    'avatar' => $user['avatar'] ?: 'https://ui-avatars.com/api/?name=Admin'
+                ];
+                header("Location: " . $adminPath);
+                exit;
+            } else {
+                $error = "Tài khoản ({$email}) không có quyền truy cập trang quản trị!";
+            }
+        } else {
+            $error = "Không thể lấy thông tin email từ Microsoft.";
+        }
+    } else {
+        $error = "Lỗi xác thực Microsoft OAuth.";
     }
 }
 
@@ -170,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </form>
 
-            <?php if (!empty($googleClientId)): ?>
+            <?php if (!empty($googleClientId) || !empty($msClientId)): ?>
                 <div class="mt-5">
                     <div class="relative">
                         <div class="absolute inset-0 flex items-center">
@@ -180,7 +265,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <span class="px-2 bg-gray-900 text-gray-400">Hoặc</span>
                         </div>
                     </div>
-                    <div class="mt-5">
+                    <div class="mt-5 space-y-3">
+                        <?php if (!empty($googleClientId)): ?>
                         <a href="?action=google_login" class="w-full bg-white text-gray-900 font-medium py-3 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center">
                             <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
                                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -190,6 +276,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </svg>
                             <span>Đăng nhập với Google</span>
                         </a>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($msClientId)): ?>
+                        <a href="?action=microsoft_login" class="w-full bg-[#2F2F2F] text-white font-medium py-3 rounded-lg hover:bg-[#3F3F3F] transition-all flex items-center justify-center border border-gray-700">
+                            <svg class="w-5 h-5 mr-2" viewBox="0 0 21 21">
+                                <path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/>
+                            </svg>
+                            <span>Đăng nhập với Microsoft</span>
+                        </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endif; ?>

@@ -12,12 +12,10 @@ if (($settings['displayMode'] ?? 'api') === 'crawl') {
         $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 } else {
-    $res = @file_get_contents('https://phimapi.com/v1/api/home');
-    if ($res) {
-        $data = json_decode($res, true);
-        if (isset($data['data']['items'])) {
-            $movies = $data['data']['items'];
-        }
+    $apiResult = fetchApiFilms('home');
+    if ($apiResult && !empty($apiResult['items'])) {
+        $movies = $apiResult['items'];
+        $domain = $apiResult['domain'];
     }
 }
 

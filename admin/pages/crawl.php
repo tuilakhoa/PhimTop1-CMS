@@ -11,7 +11,7 @@
 <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-3xl relative overflow-hidden">
     <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-[80px] pointer-events-none"></div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 relative z-10">
-        <div>
+        <div class="col-span-1 md:col-span-2">
             <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn cào</label>
             <select id="crawlSource" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-red-500">
                 <option value="kkphim">KKPhim.com (PhimAPI)</option>
@@ -30,6 +30,22 @@
                 ?>
             </select>
         </div>
+        <div class="col-span-1 md:col-span-1">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Danh mục cào</label>
+            <select id="crawlType" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-red-500">
+                <option value="phim-moi-cap-nhat">Phim Mới Cập Nhật</option>
+                <option value="phim-le">Phim Lẻ</option>
+                <option value="phim-bo">Phim Bộ</option>
+                <option value="hoat-hinh">Hoạt Hình</option>
+                <option value="tv-shows">TV Shows</option>
+                <option value="phim-vietsub">Phim Vietsub</option>
+                <option value="phim-thuyet-minh">Phim Thuyết Minh</option>
+                <option value="phim-dang-chieu">Phim Đang Chiếu (Sắp chiếu)</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 relative z-10">
         <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Từ trang</label>
             <input type="number" id="crawlPageFrom" value="1" min="1" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-red-500">
@@ -73,6 +89,7 @@
 <script>
     async function startCrawl() {
         const source = document.getElementById('crawlSource').value;
+        const type = document.getElementById('crawlType').value;
         const from = parseInt(document.getElementById('crawlPageFrom').value);
         const to = parseInt(document.getElementById('crawlPageTo').value);
         const dl = document.getElementById('downloadImages').checked ? 1 : 0;
@@ -93,17 +110,17 @@
         lucide.createIcons();
         logEl.innerHTML = '';
 
-        const appendLog = (msg, type = 'info') => {
-            const color = type === 'error' ? 'text-red-500' : type === 'success' ? 'text-green-500' : 'text-gray-300';
-            const icon = type === 'error' ? '✖' : type === 'success' ? '✔' : '➜';
+        const appendLog = (msg, msgType = 'info') => {
+            const color = msgType === 'error' ? 'text-red-500' : msgType === 'success' ? 'text-green-500' : 'text-gray-300';
+            const icon = msgType === 'error' ? '✖' : msgType === 'success' ? '✔' : '➜';
             logEl.innerHTML += `<div class="${color} mb-1"><span class="opacity-50 mr-2">[${new Date().toLocaleTimeString()}]</span> ${icon} ${msg}</div>`;
             logEl.scrollTop = logEl.scrollHeight;
         };
 
         for (let page = from; page <= to; page++) {
-            appendLog(`Đang cào trang ${page}...`, 'info');
+            appendLog(`Đang cào trang ${page} (${type})...`, 'info');
             try {
-                const res = await fetch(`api/crawl_process.php?page=${page}&source=${source}&dl=${dl}&tw=${tw}&pw=${pw}`);
+                const res = await fetch(`api/crawl_process.php?page=${page}&source=${source}&type=${type}&dl=${dl}&tw=${tw}&pw=${pw}`);
                 const data = await res.json();
                 
                 if (data.status === 'success') {

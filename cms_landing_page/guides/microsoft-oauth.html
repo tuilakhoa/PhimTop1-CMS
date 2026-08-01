@@ -1,0 +1,48 @@
+<div class="text-center" style="margin-bottom: 64px;">
+    <h2 class="title-lg">Hướng Dẫn Cấu Hình Microsoft OAuth</h2>
+    <p class="subtitle">Đăng nhập chuyên nghiệp bằng tài khoản Microsoft (Outlook, Office 365, Azure AD).</p>
+</div>
+
+<div class="grid-3 docs-grid">
+    <!-- Step 1 -->
+    <div class="doc-card step-1">
+        <div class="doc-card-glow"></div>
+        <div class="doc-number">1</div>
+        <h3 class="title-md">Tạo App trên Entra ID</h3>
+        <ul class="doc-list">
+            <li>Truy cập <a href="https://entra.microsoft.com/" target="_blank" style="color:var(--color-primary);">Microsoft Entra admin center</a> (trước đây là Azure AD).</li>
+            <li>Đăng nhập bằng tài khoản Microsoft.</li>
+            <li>Mở mục <strong>Applications</strong> > <strong>App registrations</strong> ở menu bên trái.</li>
+            <li>Nhấn <strong>New registration</strong>. Nhập tên ứng dụng (vd: PhimTop1).</li>
+            <li>Trong phần Supported account types, chọn <strong>Accounts in any organizational directory and personal Microsoft accounts</strong> (để hỗ trợ mọi tài khoản).</li>
+        </ul>
+    </div>
+    
+    <!-- Step 2 -->
+    <div class="doc-card step-2">
+        <div class="doc-card-glow"></div>
+        <div class="doc-number">2</div>
+        <h3 class="title-md">Cấu hình Redirect URI</h3>
+        <ul class="doc-list">
+            <li>Tại form đăng ký (hoặc sau khi tạo xong, vào mục <strong>Authentication</strong>).</li>
+            <li>Trong phần <strong>Platform configurations</strong>, nhấn <strong>Add a platform</strong> > <strong>Web</strong>.</li>
+            <li>Redirect URIs: Nhập URL được cấp trong Admin (vd: <code>https://domain.com/api/auth.php?action=microsoft_callback</code>).</li>
+            <li>Nhấn <strong>Configure</strong> (hoặc Register).</li>
+            <li>Ở màn hình <strong>Overview</strong>, copy <strong>Application (client) ID</strong> và lưu lại.</li>
+        </ul>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="doc-card step-3">
+        <div class="doc-card-glow"></div>
+        <div class="doc-number">3</div>
+        <h3 class="title-md">Tạo Client Secret</h3>
+        <ul class="doc-list">
+            <li>Truy cập mục <strong>Certificates & secrets</strong> ở menu bên trái.</li>
+            <li>Nhấn <strong>New client secret</strong>. Nhập mô tả (vd: Web App Key) và chọn hạn sử dụng (khuyến nghị: 24 tháng).</li>
+            <li>Nhấn <strong>Add</strong>.</li>
+            <li><strong>QUAN TRỌNG:</strong> Copy ngay giá trị trong cột <strong>Value</strong> (không phải cột Secret ID). Đây là Client Secret của bạn, nó sẽ bị ẩn sau khi bạn tải lại trang.</li>
+            <li>Dán <strong>Client ID</strong>, <strong>Client Secret</strong> vào Admin. Tenant ID giữ nguyên <code>common</code>.</li>
+        </ul>
+    </div>
+</div>

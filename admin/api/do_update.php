@@ -200,6 +200,14 @@ if ($successCount > 0) {
     require_once __DIR__ . '/../../app/Core/UpdateChecker.php';
     $checker = new \App\Core\UpdateChecker();
     $checker->clearCache();
+    
+    // Clear PHP OPcache to ensure the newly downloaded files are served immediately
+    if (function_exists('opcache_reset')) {
+        @opcache_reset();
+    }
+    if (function_exists('apcu_clear_cache')) {
+        @apcu_clear_cache();
+    }
 }
 
 if ($failCount === 0) {

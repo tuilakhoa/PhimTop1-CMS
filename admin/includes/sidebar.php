@@ -23,6 +23,7 @@
                         'security' => ['icon' => 'shield-check', 'title' => 'Bảo Mật & Đo Lường'],
                         'indexing' => ['icon' => 'globe', 'title' => 'API Indexing'],
                         'seo' => ['icon' => 'search', 'title' => 'Cấu Hình SEO'],
+                        'seo_manager' => ['icon' => 'file-search', 'title' => 'SEO Từng Trang'],
                         'sitemap' => ['icon' => 'map', 'title' => 'Quản Lý Sitemap'],
                         'themes' => ['icon' => 'palette', 'title' => 'Giao Diện'],
                         'update' => ['icon' => 'refresh-cw', 'title' => 'Cập Nhật Phiên Bản']

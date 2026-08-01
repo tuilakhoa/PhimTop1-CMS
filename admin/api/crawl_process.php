@@ -9,7 +9,8 @@ if (!isset($_SESSION['admin'])) {
 set_time_limit(0);
 header('Content-Type: application/json');
 
-$source = $_GET['source'] ?? 'phimapi';
+$source = $_GET['source'] ?? 'kkphim';
+$type = $_GET['type'] ?? 'phim-moi-cap-nhat';
 $page = (int)($_GET['page'] ?? 1);
 $dl = (int)($_GET['dl'] ?? 0);
 $tw = (int)($_GET['tw'] ?? 0);
@@ -30,11 +31,23 @@ foreach ($customSources as $cs) {
     }
 }
 
-if ($customUrl) $urls = [$customUrl];
-else if ($source === 'kkphim') $urls = ["https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=$page"];
-else if ($source === 'ophim') $urls = ["https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=$page"];
-else if ($source === 'nguonc') $urls = ["https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=$page"];
-else $urls = ["https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=$page"];
+if ($customUrl) {
+    $urls = [$customUrl];
+} else if ($source === 'nguonc') {
+    if ($type === 'phim-moi-cap-nhat') {
+        $urls = ["https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=$page"];
+    } else {
+        $urls = ["https://phim.nguonc.com/api/films/danh-sach/$type?page=$page"];
+    }
+} else {
+    // Ophim & KKPhim
+    $domain = $source === 'ophim' ? 'https://ophim1.com' : 'https://phimapi.com';
+    if ($type === 'phim-moi-cap-nhat') {
+        $urls = ["$domain/danh-sach/phim-moi-cap-nhat?page=$page"];
+    } else {
+        $urls = ["$domain/v1/api/danh-sach/$type?page=$page"];
+    }
+}
 
 $items = [];
 
