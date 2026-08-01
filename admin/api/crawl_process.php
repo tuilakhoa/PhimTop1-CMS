@@ -17,22 +17,85 @@ $pw = (int)($_GET['pw'] ?? 0);
 
 $urls = [];
 
-if ($source === 'kkphim') $urls = ["https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=$page"];
+$urls = [];
+
+// Load custom sources
+$sourcesFile = __DIR__ . '/../../config/crawl_sources.json';
+$customSources = file_exists($sourcesFile) ? json_decode(file_get_contents($sourcesFile), true) : [];
+$customUrl = '';
+foreach ($customSources as $cs) {
+    if ($cs['id'] === $source) {
+        $customUrl = str_replace('{page}', $page, $cs['url']);
+        break;
+    }
+}
+
+if ($customUrl) $urls = [$customUrl];
+else if ($source === 'kkphim') $urls = ["https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=$page"];
 else if ($source === 'ophim') $urls = ["https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=$page"];
 else if ($source === 'nguonc') $urls = ["https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=$page"];
 else $urls = ["https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=$page"];
 
 $items = [];
+
+// Smart Extractor Helpers
+function findLargestArray($array, &$largestArray) {
+    if (!is_array($array)) return;
+    
+    // Check if it's a sequential array of objects/arrays
+    $isAssoc = array_keys($array) !== range(0, count($array) - 1);
+    if (!$isAssoc && count($array) > 0) {
+        if (is_array($array[0]) && count($array) > count($largestArray)) {
+            $largestArray = $array;
+        }
+    }
+    
+    foreach ($array as $value) {
+        if (is_array($value)) {
+            findLargestArray($value, $largestArray);
+        }
+    }
+}
+
+function extractField($item, $keys) {
+    // 1. Direct match
+    foreach ($keys as $k) {
+        if (!empty($item[$k]) && !is_array($item[$k])) return $item[$k];
+    }
+    // 2. Case-insensitive match
+    foreach ($item as $key => $val) {
+        if (is_array($val)) continue;
+        foreach ($keys as $k) {
+            if (strtolower($key) === strtolower($k) && !empty($val)) return $val;
+        }
+    }
+    return '';
+}
+
 foreach ($urls as $url) {
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0');
     $res = curl_exec($ch);
     curl_close($ch);
+    
     if ($res) {
-        $data = json_decode($res, true);
-        if (isset($data['items'])) $items = array_merge($items, $data['items']);
-        else if (isset($data['data']['items'])) $items = array_merge($items, $data['data']['items']);
+        $data = null;
+        if (strpos(trim($res), '<?xml') === 0 || strpos(trim($res), '<rss') === 0) {
+            $xml = @simplexml_load_string($res, "SimpleXMLElement", LIBXML_NOCDATA);
+            if ($xml) $data = json_decode(json_encode($xml), true);
+        } else {
+            $data = json_decode($res, true);
+        }
+        
+        if ($data && is_array($data)) {
+            $largestArray = [];
+            findLargestArray($data, $largestArray);
+            if (!empty($largestArray)) {
+                $items = array_merge($items, $largestArray);
+            }
+        }
     }
 }
 
@@ -93,22 +156,29 @@ if ($pdo && !empty($items)) {
     }
 
     foreach ($items as $item) {
+        $rawSlug = extractField($item, ['slug', 'link', 'url']);
+        if (filter_var($rawSlug, FILTER_VALIDATE_URL)) {
+            $parts = explode('/', rtrim($rawSlug, '/'));
+            $rawSlug = end($parts); // Extract slug from end of link
+        }
+        $rawSlug = str_replace('.html', '', $rawSlug);
+        
         $m = [
-            'id' => $item['_id'] ?? $item['id'] ?? uniqid(),
-            'name' => $item['name'] ?? '',
-            'origin_name' => $item['origin_name'] ?? '',
-            'slug' => $item['slug'] ?? '',
-            'thumb_url' => $item['thumb_url'] ?? $item['poster_url'] ?? '',
-            'poster_url' => $item['poster_url'] ?? $item['thumb_url'] ?? '',
-            'year' => (int)($item['year'] ?? date('Y')),
-            'type' => $item['type'] ?? '',
-            'status' => $item['status'] ?? '',
-            'episode_current' => $item['episode_current'] ?? '',
-            'quality' => $item['quality'] ?? '',
-            'lang' => $item['lang'] ?? '',
-            'chieu_rap' => !empty($item['chieu_rap']) ? 1 : 0
+            'id' => extractField($item, ['_id', 'id', 'guid']) ?: uniqid(),
+            'name' => extractField($item, ['name', 'title', 'title_vi']),
+            'origin_name' => extractField($item, ['origin_name', 'original_title', 'title_en']),
+            'slug' => $rawSlug,
+            'thumb_url' => extractField($item, ['thumb_url', 'image', 'thumbnail', 'poster_url']),
+            'poster_url' => extractField($item, ['poster_url', 'poster', 'cover', 'thumb_url', 'image']),
+            'year' => (int)(extractField($item, ['year', 'release_date', 'pubDate']) ?: date('Y')),
+            'type' => extractField($item, ['type', 'category']),
+            'status' => extractField($item, ['status', 'episode_status']),
+            'episode_current' => extractField($item, ['episode_current', 'current_episode', 'episodes']),
+            'quality' => extractField($item, ['quality', 'hd']),
+            'lang' => extractField($item, ['lang', 'language']),
+            'chieu_rap' => !empty(extractField($item, ['chieu_rap', 'cinema'])) ? 1 : 0
         ];
-        if (!$m['slug']) continue;
+        if (empty($m['slug'])) continue;
         
         if ($dl === 1) {
             $thumbLocal = '/uploads/movies/' . $m['slug'] . '-thumb.webp';

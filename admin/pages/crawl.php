@@ -1,12 +1,33 @@
-<h2 class="text-2xl font-bold text-white mb-6">Cào Dữ Liệu Phim</h2>
-<div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-3xl">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+<div class="flex items-end gap-2 mb-6">
+    <div class="flex-1">
+        <h2 class="text-2xl font-bold text-white mb-2">Cào Dữ Liệu Phim</h2>
+        <p class="text-sm text-gray-400">Trình cào dữ liệu thông minh tự nhận diện định dạng XML & JSON</p>
+    </div>
+    <button onclick="document.getElementById('sourceModal').classList.remove('hidden')" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl border border-gray-700 flex items-center text-sm transition-colors">
+        <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Quản Lý Nguồn
+    </button>
+</div>
+
+<div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-3xl relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-[80px] pointer-events-none"></div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 relative z-10">
         <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn cào</label>
             <select id="crawlSource" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-red-500">
                 <option value="kkphim">KKPhim.com (PhimAPI)</option>
                 <option value="ophim">Ophim1.com</option>
                 <option value="nguonc">NguonC.com</option>
+                <?php
+                $sourcesFile = __DIR__ . '/../../config/crawl_sources.json';
+                if (file_exists($sourcesFile)) {
+                    $customSources = json_decode(file_get_contents($sourcesFile), true);
+                    if (is_array($customSources)) {
+                        foreach ($customSources as $s) {
+                            echo '<option value="' . htmlspecialchars($s['id']) . '">✨ ' . htmlspecialchars($s['name']) . '</option>';
+                        }
+                    }
+                }
+                ?>
             </select>
         </div>
         <div>
@@ -104,4 +125,102 @@
     document.getElementById('downloadImages').addEventListener('change', function() {
         document.getElementById('imageOptions').classList.toggle('hidden', !this.checked);
     });
+
+    // Custom Sources Management
+    function loadManageSources() {
+        fetch('api/manage_sources.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const list = document.getElementById('sourceList');
+                    list.innerHTML = '';
+                    data.sources.forEach(s => {
+                        list.innerHTML += `
+                            <div class="flex justify-between items-center p-3 bg-gray-900 border border-gray-700 rounded-lg mb-2">
+                                <div>
+                                    <h4 class="text-white font-bold text-sm">${s.name}</h4>
+                                    <p class="text-xs text-gray-500 mt-1 truncate max-w-[250px]">${s.url}</p>
+                                </div>
+                                <button onclick="deleteSource('${s.id}')" class="text-red-500 hover:text-red-400 p-2">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                    lucide.createIcons();
+                }
+            });
+    }
+
+    function addSource() {
+        const name = document.getElementById('newSourceName').value;
+        const url = document.getElementById('newSourceUrl').value;
+        if (!name || !url) return alert('Vui lòng nhập đủ thông tin');
+        if (!url.includes('{page}')) return alert('URL phải chứa biến {page} để có thể phân trang');
+
+        fetch('api/manage_sources.php', {
+            method: 'POST',
+            body: JSON.stringify({ name, url }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('newSourceName').value = '';
+                document.getElementById('newSourceUrl').value = '';
+                loadManageSources();
+                alert('Thêm thành công! Vui lòng tải lại trang để thấy nguồn cào mới.');
+            } else alert(data.message);
+        });
+    }
+
+    function deleteSource(id) {
+        if (!confirm('Bạn có chắc muốn xoá nguồn này?')) return;
+        fetch('api/manage_sources.php', {
+            method: 'DELETE',
+            body: JSON.stringify({ id }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                loadManageSources();
+                alert('Xoá thành công! Vui lòng tải lại trang.');
+            } else alert(data.message);
+        });
+    }
+    
+    // Load sources when modal opens
+    document.querySelector('[onclick="document.getElementById(\'sourceModal\').classList.remove(\'hidden\')"]').addEventListener('click', loadManageSources);
 </script>
+
+<!-- Manage Sources Modal -->
+<div id="sourceModal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-white font-bold text-lg">Nguồn Cào Tuỳ Chỉnh</h3>
+            <button onclick="document.getElementById('sourceModal').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="p-5">
+            <div class="mb-5">
+                <label class="block text-sm text-gray-300 mb-1">Tên nguồn</label>
+                <input type="text" id="newSourceName" placeholder="Ví dụ: PhimMoi XML" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-blue-500 mb-3">
+                
+                <label class="block text-sm text-gray-300 mb-1">URL API (JSON/XML)</label>
+                <input type="text" id="newSourceUrl" placeholder="https://domain.com/rss?page={page}" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-blue-500 text-sm font-mono mb-2">
+                <p class="text-xs text-gray-500 mb-3">Chú ý: Phải có biến <code class="text-yellow-400">{page}</code> trong URL để có thể phân trang.</p>
+                
+                <button onclick="addSource()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-bold shadow-lg shadow-blue-500/20">Thêm Nguồn Mới</button>
+            </div>
+            
+            <div class="border-t border-gray-700 pt-5">
+                <h4 class="text-gray-400 text-xs font-bold uppercase mb-3">Nguồn Đã Thêm</h4>
+                <div id="sourceList" class="max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

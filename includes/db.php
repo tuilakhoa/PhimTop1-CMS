@@ -45,7 +45,7 @@ function getSettings() {
         'adminPath' => '/admin',
         'displayMode' => 'api',
         'theme' => 'dark',
-        'cmsVersion' => '1.0.4',
+        'cmsVersion' => '1.0.5',
         'githubRepo' => 'kkphim/cms-core',
         'githubBranch' => 'main',
         'githubToken' => '',
@@ -221,7 +221,11 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN googleClientSecret VARCHAR(255)",
         "ALTER TABLE settings ADD COLUMN googleAllowedEmails TEXT",
         "ALTER TABLE settings ADD COLUMN updateServerUrl VARCHAR(255) DEFAULT 'tuilakhoa/PhimTop1-CMS'",
-        "ALTER TABLE settings ADD COLUMN allowAutoUpdate TINYINT(1) DEFAULT 1"
+        "ALTER TABLE settings ADD COLUMN allowAutoUpdate TINYINT(1) DEFAULT 1",
+        // Cleanup old deprecated columns from original setup
+        "ALTER TABLE settings DROP COLUMN githubRepo",
+        "ALTER TABLE settings DROP COLUMN cmsVersion",
+        "ALTER TABLE settings DROP COLUMN updateServerUrl"
     ];
 
     foreach ($migrations as $sql) {
