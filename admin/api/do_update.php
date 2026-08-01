@@ -92,12 +92,16 @@ if (empty($diff['files'])) {
 }
 
 $changedFiles = [];
+$removedFiles = [];
 foreach ($diff['files'] as $file) {
-    if ($file['status'] === 'removed') continue;
-    $changedFiles[] = $file['filename'];
+    if ($file['status'] === 'removed') {
+        $removedFiles[] = $file['filename'];
+    } else {
+        $changedFiles[] = $file['filename'];
+    }
 }
 
-$totalFiles = count($changedFiles);
+$totalFiles = count($changedFiles) + count($removedFiles);
 emitLog('Phát hiện ' . $totalFiles . ' tệp tin thay đổi qua Github Diff.', 'success', 20);
 
 // 3. Download Files
@@ -147,6 +151,38 @@ foreach ($changedFiles as $filename) {
             emitLog("Lỗi ghi đè $filename (Kiểm tra quyền CHMOD)", 'error', clone $currentProgress);
             $failCount++;
         }
+    }
+    
+    $currentProgress += $progressStep;
+}
+
+// 3.5 Delete Removed Files
+foreach ($removedFiles as $filename) {
+    // Map github 'admin/' path to actual admin folder on server
+    $actualFilename = $filename;
+    $adminFolderName = ltrim($settings['adminPath'] ?? '/admin', '/');
+    if ($adminFolderName !== 'admin' && strpos($filename, 'admin/') === 0) {
+        $actualFilename = $adminFolderName . '/' . substr($filename, 6);
+    }
+    
+    $targetPath = $rootDir . '/' . $actualFilename;
+    emitLog("Đang xoá: $filename", 'info', clone $currentProgress);
+    
+    if (file_exists($targetPath)) {
+        if (@unlink($targetPath)) {
+            $successCount++;
+            
+            // Try to remove empty parent directory
+            $parentDir = dirname($targetPath);
+            if (is_dir($parentDir) && count(scandir($parentDir)) == 2) { // only . and ..
+                @rmdir($parentDir);
+            }
+        } else {
+            emitLog("Lỗi xoá $filename (Kiểm tra quyền CHMOD)", 'warning', clone $currentProgress);
+        }
+    } else {
+        // File already doesn't exist, count as success
+        $successCount++;
     }
     
     $currentProgress += $progressStep;
