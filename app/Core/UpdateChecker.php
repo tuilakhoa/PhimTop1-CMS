@@ -7,7 +7,7 @@ class UpdateChecker {
     private $cacheTime = 43200; // 12 hours in seconds
     private $repo;
 
-    public function __construct($updateServerUrl = null) {
+    public function __construct() {
         $configFile = __DIR__ . '/../../config/update.php';
         if (file_exists($configFile)) {
             $this->config = require $configFile;
@@ -17,11 +17,7 @@ class UpdateChecker {
             ];
         }
         
-        $repoStr = $updateServerUrl ?: ($this->config['update_server'] ?? 'tuilakhoa/PhimTop1-CMS');
-        // Clean up if user accidentally inputs full URL
-        $repoStr = str_replace(['https://github.com/', 'http://github.com/'], '', $repoStr);
-        $repoStr = rtrim($repoStr, '/');
-        $this->repo = $repoStr;
+        $this->repo = 'tuilakhoa/PhimTop1-CMS';
         
         $this->cacheFile = __DIR__ . '/../../config/.update_cache.json';
     }

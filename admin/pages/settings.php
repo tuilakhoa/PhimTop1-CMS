@@ -36,6 +36,14 @@
             <input type="text" name="tmdbApiKey" value="<?= htmlspecialchars($settings['tmdbApiKey'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
             <p class="text-xs text-gray-500 mt-2">API Key để lấy trực tiếp ảnh từ TMDB khi CDN bị lỗi. Khuyên dùng: <code class="text-red-400">b775c363e46a24e8c885479b0131c4d2</code></p>
         </div>
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Cho phép Tự động Cập nhật (Auto Update)</label>
+            <select name="allowAutoUpdate" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <option value="1" <?= (!isset($settings['allowAutoUpdate']) || $settings['allowAutoUpdate'] == 1) ? 'selected' : '' ?>>Bật (Cho phép tải code mới từ Github)</option>
+                <option value="0" <?= (isset($settings['allowAutoUpdate']) && $settings['allowAutoUpdate'] == 0) ? 'selected' : '' ?>>Tắt (Khoá cập nhật để bảo vệ code tuỳ biến)</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-2">Nếu bạn sửa mã nguồn riêng, hãy <b>TẮT</b> tính năng này để tránh bị ghi đè code khi có bản cập nhật mới.</p>
+        </div>
     </div>
 
     <!-- Tab 2: Footer -->

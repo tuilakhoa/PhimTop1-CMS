@@ -6,7 +6,7 @@
     <title>Admin Dashboard - PhimTop1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="/admin/assets/css/admin.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars($settings['adminPath'] ?? '/admin') ?>/assets/css/admin.css?v=<?= time() ?>">
 </head>
 <body class="bg-gray-950 text-gray-200 min-h-screen">
     

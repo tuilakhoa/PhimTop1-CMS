@@ -43,9 +43,10 @@ if (empty($targetTag)) {
 
 // 1. Get Repo Configuration
 $settings = getSettings();
-$repoStr = $settings['updateServerUrl'] ?? 'tuilakhoa/PhimTop1-CMS';
-$repoStr = str_replace(['https://github.com/', 'http://github.com/'], '', $repoStr);
-$repo = rtrim($repoStr, '/');
+if (isset($settings['allowAutoUpdate']) && $settings['allowAutoUpdate'] == 0) {
+    emitLog('Tính năng cập nhật tự động đã bị TẮT bởi Quản trị viên trong phần Cài đặt.', 'error', null, true);
+}
+$repo = 'tuilakhoa/PhimTop1-CMS';
 
 // Need to read config/update.php to get current version
 $configFile = __DIR__ . '/../../config/update.php';
@@ -149,12 +150,12 @@ emitLog("Đã xử lý xong: Thành công ($successCount), Thất bại ($failCo
 // 4. Post-Update: Save new version & Clear Cache
 if ($successCount > 0) {
     $cleanLatest = ltrim($targetTag, 'v');
-    $newConfigContent = "<?php\nreturn [\n    'current_version' => '$cleanLatest',\n    'update_server' => '$repoStr'\n];\n";
+    $newConfigContent = "<?php\nreturn [\n    'current_version' => '$cleanLatest'\n];\n";
     @file_put_contents($configFile, $newConfigContent);
     emitLog("Đã cập nhật cấu hình hệ thống lên phiên bản $cleanLatest.", 'info', 95);
     
     require_once __DIR__ . '/../../app/Core/UpdateChecker.php';
-    $checker = new \App\Core\UpdateChecker($repoStr);
+    $checker = new \App\Core\UpdateChecker();
     $checker->clearCache();
 }
 

@@ -37,7 +37,7 @@ if ($isPost) {
                 )");
                 $pdo->exec("CREATE TABLE IF NOT EXISTS settings (
                     id INT PRIMARY KEY, adminPath VARCHAR(255), displayMode VARCHAR(50) DEFAULT 'api',
-                    theme VARCHAR(50) DEFAULT 'dark', cmsVersion VARCHAR(50) DEFAULT '1.0.2',
+                    theme VARCHAR(50) DEFAULT 'dark', cmsVersion VARCHAR(50) DEFAULT '1.0.3',
                     githubRepo VARCHAR(255) DEFAULT 'kkphim/cms-core', githubBranch VARCHAR(255) DEFAULT 'main',
                     githubToken VARCHAR(255), autoCheckUpdates TINYINT(1) DEFAULT 1,
                     updateServerUrl VARCHAR(255) DEFAULT 'tuilakhoa/PhimTop1-CMS',
@@ -84,7 +84,7 @@ if ($isPost) {
                 }
 
                 $pdo->exec("TRUNCATE TABLE settings");
-                $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl) VALUES (1, ?, 'api', 'dark', '1.0.2', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS')");
+                $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl) VALUES (1, ?, 'api', 'dark', '1.0.3', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS')");
                 $stmt->execute(['/' . $randomPath]);
 
                 $success = "Cài đặt MySQL thành công! Link quản trị mới là: /$randomPath";

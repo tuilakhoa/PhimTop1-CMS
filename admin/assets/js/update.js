@@ -4,15 +4,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnCheckUpdate = document.getElementById('btn-check-update');
     
     function checkUpdate(force = false) {
-        versionDisplay.innerHTML = '<span class="text-gray-500 animate-pulse">Đang kiểm tra...</span>';
-        updateMessage.innerHTML = '<div class="flex items-center gap-2 text-gray-400"><i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Vui lòng đợi trong giây lát...</div>';
-        lucide.createIcons();
+        if (force) {
+            versionDisplay.innerHTML = '<span class="text-gray-500 animate-pulse">Đang kiểm tra...</span>';
+            updateMessage.innerHTML = '<div class="flex items-center gap-2 text-gray-400"><i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Vui lòng đợi trong giây lát...</div>';
+            lucide.createIcons();
+        }
         
         if (btnCheckUpdate.querySelector('i, svg')) {
             btnCheckUpdate.querySelector('i, svg').classList.add('animate-spin');
         }
         
-        const url = `/admin/api/check_update.php${force ? '?force=1' : ''}`;
+        const timestamp = new Date().getTime();
+        const basePath = typeof ADMIN_PATH !== 'undefined' ? ADMIN_PATH : '/admin';
+        const url = `${basePath}/api/check_update.php?_=${timestamp}${force ? '&force=1' : ''}`;
         
         fetch(url)
             .then(res => res.json())
@@ -133,8 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         appendLog('Khởi động tiến trình cập nhật tự động (vui lòng không tắt trình duyệt)...', 'info');
-        
-        const source = new EventSource('/admin/api/do_update.php?download_url=' + encodeURIComponent(downloadUrl));
+        const basePath = typeof ADMIN_PATH !== 'undefined' ? ADMIN_PATH : '/admin';
+        const source = new EventSource(`${basePath}/api/do_update.php?download_url=` + encodeURIComponent(downloadUrl));
         
         source.onmessage = function(event) {
             try {
@@ -210,7 +214,8 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('path', path);
             formData.append('file', fileInput.files[0]);
             
-            fetch('/admin/api/manual_update.php', {
+            const basePath = typeof ADMIN_PATH !== 'undefined' ? ADMIN_PATH : '/admin';
+            fetch(`${basePath}/api/manual_update.php`, {
                 method: 'POST',
                 body: formData
             })

@@ -173,13 +173,82 @@ if ($cfApiConfigured) {
     </div>
 </div>
 
-<div class="bg-gradient-to-r from-gray-900 to-gray-800 p-8 rounded-2xl border border-gray-700 shadow-2xl relative overflow-hidden">
-    <div class="absolute top-[-20%] right-[-10%] w-64 h-64 bg-red-600/10 rounded-full blur-[80px] pointer-events-none"></div>
-    <h3 class="text-xl font-bold text-white mb-4">✨ PhimTop1 CMS v1.1 - Nhanh Hơn, Nhẹ Hơn, Chuẩn SEO Hơn</h3>
-    <ul class="space-y-3 text-gray-300">
-        <li class="flex items-center"><i data-lucide="zap" class="w-5 h-5 mr-3 text-yellow-400"></i> Được viết hoàn toàn bằng <strong>PHP Thuần (Monolithic)</strong>, siêu nhẹ, không cần Node.js, không cần npm.</li>
-        <li class="flex items-center"><i data-lucide="search" class="w-5 h-5 mr-3 text-blue-400"></i> Hỗ trợ URL Rewrite loại bỏ đuôi <code>.php</code>, giúp tối ưu hóa SEO tối đa cho Website.</li>
-        <li class="flex items-center"><i data-lucide="image" class="w-5 h-5 mr-3 text-green-400"></i> Tích hợp tính năng tải Logo & Favicon dễ dàng ngay trong trang quản trị.</li>
-        <li class="flex items-center"><i data-lucide="layout-template" class="w-5 h-5 mr-3 text-purple-400"></i> Kiến trúc Admin Module giúp mở rộng tính năng dễ dàng.</li>
-    </ul>
+<!-- System Health Monitor -->
+<h3 class="text-xl font-bold text-white mb-4 flex items-center mt-10"><i data-lucide="cpu" class="w-6 h-6 mr-2 text-purple-500"></i> Giám Sát Hệ Thống</h3>
+
+<div class="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-3xl border border-gray-800 shadow-2xl relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <?php
+    $dbVersion = 'N/A';
+    if ($pdo) {
+        try {
+            $dbVersion = $pdo->query('select version()')->fetchColumn();
+        } catch(Exception $e) {}
+    }
+    
+    $diskFree = @disk_free_space(".");
+    $diskTotal = @disk_total_space(".");
+    $diskText = 'Không xác định';
+    $diskPercent = 0;
+    if ($diskFree !== false && $diskTotal !== false && $diskTotal > 0) {
+        $diskPercent = round((($diskTotal - $diskFree) / $diskTotal) * 100);
+        $diskText = round(($diskTotal - $diskFree) / 1073741824, 1) . ' GB / ' . round($diskTotal / 1073741824, 1) . ' GB';
+    }
+    ?>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
+        <!-- PHP Version -->
+        <div class="flex items-center gap-5">
+            <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shrink-0 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                <i data-lucide="code-2" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <p class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Phiên Bản PHP</p>
+                <h4 class="text-white font-bold text-lg leading-tight">PHP <?= phpversion() ?></h4>
+                <p class="text-gray-500 text-xs mt-1">Giới hạn bộ nhớ: <span class="text-gray-300"><?= ini_get('memory_limit') ?></span></p>
+            </div>
+        </div>
+
+        <!-- Database -->
+        <div class="flex items-center gap-5">
+            <div class="w-14 h-14 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-400 shrink-0 border border-green-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                <i data-lucide="database" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <p class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Hệ Quản Trị CSDL</p>
+                <h4 class="text-white font-bold text-lg leading-tight">MySQL <?= htmlspecialchars(explode('-', $dbVersion)[0] ?? 'Unknown') ?></h4>
+                <p class="text-gray-500 text-xs mt-1">Kết nối: <span class="text-gray-300 uppercase"><?= htmlspecialchars($settings['dbType'] ?? 'mysql') ?></span></p>
+            </div>
+        </div>
+
+        <!-- Server OS -->
+        <div class="flex items-center gap-5">
+            <div class="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 shrink-0 border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+                <i data-lucide="server" class="w-7 h-7"></i>
+            </div>
+            <div class="overflow-hidden w-full">
+                <p class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Web Server</p>
+                <h4 class="text-white font-bold text-lg leading-tight truncate" title="<?= htmlspecialchars($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown') ?>"><?= htmlspecialchars(explode(' ', $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown')[0]) ?></h4>
+                <p class="text-gray-500 text-xs mt-1">Max Upload: <span class="text-gray-300"><?= ini_get('upload_max_filesize') ?></span></p>
+            </div>
+        </div>
+
+        <!-- Storage Bar -->
+        <div class="lg:col-span-3 bg-gray-950/50 p-5 rounded-2xl border border-gray-800 mt-2">
+            <div class="flex justify-between items-end mb-2">
+                <div>
+                    <h4 class="text-white font-semibold flex items-center gap-2"><i data-lucide="hard-drive" class="w-4 h-4 text-gray-400"></i> Trạng Thái Lưu Trữ (Ổ đĩa gốc)</h4>
+                    <p class="text-gray-500 text-xs mt-1">Đã sử dụng <?= $diskText ?></p>
+                </div>
+                <div class="text-right">
+                    <span class="text-2xl font-black <?= $diskPercent > 80 ? 'text-red-500' : ($diskPercent > 60 ? 'text-yellow-500' : 'text-blue-500') ?>"><?= $diskPercent ?>%</span>
+                </div>
+            </div>
+            <div class="w-full bg-gray-800 rounded-full h-2.5 mt-3 overflow-hidden">
+                <div class="h-2.5 rounded-full transition-all duration-1000 <?= $diskPercent > 80 ? 'bg-red-500' : ($diskPercent > 60 ? 'bg-yellow-500' : 'bg-gradient-to-r from-blue-500 to-purple-500') ?>" style="width: <?= $diskPercent ?>%"></div>
+            </div>
+        </div>
+    </div>
 </div>

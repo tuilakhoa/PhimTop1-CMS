@@ -11,6 +11,18 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+        <?php if (isset($settings['allowAutoUpdate']) && $settings['allowAutoUpdate'] == 0): ?>
+            <div class="xl:col-span-3 bg-red-500/10 border border-red-500/30 p-4 rounded-2xl flex items-center shadow-lg mb-2">
+                <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 mr-4">
+                    <i data-lucide="shield-alert" class="w-5 h-5 text-red-500"></i>
+                </div>
+                <div>
+                    <h4 class="text-red-400 font-bold mb-1">Tính năng Cập nhật Tự động đang bị TẮT!</h4>
+                    <p class="text-sm text-red-300/80">Bạn đã tắt tính năng này trong phần Cài đặt Chung để bảo vệ mã nguồn tuỳ biến. Bạn không thể cập nhật tự động từ trang này cho đến khi bật lại.</p>
+                </div>
+            </div>
+        <?php endif; ?>
+        
         <!-- Main Update Column -->
         <div class="xl:col-span-2 space-y-8">
             <!-- Status Card -->
@@ -25,12 +37,45 @@
                             <p class="text-gray-400 font-medium text-sm tracking-wide uppercase">Phiên Bản CMS Hiện Tại</p>
                         </div>
                         
+                        <?php
+                            $updateCacheFile = __DIR__ . '/../../config/.update_cache.json';
+                            $hasUpdate = false;
+                            $latestVersion = '';
+                            $updateStatusHtml = '<div class="flex items-center gap-2 text-gray-400"><i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Vui lòng đợi trong giây lát...</div>';
+                            $currentVersionDisplay = $settings['cmsVersion'] ?? '1.0.0';
+                            
+                            if (file_exists($updateCacheFile)) {
+                                $cacheData = json_decode(file_get_contents($updateCacheFile), true);
+                                if ($cacheData && isset($cacheData['success']) && $cacheData['success']) {
+                                    $currentVersionDisplay = $cacheData['current'] ?? $currentVersionDisplay;
+                                    if ($cacheData['hasUpdate']) {
+                                        $latestVersion = $cacheData['latest'];
+                                        $updateStatusHtml = '
+                                        <div class="bg-blue-500/10 border border-blue-500/20 p-5 rounded-2xl mb-4 mt-2">
+                                            <span class="text-blue-400 flex items-center gap-2 mb-2 font-bold text-lg">
+                                                <span class="relative flex h-3 w-3">
+                                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                                                </span>
+                                                Phát Hiện Phiên Bản Mới: v' . htmlspecialchars($latestVersion) . '
+                                            </span>
+                                            <strong class="block text-white text-base mb-1">' . htmlspecialchars($cacheData['title'] ?? '') . '</strong>
+                                            <p class="text-gray-400 text-sm leading-relaxed">' . htmlspecialchars($cacheData['description'] ?? '') . '</p>
+                                            <div class="flex flex-wrap gap-3 mt-5">
+                                                <button onclick="doAutoUpdate(\'' . htmlspecialchars($cacheData['download'] ?? '') . '\')" id="btn-do-update" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl text-white font-bold flex items-center shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5"><i data-lucide="zap" class="w-4 h-4 mr-2"></i> Cập Nhật Ngay</button>
+                                                ' . (!empty($cacheData['changelog']) ? '<a href="' . htmlspecialchars($cacheData['changelog']) . '" target="_blank" class="px-6 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-white font-medium flex items-center transition-colors border border-gray-700"><i data-lucide="file-text" class="w-4 h-4 mr-2 text-gray-400"></i> Xem Chi Tiết</a>' : '') . '
+                                            </div>
+                                        </div>';
+                                    } else {
+                                        $updateStatusHtml = '<div class="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-400 font-medium rounded-xl border border-green-500/20 mt-2"><i data-lucide="check-circle-2" class="w-5 h-5"></i> Tuyệt vời! Bạn đang ở phiên bản mới nhất.</div>';
+                                    }
+                                }
+                            }
+                        ?>
                         <div id="update-status-container" class="mt-2">
-                            <h3 class="text-4xl font-black text-white mb-3 tracking-tight" id="cms-version-display">Đang kiểm tra...</h3>
+                            <h3 class="text-4xl font-black text-white mb-3 tracking-tight" id="cms-version-display">Phiên Bản <span class="text-blue-400">v<?= htmlspecialchars($currentVersionDisplay) ?></span></h3>
                             <div id="update-message" class="text-sm text-gray-300 mb-6 min-h-[40px] transition-all duration-300">
-                                <div class="flex items-center gap-2 text-gray-400">
-                                    <i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Vui lòng đợi trong giây lát...
-                                </div>
+                                <?= $updateStatusHtml ?>
                             </div>
                             
                             <button id="btn-check-update" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white text-sm font-semibold rounded-xl transition-all duration-300 flex items-center gap-2 border border-gray-700 hover:border-gray-600 shadow-md">
@@ -74,24 +119,6 @@
 
         <!-- Sidebar Tools -->
         <div class="space-y-8">
-            <!-- Server Config -->
-            <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-xl">
-                <h3 class="text-lg font-bold text-white mb-4 border-b border-gray-800 pb-3 flex items-center gap-2">
-                    <i data-lucide="link" class="w-5 h-5 text-blue-500"></i> Nguồn Cập Nhật
-                </h3>
-                <form method="POST" class="space-y-4" action="?page=update">
-                    <input type="hidden" name="action" value="update_settings">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-2">Github Repository</label>
-                        <input type="text" name="updateServerUrl" value="<?= htmlspecialchars($settings['updateServerUrl'] ?? 'tuilakhoa/PhimTop1-CMS') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none text-sm transition-all" placeholder="Username/Repository">
-                        <p class="text-xs text-gray-500 mt-2">Hệ thống sẽ tự động đồng bộ mã nguồn qua Github Release & API.</p>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 font-semibold py-2.5 rounded-xl border border-blue-500/30 transition-colors flex items-center justify-center gap-2 text-sm">
-                        <i data-lucide="save" class="w-4 h-4"></i> Lưu Nguồn
-                    </button>
-                </form>
-            </div>
-
             <!-- Manual File Upload -->
             <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
                 <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-orange-500/10 rounded-full blur-[40px] pointer-events-none"></div>
@@ -145,4 +172,7 @@
     </div>
 </div>
 
-<script src="/admin/assets/js/update.js?v=<?= time() ?>"></script>
+<script>
+    const ADMIN_PATH = <?= json_encode($settings['adminPath'] ?? '/admin') ?>;
+</script>
+<script src="<?= htmlspecialchars($settings['adminPath'] ?? '/admin') ?>/assets/js/update.js?v=<?= time() ?>"></script>

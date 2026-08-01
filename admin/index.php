@@ -68,7 +68,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     if (isset($_POST['googleAllowedEmails'])) $updates['googleAllowedEmails'] = $_POST['googleAllowedEmails'];
 
     // Update Settings
-    if (isset($_POST['updateServerUrl'])) $updates['updateServerUrl'] = $_POST['updateServerUrl'];
+    if (isset($_POST['allowAutoUpdate'])) $updates['allowAutoUpdate'] = (int)$_POST['allowAutoUpdate'];
 
     // DB Config
     if (isset($_POST['dbType'])) {

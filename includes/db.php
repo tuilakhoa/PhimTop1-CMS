@@ -45,7 +45,7 @@ function getSettings() {
         'adminPath' => '/admin',
         'displayMode' => 'api',
         'theme' => 'dark',
-        'cmsVersion' => '1.0.2',
+        'cmsVersion' => '1.0.3',
         'githubRepo' => 'kkphim/cms-core',
         'githubBranch' => 'main',
         'githubToken' => '',
@@ -89,7 +89,7 @@ function getSettings() {
         'googleClientId' => '',
         'googleClientSecret' => '',
         'googleAllowedEmails' => '',
-        'updateServerUrl' => 'https://update.phimtop1.asia/check'
+        'allowAutoUpdate' => 1
     ];
     
     $config = getDbConfig();
@@ -220,7 +220,8 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN googleClientId VARCHAR(255)",
         "ALTER TABLE settings ADD COLUMN googleClientSecret VARCHAR(255)",
         "ALTER TABLE settings ADD COLUMN googleAllowedEmails TEXT",
-        "ALTER TABLE settings ADD COLUMN updateServerUrl VARCHAR(255) DEFAULT 'https://update.phimtop1.asia/check'"
+        "ALTER TABLE settings ADD COLUMN updateServerUrl VARCHAR(255) DEFAULT 'tuilakhoa/PhimTop1-CMS'",
+        "ALTER TABLE settings ADD COLUMN allowAutoUpdate TINYINT(1) DEFAULT 1"
     ];
 
     foreach ($migrations as $sql) {
@@ -260,7 +261,9 @@ function checkSetup() {
 }
 
 function requireAdmin() {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        session_start();
+    }
     if (!isset($_SESSION['admin'])) {
         header("Location: /login");
         exit;

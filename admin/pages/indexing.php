@@ -46,7 +46,7 @@ if ($pdo) {
                 <i data-lucide="send" class="w-5 h-5 mr-2 text-green-500"></i> Bắn URL (Ping)
             </h3>
             
-            <form action="/admin/api/push_index.php" method="POST" target="pingIframe" class="mb-4">
+            <form action="<?= htmlspecialchars($settings['adminPath'] ?? '/admin') ?>/api/push_index.php" method="POST" target="pingIframe" class="mb-4">
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Chọn phim để bắn (Gần đây nhất)</label>
                     <select name="url" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-green-500 outline-none">
