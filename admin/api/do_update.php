@@ -111,7 +111,14 @@ $currentProgress = 20;
 foreach ($changedFiles as $filename) {
     // Raw Github URL format: https://raw.githubusercontent.com/user/repo/tag/filename
     $fileUrl = "https://raw.githubusercontent.com/$repo/$targetTag/" . str_replace(' ', '%20', $filename);
-    $targetPath = $rootDir . '/' . $filename;
+    // Map github 'admin/' path to actual admin folder on server
+    $actualFilename = $filename;
+    $adminFolderName = ltrim($settings['adminPath'] ?? '/admin', '/');
+    if ($adminFolderName !== 'admin' && strpos($filename, 'admin/') === 0) {
+        $actualFilename = $adminFolderName . '/' . substr($filename, 6);
+    }
+    
+    $targetPath = $rootDir . '/' . $actualFilename;
     
     emitLog("Đang tải: $filename", 'info', $currentProgress);
     
