@@ -198,7 +198,7 @@ $editId = $_GET['id'] ?? '';
                                                     <?php endif; ?>
                                                 </td>
                                                 <?php foreach ($columns as $col): 
-                                                    $val = $row[$col['Field']];
+                                                    $val = (string)($row[$col['Field']] ?? '');
                                                     $displayVal = $val;
                                                     if (strlen($val) > 50) $displayVal = substr($val, 0, 50) . '...';
                                                 ?>
@@ -251,7 +251,7 @@ $editId = $_GET['id'] ?? '';
                                 $isAutoInc = strpos($col['Extra'], 'auto_increment') !== false;
                                 if ($mode === 'insert' && $isAutoInc) continue; // Skip AI on insert
                                 
-                                $val = $editData[$colName] ?? $col['Default'] ?? '';
+                                $val = (string)($editData[$colName] ?? $col['Default'] ?? '');
                                 $type = $col['Type'];
                                 $isTextarea = strpos($type, 'text') !== false;
                             ?>

@@ -5,6 +5,7 @@ class UpdateChecker {
     private $config;
     private $cacheFile;
     private $cacheTime = 43200; // 12 hours in seconds
+    private $repo;
 
     public function __construct($updateServerUrl = null) {
         $configFile = __DIR__ . '/../../config/update.php';
@@ -15,7 +16,13 @@ class UpdateChecker {
                 'current_version' => '1.0.0',
             ];
         }
-        $this->config['update_server'] = $updateServerUrl ?: ($this->config['update_server'] ?? 'https://update.phimtop1.asia/check');
+        
+        $repoStr = $updateServerUrl ?: ($this->config['update_server'] ?? 'tuilakhoa/PhimTop1-CMS');
+        // Clean up if user accidentally inputs full URL
+        $repoStr = str_replace(['https://github.com/', 'http://github.com/'], '', $repoStr);
+        $repoStr = rtrim($repoStr, '/');
+        $this->repo = $repoStr;
+        
         $this->cacheFile = __DIR__ . '/../../config/.update_cache.json';
     }
 
@@ -29,49 +36,55 @@ class UpdateChecker {
         }
 
         $currentVersion = $this->getCurrentVersion();
-        $url = $this->config['update_server'] . '?v=' . urlencode($currentVersion);
+        $url = 'https://api.github.com/repos/' . $this->repo . '/releases/latest';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Accept: application/json',
-            'User-Agent: PlayCMS'
+            'Accept: application/vnd.github.v3+json',
+            'User-Agent: PhimTop1-CMS-Updater'
         ]);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For local testing, better to enable in production
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
         curl_close($ch);
 
         if ($response === false || $httpCode !== 200) {
             return [
                 'success' => false,
-                'message' => 'Không thể kết nối máy chủ cập nhật.'
+                'message' => 'Không thể kết nối máy chủ Github (Mã lỗi: ' . $httpCode . ')'
             ];
         }
 
         $data = json_decode($response, true);
-        if (json_last_error() !== JSON_ERROR_NONE || !isset($data['success'])) {
+        if (json_last_error() !== JSON_ERROR_NONE || !isset($data['tag_name'])) {
             return [
                 'success' => false,
-                'message' => 'Dữ liệu phản hồi không hợp lệ.'
+                'message' => 'Dữ liệu phản hồi từ Github không hợp lệ.'
             ];
         }
 
-        if ($data['success']) {
-            $latestVersion = $data['latest'] ?? $currentVersion;
-            // Use version_compare
-            $hasUpdate = version_compare($currentVersion, $latestVersion, '<');
-            $data['hasUpdate'] = $hasUpdate;
-            $data['current'] = $currentVersion;
-            
-            $this->setCache($data);
-        }
+        $latestVersion = ltrim($data['tag_name'], 'v');
+        $currentClean = ltrim($currentVersion, 'v');
+        
+        $hasUpdate = version_compare($currentClean, $latestVersion, '<');
+        
+        $result = [
+            'success' => true,
+            'current' => $currentClean,
+            'latest' => $latestVersion,
+            'hasUpdate' => $hasUpdate,
+            'title' => $data['name'] ?? 'Bản cập nhật v' . $latestVersion,
+            'description' => $data['body'] ?? 'Cập nhật từ Github Release.',
+            'changelog' => $data['html_url'] ?? ('https://github.com/' . $this->repo . '/releases'),
+            'download' => $data['tag_name'] // Pass the exact target tag to do_update
+        ];
 
-        return $data;
+        $this->setCache($result);
+        return $result;
     }
 
     public function clearCache() {

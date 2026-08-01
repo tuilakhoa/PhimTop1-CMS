@@ -45,7 +45,7 @@ function getSettings() {
         'adminPath' => '/admin',
         'displayMode' => 'api',
         'theme' => 'dark',
-        'cmsVersion' => 'v1.1',
+        'cmsVersion' => '1.0.2',
         'githubRepo' => 'kkphim/cms-core',
         'githubBranch' => 'main',
         'githubToken' => '',

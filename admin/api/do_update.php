@@ -31,63 +31,101 @@ function emitLog($message, $type = 'info', $progress = null, $complete = false) 
     }
 }
 
-// Allow GET for EventSource, fallback to POST JSON if needed, but SSE uses GET.
-$downloadUrl = $_GET['download_url'] ?? '';
+$targetTag = $_GET['download_url'] ?? '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
-    $downloadUrl = $data['download_url'] ?? '';
+    $targetTag = $data['download_url'] ?? '';
 }
 
-// Fallback to settings if not provided
-if (empty($downloadUrl)) {
-    $settings = getSettings();
-    $downloadUrl = $settings['updateServerUrl'] ?? '';
+if (empty($targetTag)) {
+    emitLog('Không tìm thấy phiên bản mục tiêu.', 'error', null, true);
 }
 
-if (empty($downloadUrl)) {
-    emitLog('Không tìm thấy đường dẫn tải xuống.', 'error', null, true);
+// 1. Get Repo Configuration
+$settings = getSettings();
+$repoStr = $settings['updateServerUrl'] ?? 'tuilakhoa/PhimTop1-CMS';
+$repoStr = str_replace(['https://github.com/', 'http://github.com/'], '', $repoStr);
+$repo = rtrim($repoStr, '/');
+
+// Need to read config/update.php to get current version
+$configFile = __DIR__ . '/../../config/update.php';
+$configUpdate = file_exists($configFile) ? require $configFile : ['current_version' => '1.0.0'];
+$currentVersion = $configUpdate['current_version'] ?? '1.0.0';
+
+emitLog("Khởi tạo quá trình cập nhật (Github API)...", 'info', 5);
+emitLog("Đang kết nối Github Repository: $repo", 'info', 10);
+
+// 2. Fetch Diff from Github
+function callGithub($url) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'PhimTop1-CMS-Updater');
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($httpCode === 200) return json_decode($response, true);
+    return false;
 }
 
-emitLog('Khởi tạo quá trình cập nhật (File Sync)...', 'info', 5);
+// Try with 'v' prefix first, then without
+$baseTag = 'v' . ltrim($currentVersion, 'v');
+$compareUrl = "https://api.github.com/repos/$repo/compare/$baseTag...$targetTag";
+$diff = callGithub($compareUrl);
 
-// 1. Download the JSON config
-emitLog('Đang tải thông tin tệp tin từ máy chủ...', 'info', 15);
-$jsonContent = @file_get_contents($downloadUrl);
-if ($jsonContent === false) {
-    emitLog('Không thể tải thông tin cập nhật từ máy chủ.', 'error', null, true);
+if (!$diff) {
+    // Try without 'v'
+    $baseTag = ltrim($currentVersion, 'v');
+    $compareUrl = "https://api.github.com/repos/$repo/compare/$baseTag...$targetTag";
+    $diff = callGithub($compareUrl);
 }
 
-$updateData = json_decode($jsonContent, true);
-if (json_last_error() !== JSON_ERROR_NONE) {
-    emitLog('Định dạng dữ liệu từ máy chủ không hợp lệ.', 'error', null, true);
+if (!$diff) {
+    emitLog("Không thể so sánh phiên bản ($baseTag...$targetTag). Github API có thể bị giới hạn hoặc tag không tồn tại.", 'error', null, true);
 }
 
-if (empty($updateData['changed_files']) || !is_array($updateData['changed_files'])) {
-    emitLog('Không tìm thấy danh sách tệp tin cần cập nhật.', 'error', null, true);
+if (empty($diff['files'])) {
+    emitLog('Không tìm thấy tệp tin nào thay đổi giữa 2 phiên bản.', 'warning', 100, true);
 }
 
-$changedFiles = $updateData['changed_files'];
+$changedFiles = [];
+foreach ($diff['files'] as $file) {
+    if ($file['status'] === 'removed') continue;
+    $changedFiles[] = $file['filename'];
+}
+
 $totalFiles = count($changedFiles);
-emitLog('Phát hiện ' . $totalFiles . ' tệp tin cần cập nhật.', 'success', 25);
+emitLog('Phát hiện ' . $totalFiles . ' tệp tin thay đổi qua Github Diff.', 'success', 20);
 
+// 3. Download Files
 $rootDir = realpath(__DIR__ . '/../../');
-$baseUrl = rtrim(dirname($downloadUrl), '/');
 $successCount = 0;
 $failCount = 0;
 
-$progressStep = 60 / ($totalFiles > 0 ? $totalFiles : 1);
-$currentProgress = 30;
+$progressStep = 70 / ($totalFiles > 0 ? $totalFiles : 1);
+$currentProgress = 20;
 
-foreach ($changedFiles as $file) {
-    $file = ltrim($file, '/');
-    $fileUrl = $baseUrl . '/' . str_replace(' ', '%20', $file);
-    $targetPath = $rootDir . '/' . $file;
+foreach ($changedFiles as $filename) {
+    // Raw Github URL format: https://raw.githubusercontent.com/user/repo/tag/filename
+    $fileUrl = "https://raw.githubusercontent.com/$repo/$targetTag/" . str_replace(' ', '%20', $filename);
+    $targetPath = $rootDir . '/' . $filename;
     
-    emitLog("Đang tải: $file", 'info', $currentProgress);
+    emitLog("Đang tải: $filename", 'info', $currentProgress);
     
-    $fileContent = @file_get_contents($fileUrl);
-    if ($fileContent === false) {
-        emitLog("Lỗi khi tải $file", 'error', clone $currentProgress);
+    // Download raw file
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $fileUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $fileContent = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($fileContent === false || $httpCode !== 200) {
+        emitLog("Lỗi tải $filename (HTTP $httpCode)", 'error', clone $currentProgress);
         $failCount++;
     } else {
         $targetDir = dirname($targetPath);
@@ -98,7 +136,7 @@ foreach ($changedFiles as $file) {
         if (@file_put_contents($targetPath, $fileContent) !== false) {
             $successCount++;
         } else {
-            emitLog("Lỗi khi ghi đè $file (Kiểm tra quyền)", 'error', clone $currentProgress);
+            emitLog("Lỗi ghi đè $filename (Kiểm tra quyền CHMOD)", 'error', clone $currentProgress);
             $failCount++;
         }
     }
@@ -108,11 +146,17 @@ foreach ($changedFiles as $file) {
 
 emitLog("Đã xử lý xong: Thành công ($successCount), Thất bại ($failCount).", $failCount > 0 ? 'warning' : 'success', 90);
 
-// Clear UpdateChecker cache
-require_once __DIR__ . '/../../app/Core/UpdateChecker.php';
-$settings = getSettings();
-$checker = new \App\Core\UpdateChecker($settings['updateServerUrl'] ?? null);
-$checker->clearCache();
+// 4. Post-Update: Save new version & Clear Cache
+if ($successCount > 0) {
+    $cleanLatest = ltrim($targetTag, 'v');
+    $newConfigContent = "<?php\nreturn [\n    'current_version' => '$cleanLatest',\n    'update_server' => '$repoStr'\n];\n";
+    @file_put_contents($configFile, $newConfigContent);
+    emitLog("Đã cập nhật cấu hình hệ thống lên phiên bản $cleanLatest.", 'info', 95);
+    
+    require_once __DIR__ . '/../../app/Core/UpdateChecker.php';
+    $checker = new \App\Core\UpdateChecker($repoStr);
+    $checker->clearCache();
+}
 
 if ($failCount === 0) {
     emitLog('Cập nhật hệ thống thành công! Trình duyệt sẽ tải lại sau giây lát.', 'success', 100, true);

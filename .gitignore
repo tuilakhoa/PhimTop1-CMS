@@ -1,8 +1,24 @@
-node_modules/
-build/
-dist/
-coverage/
+# OS generated files
 .DS_Store
-*.log
-.env*
-!.env.example
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Configs and sensitive data
+config.json
+config/.update_cache.json
+release.sh
+test_update.php
+
+# PHP related
+vendor/
+composer.phar

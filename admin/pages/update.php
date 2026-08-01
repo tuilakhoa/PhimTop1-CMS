@@ -82,9 +82,9 @@
                 <form method="POST" class="space-y-4" action="?page=update">
                     <input type="hidden" name="action" value="update_settings">
                     <div>
-                        <label class="block text-sm text-gray-400 mb-2">Update Server (JSON URL)</label>
-                        <input type="text" name="updateServerUrl" value="<?= htmlspecialchars($settings['updateServerUrl'] ?? 'https://update.phimtop1.asia/check') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none text-sm transition-all" placeholder="https://raw.githubusercontent.com/.../update.json">
-                        <p class="text-xs text-gray-500 mt-2">Hệ thống sẽ tải danh sách file cần cập nhật từ URL này.</p>
+                        <label class="block text-sm text-gray-400 mb-2">Github Repository</label>
+                        <input type="text" name="updateServerUrl" value="<?= htmlspecialchars($settings['updateServerUrl'] ?? 'tuilakhoa/PhimTop1-CMS') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none text-sm transition-all" placeholder="Username/Repository">
+                        <p class="text-xs text-gray-500 mt-2">Hệ thống sẽ tự động đồng bộ mã nguồn qua Github Release & API.</p>
                     </div>
                     <button type="submit" class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 font-semibold py-2.5 rounded-xl border border-blue-500/30 transition-colors flex items-center justify-center gap-2 text-sm">
                         <i data-lucide="save" class="w-4 h-4"></i> Lưu Nguồn

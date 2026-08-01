@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
         updateMessage.innerHTML = '<div class="flex items-center gap-2 text-gray-400"><i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Vui lòng đợi trong giây lát...</div>';
         lucide.createIcons();
         
-        if (btnCheckUpdate.querySelector('i')) {
-            btnCheckUpdate.querySelector('i').classList.add('animate-spin');
+        if (btnCheckUpdate.querySelector('i, svg')) {
+            btnCheckUpdate.querySelector('i, svg').classList.add('animate-spin');
         }
         
         const url = `/admin/api/check_update.php${force ? '?force=1' : ''}`;
@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(url)
             .then(res => res.json())
             .then(data => {
-                if (btnCheckUpdate.querySelector('i')) {
-                    btnCheckUpdate.querySelector('i').classList.remove('animate-spin');
+                if (btnCheckUpdate.querySelector('i, svg')) {
+                    btnCheckUpdate.querySelector('i, svg').classList.remove('animate-spin');
                 }
                 
                 if (data.success) {
@@ -52,8 +52,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 lucide.createIcons();
             })
             .catch(error => {
-                if (btnCheckUpdate.querySelector('i')) {
-                    btnCheckUpdate.querySelector('i').classList.remove('animate-spin');
+                if (btnCheckUpdate.querySelector('i, svg')) {
+                    btnCheckUpdate.querySelector('i, svg').classList.remove('animate-spin');
                 }
                 versionDisplay.innerHTML = '<span class="text-red-500">Mất Kết Nối</span>';
                 updateMessage.innerHTML = `<span class="text-red-400 flex items-center gap-2 mt-2 font-medium bg-red-500/10 p-3 rounded-xl border border-red-500/20"><i data-lucide="wifi-off" class="w-5 h-5"></i> Lỗi kết nối đến máy chủ cập nhật. Hãy kiểm tra mạng hoặc thử lại sau.</span>`;
