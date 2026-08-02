@@ -32,12 +32,15 @@ if ($isPost) {
                 $pdo = new PDO($dsn, $dbUser, $dbPass);
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+                $pdo->exec("DROP TABLE IF EXISTS users");
+                $pdo->exec("DROP TABLE IF EXISTS settings");
+                
+                $pdo->exec("CREATE TABLE users (
                     id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL
                 )");
-                $pdo->exec("CREATE TABLE IF NOT EXISTS settings (
+                $pdo->exec("CREATE TABLE settings (
                     id INT PRIMARY KEY, adminPath VARCHAR(255), displayMode VARCHAR(50) DEFAULT 'api',
-                    theme VARCHAR(50) DEFAULT 'dark', cmsVersion VARCHAR(50) DEFAULT '1.0.2',
+                    theme VARCHAR(50) DEFAULT 'dark', cmsVersion VARCHAR(50) DEFAULT '1.0.0',
                     githubRepo VARCHAR(255) DEFAULT 'kkphim/cms-core', githubBranch VARCHAR(255) DEFAULT 'main',
                     githubToken VARCHAR(255), autoCheckUpdates TINYINT(1) DEFAULT 1,
                     updateServerUrl VARCHAR(255) DEFAULT 'tuilakhoa/PhimTop1-CMS',
@@ -84,7 +87,7 @@ if ($isPost) {
                 }
 
                 $pdo->exec("TRUNCATE TABLE settings");
-                $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl, comicApiUrl) VALUES (1, ?, 'api', 'dark', '1.0.2', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS', 'https://otruyenapi.com/v1/api')");
+                $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl, comicApiUrl) VALUES (1, ?, 'api', 'dark', '1.0.0', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS', 'https://otruyenapi.com/v1/api')");
                 $stmt->execute(['/' . $randomPath]);
 
                 $success = "Cài đặt MySQL thành công! Link quản trị mới là: /$randomPath";
@@ -130,7 +133,7 @@ if ($isPost) {
                     'adminPath' => '/' . $randomPath,
                     'displayMode' => 'api',
                     'theme' => 'dark',
-                    'cmsVersion' => '1.0.7',
+                    'cmsVersion' => '1.0.0',
                     'siteName' => 'PhimTop1',
                     'seoTitle' => 'PhimTop1 - Xem Phim Online Chất Lượng Cao',
                     'seoDesc' => 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.',
