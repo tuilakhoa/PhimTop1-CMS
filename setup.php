@@ -82,16 +82,19 @@ if ($isPost) {
                 $randomPath = 'admin_' . substr(md5(uniqid(rand(), true)), 0, 6);
                 $adminDir = __DIR__ . '/admin';
                 $newAdminDir = __DIR__ . '/' . $randomPath;
+                $finalAdminPath = 'admin';
                 if (is_dir($adminDir)) {
-                    @rename($adminDir, $newAdminDir);
+                    if (@rename($adminDir, $newAdminDir)) {
+                        $finalAdminPath = $randomPath;
+                    }
                 }
 
                 $pdo->exec("TRUNCATE TABLE settings");
                 $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl, comicApiUrl) VALUES (1, ?, 'api', 'dark', '1.0.0', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS', 'https://otruyenapi.com/v1/api')");
-                $stmt->execute(['/' . $randomPath]);
+                $stmt->execute(['/' . $finalAdminPath]);
 
-                $success = "Cài đặt MySQL thành công! Link quản trị mới là: /$randomPath";
-                echo "<script>setTimeout(() => window.location.href='/$randomPath', 3000);</script>";
+                $success = "Cài đặt MySQL thành công! Link quản trị mới là: /$finalAdminPath";
+                echo "<script>setTimeout(() => window.location.href='/$finalAdminPath', 3000);</script>";
             } catch (Exception $e) {
                 $error = "Kết nối hoặc cài đặt DB thất bại: " . $e->getMessage();
             }
@@ -113,8 +116,11 @@ if ($isPost) {
                 $randomPath = 'admin_' . substr(md5(uniqid(rand(), true)), 0, 6);
                 $adminDir = __DIR__ . '/admin';
                 $newAdminDir = __DIR__ . '/' . $randomPath;
+                $finalAdminPath = 'admin';
                 if (is_dir($adminDir)) {
-                    @rename($adminDir, $newAdminDir);
+                    if (@rename($adminDir, $newAdminDir)) {
+                        $finalAdminPath = $randomPath;
+                    }
                 }
 
                 require_once __DIR__ . '/includes/firestore_helper.php';
@@ -130,7 +136,7 @@ if ($isPost) {
                 
                 // Khởi tạo Settings mặc định
                 $fs->setDocument('settings', '1', [
-                    'adminPath' => '/' . $randomPath,
+                    'adminPath' => '/' . $finalAdminPath,
                     'displayMode' => 'api',
                     'theme' => 'dark',
                     'cmsVersion' => '1.0.0',
@@ -143,8 +149,8 @@ if ($isPost) {
                     'updateServerUrl' => 'tuilakhoa/PhimTop1-CMS'
                 ]);
 
-                $success = "Cài đặt Firestore thành công! Link quản trị mới là: /$randomPath";
-                echo "<script>setTimeout(() => window.location.href='/$randomPath', 3000);</script>";
+                $success = "Cài đặt Firestore thành công! Link quản trị mới là: /$finalAdminPath";
+                echo "<script>setTimeout(() => window.location.href='/$finalAdminPath', 3000);</script>";
             }
         }
     }
