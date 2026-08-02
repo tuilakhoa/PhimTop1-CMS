@@ -37,12 +37,12 @@ if ($isPost) {
                 )");
                 $pdo->exec("CREATE TABLE IF NOT EXISTS settings (
                     id INT PRIMARY KEY, adminPath VARCHAR(255), displayMode VARCHAR(50) DEFAULT 'api',
-                    theme VARCHAR(50) DEFAULT 'dark', cmsVersion VARCHAR(50) DEFAULT '1.0.1',
+                    theme VARCHAR(50) DEFAULT 'dark', cmsVersion VARCHAR(50) DEFAULT '1.0.2',
                     githubRepo VARCHAR(255) DEFAULT 'kkphim/cms-core', githubBranch VARCHAR(255) DEFAULT 'main',
                     githubToken VARCHAR(255), autoCheckUpdates TINYINT(1) DEFAULT 1,
                     updateServerUrl VARCHAR(255) DEFAULT 'tuilakhoa/PhimTop1-CMS',
                     lastUpdateCheck VARCHAR(255), latestRelease TEXT,
-                    siteName VARCHAR(255) DEFAULT 'PhimTop1',
+                    siteName VARCHAR(255) DEFAULT 'PhimTop1', comicApiUrl VARCHAR(255) DEFAULT 'https://otruyenapi.com/v1/api',
                     seoTitle TEXT, seoDesc TEXT, seoKeywords TEXT, logoUrl VARCHAR(255),
                     verifyGoogle VARCHAR(255), verifyBing VARCHAR(255), verifyYandex VARCHAR(255),
                     customHead TEXT, customBody TEXT
@@ -84,7 +84,7 @@ if ($isPost) {
                 }
 
                 $pdo->exec("TRUNCATE TABLE settings");
-                $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl) VALUES (1, ?, 'api', 'dark', '1.0.1', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS')");
+                $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl, comicApiUrl) VALUES (1, ?, 'api', 'dark', '1.0.2', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS', 'https://otruyenapi.com/v1/api')");
                 $stmt->execute(['/' . $randomPath]);
 
                 $success = "Cài đặt MySQL thành công! Link quản trị mới là: /$randomPath";
@@ -136,6 +136,7 @@ if ($isPost) {
                     'seoDesc' => 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.',
                     'seoKeywords' => 'xem phim, phim online, phim hay, phim vietsub',
                     'logoUrl' => '',
+                    'comicApiUrl' => 'https://otruyenapi.com/v1/api',
                     'updateServerUrl' => 'tuilakhoa/PhimTop1-CMS'
                 ]);
 

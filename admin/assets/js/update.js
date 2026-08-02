@@ -28,26 +28,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     versionDisplay.innerHTML = `Phiên Bản <span class="text-blue-400">v${data.current}</span>`;
                     
-                    if (data.hasUpdate) {
+                    if (data.releases && data.releases.length > 0) {
+                        const currentClean = data.current;
+                        let optionsHtml = '';
+                        data.releases.forEach(r => {
+                            let label = r.version === currentClean ? `v${r.version} (Hiện tại)` : `v${r.version}`;
+                            let selected = r.version === data.latest ? 'selected' : '';
+                            optionsHtml += `<option value="${r.tag_name}" data-changelog="${r.changelog}" data-desc="${r.description.replace(/"/g, '&quot;')}" ${selected}>${label}</option>`;
+                        });
+
                         updateMessage.innerHTML = `
                             <div class="bg-blue-500/10 border border-blue-500/20 p-5 rounded-2xl mb-4 mt-2">
                                 <span class="text-blue-400 flex items-center gap-2 mb-2 font-bold text-lg">
-                                    <span class="relative flex h-3 w-3">
-                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                      <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-                                    </span>
-                                    Phát Hiện Phiên Bản Mới: v${data.latest}
+                                    <i data-lucide="layers" class="w-5 h-5"></i>
+                                    Chọn Phiên Bản Cài Đặt
                                 </span>
-                                ${data.title ? `<strong class="block text-white text-base mb-1">${data.title}</strong>` : ''}
-                                ${data.description ? `<p class="text-gray-400 text-sm leading-relaxed">${data.description}</p>` : ''}
+                                
+                                <select id="version-selector" class="mt-3 block w-full bg-gray-800 border border-gray-700 text-white rounded-xl py-2 px-3 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 text-sm mb-4">
+                                    ${optionsHtml}
+                                </select>
+                                
+                                <p id="version-desc" class="text-gray-400 text-sm leading-relaxed max-h-32 overflow-y-auto custom-scrollbar"></p>
+                                
                                 <div class="flex flex-wrap gap-3 mt-5">
-                                    ${data.download ? `<button onclick="doAutoUpdate('${data.download}')" id="btn-do-update" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl text-white font-bold flex items-center shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5"><i data-lucide="zap" class="w-4 h-4 mr-2"></i> Cập Nhật Ngay</button>` : ''}
-                                    ${data.changelog ? `<a href="${data.changelog}" target="_blank" class="px-6 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-white font-medium flex items-center transition-colors border border-gray-700"><i data-lucide="file-text" class="w-4 h-4 mr-2 text-gray-400"></i> Xem Chi Tiết</a>` : ''}
+                                    <button id="btn-do-update-selected" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl text-white font-bold flex items-center shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5"><i data-lucide="zap" class="w-4 h-4 mr-2"></i> Cài Đặt Phiên Bản Này</button>
+                                    <a id="btn-view-changelog" href="#" target="_blank" class="px-6 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-white font-medium flex items-center transition-colors border border-gray-700"><i data-lucide="file-text" class="w-4 h-4 mr-2 text-gray-400"></i> Xem Chi Tiết</a>
                                 </div>
                             </div>
                         `;
+                        
+                        setTimeout(() => {
+                            const selector = document.getElementById('version-selector');
+                            const descEl = document.getElementById('version-desc');
+                            const changelogBtn = document.getElementById('btn-view-changelog');
+                            const installBtn = document.getElementById('btn-do-update-selected');
+                            
+                            function updateVersionInfo() {
+                                const selectedOption = selector.options[selector.selectedIndex];
+                                descEl.innerText = selectedOption.getAttribute('data-desc') || 'Không có mô tả.';
+                                changelogBtn.href = selectedOption.getAttribute('data-changelog') || '#';
+                            }
+                            
+                            selector.addEventListener('change', updateVersionInfo);
+                            updateVersionInfo();
+                            
+                            installBtn.addEventListener('click', function() {
+                                doAutoUpdate(selector.value);
+                            });
+                            lucide.createIcons();
+                        }, 100);
+
                     } else {
-                        updateMessage.innerHTML = `<div class="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-400 font-medium rounded-xl border border-green-500/20 mt-2"><i data-lucide="check-circle-2" class="w-5 h-5"></i> Tuyệt vời! Bạn đang ở phiên bản mới nhất.</div>`;
+                        updateMessage.innerHTML = `<div class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 text-yellow-400 font-medium rounded-xl border border-yellow-500/20 mt-2"><i data-lucide="alert-circle" class="w-5 h-5"></i> Không tìm thấy phiên bản nào trên máy chủ.</div>`;
                     }
                 } else {
                     versionDisplay.innerHTML = '<span class="text-red-500">Lỗi kiểm tra</span>';
@@ -76,14 +108,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        const btnDoUpdate = document.getElementById('btn-do-update');
+        const btnDoUpdate = document.getElementById('btn-do-update-selected');
         const logContainer = document.getElementById('update-log-container');
         const logOutput = document.getElementById('update-log');
         const progressBar = document.getElementById('update-progress-bar');
         
-        btnDoUpdate.disabled = true;
-        btnDoUpdate.classList.add('opacity-50', 'cursor-not-allowed', 'transform-none');
-        btnDoUpdate.innerHTML = '<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Đang xử lý...';
+        if (btnDoUpdate) {
+            btnDoUpdate.disabled = true;
+            btnDoUpdate.classList.add('opacity-50', 'cursor-not-allowed', 'transform-none');
+            btnDoUpdate.innerHTML = '<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Đang xử lý...';
+        }
         lucide.createIcons();
         
         // Show terminal with animation
@@ -158,16 +192,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.complete) {
                     source.close();
                     if (data.type === 'success') {
-                        btnDoUpdate.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Cập Nhật Hoàn Tất';
-                        btnDoUpdate.className = "px-6 py-2.5 bg-green-600 rounded-xl text-white font-bold flex items-center shadow-lg shadow-green-500/30";
+                        if (btnDoUpdate) {
+                            btnDoUpdate.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Cài Đặt Hoàn Tất';
+                            btnDoUpdate.className = "px-6 py-2.5 bg-green-600 rounded-xl text-white font-bold flex items-center shadow-lg shadow-green-500/30";
+                        }
                         lucide.createIcons();
                         appendLog('Trang web sẽ tự động tải lại trong 3 giây...', 'info');
                         setTimeout(() => window.location.reload(), 3000);
                     } else {
-                        btnDoUpdate.disabled = false;
-                        btnDoUpdate.classList.remove('opacity-50', 'cursor-not-allowed');
-                        btnDoUpdate.innerHTML = '<i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Thử Lại';
-                        btnDoUpdate.className = "px-6 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-white font-bold flex items-center border border-gray-600 transition-colors";
+                        if (btnDoUpdate) {
+                            btnDoUpdate.disabled = false;
+                            btnDoUpdate.classList.remove('opacity-50', 'cursor-not-allowed');
+                            btnDoUpdate.innerHTML = '<i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Thử Lại';
+                            btnDoUpdate.className = "px-6 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-white font-bold flex items-center border border-gray-600 transition-colors";
+                        }
                         lucide.createIcons();
                     }
                 }
@@ -179,10 +217,12 @@ document.addEventListener('DOMContentLoaded', function() {
         source.onerror = function() {
             appendLog('Mất kết nối với máy chủ trong quá trình cập nhật! Quá trình có thể vẫn đang chạy ngầm.', 'error');
             source.close();
-            btnDoUpdate.disabled = false;
-            btnDoUpdate.classList.remove('opacity-50', 'cursor-not-allowed');
-            btnDoUpdate.innerHTML = '<i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Thử Lại';
-            btnDoUpdate.className = "px-6 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-white font-bold flex items-center border border-gray-600 transition-colors";
+            if (btnDoUpdate) {
+                btnDoUpdate.disabled = false;
+                btnDoUpdate.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnDoUpdate.innerHTML = '<i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Thử Lại';
+                btnDoUpdate.className = "px-6 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-white font-bold flex items-center border border-gray-600 transition-colors";
+            }
             lucide.createIcons();
         };
     };
@@ -192,57 +232,4 @@ document.addEventListener('DOMContentLoaded', function() {
         checkUpdate(false);
     }
     
-    // Manual Update Form
-    const manualForm = document.getElementById('manual-update-form');
-    if (manualForm) {
-        manualForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-manual-update');
-            const resultDiv = document.getElementById('manual-result');
-            const path = document.getElementById('manual-path').value;
-            const fileInput = document.getElementById('manual-file');
-            
-            if (!fileInput.files[0]) {
-                return alert('Vui lòng chọn file.');
-            }
-            
-            btn.disabled = true;
-            btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Đang tải lên...';
-            lucide.createIcons();
-            
-            const formData = new FormData();
-            formData.append('path', path);
-            formData.append('file', fileInput.files[0]);
-            
-            const basePath = typeof ADMIN_PATH !== 'undefined' ? ADMIN_PATH : '/admin';
-            fetch(`${basePath}/api/manual_update.php`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                resultDiv.classList.remove('hidden', 'bg-green-500/10', 'border-green-500/20', 'text-green-400', 'bg-red-500/10', 'border-red-500/20', 'text-red-400');
-                if (data.success) {
-                    resultDiv.classList.add('bg-green-500/10', 'border-green-500/20', 'text-green-400');
-                    resultDiv.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 inline-block mr-1"></i> ${data.message}`;
-                    manualForm.reset();
-                } else {
-                    resultDiv.classList.add('bg-red-500/10', 'border-red-500/20', 'text-red-400');
-                    resultDiv.innerHTML = `<i data-lucide="alert-octagon" class="w-4 h-4 inline-block mr-1"></i> ${data.message}`;
-                }
-                lucide.createIcons();
-            })
-            .catch(err => {
-                resultDiv.classList.remove('hidden');
-                resultDiv.classList.add('bg-red-500/10', 'border-red-500/20', 'text-red-400');
-                resultDiv.innerHTML = `<i data-lucide="wifi-off" class="w-4 h-4 inline-block mr-1"></i> Lỗi kết nối máy chủ.`;
-                lucide.createIcons();
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i data-lucide="hard-drive-upload" class="w-4 h-4 mr-2"></i> Ghi Đè File';
-                lucide.createIcons();
-            });
-        });
-    }
 });

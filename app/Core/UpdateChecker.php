@@ -32,7 +32,7 @@ class UpdateChecker {
         }
 
         $currentVersion = $this->getCurrentVersion();
-        $url = 'https://api.github.com/repos/' . $this->repo . '/releases/latest';
+        $url = 'https://api.github.com/repos/' . $this->repo . '/releases';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -56,27 +56,34 @@ class UpdateChecker {
         }
 
         $data = json_decode($response, true);
-        if (json_last_error() !== JSON_ERROR_NONE || !isset($data['tag_name'])) {
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($data) || empty($data)) {
             return [
                 'success' => false,
-                'message' => 'Dữ liệu phản hồi từ Github không hợp lệ.'
+                'message' => 'Dữ liệu phản hồi từ Github không hợp lệ hoặc chưa có phiên bản nào.'
             ];
         }
 
-        $latestVersion = ltrim($data['tag_name'], 'v');
         $currentClean = ltrim($currentVersion, 'v');
-        
+        $latestVersion = ltrim($data[0]['tag_name'], 'v');
         $hasUpdate = version_compare($currentClean, $latestVersion, '<');
-        
+
+        $releases = [];
+        foreach (array_slice($data, 0, 10) as $release) {
+            $releases[] = [
+                'tag_name' => $release['tag_name'],
+                'version' => ltrim($release['tag_name'], 'v'),
+                'title' => $release['name'] ?? 'Bản cập nhật ' . $release['tag_name'],
+                'description' => $release['body'] ?? '',
+                'changelog' => $release['html_url'] ?? ('https://github.com/' . $this->repo . '/releases/tag/' . $release['tag_name'])
+            ];
+        }
+
         $result = [
             'success' => true,
             'current' => $currentClean,
             'latest' => $latestVersion,
             'hasUpdate' => $hasUpdate,
-            'title' => $data['name'] ?? 'Bản cập nhật v' . $latestVersion,
-            'description' => $data['body'] ?? 'Cập nhật từ Github Release.',
-            'changelog' => $data['html_url'] ?? ('https://github.com/' . $this->repo . '/releases'),
-            'download' => $data['tag_name'] // Pass the exact target tag to do_update
+            'releases' => $releases
         ];
 
         $this->setCache($result);

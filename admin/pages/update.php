@@ -117,30 +117,7 @@
             </div>
         </div>
 
-        <!-- Sidebar Tools -->
-        <div class="space-y-8">
-            <!-- Manual File Upload -->
-            <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
-                <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-orange-500/10 rounded-full blur-[40px] pointer-events-none"></div>
-                <h3 class="text-lg font-bold text-white mb-4 border-b border-gray-800 pb-3 flex items-center gap-2">
-                    <i data-lucide="upload-cloud" class="w-5 h-5 text-orange-500"></i> Cập Nhật Thủ Công
-                </h3>
-                <form id="manual-update-form" class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-2">Đường dẫn đích (ví dụ: <code>themes/netflix/index.php</code>)</label>
-                        <input type="text" id="manual-path" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-500/50 outline-none text-sm font-mono transition-all" placeholder="path/to/file.php">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-2">Chọn file thay thế</label>
-                        <input type="file" id="manual-file" required class="w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700 cursor-pointer border border-gray-700 rounded-xl p-1 bg-gray-900">
-                    </div>
-                    <button type="submit" id="btn-manual-update" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm shadow-lg shadow-orange-500/20">
-                        <i data-lucide="hard-drive-upload" class="w-4 h-4"></i> Ghi Đè File
-                    </button>
-                    <div id="manual-result" class="text-sm mt-3 hidden rounded-xl p-3 border"></div>
-                </form>
-            </div>
-        </div>
+        <!-- Removed Manual Update Sidebar Tools -->
     </div>
 
     <!-- Information Card -->

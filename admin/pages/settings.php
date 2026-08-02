@@ -42,6 +42,12 @@
         </div>
 
         <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn API Truyện (OTruyen)</label>
+            <input type="url" name="comicApiUrl" value="<?= htmlspecialchars($settings['comicApiUrl'] ?? 'https://otruyenapi.com/v1/api') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+            <p class="text-xs text-gray-500 mt-2">URL cơ sở để tải danh sách truyện. Mặc định: <code class="text-red-400">https://otruyenapi.com/v1/api</code></p>
+        </div>
+
+        <div class="mb-6">
             <label class="block text-sm font-medium text-gray-300 mb-2">TMDB API Key</label>
             <input type="text" name="tmdbApiKey" value="<?= htmlspecialchars($settings['tmdbApiKey'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
             <p class="text-xs text-gray-500 mt-2">API Key để lấy trực tiếp ảnh từ TMDB khi CDN bị lỗi. Khuyên dùng: <code class="text-red-400">b775c363e46a24e8c885479b0131c4d2</code></p>

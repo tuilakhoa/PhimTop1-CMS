@@ -45,7 +45,7 @@ function getSettings() {
         'adminPath' => '/admin',
         'displayMode' => 'api',
         'theme' => 'dark',
-        'cmsVersion' => '1.0.1',
+        'cmsVersion' => '1.0.2',
         'githubRepo' => 'kkphim/cms-core',
         'githubBranch' => 'main',
         'githubToken' => '',
@@ -239,6 +239,7 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN geminiApiKey VARCHAR(255) DEFAULT ''",
         "ALTER TABLE settings ADD COLUMN openaiApiKey VARCHAR(255) DEFAULT ''",
         "ALTER TABLE settings ADD COLUMN aiProvider VARCHAR(50) DEFAULT 'gemini'",
+        "ALTER TABLE settings ADD COLUMN comicApiUrl VARCHAR(255) DEFAULT 'https://otruyenapi.com/v1/api'",
         "CREATE TABLE IF NOT EXISTS seo_metadata (
             id INT AUTO_INCREMENT PRIMARY KEY,
             type VARCHAR(50) NOT NULL,
@@ -457,12 +458,14 @@ function fetchApiMovieDetail($slug) {
 
 // Comic API Fetch Helper (OTruyen)
 function fetchApiComics($type, $slug = '', $page = 1, $keyword = '') {
+    global $settings;
+    $baseUrl = rtrim($settings['comicApiUrl'] ?? 'https://otruyenapi.com/v1/api', '/');
     $url = '';
     
-    if ($type === 'home') $url = "https://otruyenapi.com/v1/api/home";
-    else if ($type === 'search') $url = "https://otruyenapi.com/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&page=$page";
-    else if (in_array($type, ['the-loai'])) $url = "https://otruyenapi.com/v1/api/the-loai/$slug?page=$page";
-    else $url = "https://otruyenapi.com/v1/api/danh-sach/" . ($slug ?: 'truyen-moi') . "?page=$page";
+    if ($type === 'home') $url = "$baseUrl/home";
+    else if ($type === 'search') $url = "$baseUrl/tim-kiem?keyword=" . urlencode($keyword) . "&page=$page";
+    else if (in_array($type, ['the-loai'])) $url = "$baseUrl/the-loai/$slug?page=$page";
+    else $url = "$baseUrl/danh-sach/" . ($slug ?: 'truyen-moi') . "?page=$page";
     
     $res = @file_get_contents($url);
     if (!$res) return null;
@@ -493,7 +496,9 @@ function fetchApiComics($type, $slug = '', $page = 1, $keyword = '') {
 }
 
 function fetchApiComicDetail($slug) {
-    $url = "https://otruyenapi.com/v1/api/truyen-tranh/" . urlencode($slug);
+    global $settings;
+    $baseUrl = rtrim($settings['comicApiUrl'] ?? 'https://otruyenapi.com/v1/api', '/');
+    $url = "$baseUrl/truyen-tranh/" . urlencode($slug);
     
     $res = @file_get_contents($url);
     if (!$res) return null;

@@ -10,6 +10,7 @@ $errorMsg = '';
 if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     $updates = [];
     if (isset($_POST['displayMode'])) $updates['displayMode'] = $_POST['displayMode'];
+    if (isset($_POST['comicApiUrl'])) $updates['comicApiUrl'] = $_POST['comicApiUrl'];
     if (isset($_POST['tmdbApiKey'])) $updates['tmdbApiKey'] = $_POST['tmdbApiKey'];
     if (isset($_POST['siteName'])) $updates['siteName'] = $_POST['siteName'];
     if (isset($_POST['seoTitle'])) $updates['seoTitle'] = $_POST['seoTitle'];
