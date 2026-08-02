@@ -45,7 +45,7 @@ function getSettings() {
         'adminPath' => '/admin',
         'displayMode' => 'api',
         'theme' => 'dark',
-        'cmsVersion' => '1.0.8',
+        'cmsVersion' => '1.0.1',
         'githubRepo' => 'kkphim/cms-core',
         'githubBranch' => 'main',
         'githubToken' => '',
@@ -79,6 +79,8 @@ function getSettings() {
         'indexNowKey' => '',
         'slugMovie' => 'phim',
         'slugWatch' => 'xem-phim',
+        'slugComic' => 'truyen',
+        'slugRead' => 'doc-truyen',
         'slugList' => 'danh-sach',
         'slugGenre' => 'the-loai',
         'slugCountry' => 'quoc-gia',
@@ -216,6 +218,8 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN indexNowKey VARCHAR(255)",
         "ALTER TABLE settings ADD COLUMN slugMovie VARCHAR(50) DEFAULT 'phim'",
         "ALTER TABLE settings ADD COLUMN slugWatch VARCHAR(50) DEFAULT 'xem-phim'",
+        "ALTER TABLE settings ADD COLUMN slugComic VARCHAR(50) DEFAULT 'truyen'",
+        "ALTER TABLE settings ADD COLUMN slugRead VARCHAR(50) DEFAULT 'doc-truyen'",
         "ALTER TABLE settings ADD COLUMN slugList VARCHAR(50) DEFAULT 'danh-sach'",
         "ALTER TABLE settings ADD COLUMN slugGenre VARCHAR(50) DEFAULT 'the-loai'",
         "ALTER TABLE settings ADD COLUMN slugCountry VARCHAR(50) DEFAULT 'quoc-gia'",
@@ -446,6 +450,80 @@ function fetchApiMovieDetail($slug) {
     }
     if (!empty($result['movie']['poster_url']) && !preg_match('/^http/', $result['movie']['poster_url'])) {
         $result['movie']['poster_url'] = rtrim($result['domain'], '/') . '/' . ltrim($result['movie']['poster_url'], '/');
+    }
+    
+    return $result;
+}
+
+// Comic API Fetch Helper (OTruyen)
+function fetchApiComics($type, $slug = '', $page = 1, $keyword = '') {
+    $url = '';
+    
+    if ($type === 'home') $url = "https://otruyenapi.com/v1/api/home";
+    else if ($type === 'search') $url = "https://otruyenapi.com/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&page=$page";
+    else if (in_array($type, ['the-loai'])) $url = "https://otruyenapi.com/v1/api/the-loai/$slug?page=$page";
+    else $url = "https://otruyenapi.com/v1/api/danh-sach/" . ($slug ?: 'truyen-moi') . "?page=$page";
+    
+    $res = @file_get_contents($url);
+    if (!$res) return null;
+    $data = json_decode($res, true);
+    
+    $result = [
+        'items' => [],
+        'titlePage' => '',
+        'domain' => 'https://otruyencdn.com/',
+        'seoOnPage' => [],
+        'pagination' => [
+            'totalPages' => 1,
+            'currentPage' => $page
+        ]
+    ];
+    
+    if (isset($data['data']['items'])) $result['items'] = $data['data']['items'];
+    
+    $result['titlePage'] = $data['data']['titlePage'] ?? '';
+    $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://otruyencdn.com/';
+    $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
+    
+    if (isset($data['data']['params']['pagination'])) {
+        $result['pagination'] = $data['data']['params']['pagination'];
+    }
+    
+    return $result;
+}
+
+function fetchApiComicDetail($slug) {
+    $url = "https://otruyenapi.com/v1/api/truyen-tranh/" . urlencode($slug);
+    
+    $res = @file_get_contents($url);
+    if (!$res) return null;
+    $data = json_decode($res, true);
+    
+    $result = [
+        'comic' => null,
+        'chapters' => [],
+        'seoOnPage' => [],
+        'domain' => 'https://otruyencdn.com/'
+    ];
+    
+    if (isset($data['data']['item'])) {
+        $result['comic'] = $data['data']['item'];
+        // Fix missing properties to match Movie structure if needed by theme
+        if (!isset($result['comic']['year'])) $result['comic']['year'] = '';
+        if (!isset($result['comic']['quality'])) $result['comic']['quality'] = '';
+        if (!isset($result['comic']['lang'])) $result['comic']['lang'] = '';
+        if (!isset($result['comic']['time'])) $result['comic']['time'] = '';
+        
+        $result['chapters'] = $result['comic']['chapters'] ?? [];
+        $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
+        $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://otruyencdn.com/';
+    }
+    
+    if (!empty($result['comic']['thumb_url']) && !preg_match('/^http/', $result['comic']['thumb_url'])) {
+        $result['comic']['thumb_url'] = rtrim($result['domain'], '/') . '/' . ltrim($result['comic']['thumb_url'], '/');
+    }
+    if (!empty($result['comic']['poster_url']) && !preg_match('/^http/', $result['comic']['poster_url'])) {
+        $result['comic']['poster_url'] = rtrim($result['domain'], '/') . '/' . ltrim($result['comic']['poster_url'], '/');
     }
     
     return $result;

@@ -52,6 +52,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     // Router Slugs
     if (isset($_POST['slugMovie'])) $updates['slugMovie'] = $_POST['slugMovie'];
     if (isset($_POST['slugWatch'])) $updates['slugWatch'] = $_POST['slugWatch'];
+    if (isset($_POST['slugComic'])) $updates['slugComic'] = $_POST['slugComic'];
+    if (isset($_POST['slugRead'])) $updates['slugRead'] = $_POST['slugRead'];
     if (isset($_POST['slugList'])) $updates['slugList'] = $_POST['slugList'];
     if (isset($_POST['slugGenre'])) $updates['slugGenre'] = $_POST['slugGenre'];
     if (isset($_POST['slugCountry'])) $updates['slugCountry'] = $_POST['slugCountry'];
@@ -118,6 +120,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
         
         $slugMovie = $settings['slugMovie'] ?? 'phim';
         $slugWatch = $settings['slugWatch'] ?? 'xem-phim';
+        $slugComic = $settings['slugComic'] ?? 'truyen';
+        $slugRead = $settings['slugRead'] ?? 'doc-truyen';
         $slugList = $settings['slugList'] ?? 'danh-sach';
         $slugGenre = $settings['slugGenre'] ?? 'the-loai';
         $slugCountry = $settings['slugCountry'] ?? 'quoc-gia';
@@ -125,6 +129,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
         $seoBlock = "# SEO URL Rewrites\n";
         $seoBlock .= "    RewriteRule ^{$slugMovie}/([^/]+)/?$ movie.php?slug=$1 [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugWatch}/([^/]+)/([^/]+)/?$ watch.php?slug=$1&ep=$2 [QSA,L]\n";
+        $seoBlock .= "    RewriteRule ^{$slugComic}/([^/]+)/?$ comic.php?slug=$1 [QSA,L]\n";
+        $seoBlock .= "    RewriteRule ^{$slugRead}/([^/]+)/([^/]+)/?$ read.php?slug=$1&chap=$2 [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugList}/([^/]+)/?$ category.php?type=$1 [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugGenre}/([^/]+)/?$ category.php?slug=$1&type=the-loai [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugCountry}/([^/]+)/?$ category.php?slug=$1&type=quoc-gia [QSA,L]\n";

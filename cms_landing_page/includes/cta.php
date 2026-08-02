@@ -16,7 +16,7 @@
                     </p>
                     
                     <div class="cta-actions">
-                        <a href="https://github.com/kkphim/cms-core/archive/refs/heads/main.zip" class="btn-primary">
+                        <a href="https://github.com/tuilakhoa/PhimTop1-CMS/archive/refs/heads/main.zip" class="btn-primary">
                             <i data-lucide="download-cloud" style="width: 20px; height: 20px;"></i> Tải Mã Nguồn
                         </a>
                         <a href="https://t.me/your_telegram_group" target="_blank" class="btn-primary btn-telegram">
