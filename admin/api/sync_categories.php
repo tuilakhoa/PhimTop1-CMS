@@ -19,8 +19,7 @@ function fetchApi($url) {
 }
 
 try {
-    $pdo = getPDO();
-    if (!$pdo) throw new Exception("Không thể kết nối cơ sở dữ liệu");
+    $repo = getCategoryRepository();
     
     // Fetch Thể Loại
     $genresData = fetchApi('https://phimapi.com/the-loai');
@@ -29,14 +28,11 @@ try {
     // Fetch Quốc Gia
     $countriesData = fetchApi('https://phimapi.com/quoc-gia');
     $countries = $countriesData['data']['items'] ?? [];
-    
-    $stmt = $pdo->prepare("INSERT INTO categories (slug, name, type) VALUES (?, ?, ?)
-        ON DUPLICATE KEY UPDATE name=VALUES(name)");
         
     $genresCount = 0;
     foreach ($genres as $item) {
         if (!empty($item['slug']) && !empty($item['name'])) {
-            $stmt->execute([$item['slug'], $item['name'], 'genre']);
+            $repo->saveCategory($item['slug'], $item['name'], 'genre');
             $genresCount++;
         }
     }
@@ -44,7 +40,7 @@ try {
     $countriesCount = 0;
     foreach ($countries as $item) {
         if (!empty($item['slug']) && !empty($item['name'])) {
-            $stmt->execute([$item['slug'], $item['name'], 'country']);
+            $repo->saveCategory($item['slug'], $item['name'], 'country');
             $countriesCount++;
         }
     }

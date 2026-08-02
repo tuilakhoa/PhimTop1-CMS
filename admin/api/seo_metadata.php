@@ -14,11 +14,12 @@ if (!$pdo) {
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
+$repo = getSeoRepository();
 
 if ($method === 'GET') {
     // List all
-    $stmt = $pdo->query("SELECT * FROM seo_metadata ORDER BY updated_at DESC");
-    echo json_encode(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+    $data = $repo->getAllSeoMetadata();
+    echo json_encode(['success' => true, 'data' => $data]);
 } elseif ($method === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
     $type = trim($data['type'] ?? '');
@@ -36,24 +37,24 @@ if ($method === 'GET') {
     if ($custom_slug === '') $custom_slug = null;
 
     try {
-        if (!empty($data['id'])) {
-            // Update
-            $stmt = $pdo->prepare("UPDATE seo_metadata SET type=?, item_id=?, custom_slug=?, seo_title=?, seo_desc=?, seo_keywords=? WHERE id=?");
-            $stmt->execute([$type, $item_id, $custom_slug, $seo_title, $seo_desc, $seo_keywords, $data['id']]);
-        } else {
-            // Insert
-            $stmt = $pdo->prepare("INSERT INTO seo_metadata (type, item_id, custom_slug, seo_title, seo_desc, seo_keywords) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$type, $item_id, $custom_slug, $seo_title, $seo_desc, $seo_keywords]);
-        }
+        $saveData = [
+            'id' => $data['id'] ?? null,
+            'type' => $type,
+            'item_id' => $item_id,
+            'custom_slug' => $custom_slug,
+            'seo_title' => $seo_title,
+            'seo_desc' => $seo_desc,
+            'seo_keywords' => $seo_keywords
+        ];
+        $repo->saveSeoMetadata($saveData);
         echo json_encode(['success' => true]);
-    } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Lỗi cơ sở dữ liệu: ' . $e->getMessage()]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Lỗi máy chủ: ' . $e->getMessage()]);
     }
 } elseif ($method === 'DELETE') {
     $data = json_decode(file_get_contents('php://input'), true);
     if (!empty($data['id'])) {
-        $stmt = $pdo->prepare("DELETE FROM seo_metadata WHERE id = ?");
-        $stmt->execute([$data['id']]);
+        $repo->deleteSeoMetadata($data['id']);
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Invalid ID']);

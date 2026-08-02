@@ -70,7 +70,7 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
                      alt="Thumb" class="w-full rounded-xl shadow-2xl border-2 border-gray-700/50">
             </div>
             
-            <div class="flex-grow">
+            <div class="flex-grow min-w-0">
                 <div class="flex flex-wrap gap-2 mb-4">
                     <?php if (!empty($movie['quality'])): ?>
                         <span class="inline-flex items-center whitespace-nowrap w-fit px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-md"><?= htmlspecialchars($movie['quality']) ?></span>
@@ -112,7 +112,7 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
                     </div>
                 </div>
                 
-                <div class="mb-8 text-gray-300 leading-relaxed">
+                <div class="mb-8 text-gray-300 leading-relaxed break-words">
                     <?= !empty($movie['content']) ? strip_tags($movie['content'], '<p><br><b><i>') : 'Chưa có tóm tắt.' ?>
                 </div>
 

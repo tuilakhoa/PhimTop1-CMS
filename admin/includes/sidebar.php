@@ -25,7 +25,9 @@
                         'seo' => ['icon' => 'search', 'title' => 'Cấu Hình SEO'],
                         'seo_manager' => ['icon' => 'file-search', 'title' => 'SEO Từng Trang'],
                         'sitemap' => ['icon' => 'map', 'title' => 'Quản Lý Sitemap'],
+                        'robots' => ['icon' => 'file-text', 'title' => 'Robots.txt'],
                         'themes' => ['icon' => 'palette', 'title' => 'Giao Diện'],
+                        'ai_settings' => ['icon' => 'bot', 'title' => 'Cấu Hình AI'],
                         'update' => ['icon' => 'refresh-cw', 'title' => 'Cập Nhật Phiên Bản']
                     ]
                 ];

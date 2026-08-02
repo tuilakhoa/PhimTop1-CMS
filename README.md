@@ -76,11 +76,9 @@ Nội dung file `firestore.rules`:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Cho phép đọc tự do (hiển thị phim cho người dùng)
-    // KHÔNG cho phép ghi từ Client (Chỉ PHP Backend có Service Account mới được ghi)
+    // KHÔNG cho phép truy cập từ Client (Chỉ PHP Backend có Service Account mới được quyền đọc/ghi)
     match /{document=**} {
-      allow read: if true;
-      allow write: if false; 
+      allow read, write: if false; 
     }
   }
 }

@@ -138,7 +138,7 @@ class FirestoreClient {
     }
 
     public function getDocument($collection, $docId) {
-        $data = $this->request('GET', "/{$collection}/{$docId}");
+        $data = $this->request('GET', "/{$collection}/{$docId}", null, true);
         if (isset($data['fields'])) {
             return $this->parseFields($data['fields']);
         }
@@ -159,7 +159,7 @@ class FirestoreClient {
     }
 
     public function getAllDocuments($collection) {
-        $data = $this->request('GET', "/{$collection}");
+        $data = $this->request('GET', "/{$collection}", null, true);
         $results = [];
         if (isset($data['documents'])) {
             foreach ($data['documents'] as $doc) {
@@ -173,5 +173,10 @@ class FirestoreClient {
             }
         }
         return $results;
+    }
+
+    public function deleteDocument($collection, $docId) {
+        $response = $this->request('DELETE', "/{$collection}/{$docId}", null, true);
+        return true; // DELETE in REST API typically returns {} on success
     }
 }

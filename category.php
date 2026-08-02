@@ -27,25 +27,18 @@ global $pageTitle, $pageDesc, $pageKeywords;
 $siteName = $settings['siteName'] ?? 'PhimTop1';
 
 if (($settings['displayMode'] ?? 'api') === 'crawl') {
-    $pdo = getPDO();
-    if ($pdo) {
-        $limit = 24;
-        $offset = ($page - 1) * $limit;
-        if ($originalType) {
-            $stmt = $pdo->prepare("SELECT * FROM movies WHERE type = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?");
-            $stmt->bindValue(1, $originalType, PDO::PARAM_STR);
-            $stmt->bindValue(2, $limit, PDO::PARAM_INT);
-            $stmt->bindValue(3, $offset, PDO::PARAM_INT);
-            $stmt->execute();
-            $title = "Danh sách: " . htmlspecialchars($originalType);
-            $pageTitle = $title . ' - ' . $siteName;
-        } else {
-            $stmt = $pdo->prepare("SELECT * FROM movies ORDER BY updated_at DESC LIMIT ? OFFSET ?");
-            $stmt->bindValue(1, $limit, PDO::PARAM_INT);
-            $stmt->bindValue(2, $offset, PDO::PARAM_INT);
-            $stmt->execute();
-        }
-        $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $repo = getMovieRepository();
+    $limit = 24;
+    
+    if ($originalType) {
+        $result = $repo->getMovies($page, $limit, '', $originalType);
+        $movies = $result['items'];
+        
+        $title = "Danh sách: " . htmlspecialchars($originalType);
+        $pageTitle = $title . ' - ' . $siteName;
+    } else {
+        $result = $repo->getMovies($page, $limit, '');
+        $movies = $result['items'];
     }
 } else {
     $apiType = in_array($originalType, ['the-loai', 'quoc-gia', 'danh-sach', 'nam-phat-hanh']) ? $originalType : 'danh-sach';

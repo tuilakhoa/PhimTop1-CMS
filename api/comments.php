@@ -2,25 +2,22 @@
 header('Content-Type: application/json');
 require_once __DIR__ . '/../includes/db.php';
 
-$pdo = getPDO();
-
-if (!$pdo) {
-    echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
-    exit;
-}
-
 try {
-    $pdo->exec("CREATE TABLE IF NOT EXISTS comments (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        movie_slug VARCHAR(255) NOT NULL,
-        user_name VARCHAR(100) NOT NULL,
-        content TEXT NOT NULL,
-        status VARCHAR(50) DEFAULT 'approved',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )");
+    $pdo = getPDO();
+    if ($pdo) {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS comments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            movie_slug VARCHAR(255) NOT NULL,
+            user_name VARCHAR(100) NOT NULL,
+            content TEXT NOT NULL,
+            status VARCHAR(50) DEFAULT 'approved',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )");
+    }
 } catch (PDOException $e) {}
 
 $method = $_SERVER['REQUEST_METHOD'];
+$repo = getCommentRepository();
 
 if ($method === 'GET') {
     // Fetch comments
@@ -31,9 +28,7 @@ if ($method === 'GET') {
     }
 
     try {
-        $stmt = $pdo->prepare("SELECT id, user_name, content, created_at FROM comments WHERE movie_slug = ? AND status = 'approved' ORDER BY created_at DESC");
-        $stmt->execute([$slug]);
-        $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $comments = $repo->getCommentsByMovie($slug, true);
 
         // Format date
         foreach ($comments as &$c) {
@@ -52,7 +47,7 @@ if ($method === 'GET') {
         }
 
         echo json_encode(['success' => true, 'data' => $comments]);
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
 } elseif ($method === 'POST') {
@@ -79,22 +74,21 @@ if ($method === 'GET') {
     }
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO comments (movie_slug, user_name, content, status) VALUES (?, ?, ?, 'approved')");
-        $stmt->execute([$slug, htmlspecialchars($name), htmlspecialchars($content)]);
-        
-        $newId = $pdo->lastInsertId();
+        $cleanName = htmlspecialchars($name);
+        $cleanContent = htmlspecialchars($content);
+        $newId = $repo->addComment($slug, $cleanName, $cleanContent, 'approved');
         
         echo json_encode([
             'success' => true, 
             'message' => 'Bình luận thành công.',
             'comment' => [
                 'id' => $newId,
-                'user_name' => htmlspecialchars($name),
-                'content' => htmlspecialchars($content),
+                'user_name' => $cleanName,
+                'content' => $cleanContent,
                 'time_ago' => 'Vừa xong'
             ]
         ]);
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Lỗi máy chủ khi đăng bình luận.']);
     }
 } else {

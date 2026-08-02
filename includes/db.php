@@ -45,7 +45,7 @@ function getSettings() {
         'adminPath' => '/admin',
         'displayMode' => 'api',
         'theme' => 'dark',
-        'cmsVersion' => '1.0.7',
+        'cmsVersion' => '1.0.8',
         'githubRepo' => 'kkphim/cms-core',
         'githubBranch' => 'main',
         'githubToken' => '',
@@ -301,28 +301,16 @@ function requireAdmin() {
 }
 
 // SEO Helper Functions
+require_once __DIR__ . '/repositories.php';
+
 function getSeoMetadata($type, $slug) {
-    $pdo = getPDO();
-    if (!$pdo) return null;
-    try {
-        $stmt = $pdo->prepare("SELECT * FROM seo_metadata WHERE type = ? AND item_id = ?");
-        $stmt->execute([$type, $slug]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-        return null;
-    }
+    $repo = getSeoRepository();
+    return $repo->getSeoMetadata($type, $slug);
 }
 
 function resolveCustomSlug($type, $customSlug) {
-    $pdo = getPDO();
-    if (!$pdo) return $customSlug;
-    try {
-        $stmt = $pdo->prepare("SELECT item_id FROM seo_metadata WHERE type = ? AND custom_slug = ? AND custom_slug IS NOT NULL AND custom_slug != ''");
-        $stmt->execute([$type, $customSlug]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row) return $row['item_id'];
-    } catch (Exception $e) {}
-    return $customSlug;
+    $repo = getSeoRepository();
+    return $repo->resolveCustomSlug($type, $customSlug);
 }
 
 // API Fetch Helper

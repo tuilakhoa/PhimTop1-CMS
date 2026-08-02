@@ -157,12 +157,9 @@ function downloadAndProcessImage($url, $savePath, $targetWidth = 0) {
 
 $added = 0;
 $updated = 0;
-$pdo = getPDO();
-if ($pdo && !empty($items)) {
-    $stmt = $pdo->prepare("INSERT INTO movies (id, name, origin_name, slug, thumb_url, poster_url, year, type, status, episode_current, quality, lang, chieu_rap)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE name=VALUES(name), origin_name=VALUES(origin_name), thumb_url=VALUES(thumb_url), poster_url=VALUES(poster_url), year=VALUES(year), type=VALUES(type), status=VALUES(status), episode_current=VALUES(episode_current), quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap)");
+$repo = getMovieRepository();
 
+if (!empty($items)) {
     $uploadDir = __DIR__ . '/../../uploads/movies/';
     if ($dl === 1 && !is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
@@ -213,9 +210,11 @@ if ($pdo && !empty($items)) {
             if (strpos($m['poster_url'], 'http') !== 0 && !empty($m['poster_url'])) $m['poster_url'] = 'https://phimimg.com/' . $m['poster_url'];
         }
         
-        $stmt->execute([$m['id'], $m['name'], $m['origin_name'], $m['slug'], $m['thumb_url'], $m['poster_url'], $m['year'], $m['type'], $m['status'], $m['episode_current'], $m['quality'], $m['lang'], $m['chieu_rap']]);
-        if ($stmt->rowCount() == 1) $added++;
-        else $updated++;
+        // Save via repository
+        $existing = clone (object) $m; // just a dummy object
+        if ($repo->saveMovie($m)) {
+            $added++;
+        }
     }
 }
 echo json_encode(['status' => 'success', 'added' => $added, 'updated' => $updated]);

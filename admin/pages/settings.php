@@ -132,34 +132,6 @@
             <p class="text-xs text-gray-500 mt-2">Nhập `common` nếu cho phép mọi tài khoản, hoặc nhập ID tổ chức của bạn.</p>
         </div>
 
-        <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-800 pb-2 flex items-center mt-12">
-            <i data-lucide="bot" class="w-5 h-5 mr-2 text-purple-500"></i> Tích hợp Trí Tuệ Nhân Tạo (AI)
-        </h3>
-        <p class="text-sm text-gray-400 mb-5">Cấu hình API Key của các nhà cung cấp AI để sử dụng tính năng "Viết lại Mô tả bằng AI".</p>
-        
-        <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-300 mb-1.5">Mô Hình Khuyên Dùng (Mặc định)</label>
-            <select name="aiProvider" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-purple-500 outline-none transition-shadow appearance-none">
-                <option value="gemini" <?= ($settings['aiProvider'] ?? 'gemini') === 'gemini' ? 'selected' : '' ?>>Google Gemini</option>
-                <option value="openai" <?= ($settings['aiProvider'] ?? '') === 'openai' ? 'selected' : '' ?>>OpenAI ChatGPT</option>
-            </select>
-        </div>
-
-        <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-300 mb-1.5 flex items-center">
-                <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" class="w-4 h-4 mr-1.5" alt="Gemini"> Gemini API Key
-            </label>
-            <input type="password" name="geminiApiKey" value="<?= htmlspecialchars($settings['geminiApiKey'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-purple-500 outline-none transition-shadow" placeholder="AIzaSy...">
-            <p class="text-xs text-gray-500 mt-2">Lấy API Key tại <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-purple-400 hover:underline">Google AI Studio</a>.</p>
-        </div>
-
-        <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-300 mb-1.5 flex items-center">
-                <i data-lucide="cpu" class="w-4 h-4 mr-1.5"></i> OpenAI API Key
-            </label>
-            <input type="password" name="openaiApiKey" value="<?= htmlspecialchars($settings['openaiApiKey'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-purple-500 outline-none transition-shadow" placeholder="sk-proj-...">
-            <p class="text-xs text-gray-500 mt-2">Lấy API Key tại <a href="https://platform.openai.com/api-keys" target="_blank" class="text-purple-400 hover:underline">OpenAI Platform</a>.</p>
-        </div>
     </div>
 
     <!-- Tab 4: Database -->
@@ -208,8 +180,7 @@
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
-      allow read: if true;
-      allow write: if false; // Chỉ PHP Server (dùng JSON) mới có quyền ghi
+      allow read, write: if false; // Chỉ PHP Server (dùng JSON) mới có quyền đọc và ghi
     }
   }
 }</pre>

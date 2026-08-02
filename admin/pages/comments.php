@@ -16,19 +16,19 @@ try {
     // Ignore error if it already exists or on some weird DB setups
 }
 
+$repo = getCommentRepository();
+
 // Handle Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete_id'])) {
-        $id = (int)$_POST['delete_id'];
-        $stmt = $pdo->prepare("DELETE FROM comments WHERE id = ?");
-        $stmt->execute([$id]);
+        $id = $_POST['delete_id'];
+        $repo->deleteComment($id);
         $_SESSION['success'] = "Đã xóa bình luận thành công!";
     } elseif (isset($_POST['toggle_id'])) {
-        $id = (int)$_POST['toggle_id'];
+        $id = $_POST['toggle_id'];
         $current = $_POST['current_status'] ?? 'approved';
         $newStatus = $current === 'approved' ? 'pending' : 'approved';
-        $stmt = $pdo->prepare("UPDATE comments SET status = ? WHERE id = ?");
-        $stmt->execute([$newStatus, $id]);
+        $repo->updateStatus($id, $newStatus);
         $_SESSION['success'] = "Đã cập nhật trạng thái bình luận!";
     }
     header("Location: ?page=comments");
@@ -39,16 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $page = isset($_GET['p']) ? (int)$_GET['p'] : 1;
 if ($page < 1) $page = 1;
 $limit = 20;
-$offset = ($page - 1) * $limit;
 
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM comments");
-$stmt->execute();
-$totalComments = $stmt->fetchColumn();
-$totalPages = ceil($totalComments / $limit);
-
-$stmt = $pdo->prepare("SELECT * FROM comments ORDER BY created_at DESC LIMIT $limit OFFSET $offset");
-$stmt->execute();
-$commentsList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $repo->getAllComments($page, $limit, '');
+$totalComments = $result['total'];
+$totalPages = $result['totalPages'];
+$commentsList = $result['items'];
 
 ?>
 <div class="mb-6 flex justify-between items-center">

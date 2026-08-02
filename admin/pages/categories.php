@@ -16,15 +16,11 @@
 </div>
 
 <?php
-$pdo = getPDO();
-$genres = [];
-$countries = [];
-if ($pdo) {
-    $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        if ($row['type'] === 'genre') $genres[] = $row;
-        else if ($row['type'] === 'country') $countries[] = $row;
-    }
+$repo = getCategoryRepository();
+$allCats = $repo->getCategories();
+foreach ($allCats as $row) {
+    if (($row['type'] ?? '') === 'genre') $genres[] = $row;
+    else if (($row['type'] ?? '') === 'country') $countries[] = $row;
 }
 ?>
 

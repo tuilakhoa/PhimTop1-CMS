@@ -37,7 +37,7 @@ if ($isPost) {
                 )");
                 $pdo->exec("CREATE TABLE IF NOT EXISTS settings (
                     id INT PRIMARY KEY, adminPath VARCHAR(255), displayMode VARCHAR(50) DEFAULT 'api',
-                    theme VARCHAR(50) DEFAULT 'dark', cmsVersion VARCHAR(50) DEFAULT '1.0.7',
+                    theme VARCHAR(50) DEFAULT 'dark', cmsVersion VARCHAR(50) DEFAULT '1.0.8',
                     githubRepo VARCHAR(255) DEFAULT 'kkphim/cms-core', githubBranch VARCHAR(255) DEFAULT 'main',
                     githubToken VARCHAR(255), autoCheckUpdates TINYINT(1) DEFAULT 1,
                     updateServerUrl VARCHAR(255) DEFAULT 'tuilakhoa/PhimTop1-CMS',
@@ -84,7 +84,7 @@ if ($isPost) {
                 }
 
                 $pdo->exec("TRUNCATE TABLE settings");
-                $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl) VALUES (1, ?, 'api', 'dark', '1.0.7', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS')");
+                $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl) VALUES (1, ?, 'api', 'dark', '1.0.8', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS')");
                 $stmt->execute(['/' . $randomPath]);
 
                 $success = "Cài đặt MySQL thành công! Link quản trị mới là: /$randomPath";
@@ -113,6 +113,31 @@ if ($isPost) {
                 if (is_dir($adminDir)) {
                     @rename($adminDir, $newAdminDir);
                 }
+
+                require_once __DIR__ . '/includes/firestore_helper.php';
+                $fs = new FirestoreClient($projectId, $saData);
+                
+                // Khởi tạo tài khoản Admin
+                $hashed = password_hash($password, PASSWORD_BCRYPT);
+                $fs->setDocument('users', md5($username), [
+                    'username' => $username,
+                    'password' => $hashed,
+                    'role' => 'admin'
+                ]);
+                
+                // Khởi tạo Settings mặc định
+                $fs->setDocument('settings', '1', [
+                    'adminPath' => '/' . $randomPath,
+                    'displayMode' => 'api',
+                    'theme' => 'dark',
+                    'cmsVersion' => '1.0.7',
+                    'siteName' => 'PhimTop1',
+                    'seoTitle' => 'PhimTop1 - Xem Phim Online Chất Lượng Cao',
+                    'seoDesc' => 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.',
+                    'seoKeywords' => 'xem phim, phim online, phim hay, phim vietsub',
+                    'logoUrl' => '',
+                    'updateServerUrl' => 'tuilakhoa/PhimTop1-CMS'
+                ]);
 
                 $success = "Cài đặt Firestore thành công! Link quản trị mới là: /$randomPath";
                 echo "<script>setTimeout(() => window.location.href='/$randomPath', 3000);</script>";
@@ -323,8 +348,7 @@ if ($isPost) {
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
-      allow read: if true;
-      allow write: if false; // Chỉ PHP Server (dùng JSON) mới có quyền ghi
+      allow read, write: if false; // Chỉ PHP Server (dùng JSON) mới có quyền đọc và ghi
     }
   }
 }</pre>

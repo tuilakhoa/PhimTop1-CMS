@@ -9,14 +9,10 @@ $title = "Kết quả tìm kiếm cho: " . htmlspecialchars($keyword);
 $domain = 'https://phimimg.com/';
 
 if (($settings['displayMode'] ?? 'api') === 'crawl') {
-    $pdo = getPDO();
-    if ($pdo && $keyword) {
-        $search = "%$keyword%";
-        $stmt = $pdo->prepare("SELECT * FROM movies WHERE name LIKE ? OR origin_name LIKE ? LIMIT 50");
-        $stmt->bindValue(1, $search, PDO::PARAM_STR);
-        $stmt->bindValue(2, $search, PDO::PARAM_STR);
-        $stmt->execute();
-        $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if ($keyword) {
+        $repo = getMovieRepository();
+        $result = $repo->getMovies(1, 50, $keyword);
+        $movies = $result['items'];
     }
 } else {
     if ($keyword) {

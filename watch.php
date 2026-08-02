@@ -19,24 +19,20 @@ $domain = 'https://phimimg.com/';
 
 // Fetch Data (Same logic as movie.php)
 if (($settings['displayMode'] ?? 'api') === 'crawl') {
-    $pdo = getPDO();
-    if ($pdo) {
-        $stmt = $pdo->prepare("SELECT * FROM movies WHERE slug = ?");
-        $stmt->execute([$originalSlug]);
-        $movie = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($movie) {
-            $episodes = [['server_name' => 'VIP', 'server_data' => []]];
-            
-            global $pageTitle, $pageDesc, $pageKeywords;
-            $siteName = $settings['siteName'] ?? 'PhimTop1';
-            $pageTitle = 'Xem Phim ' . ($movie['name'] ?? '') . ' Tập ' . htmlspecialchars($ep) . ' - ' . $siteName;
-            
-            $contentDesc = strip_tags(html_entity_decode($movie['content'] ?? ''));
-            if (mb_strlen($contentDesc) > 160) {
-                $contentDesc = mb_substr($contentDesc, 0, 157) . '...';
-            }
-            $pageDesc = $contentDesc;
+    $repo = getMovieRepository();
+    $movie = $repo->getMovieBySlug($originalSlug);
+    if ($movie) {
+        $episodes = [['server_name' => 'VIP', 'server_data' => []]];
+        
+        global $pageTitle, $pageDesc, $pageKeywords;
+        $siteName = $settings['siteName'] ?? 'PhimTop1';
+        $pageTitle = 'Xem Phim ' . ($movie['name'] ?? '') . ' Tập ' . htmlspecialchars($ep) . ' - ' . $siteName;
+        
+        $contentDesc = strip_tags(html_entity_decode($movie['content'] ?? ''));
+        if (mb_strlen($contentDesc) > 160) {
+            $contentDesc = mb_substr($contentDesc, 0, 157) . '...';
         }
+        $pageDesc = $contentDesc;
     }
 } else {
     $apiResult = fetchApiMovieDetail($originalSlug);

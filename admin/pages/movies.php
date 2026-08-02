@@ -17,28 +17,11 @@ $totalPages = 0;
 $movies = [];
 
 if ($displayMode === 'crawl') {
-    $where = "1=1";
-    $params = [];
-
-    if ($q !== '') {
-        $where .= " AND (name LIKE ? OR origin_name LIKE ? OR slug LIKE ?)";
-        $search = "%{$q}%";
-        $params[] = $search;
-        $params[] = $search;
-        $params[] = $search;
-    }
-
-    if ($pdo) {
-        $stmtTotal = $pdo->prepare("SELECT COUNT(*) FROM movies WHERE $where");
-        $stmtTotal->execute($params);
-        $totalMovies = $stmtTotal->fetchColumn();
-        $totalPages = ceil($totalMovies / $limit);
-
-        $sql = "SELECT * FROM movies WHERE $where ORDER BY updated_at DESC LIMIT $limit OFFSET $offset";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    $repo = getMovieRepository();
+    $result = $repo->getMovies($page, $limit, $q);
+    $totalMovies = $result['total'];
+    $totalPages = $result['totalPages'];
+    $movies = $result['items'];
 } else {
     // Chế độ API
     if ($q !== '') {
