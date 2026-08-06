@@ -43,6 +43,7 @@ class UpdateChecker {
             'User-Agent: PhimTop1-CMS-Updater'
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);

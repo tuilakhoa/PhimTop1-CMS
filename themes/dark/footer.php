@@ -65,5 +65,6 @@
     <?php if (!empty($settings['customBody'])): ?>
         <?= $settings['customBody'] ?>
     <?php endif; ?>
+    <?php do_action('cms_footer'); ?>
 </body>
 </html>

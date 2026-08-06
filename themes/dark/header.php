@@ -60,7 +60,7 @@ if ($pdo) {
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="/themes/light/assets/css/style.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="/themes/dark/assets/css/style.css?v=<?= time() ?>">
     
     <!-- Cấu hình Đo lường & Bảo mật (Cloudflare/GA4) -->
     <?php if (!empty($settings['cfAnalyticsToken'])): ?>
@@ -84,6 +84,7 @@ if ($pdo) {
     <?php if (!empty($settings['customHead'])): ?>
         <?= $settings['customHead'] ?>
     <?php endif; ?>
+    <?php do_action('cms_head'); ?>
 </head>
 <body class="<?= $bodyClass ?> min-h-screen">
     <nav class="glass-nav fixed w-full top-0 z-50">
@@ -107,6 +108,7 @@ if ($pdo) {
                     <div class="hidden md:flex items-center space-x-6">
                         <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="text-gray-300 hover:text-white transition-colors">Phim Lẻ</a>
                         <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="text-gray-300 hover:text-white transition-colors">Phim Bộ</a>
+                        <?php do_action('theme_header_menu'); ?>
                         
                         <!-- Dropdown Thể Loại -->
                         <div class="relative group">
@@ -146,6 +148,16 @@ if ($pdo) {
                         <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
                     </form>
                     
+                    <?php if (!empty($settings['appDownloadUrl'])): ?>
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="hidden md:flex items-center bg-red-600 hover:bg-red-500 text-white text-sm font-bold py-2 px-4 rounded-full transition-colors shadow-[0_0_15px_rgba(220,38,38,0.3)] border border-red-500/50 mr-2">
+                        <i data-lucide="smartphone" class="w-4 h-4 mr-1.5"></i> Tải App Mobile
+                    </a>
+                    <?php endif; ?>
+                    <?php if (!empty($settings['appDownloadUrlTv'])): ?>
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="hidden md:flex items-center bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold py-2 px-4 rounded-full transition-colors border border-gray-700 mr-2">
+                        <i data-lucide="tv" class="w-4 h-4 mr-1.5"></i> Tải App TV
+                    </a>
+                    <?php endif; ?>
 
                     <?php include __DIR__ . '/../../includes/user_nav.php'; ?>
 
@@ -170,6 +182,18 @@ if ($pdo) {
                 <div class="flex flex-col space-y-3 font-medium text-gray-300">
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white">Phim Lẻ</a>
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white">Phim Bộ</a>
+                    <?php do_action('theme_mobile_menu'); ?>
+                    
+                    <?php if (!empty($settings['appDownloadUrl'])): ?>
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-red-600/30 mt-2">
+                        <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng Mobile
+                    </a>
+                    <?php endif; ?>
+                    <?php if (!empty($settings['appDownloadUrlTv'])): ?>
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-gray-900/30 mt-2">
+                        <i data-lucide="tv" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng TV
+                    </a>
+                    <?php endif; ?>
                     
                     <div class="border-t border-gray-800 pt-2 pb-1">
                         <p class="text-gray-500 text-sm mb-2 font-bold uppercase tracking-wider">Thể Loại</p>

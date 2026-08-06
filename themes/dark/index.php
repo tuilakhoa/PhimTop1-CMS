@@ -3,28 +3,131 @@ include __DIR__ . '/header.php';
 ?>
 
 <div class="container mx-auto px-4">
-    <!-- Hero Section / Featured (just a banner) -->
-    <div class="relative w-full h-[50vh] md:h-[60vh] rounded-2xl overflow-hidden mb-12 shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent z-10"></div>
-        <img src="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop" 
-             alt="Featured" class="absolute inset-0 w-full h-full object-cover">
+    <!-- Hero Section / Featured -->
+<?php
+if (!function_exists('getPhimImgUrl')) {
+    function getPhimImgUrl($url) {
+        global $data, $settings;
+        if (empty($url)) return '';
+        if (preg_match('/^http/', $url)) return $url;
+        if (preg_match('/^\/[a-zA-Z0-9_-]+\.(jpg|jpeg|png|webp)$/i', $url)) {
+            return 'https://image.tmdb.org/t/p/w500' . $url;
+        }
+        $domain = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+        return rtrim($domain, '/') . '/' . ltrim($url, '/');
+    }
+}
+
+$featuredMovies = [];
+$featuredType = $settings['featuredType'] ?? 'latest';
+$featuredStyle = $settings['featuredStyle'] ?? 'single';
+$featuredCount = max(1, (int)($settings['featuredCount'] ?? 5));
+
+if ($featuredType === 'admin') {
+    $slugs = explode(',', $settings['featuredMovieSlug'] ?? '');
+    foreach ($slugs as $s) {
+        $s = trim($s);
+        if (!$s) continue;
+        if (($settings['displayMode'] ?? 'api') === 'crawl') {
+            $m = getMovieRepository()->getMovieBySlug($s);
+            if ($m) $featuredMovies[] = $m;
+        } else {
+            $res = fetchApiMovieDetail($s);
+            if ($res && $res['movie']) $featuredMovies[] = $res['movie'];
+        }
+    }
+} elseif ($featuredType === 'view') {
+    $pdo = getPDO();
+    if ($pdo) {
+        $stmt = $pdo->prepare("SELECT * FROM movies ORDER BY view DESC LIMIT " . $featuredCount);
+        $stmt->execute();
+        $featuredMovies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+} else {
+    $featuredMovies = array_slice($movies, 0, $featuredCount);
+}
+
+if ($featuredStyle === 'single' && count($featuredMovies) > 0) {
+    $featuredMovies = [$featuredMovies[0]];
+}
+if (empty($featuredMovies) && !empty($movies)) {
+    $featuredMovies = [$movies[0]];
+}
+?>
+
+<?php if (!empty($featuredMovies)): ?>
+    <?php if ($featuredStyle === 'slider' && count($featuredMovies) > 1): ?>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+        <div class="swiper swiper-hero w-full h-[50vh] md:h-[60vh] rounded-2xl overflow-hidden mb-12 shadow-2xl relative">
+            <div class="swiper-wrapper">
+                <?php foreach($featuredMovies as $featured): ?>
+                    <div class="swiper-slide relative w-full h-full">
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent z-10"></div>
+                        <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover">
+                        
+                        <div class="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-4xl">
+                            <span class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full w-fit mb-4 uppercase tracking-wider">Phim Nổi Bật</span>
+                            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
+                                <?= htmlspecialchars($featured['name'] ?? '') ?>
+                            </h1>
+                            <p class="text-gray-300 text-lg md:text-xl mb-8 max-w-2xl line-clamp-3">
+                                <?= htmlspecialchars(strip_tags(!empty($featured['content']) ? $featured['content'] : 'Nội dung đang cập nhật...')) ?>
+                            </p>
+                            <div class="flex flex-wrap items-center gap-4">
+                                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
+                                    <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                                    <span>Xem Ngay</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <!-- Pagination & Navigation -->
+            <div class="swiper-pagination !bottom-4"></div>
+            <div class="swiper-button-prev !text-white/50 hover:!text-white after:!text-2xl transition-colors hidden md:flex"></div>
+            <div class="swiper-button-next !text-white/50 hover:!text-white after:!text-2xl transition-colors hidden md:flex"></div>
+        </div>
         
-        <div class="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-4xl">
-            <span class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full w-fit mb-4 uppercase tracking-wider">Phim Mới Nổi Bật</span>
-            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
-                Khám Phá Thế Giới <span class="text-red-500">Điện Ảnh</span> Bất Tận
-            </h1>
-            <p class="text-gray-300 text-lg md:text-xl mb-8 max-w-2xl line-clamp-3">
-                Thưởng thức những bộ phim bom tấn đỉnh cao với chất lượng tuyệt vời nhất. Cập nhật liên tục mỗi ngày.
-            </p>
-            <div class="flex flex-wrap items-center gap-4">
-                <a href="#new-movies" class="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
-                    <i data-lucide="play" class="w-5 h-5 fill-current"></i>
-                    <span>Xem Ngay</span>
-                </a>
+        <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof Swiper !== 'undefined') {
+                    new Swiper('.swiper-hero', {
+                        slidesPerView: 1,
+                        loop: true,
+                        autoplay: { delay: 5000, disableOnInteraction: false },
+                        effect: 'fade',
+                        fadeEffect: { crossFade: true },
+                        pagination: { el: '.swiper-hero .swiper-pagination', clickable: true },
+                        navigation: { nextEl: '.swiper-hero .swiper-button-next', prevEl: '.swiper-hero .swiper-button-prev' }
+                    });
+                }
+            });
+        </script>
+    <?php else: $featured = $featuredMovies[0]; ?>
+        <div class="relative w-full h-[50vh] md:h-[60vh] rounded-2xl overflow-hidden mb-12 shadow-2xl">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent z-10"></div>
+            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover">
+            
+            <div class="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-4xl">
+                <span class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full w-fit mb-4 uppercase tracking-wider">Phim Nổi Bật</span>
+                <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
+                    <?= htmlspecialchars($featured['name'] ?? '') ?>
+                </h1>
+                <p class="text-gray-300 text-lg md:text-xl mb-8 max-w-2xl line-clamp-3">
+                    <?= htmlspecialchars(strip_tags(!empty($featured['content']) ? $featured['content'] : 'Nội dung đang cập nhật...')) ?>
+                </p>
+                <div class="flex flex-wrap items-center gap-4">
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
+                        <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                        <span>Xem Ngay</span>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
+    <?php endif; ?>
+<?php endif; ?>
 
     <!-- Phim Mới Cập Nhật -->
     <div id="new-movies" class="mb-12">

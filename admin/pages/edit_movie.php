@@ -176,9 +176,9 @@ if (!$movie) {
             <div>
                 <div class="flex justify-between items-end mb-1">
                     <label class="block text-sm font-medium text-gray-400">Nội Dung Phim</label>
-                    <button type="button" onclick="rewriteWithAI()" id="btn-rewrite-ai" class="text-xs bg-purple-600/20 text-purple-400 hover:bg-purple-600/30 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors border border-purple-500/20" title="Viết lại bằng AI">
-                        <i data-lucide="sparkles" class="w-4 h-4"></i>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <?php do_action('admin_movie_content_buttons', $movie); ?>
+                    </div>
                 </div>
                 <textarea name="content" id="movie-content" rows="6" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all custom-scrollbar"><?= htmlspecialchars($movie['content']) ?></textarea>
             </div>
@@ -192,49 +192,3 @@ if (!$movie) {
     </div>
 </form>
 
-<script>
-function rewriteWithAI() {
-    const textarea = document.getElementById('movie-content');
-    const btn = document.getElementById('btn-rewrite-ai');
-    const originalContent = textarea.value.trim();
-    
-    if (!originalContent) {
-        alert('Vui lòng nhập nội dung trước khi viết lại.');
-        return;
-    }
-    
-    // Change button state
-    const originalBtnHTML = btn.innerHTML;
-    btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i>';
-    btn.disabled = true;
-    lucide.createIcons();
-    
-    fetch('/admin/api/ai_rewrite.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'content=' + encodeURIComponent(originalContent)
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status && data.result) {
-            textarea.value = data.result;
-            // Hiệu ứng nháy xanh báo thành công
-            textarea.classList.add('ring-2', 'ring-green-500', 'border-green-500');
-            setTimeout(() => {
-                textarea.classList.remove('ring-2', 'ring-green-500', 'border-green-500');
-            }, 1000);
-        } else {
-            alert('Lỗi: ' + (data.message || 'Không thể kết nối AI.'));
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert('Lỗi kết nối đến máy chủ.');
-    })
-    .finally(() => {
-        btn.innerHTML = originalBtnHTML;
-        btn.disabled = false;
-        lucide.createIcons();
-    });
-}
-</script>

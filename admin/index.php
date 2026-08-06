@@ -10,6 +10,8 @@ $errorMsg = '';
 if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     $updates = [];
     if (isset($_POST['displayMode'])) $updates['displayMode'] = $_POST['displayMode'];
+    if (isset($_POST['apiSource'])) $updates['apiSource'] = $_POST['apiSource'];
+    if (isset($_POST['enableComics'])) $updates['enableComics'] = (int)$_POST['enableComics'];
     if (isset($_POST['comicApiUrl'])) $updates['comicApiUrl'] = $_POST['comicApiUrl'];
     if (isset($_POST['tmdbApiKey'])) $updates['tmdbApiKey'] = $_POST['tmdbApiKey'];
     if (isset($_POST['siteName'])) $updates['siteName'] = $_POST['siteName'];
@@ -58,6 +60,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     if (isset($_POST['slugList'])) $updates['slugList'] = $_POST['slugList'];
     if (isset($_POST['slugGenre'])) $updates['slugGenre'] = $_POST['slugGenre'];
     if (isset($_POST['slugCountry'])) $updates['slugCountry'] = $_POST['slugCountry'];
+    if (isset($_POST['slugComicList'])) $updates['slugComicList'] = $_POST['slugComicList'];
     
     // Sitemap
     if (isset($_POST['sitemapLimit'])) $updates['sitemapLimit'] = (int)$_POST['sitemapLimit'];
@@ -66,8 +69,10 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     if (isset($_POST['sitemapLinksPerFile'])) $updates['sitemapLinksPerFile'] = (int)$_POST['sitemapLinksPerFile'];
     
     // Google OAuth
+    if (isset($_POST['enableGoogleLogin'])) $updates['enableGoogleLogin'] = (int)$_POST['enableGoogleLogin'];
     if (isset($_POST['googleClientId'])) $updates['googleClientId'] = $_POST['googleClientId'];
     if (isset($_POST['googleClientSecret'])) $updates['googleClientSecret'] = $_POST['googleClientSecret'];
+    if (isset($_POST['enableMicrosoftLogin'])) $updates['enableMicrosoftLogin'] = (int)$_POST['enableMicrosoftLogin'];
     if (isset($_POST['msClientId'])) $updates['msClientId'] = $_POST['msClientId'];
     if (isset($_POST['msClientSecret'])) $updates['msClientSecret'] = $_POST['msClientSecret'];
     if (isset($_POST['msTenantId'])) $updates['msTenantId'] = $_POST['msTenantId'];
@@ -80,6 +85,12 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
 
     // Update Settings
     if (isset($_POST['allowAutoUpdate'])) $updates['allowAutoUpdate'] = (int)$_POST['allowAutoUpdate'];
+    
+    // Featured Banner Settings
+    if (isset($_POST['featuredType'])) $updates['featuredType'] = $_POST['featuredType'];
+    if (isset($_POST['featuredMovieSlug'])) $updates['featuredMovieSlug'] = $_POST['featuredMovieSlug'];
+    if (isset($_POST['featuredStyle'])) $updates['featuredStyle'] = $_POST['featuredStyle'];
+    if (isset($_POST['featuredCount'])) $updates['featuredCount'] = (int)$_POST['featuredCount'];
 
     // DB Config
     if (isset($_POST['dbType'])) {
@@ -123,6 +134,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
         $slugWatch = $settings['slugWatch'] ?? 'xem-phim';
         $slugComic = $settings['slugComic'] ?? 'truyen';
         $slugRead = $settings['slugRead'] ?? 'doc-truyen';
+        $slugComicList = $settings['slugComicList'] ?? 'danh-sach-truyen';
         $slugList = $settings['slugList'] ?? 'danh-sach';
         $slugGenre = $settings['slugGenre'] ?? 'the-loai';
         $slugCountry = $settings['slugCountry'] ?? 'quoc-gia';
@@ -130,11 +142,13 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
         $seoBlock = "# SEO URL Rewrites\n";
         $seoBlock .= "    RewriteRule ^{$slugMovie}/([^/]+)/?$ movie.php?slug=$1 [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugWatch}/([^/]+)/([^/]+)/?$ watch.php?slug=$1&ep=$2 [QSA,L]\n";
+        $seoBlock .= "    RewriteRule ^{$slugComicList}/?$ danh-sach-truyen.php [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugComic}/([^/]+)/?$ comic.php?slug=$1 [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugRead}/([^/]+)/([^/]+)/?$ read.php?slug=$1&chap=$2 [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugList}/([^/]+)/?$ category.php?type=$1 [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugGenre}/([^/]+)/?$ category.php?slug=$1&type=the-loai [QSA,L]\n";
         $seoBlock .= "    RewriteRule ^{$slugCountry}/([^/]+)/?$ category.php?slug=$1&type=quoc-gia [QSA,L]\n";
+        $seoBlock .= "    RewriteRule ^tim-kiem/?$ search.php [QSA,L]\n";
         
         // Replace the block dynamically using regex
         $newHtaccess = preg_replace('/# SEO URL Rewrites.*?(?=(<\/IfModule>|<\/FilesMatch>|$))/is', str_replace(['\\', '$'], ['\\\\', '\$'], $seoBlock), $htaccessContent);
@@ -171,6 +185,8 @@ include __DIR__ . '/includes/sidebar.php';
 
     <?php
     $pageFile = __DIR__ . "/pages/{$currentPage}.php";
+    $pageFile = apply_filters('admin_page_file', $pageFile, $currentPage);
+    
     if (file_exists($pageFile)) {
         include $pageFile;
     } else {
@@ -199,5 +215,6 @@ include __DIR__ . '/includes/sidebar.php';
         sidebarOverlay.addEventListener('click', toggleSidebar);
     }
 </script>
+<?php do_action('admin_footer'); ?>
 </body>
 </html>

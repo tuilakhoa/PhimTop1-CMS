@@ -113,7 +113,7 @@ $tmdbCount = $comic['tmdb']['vote_count'] ?? 0;
         <div class="flex-1 text-white pt-2 md:pt-4">
             <!-- Title -->
             <h1 class="text-3xl md:text-5xl font-bold mb-2 text-white leading-tight drop-shadow-md"><?= htmlspecialchars($comic['name']) ?></h1>
-            <h2 class="text-lg text-gray-400 mb-4 italic"><?= htmlspecialchars($comic['origin_name']) ?> (<?= htmlspecialchars($comic['year'] ?? date('Y')) ?>)</h2>
+            <h2 class="text-lg text-gray-400 mb-4 italic"><?= htmlspecialchars(is_array($comic['origin_name'] ?? '') ? implode(', ', $comic['origin_name']) : ($comic['origin_name'] ?? '')) ?> (<?= htmlspecialchars($comic['year'] ?? date('Y')) ?>)</h2>
             
             <!-- Genres -->
             <div class="flex flex-wrap gap-2 mb-6">
@@ -129,7 +129,7 @@ $tmdbCount = $comic['tmdb']['vote_count'] ?? 0;
             <!-- Actions -->
             <div class="flex flex-wrap items-center gap-3 mb-8 bg-[#141414]/50 p-4 rounded-2xl border border-gray-800/50 backdrop-blur-sm">
                 <?php if (!empty($chapters[0]['server_data'])): ?>
-                    <a href="/<?= $settings["slugRead"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($chapters[0]['server_data'][0]['slug']) ?>" 
+                    <a href="/<?= $settings["slugRead"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($chapters[0]['server_data'][0]['slug'] ?? $chapters[0]['server_data'][0]['chapter_name'] ?? '') ?>" 
                        class="px-8 py-2.5 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-full transition-all hover:scale-105 flex items-center shadow-lg shadow-yellow-500/20">
                         Xem ngay
                     </a>
@@ -181,11 +181,13 @@ $tmdbCount = $comic['tmdb']['vote_count'] ?? 0;
                         <?php 
                         $server = $chapters[0] ?? ['server_data' => []];
                         foreach ($server['server_data'] as $ep): 
+                            $cSlug = $ep['slug'] ?? $ep['chapter_name'] ?? '';
+                            $cName = $ep['name'] ?? $ep['chapter_name'] ?? '';
                         ?>
-                            <a href="/<?= $settings["slugRead"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($ep['slug']) ?>" 
+                            <a href="/<?= $settings["slugRead"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($cSlug) ?>" 
                                class="px-2 py-2.5 bg-[#202020] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded transition-all text-center truncate border border-gray-800"
-                               title="<?= htmlspecialchars($ep['name']) ?>">
-                                <?= htmlspecialchars($ep['name']) ?>
+                               title="<?= htmlspecialchars($cName) ?>">
+                                <?= htmlspecialchars($cName) ?>
                             </a>
                         <?php endforeach; ?>
                         <?php if(empty($server['server_data'])): ?>

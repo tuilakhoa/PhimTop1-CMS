@@ -58,5 +58,6 @@
     <script>
         lucide.createIcons();
     </script>
+    <?php do_action('cms_footer'); ?>
 </body>
 </html>

@@ -1,5 +1,24 @@
 <?php
+
+if (!function_exists('getallheaders')) {
+    function getallheaders() {
+        $headers = [];
+        foreach ($_SERVER as $name => $value) {
+            if (substr($name, 0, 5) == 'HTTP_') {
+                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
+        }
+        return $headers;
+    }
+}
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    session_set_cookie_params([
+        'lifetime' => 86400 * 30, // 30 days
+        'path' => '/',
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
     session_start();
 }
 $dbConfigPath = __DIR__ . '/../config.json';
@@ -81,6 +100,7 @@ function getSettings() {
         'slugWatch' => 'xem-phim',
         'slugComic' => 'truyen',
         'slugRead' => 'doc-truyen',
+        'slugComicList' => 'danh-sach-truyen',
         'slugList' => 'danh-sach',
         'slugGenre' => 'the-loai',
         'slugCountry' => 'quoc-gia',
@@ -97,7 +117,15 @@ function getSettings() {
         'geminiApiKey' => '',
         'openaiApiKey' => '',
         'aiProvider' => 'gemini',
-        'allowAutoUpdate' => 1
+        'allowAutoUpdate' => 1,
+        'appApiKey' => '',
+        'appBannerEnabled' => 0,
+        'appDownloadUrl' => '',
+        'appDownloadUrlTv' => '',
+        'featuredType' => 'latest',
+        'featuredMovieSlug' => '',
+        'featuredStyle' => 'single',
+        'featuredCount' => 5
     ];
     
     $config = getDbConfig();
@@ -121,10 +149,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 2) {
+            if (!isset($row['db_version']) || $row['db_version'] < 3) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 2]);
-                $row['db_version'] = 2;
+                updateSettings(['db_version' => 3]);
+                $row['db_version'] = 3;
             }
             
             return array_merge($defaultSettings, $row);
@@ -188,6 +216,25 @@ function updateSettings($updates) {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             UNIQUE KEY user_movie (user_email, movie_slug)
         )",
+        "CREATE TABLE IF NOT EXISTS user_follows (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_email VARCHAR(255) NOT NULL,
+            item_slug VARCHAR(255) NOT NULL,
+            item_type VARCHAR(50) DEFAULT 'movie',
+            item_name VARCHAR(255) NOT NULL,
+            thumb_url TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY user_item (user_email, item_slug)
+        )",
+        "CREATE TABLE IF NOT EXISTS notifications (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_email VARCHAR(255) NULL,
+            title VARCHAR(255) NOT NULL,
+            message TEXT NOT NULL,
+            url VARCHAR(255),
+            is_read TINYINT(1) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )",
         "ALTER TABLE settings ADD COLUMN siteName VARCHAR(255) DEFAULT 'PhimTop1'",
         "ALTER TABLE members ADD COLUMN password VARCHAR(255) NULL",
         "ALTER TABLE members ADD COLUMN role VARCHAR(50) DEFAULT 'user'",
@@ -220,6 +267,7 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN slugWatch VARCHAR(50) DEFAULT 'xem-phim'",
         "ALTER TABLE settings ADD COLUMN slugComic VARCHAR(50) DEFAULT 'truyen'",
         "ALTER TABLE settings ADD COLUMN slugRead VARCHAR(50) DEFAULT 'doc-truyen'",
+        "ALTER TABLE settings ADD COLUMN slugComicList VARCHAR(50) DEFAULT 'danh-sach-truyen'",
         "ALTER TABLE settings ADD COLUMN slugList VARCHAR(50) DEFAULT 'danh-sach'",
         "ALTER TABLE settings ADD COLUMN slugGenre VARCHAR(50) DEFAULT 'the-loai'",
         "ALTER TABLE settings ADD COLUMN slugCountry VARCHAR(50) DEFAULT 'quoc-gia'",
@@ -240,6 +288,10 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN openaiApiKey VARCHAR(255) DEFAULT ''",
         "ALTER TABLE settings ADD COLUMN aiProvider VARCHAR(50) DEFAULT 'gemini'",
         "ALTER TABLE settings ADD COLUMN comicApiUrl VARCHAR(255) DEFAULT 'https://otruyenapi.com/v1/api'",
+        "ALTER TABLE settings ADD COLUMN appApiKey VARCHAR(255) DEFAULT ''",
+        "ALTER TABLE settings ADD COLUMN appBannerEnabled TINYINT(1) DEFAULT 0",
+        "ALTER TABLE settings ADD COLUMN appDownloadUrl VARCHAR(255) DEFAULT ''",
+        "ALTER TABLE settings ADD COLUMN appDownloadUrlTv VARCHAR(255) DEFAULT ''",
         "CREATE TABLE IF NOT EXISTS seo_metadata (
             id INT AUTO_INCREMENT PRIMARY KEY,
             type VARCHAR(50) NOT NULL,
@@ -253,6 +305,10 @@ function updateSettings($updates) {
             UNIQUE KEY type_item (type, item_id),
             UNIQUE KEY type_custom_slug (type, custom_slug)
         )",
+        "ALTER TABLE settings ADD COLUMN featuredType VARCHAR(50) DEFAULT 'latest'",
+        "ALTER TABLE settings ADD COLUMN featuredMovieSlug VARCHAR(255) DEFAULT ''",
+        "ALTER TABLE settings ADD COLUMN featuredStyle VARCHAR(50) DEFAULT 'single'",
+        "ALTER TABLE settings ADD COLUMN featuredCount INT DEFAULT 5",
         // Cleanup old deprecated columns from original setup
         "ALTER TABLE settings DROP COLUMN githubRepo",
         "ALTER TABLE settings DROP COLUMN cmsVersion",
@@ -319,33 +375,71 @@ function resolveCustomSlug($type, $customSlug) {
 }
 
 // API Fetch Helper
+function fetchApiWithCache($url, $ttl = 900) {
+    $cacheDir = __DIR__ . '/../cache/api';
+    if (!is_dir($cacheDir)) @mkdir($cacheDir, 0777, true);
+    
+    $cacheFile = $cacheDir . '/' . md5($url) . '.json';
+    
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $ttl) {
+        $cachedData = file_get_contents($cacheFile);
+        if ($cachedData) return $cachedData;
+    }
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $res = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($res && $httpCode >= 200 && $httpCode < 300) {
+        file_put_contents($cacheFile, $res);
+        return $res;
+    }
+    
+    // Fallback to stale cache if API fails
+    if (file_exists($cacheFile)) {
+        return file_get_contents($cacheFile);
+    }
+    
+    return null;
+}
+
 function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '') {
     $settings = getSettings();
     $apiSource = $settings['apiSource'] ?? 'kkphim';
+    
+    // Map internal DB types to API types
+    if ($type === 'genre') $type = 'the-loai';
+    if ($type === 'country') $type = 'quoc-gia';
+    
     $url = '';
     
     if ($apiSource === 'nguonc') {
         if ($type === 'home') $url = "https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=$page";
-        else if ($type === 'search') $url = "https://phim.nguonc.com/api/films/search?keyword=" . urlencode($keyword) . "&page=$page";
+        else if ($type === 'search') $url = "https://phim.nguonc.com/api/films/search?keyword=" . rawurlencode($keyword) . "&page=$page";
         else if ($type === 'danh-sach') $url = "https://phim.nguonc.com/api/films/danh-sach/$slug?page=$page";
         else if ($type === 'the-loai') $url = "https://phim.nguonc.com/api/films/the-loai/$slug?page=$page";
         else if ($type === 'quoc-gia') $url = "https://phim.nguonc.com/api/films/quoc-gia/$slug?page=$page";
         else if ($type === 'nam-phat-hanh') $url = "https://phim.nguonc.com/api/films/nam-phat-hanh/$slug?page=$page";
     } else if ($apiSource === 'ophim') {
         if ($type === 'home') $url = "https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=$page";
-        else if ($type === 'search') $url = "https://ophim1.com/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&page=$page";
+        else if ($type === 'search') $url = "https://ophim1.com/v1/api/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page";
         else if (in_array($type, ['the-loai', 'quoc-gia'])) $url = "https://ophim1.com/v1/api/$type/$slug?page=$page";
         else if ($type === 'nam-phat-hanh') $url = "https://ophim1.com/v1/api/nam/$slug?page=$page";
         else $url = "https://ophim1.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page";
     } else { // kkphim
         if ($type === 'home') $url = "https://phimapi.com/v1/api/home?page=$page";
-        else if ($type === 'search') $url = "https://phimapi.com/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&page=$page";
+        else if ($type === 'search') $url = "https://phimapi.com/v1/api/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page";
         else if (in_array($type, ['the-loai', 'quoc-gia'])) $url = "https://phimapi.com/v1/api/$type/$slug?page=$page";
         else if ($type === 'nam-phat-hanh') $url = "https://phimapi.com/v1/api/nam/$slug?page=$page";
         else $url = "https://phimapi.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page";
     }
     
-    $res = @file_get_contents($url);
+    $res = fetchApiWithCache($url, 900); // 15 mins cache for list
     if (!$res) return null;
     $data = json_decode($res, true);
     
@@ -390,14 +484,14 @@ function fetchApiMovieDetail($slug) {
     
     $url = '';
     if ($apiSource === 'nguonc') {
-        $url = "https://phim.nguonc.com/api/film/" . urlencode($slug);
+        $url = "https://phim.nguonc.com/api/film/" . rawurlencode($slug);
     } else if ($apiSource === 'ophim') {
-        $url = "https://ophim1.com/phim/" . urlencode($slug);
+        $url = "https://ophim1.com/phim/" . rawurlencode($slug);
     } else { // kkphim
-        $url = "https://phimapi.com/phim/" . urlencode($slug);
+        $url = "https://phimapi.com/phim/" . rawurlencode($slug);
     }
     
-    $res = @file_get_contents($url);
+    $res = fetchApiWithCache($url, 3600); // 1 hour cache for movie details
     if (!$res) return null;
     $data = json_decode($res, true);
     
@@ -463,11 +557,11 @@ function fetchApiComics($type, $slug = '', $page = 1, $keyword = '') {
     $url = '';
     
     if ($type === 'home') $url = "$baseUrl/home";
-    else if ($type === 'search') $url = "$baseUrl/tim-kiem?keyword=" . urlencode($keyword) . "&page=$page";
+    else if ($type === 'search') $url = "$baseUrl/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page";
     else if (in_array($type, ['the-loai'])) $url = "$baseUrl/the-loai/$slug?page=$page";
     else $url = "$baseUrl/danh-sach/" . ($slug ?: 'truyen-moi') . "?page=$page";
     
-    $res = @file_get_contents($url);
+    $res = fetchApiWithCache($url, 900);
     if (!$res) return null;
     $data = json_decode($res, true);
     
@@ -485,11 +579,21 @@ function fetchApiComics($type, $slug = '', $page = 1, $keyword = '') {
     if (isset($data['data']['items'])) $result['items'] = $data['data']['items'];
     
     $result['titlePage'] = $data['data']['titlePage'] ?? '';
-    $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://otruyencdn.com/';
+    $domain = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://otruyencdn.com/';
+    $result['domain'] = rtrim($domain, '/') . '/uploads/comics/';
     $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
     
     if (isset($data['data']['params']['pagination'])) {
         $result['pagination'] = $data['data']['params']['pagination'];
+    }
+    
+    // Ensure origin_name is a string to prevent Android app from crashing
+    if (!empty($result['items'])) {
+        foreach ($result['items'] as &$item) {
+            if (isset($item['origin_name']) && is_array($item['origin_name'])) {
+                $item['origin_name'] = implode(', ', $item['origin_name']);
+            }
+        }
     }
     
     return $result;
@@ -498,9 +602,9 @@ function fetchApiComics($type, $slug = '', $page = 1, $keyword = '') {
 function fetchApiComicDetail($slug) {
     global $settings;
     $baseUrl = rtrim($settings['comicApiUrl'] ?? 'https://otruyenapi.com/v1/api', '/');
-    $url = "$baseUrl/truyen-tranh/" . urlencode($slug);
+    $url = "$baseUrl/truyen-tranh/" . rawurlencode($slug);
     
-    $res = @file_get_contents($url);
+    $res = fetchApiWithCache($url, 3600);
     if (!$res) return null;
     $data = json_decode($res, true);
     
@@ -519,18 +623,30 @@ function fetchApiComicDetail($slug) {
         if (!isset($result['comic']['lang'])) $result['comic']['lang'] = '';
         if (!isset($result['comic']['time'])) $result['comic']['time'] = '';
         
+        // Ensure origin_name is a string to prevent Android app from crashing
+        if (isset($result['comic']['origin_name']) && is_array($result['comic']['origin_name'])) {
+            $result['comic']['origin_name'] = implode(', ', $result['comic']['origin_name']);
+        }
+        
         $result['chapters'] = $result['comic']['chapters'] ?? [];
         $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
         $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://otruyencdn.com/';
     }
     
+    $baseImgUrl = rtrim($result['domain'], '/') . '/uploads/comics/';
     if (!empty($result['comic']['thumb_url']) && !preg_match('/^http/', $result['comic']['thumb_url'])) {
-        $result['comic']['thumb_url'] = rtrim($result['domain'], '/') . '/' . ltrim($result['comic']['thumb_url'], '/');
+        $result['comic']['thumb_url'] = $baseImgUrl . ltrim($result['comic']['thumb_url'], '/');
     }
     if (!empty($result['comic']['poster_url']) && !preg_match('/^http/', $result['comic']['poster_url'])) {
-        $result['comic']['poster_url'] = rtrim($result['domain'], '/') . '/' . ltrim($result['comic']['poster_url'], '/');
+        $result['comic']['poster_url'] = $baseImgUrl . ltrim($result['comic']['poster_url'], '/');
+    }
+    
+    // Lấy ảnh poster từ seoSchema nếu poster_url không có sẵn trong item
+    if (empty($result['comic']['poster_url']) && !empty($result['seoOnPage']['seoSchema']['image'])) {
+        $result['comic']['poster_url'] = $result['seoOnPage']['seoSchema']['image'];
     }
     
     return $result;
 }
 
+require_once __DIR__ . '/plugins.php';

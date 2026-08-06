@@ -1,0 +1,107 @@
+> Task :app:buildKotlinToolingMetadata UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preMobileReleaseBuild UP-TO-DATE
+> Task :app:checkMobileReleaseAarMetadata UP-TO-DATE
+> Task :app:generateMobileReleaseResValues UP-TO-DATE
+> Task :app:mapMobileReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateMobileReleaseResources UP-TO-DATE
+> Task :app:mergeMobileReleaseResources UP-TO-DATE
+> Task :app:packageMobileReleaseResources UP-TO-DATE
+> Task :app:parseMobileReleaseLocalResources UP-TO-DATE
+> Task :app:createMobileReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksMobileRelease UP-TO-DATE
+> Task :app:processMobileReleaseMainManifest UP-TO-DATE
+> Task :app:processMobileReleaseManifest UP-TO-DATE
+> Task :app:processMobileReleaseManifestForPackage UP-TO-DATE
+> Task :app:processMobileReleaseResources UP-TO-DATE
+> Task :app:javaPreCompileMobileRelease UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:mergeMobileReleaseJniLibFolders UP-TO-DATE
+> Task :app:mergeMobileReleaseNativeLibs NO-SOURCE
+> Task :app:stripMobileReleaseDebugSymbols NO-SOURCE
+> Task :app:extractMobileReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeMobileReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:checkMobileReleaseDuplicateClasses UP-TO-DATE
+> Task :app:desugarMobileReleaseFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexMobileRelease UP-TO-DATE
+> Task :app:mergeMobileReleaseArtProfile UP-TO-DATE
+> Task :app:mergeMobileReleaseShaders UP-TO-DATE
+> Task :app:compileMobileReleaseShaders NO-SOURCE
+> Task :app:generateMobileReleaseAssets UP-TO-DATE
+> Task :app:mergeMobileReleaseAssets UP-TO-DATE
+> Task :app:compressMobileReleaseAssets UP-TO-DATE
+> Task :app:optimizeMobileReleaseResources UP-TO-DATE
+> Task :app:collectMobileReleaseDependencies UP-TO-DATE
+> Task :app:sdkMobileReleaseDependencyData UP-TO-DATE
+> Task :app:validateSigningMobileRelease UP-TO-DATE
+> Task :app:writeMobileReleaseAppMetadata UP-TO-DATE
+> Task :app:writeMobileReleaseSigningConfigVersions UP-TO-DATE
+> Task :app:preTvReleaseBuild UP-TO-DATE
+> Task :app:checkTvReleaseAarMetadata UP-TO-DATE
+> Task :app:generateTvReleaseResValues UP-TO-DATE
+> Task :app:mapTvReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateTvReleaseResources UP-TO-DATE
+> Task :app:mergeTvReleaseResources UP-TO-DATE
+> Task :app:packageTvReleaseResources UP-TO-DATE
+> Task :app:parseTvReleaseLocalResources UP-TO-DATE
+> Task :app:createTvReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksTvRelease UP-TO-DATE
+> Task :app:processTvReleaseMainManifest UP-TO-DATE
+> Task :app:processTvReleaseManifest UP-TO-DATE
+> Task :app:processTvReleaseManifestForPackage UP-TO-DATE
+> Task :app:processTvReleaseResources UP-TO-DATE
+> Task :app:javaPreCompileTvRelease UP-TO-DATE
+> Task :app:mergeTvReleaseJniLibFolders UP-TO-DATE
+> Task :app:mergeTvReleaseNativeLibs NO-SOURCE
+> Task :app:stripTvReleaseDebugSymbols NO-SOURCE
+> Task :app:extractTvReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeTvReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:checkTvReleaseDuplicateClasses UP-TO-DATE
+> Task :app:desugarTvReleaseFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexTvRelease UP-TO-DATE
+> Task :app:mergeTvReleaseArtProfile UP-TO-DATE
+> Task :app:mergeTvReleaseShaders UP-TO-DATE
+> Task :app:compileTvReleaseShaders NO-SOURCE
+> Task :app:generateTvReleaseAssets UP-TO-DATE
+> Task :app:mergeTvReleaseAssets UP-TO-DATE
+> Task :app:compressTvReleaseAssets UP-TO-DATE
+> Task :app:optimizeTvReleaseResources UP-TO-DATE
+> Task :app:collectTvReleaseDependencies UP-TO-DATE
+> Task :app:sdkTvReleaseDependencyData UP-TO-DATE
+> Task :app:validateSigningTvRelease UP-TO-DATE
+> Task :app:writeTvReleaseAppMetadata UP-TO-DATE
+> Task :app:writeTvReleaseSigningConfigVersions UP-TO-DATE
+> Task :app:compileMobileReleaseKotlin
+> Task :app:compileMobileReleaseJavaWithJavac NO-SOURCE
+> Task :app:compileTvReleaseKotlin
+> Task :app:generateMobileReleaseLintVitalReportModel
+> Task :app:dexBuilderMobileRelease
+> Task :app:mergeMobileReleaseGlobalSynthetics UP-TO-DATE
+> Task :app:processMobileReleaseJavaRes UP-TO-DATE
+> Task :app:mergeMobileReleaseJavaResource UP-TO-DATE
+> Task :app:compileTvReleaseJavaWithJavac NO-SOURCE
+> Task :app:generateTvReleaseLintVitalReportModel
+> Task :app:dexBuilderTvRelease
+> Task :app:mergeTvReleaseGlobalSynthetics UP-TO-DATE
+> Task :app:processTvReleaseJavaRes UP-TO-DATE
+> Task :app:mergeTvReleaseJavaResource UP-TO-DATE
+> Task :app:lintVitalAnalyzeMobileRelease
+> Task :app:mergeDexTvRelease
+> Task :app:mergeDexMobileRelease
+> Task :app:lintVitalAnalyzeTvRelease
+> Task :app:compileTvReleaseArtProfile
+> Task :app:compileMobileReleaseArtProfile
+> Task :app:packageTvRelease
+> Task :app:createTvReleaseApkListingFileRedirect UP-TO-DATE
+> Task :app:packageMobileRelease
+> Task :app:createMobileReleaseApkListingFileRedirect UP-TO-DATE
+> Task :app:lintVitalReportMobileRelease
+> Task :app:lintVitalReportTvRelease
+> Task :app:lintVitalMobileRelease
+> Task :app:assembleMobileRelease
+> Task :app:lintVitalTvRelease
+> Task :app:assembleTvRelease
+
+BUILD SUCCESSFUL in 1m 8s
+83 actionable tasks: 19 executed, 64 up-to-date

@@ -71,6 +71,11 @@
                     <p class="text-xs text-gray-500 mt-1">Vd: domain.com/<b>doc-truyen</b>/ten-truyen/chap-1</p>
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Slug Danh Sách Truyện (Mặc định: danh-sach-truyen)</label>
+                    <input type="text" name="slugComicList" value="<?= htmlspecialchars($settings['slugComicList'] ?? 'danh-sach-truyen') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Vd: domain.com/<b>danh-sach-truyen</b></p>
+                </div>
+                <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Slug Danh Sách (Mặc định: danh-sach)</label>
                     <input type="text" name="slugList" value="<?= htmlspecialchars($settings['slugList'] ?? 'danh-sach') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
                 </div>

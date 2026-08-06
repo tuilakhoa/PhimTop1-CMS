@@ -84,7 +84,7 @@ $tmdbCount = $comic['tmdb']['vote_count'] ?? 0;
                 </div>
                 
                 <h1 class="text-3xl md:text-5xl font-bold text-white mb-2"><?= htmlspecialchars($comic['name']) ?></h1>
-                <p class="text-xl text-gray-400 mb-4 italic"><?= htmlspecialchars($comic['origin_name'] ?? '') ?></p>
+                <p class="text-xl text-gray-400 mb-4 italic"><?= htmlspecialchars(is_array($comic['origin_name'] ?? '') ? implode(', ', $comic['origin_name']) : ($comic['origin_name'] ?? '')) ?></p>
                 
                 <?php if ($tmdbVote > 0): ?>
                 <div class="flex items-center gap-2 mb-6">
@@ -148,11 +148,17 @@ $tmdbCount = $comic['tmdb']['vote_count'] ?? 0;
                 <?php endif; ?>
                 
                 <?php if (!empty($chapters) && !empty($chapters[0]['server_data'])): ?>
-                    <a href="/<?= $settings["slugRead"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($chapters[0]['server_data'][0]['slug']) ?>" 
-                       class="inline-flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
-                        <i data-lucide="play" class="w-5 h-5 fill-current"></i>
-                        <span>Đọc Ngay</span>
-                    </a>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="/<?= $settings["slugRead"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($chapters[0]['server_data'][0]['slug'] ?? $chapters[0]['server_data'][0]['chapter_name'] ?? '') ?>" 
+                           class="inline-flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
+                            <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                            <span>Đọc Ngay</span>
+                        </a>
+                        <button id="btn-follow-comic" class="hidden items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg border border-gray-700">
+                            <i data-lucide="bookmark" id="icon-follow-comic" class="w-5 h-5"></i>
+                            <span id="text-follow-comic">Theo dõi</span>
+                        </button>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -165,10 +171,13 @@ $tmdbCount = $comic['tmdb']['vote_count'] ?? 0;
                 <i data-lucide="list-video" class="w-5 h-5 mr-2 text-red-500"></i> Chọn chương
             </h3>
             <div class="flex flex-wrap gap-2 p-2">
-                <?php foreach ($chapters[0]['server_data'] as $e): ?>
-                    <a href="/<?= $settings["slugRead"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>" 
+                <?php foreach ($chapters[0]['server_data'] as $e): 
+                    $cSlug = $e['slug'] ?? $e['chapter_name'] ?? '';
+                    $cName = $e['name'] ?? $e['chapter_name'] ?? '';
+                ?>
+                    <a href="/<?= $settings["slugRead"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($cSlug) ?>" 
                        class="px-4 py-2 rounded-lg transition-all bg-gray-800 text-gray-300 hover:bg-red-600 hover:text-white hover:shadow-lg hover:shadow-red-600/30 font-medium">
-                        <?= htmlspecialchars($e['name']) ?>
+                        <?= htmlspecialchars($cName) ?>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -285,6 +294,61 @@ $tmdbCount = $comic['tmdb']['vote_count'] ?? 0;
         }
         
         fetchComments();
+        
+        // Follow logic
+        const btnFollow = document.getElementById('btn-follow-comic');
+        if (btnFollow) {
+            const iconFollow = document.getElementById('icon-follow-comic');
+            const textFollow = document.getElementById('text-follow-comic');
+            
+            // Check follow status
+            fetch('/api/follow.php?action=check&slug=' + comicSlug)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        btnFollow.classList.remove('hidden');
+                        btnFollow.classList.add('inline-flex');
+                        if (res.is_following) {
+                            textFollow.textContent = 'Hủy theo dõi';
+                            iconFollow.classList.add('fill-current', 'text-red-500');
+                        }
+                    } else if (res.status === 'error' && res.message === 'Unauthorized') {
+                        // Show button but redirect to login on click
+                        btnFollow.classList.remove('hidden');
+                        btnFollow.classList.add('inline-flex');
+                    }
+                });
+                
+            btnFollow.addEventListener('click', function() {
+                const thumbUrl = '<?= htmlspecialchars(!empty($comic['thumb_url']) ? $comic['thumb_url'] : (!empty($comic['poster_url']) ? $comic['poster_url'] : '')) ?>';
+                const name = '<?= htmlspecialchars($comic['name']) ?>';
+                
+                fetch('/api/follow.php?action=toggle', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        item_slug: comicSlug,
+                        item_type: 'comic',
+                        item_name: name,
+                        thumb_url: thumbUrl
+                    })
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        if (res.action === 'added') {
+                            textFollow.textContent = 'Hủy theo dõi';
+                            iconFollow.classList.add('fill-current', 'text-red-500');
+                        } else {
+                            textFollow.textContent = 'Theo dõi';
+                            iconFollow.classList.remove('fill-current', 'text-red-500');
+                        }
+                    } else if (res.status === 'error' && res.message === 'Unauthorized') {
+                        window.location.href = '/member.php?mode=login&error=' + encodeURIComponent('Vui lòng đăng nhập để theo dõi.');
+                    }
+                });
+            });
+        }
     });
     </script>
 

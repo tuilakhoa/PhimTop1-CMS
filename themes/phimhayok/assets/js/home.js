@@ -16,6 +16,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 1280: { slidesPerView: 5.2 },
             }
         });
+        // Hero Swiper
+        new Swiper('.swiper-hero', {
+            slidesPerView: 1,
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            effect: 'fade',
+            fadeEffect: {
+                crossFade: true
+            },
+            pagination: {
+                el: '.swiper-hero .swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-hero .swiper-button-next',
+                prevEl: '.swiper-hero .swiper-button-prev',
+            }
+        });
 
         // Top 10 Swiper
         new Swiper('.swiper-top10', {

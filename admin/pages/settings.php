@@ -8,11 +8,11 @@
         <button type="button" onclick="switchTab('footer')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="footer">
             <i data-lucide="layout-template" class="w-4 h-4 inline-block mr-2"></i>Footer & Mạng Xã Hội
         </button>
-        <button type="button" onclick="switchTab('oauth')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="oauth">
-            <i data-lucide="shield-check" class="w-4 h-4 inline-block mr-2"></i>Đăng Nhập MXH (OAuth)
-        </button>
         <button type="button" onclick="switchTab('database')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="database">
             <i data-lucide="database" class="w-4 h-4 inline-block mr-2"></i>Cơ Sở Dữ Liệu
+        </button>
+        <button type="button" onclick="switchTab('theme')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="theme">
+            <i data-lucide="monitor" class="w-4 h-4 inline-block mr-2"></i>Giao Diện Trang Chủ
         </button>
     </nav>
 </div>
@@ -41,11 +41,7 @@
             <p class="text-xs text-gray-500 mt-2">Hệ thống sẽ tự động điều chỉnh cấu trúc dữ liệu để giao diện hoạt động bình thường trên mọi nguồn.</p>
         </div>
 
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn API Truyện (OTruyen)</label>
-            <input type="url" name="comicApiUrl" value="<?= htmlspecialchars($settings['comicApiUrl'] ?? 'https://otruyenapi.com/v1/api') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
-            <p class="text-xs text-gray-500 mt-2">URL cơ sở để tải danh sách truyện. Mặc định: <code class="text-red-400">https://otruyenapi.com/v1/api</code></p>
-        </div>
+
 
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-300 mb-2">TMDB API Key</label>
@@ -59,6 +55,38 @@
                 <option value="0" <?= (isset($settings['allowAutoUpdate']) && $settings['allowAutoUpdate'] == 0) ? 'selected' : '' ?>>Tắt (Khoá cập nhật để bảo vệ code tuỳ biến)</option>
             </select>
             <p class="text-xs text-gray-500 mt-2">Nếu bạn sửa mã nguồn riêng, hãy <b>TẮT</b> tính năng này để tránh bị ghi đè code khi có bản cập nhật mới.</p>
+        </div>
+    </div>
+
+    <!-- Tab Theme Home -->
+    <div id="tab-theme" class="tab-content hidden animate-fade-in">
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn Phim Nổi Bật</label>
+            <select name="featuredType" id="featuredTypeSelect" onchange="toggleFeaturedOptions()" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <option value="latest" <?= ($settings['featuredType'] ?? 'latest') === 'latest' ? 'selected' : '' ?>>Phim Mới Nhất (Tự động lấy phim vừa cập nhật)</option>
+                <option value="view" <?= ($settings['featuredType'] ?? 'latest') === 'view' ? 'selected' : '' ?>>Xem Nhiều Nhất (Theo lượt xem Database local)</option>
+                <option value="admin" <?= ($settings['featuredType'] ?? 'latest') === 'admin' ? 'selected' : '' ?>>Admin Chọn Thủ Công (Nhập Slug)</option>
+            </select>
+        </div>
+
+        <div class="mb-6" id="featuredSlugWrapper" style="<?= ($settings['featuredType'] ?? 'latest') === 'admin' ? '' : 'display: none;' ?>">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Slug Phim Nổi Bật</label>
+            <input type="text" name="featuredMovieSlug" value="<?= htmlspecialchars($settings['featuredMovieSlug'] ?? '') ?>" placeholder="vd: mai, dao-pho-kem-pho" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+            <p class="text-xs text-gray-500 mt-2">Nhập slug của phim. Có thể nhập nhiều slug cách nhau bởi dấu phẩy nếu muốn dùng Slider.</p>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Kiểu Hiển Thị Hero Banner</label>
+            <select name="featuredStyle" id="featuredStyleSelect" onchange="toggleFeaturedOptions()" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <option value="single" <?= ($settings['featuredStyle'] ?? 'single') === 'single' ? 'selected' : '' ?>>Ảnh Đơn (Banner Tĩnh)</option>
+                <option value="slider" <?= ($settings['featuredStyle'] ?? 'single') === 'slider' ? 'selected' : '' ?>>Slider Động (Swiper)</option>
+            </select>
+        </div>
+
+        <div class="mb-6" id="featuredCountWrapper" style="<?= ($settings['featuredStyle'] ?? 'single') === 'slider' ? '' : 'display: none;' ?>">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Số lượng phim trong Slider</label>
+            <input type="number" min="1" max="10" name="featuredCount" value="<?= htmlspecialchars($settings['featuredCount'] ?? 5) ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+            <p class="text-xs text-gray-500 mt-2">Chỉ áp dụng khi chọn Nguồn là "Mới Nhất" hoặc "Xem Nhiều Nhất" và Hiển thị là "Slider".</p>
         </div>
     </div>
 
@@ -89,56 +117,6 @@
         </div>
     </div>
     
-    <!-- Tab 3: OAuth -->
-    <div id="tab-oauth" class="tab-content hidden animate-fade-in">
-        <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-800 pb-2 flex items-center">
-            <i data-lucide="chrome" class="w-5 h-5 mr-2 text-red-500"></i> Google OAuth 2.0
-        </h3>
-        <div class="mb-5 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl flex items-start space-x-3">
-            <i data-lucide="info" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
-            <div>
-                <p class="text-sm text-blue-300 font-medium mb-1">Authorized redirect URI:</p>
-                <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block"><?= 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=google_callback' ?></code>
-                <p class="text-xs text-blue-400/80 mt-2">Copy đường dẫn này dán vào cấu hình OAuth 2.0 Client ID trên Google Cloud Console.</p>
-            </div>
-        </div>
-        
-        <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-300 mb-1.5">Google Client ID</label>
-            <input type="text" name="googleClientId" value="<?= htmlspecialchars($settings['googleClientId'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow" placeholder="Nhập Client ID...">
-        </div>
-        <div class="mb-8">
-            <label class="block text-sm font-medium text-gray-300 mb-1.5">Google Client Secret</label>
-            <input type="text" name="googleClientSecret" value="<?= htmlspecialchars($settings['googleClientSecret'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow" placeholder="Nhập Client Secret...">
-        </div>
-
-        <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-800 pb-2 flex items-center mt-8">
-            <i data-lucide="layout-grid" class="w-5 h-5 mr-2 text-blue-500"></i> Microsoft OAuth 2.0
-        </h3>
-        <div class="mb-5 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl flex items-start space-x-3">
-            <i data-lucide="info" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
-            <div>
-                <p class="text-sm text-blue-300 font-medium mb-1">Authorized redirect URI:</p>
-                <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block"><?= 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=microsoft_callback' ?></code>
-                <p class="text-xs text-blue-400/80 mt-2">Copy đường dẫn này dán vào Web Redirect URI trên Azure Portal.</p>
-            </div>
-        </div>
-        
-        <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-300 mb-1.5">Microsoft Client ID</label>
-            <input type="text" name="msClientId" value="<?= htmlspecialchars($settings['msClientId'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-blue-500 outline-none transition-shadow" placeholder="Nhập Client ID...">
-        </div>
-        <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-300 mb-1.5">Microsoft Client Secret</label>
-            <input type="text" name="msClientSecret" value="<?= htmlspecialchars($settings['msClientSecret'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-blue-500 outline-none transition-shadow" placeholder="Nhập Client Secret...">
-        </div>
-        <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-300 mb-1.5">Microsoft Tenant ID</label>
-            <input type="text" name="msTenantId" value="<?= htmlspecialchars($settings['msTenantId'] ?? 'common') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-blue-500 outline-none transition-shadow" placeholder="Mặc định: common">
-            <p class="text-xs text-gray-500 mt-2">Nhập `common` nếu cho phép mọi tài khoản, hoặc nhập ID tổ chức của bạn.</p>
-        </div>
-
-    </div>
 
     <!-- Tab 4: Database -->
     <?php $dbConfig = getDbConfig(); $isFs = ($dbConfig['type'] ?? 'mysql') === 'firestore'; ?>
@@ -259,6 +237,25 @@ service cloud.firestore {
         if (btn) {
             btn.classList.remove('inactive-tab');
             btn.classList.add('active-tab');
+        }
+    }
+
+    function toggleFeaturedOptions() {
+        const typeSelect = document.getElementById('featuredTypeSelect');
+        const styleSelect = document.getElementById('featuredStyleSelect');
+        const slugWrapper = document.getElementById('featuredSlugWrapper');
+        const countWrapper = document.getElementById('featuredCountWrapper');
+        
+        if (typeSelect.value === 'admin') {
+            slugWrapper.style.display = 'block';
+        } else {
+            slugWrapper.style.display = 'none';
+        }
+        
+        if (styleSelect.value === 'slider') {
+            countWrapper.style.display = 'block';
+        } else {
+            countWrapper.style.display = 'none';
         }
     }
 </script>

@@ -1,0 +1,10 @@
+#Thu Aug 06 07:54:11 ICT 2026
+base.0=/home/khoa/Bản tải về/phimtop1cms/android-app/app/build/intermediates/dex/tvRelease/mergeDexTvRelease/classes.dex
+base.1=/home/khoa/Bản tải về/phimtop1cms/android-app/app/build/intermediates/dex/tvRelease/mergeDexTvRelease/classes2.dex
+base.2=/home/khoa/Bản tải về/phimtop1cms/android-app/app/build/intermediates/dex/tvRelease/mergeDexTvRelease/classes3.dex
+path.0=classes.dex
+path.1=classes2.dex
+path.2=classes3.dex
+renamed.0=classes.dex
+renamed.1=classes2.dex
+renamed.2=classes3.dex

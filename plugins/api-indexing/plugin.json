@@ -1,0 +1,6 @@
+{
+    "name": "Tự động Indexing (Google/IndexNow)",
+    "description": "Ping URL tự động tới Google Web Indexing API và IndexNow (Bing/Yandex) để lập chỉ mục bài viết ngay lập tức.",
+    "version": "1.0.0",
+    "author": "PhimTop1 CMS"
+}

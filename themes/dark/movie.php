@@ -148,11 +148,17 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
                 <?php endif; ?>
                 
                 <?php if (!empty($episodes) && !empty($episodes[0]['server_data'])): ?>
-                    <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($episodes[0]['server_data'][0]['slug']) ?>" 
-                       class="inline-flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
-                        <i data-lucide="play" class="w-5 h-5 fill-current"></i>
-                        <span>Xem Ngay</span>
-                    </a>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($episodes[0]['server_data'][0]['slug']) ?>" 
+                           class="inline-flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
+                            <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                            <span>Xem Ngay</span>
+                        </a>
+                        <button id="btn-follow-movie" class="hidden items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg border border-gray-700">
+                            <i data-lucide="bookmark" id="icon-follow-movie" class="w-5 h-5"></i>
+                            <span id="text-follow-movie">Theo dõi</span>
+                        </button>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -285,6 +291,61 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
         }
         
         fetchComments();
+        
+        // Follow logic
+        const btnFollow = document.getElementById('btn-follow-movie');
+        if (btnFollow) {
+            const iconFollow = document.getElementById('icon-follow-movie');
+            const textFollow = document.getElementById('text-follow-movie');
+            
+            // Check follow status
+            fetch('/api/follow.php?action=check&slug=' + movieSlug)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        btnFollow.classList.remove('hidden');
+                        btnFollow.classList.add('inline-flex');
+                        if (res.is_following) {
+                            textFollow.textContent = 'Hủy theo dõi';
+                            iconFollow.classList.add('fill-current', 'text-red-500');
+                        }
+                    } else if (res.status === 'error' && res.message === 'Unauthorized') {
+                        // Show button but redirect to login on click
+                        btnFollow.classList.remove('hidden');
+                        btnFollow.classList.add('inline-flex');
+                    }
+                });
+                
+            btnFollow.addEventListener('click', function() {
+                const thumbUrl = '<?= htmlspecialchars(!empty($movie['thumb_url']) ? $movie['thumb_url'] : (!empty($movie['poster_url']) ? $movie['poster_url'] : '')) ?>';
+                const name = '<?= htmlspecialchars($movie['name']) ?>';
+                
+                fetch('/api/follow.php?action=toggle', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        item_slug: movieSlug,
+                        item_type: 'movie',
+                        item_name: name,
+                        thumb_url: thumbUrl
+                    })
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        if (res.action === 'added') {
+                            textFollow.textContent = 'Hủy theo dõi';
+                            iconFollow.classList.add('fill-current', 'text-red-500');
+                        } else {
+                            textFollow.textContent = 'Theo dõi';
+                            iconFollow.classList.remove('fill-current', 'text-red-500');
+                        }
+                    } else if (res.status === 'error' && res.message === 'Unauthorized') {
+                        window.location.href = '/member.php?mode=login&error=' + encodeURIComponent('Vui lòng đăng nhập để theo dõi.');
+                    }
+                });
+            });
+        }
     });
     </script>
 

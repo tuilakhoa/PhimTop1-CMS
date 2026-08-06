@@ -87,6 +87,7 @@ if ($pdo) {
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <?php endif; ?>
 
+    <?php do_action('cms_head'); ?>
 </head>
 <body class="<?= $bodyClass ?> min-h-screen flex flex-col">
     <!-- Header -->
@@ -119,6 +120,7 @@ if ($pdo) {
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-ngan" class="hover:text-white flex items-center transition-colors">
                         <i data-lucide="smartphone" class="w-4 h-4 mr-1.5"></i> Phim ngắn
                     </a>
+                    <?php do_action('theme_header_menu'); ?>
                     
                     <!-- Dropdowns -->
                     <div class="relative group">
@@ -165,15 +167,16 @@ if ($pdo) {
                         <i data-lucide="search" class="w-5 h-5"></i>
                     </button>
                 </form>
-                
-                <a href="/login" class="bg-phim-yellow hover:bg-yellow-400 text-black font-bold text-sm px-6 py-2.5 rounded transition-colors uppercase shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-                    Đăng Nhập
-                </a>
 
-                <?php if (isset($_SESSION['admin'])): ?>
-                    <a href="/admin" class="hidden md:flex text-gray-400 hover:text-white items-center text-sm ml-2">
-                        <i data-lucide="settings" class="w-5 h-5"></i>
-                    </a>
+                <?php if (!empty($settings['appDownloadUrl'])): ?>
+                <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="hidden md:flex items-center bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold py-2 px-4 rounded-full transition-colors shadow-[0_0_15px_rgba(234,179,8,0.3)] border border-yellow-400/50 mr-2">
+                    <i data-lucide="smartphone" class="w-4 h-4 mr-1.5"></i> Tải App Mobile
+                </a>
+                <?php endif; ?>
+                <?php if (!empty($settings['appDownloadUrlTv'])): ?>
+                <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="hidden md:flex items-center bg-[#1f1f1f] hover:bg-[#2f2f2f] text-gray-200 text-sm font-bold py-2 px-4 rounded-full transition-colors border border-gray-700">
+                    <i data-lucide="tv" class="w-4 h-4 mr-1.5"></i> Tải App TV
+                </a>
                 <?php endif; ?>
 
                 <?php include __DIR__ . '/../../includes/user_nav.php'; ?>
@@ -187,6 +190,24 @@ if ($pdo) {
         <!-- Mobile Menu (Hidden) -->
         <div id="mobileMenu" class="hidden bg-[#0a0a0a] border-t border-gray-900 absolute w-full left-0 top-[72px] shadow-2xl pb-4">
             <!-- (Mobile menu implementation kept simple) -->
+            <div class="px-4 py-4 space-y-4">
+                <div class="flex flex-col space-y-3 font-medium text-gray-300">
+                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white">Phim Lẻ</a>
+                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white">Phim Bộ</a>
+                    <?php do_action('theme_mobile_menu'); ?>
+                    
+                    <?php if (!empty($settings['appDownloadUrl'])): ?>
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-yellow-500/30 mt-2">
+                        <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng Mobile
+                    </a>
+                    <?php endif; ?>
+                    <?php if (!empty($settings['appDownloadUrlTv'])): ?>
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-center bg-[#1f1f1f] hover:bg-[#2f2f2f] text-gray-200 font-bold py-2.5 px-4 rounded-lg transition-colors border border-gray-800 mt-2">
+                        <i data-lucide="tv" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng TV
+                    </a>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </nav>
     <main class="flex-grow pt-[72px] bg-black">

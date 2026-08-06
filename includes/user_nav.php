@@ -4,8 +4,26 @@ if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
 }
 $settings = getSettings();
 ?>
-<div class="flex items-center">
+<div class="flex items-center space-x-4">
     <?php if (isset($_SESSION['user'])): ?>
+        <!-- Notification Bell -->
+        <div class="relative group z-50">
+            <button class="relative p-2 text-gray-300 hover:text-white transition-colors focus:outline-none" id="btn-notifications">
+                <i data-lucide="bell" class="w-6 h-6"></i>
+                <span id="notif-badge" class="hidden absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">0</span>
+            </button>
+            <div class="absolute right-0 mt-2 w-80 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all origin-top-right transform scale-95 group-hover:scale-100 z-50">
+                <div class="p-3 border-b border-gray-800 flex justify-between items-center">
+                    <h4 class="text-white font-bold">Thông Báo</h4>
+                    <button id="btn-mark-all-read" class="text-xs text-blue-400 hover:text-blue-300">Đọc tất cả</button>
+                </div>
+                <div id="notif-list" class="max-h-80 overflow-y-auto custom-scrollbar p-2">
+                    <div class="text-center text-gray-500 text-sm py-4">Đang tải...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Profile Dropdown -->
         <div class="relative group z-50">
             <button class="flex items-center space-x-2 focus:outline-none bg-gray-800/50 hover:bg-gray-700/50 px-2 py-1.5 md:px-3 md:py-2 rounded-full transition-all border border-gray-700/50">
                 <img src="<?= htmlspecialchars($_SESSION['user']['avatar'] ?: 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['user']['name']) . '&background=random') ?>" class="w-6 h-6 md:w-8 md:h-8 rounded-full border border-gray-600 shadow-sm" alt="Avatar">
@@ -31,3 +49,63 @@ $settings = getSettings();
         </a>
     <?php endif; ?>
 </div>
+
+<?php if (isset($_SESSION['user'])): ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const notifBadge = document.getElementById('notif-badge');
+    const notifList = document.getElementById('notif-list');
+    const btnMarkAll = document.getElementById('btn-mark-all-read');
+    
+    function fetchNotifications() {
+        fetch('/api/notifications.php?action=list')
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    if (res.unread_count > 0) {
+                        notifBadge.textContent = res.unread_count;
+                        notifBadge.classList.remove('hidden');
+                    } else {
+                        notifBadge.classList.add('hidden');
+                    }
+                    
+                    if (res.data.length === 0) {
+                        notifList.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">Không có thông báo.</div>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    res.data.forEach(item => {
+                        const bgClass = item.is_read == 0 ? 'bg-gray-800/80' : '';
+                        const titleClass = item.is_read == 0 ? 'font-bold text-white' : 'text-gray-300';
+                        html += `
+                            <div class="p-3 mb-1 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer ${bgClass}" onclick="markRead(${item.id})">
+                                <p class="text-sm ${titleClass} mb-1">${item.title}</p>
+                                <p class="text-xs text-gray-400 mb-1">${item.message}</p>
+                                <p class="text-[10px] text-gray-500">${item.created_at}</p>
+                            </div>
+                        `;
+                    });
+                    notifList.innerHTML = html;
+                }
+            });
+    }
+    
+    window.markRead = function(id) {
+        fetch('/api/notifications.php?action=mark_read', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({notification_id: id})
+        }).then(() => fetchNotifications());
+    };
+    
+    if (btnMarkAll) {
+        btnMarkAll.addEventListener('click', () => markRead(0));
+    }
+    
+    fetchNotifications();
+    // Refresh every 2 minutes
+    setInterval(fetchNotifications, 120000);
+});
+</script>
+<?php endif; ?>

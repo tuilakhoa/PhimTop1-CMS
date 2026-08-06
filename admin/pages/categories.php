@@ -18,6 +18,8 @@
 <?php
 $repo = getCategoryRepository();
 $allCats = $repo->getCategories();
+$genres = [];
+$countries = [];
 foreach ($allCats as $row) {
     if (($row['type'] ?? '') === 'genre') $genres[] = $row;
     else if (($row['type'] ?? '') === 'country') $countries[] = $row;

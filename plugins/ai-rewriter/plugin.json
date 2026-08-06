@@ -1,0 +1,6 @@
+{
+    "name": "AI Content Rewriter",
+    "description": "Tích hợp Gemini và OpenAI để tự động viết lại mô tả phim chuẩn SEO.",
+    "version": "1.0.0",
+    "author": "PhimTop1 CMS"
+}

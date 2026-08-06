@@ -1,0 +1,6 @@
+{
+    "name": "Social Login (OAuth)",
+    "description": "Tích hợp tính năng đăng nhập bằng Google và Microsoft cho website.",
+    "version": "1.0.0",
+    "author": "PhimTop1 CMS"
+}
