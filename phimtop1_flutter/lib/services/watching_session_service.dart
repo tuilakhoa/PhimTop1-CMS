@@ -37,6 +37,7 @@ class WatchingSessionService {
     required String episodeName,
     required String userName,
     required bool isLoggedIn,
+    int Function()? getProgress,
   }) async {
     await _initDeviceId();
     
@@ -65,10 +66,12 @@ class WatchingSessionService {
     };
 
     // Run immediately first time
+    payload['progress'] = getProgress?.call() ?? 0;
     _sendHeartbeat(payload);
 
     // Then every 10 seconds
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      payload['progress'] = getProgress?.call() ?? 0;
       _sendHeartbeat(payload);
     });
   }

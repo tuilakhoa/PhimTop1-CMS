@@ -74,6 +74,13 @@ function sendCommand(deviceId, cmd) {
     });
 }
 
+function formatTime(seconds) {
+    if (!seconds || seconds <= 0) return '00:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
 function renderSessions(sessions) {
     const tbody = document.getElementById('sessions-tbody');
     const countBadge = document.getElementById('online-count');
@@ -103,7 +110,7 @@ function renderSessions(sessions) {
             <td class="px-6 py-4">${userBadge}</td>
             <td class="px-6 py-4">
                 <div class="text-white font-medium truncate max-w-[200px]" title="${s.movie_name}">${s.movie_name}</div>
-                <div class="text-xs text-blue-400">${s.episode_name}</div>
+                <div class="text-xs text-blue-400">${s.episode_name} ${s.progress ? `<span class="text-green-400 ml-1">(Đang xem: ${formatTime(s.progress)})</span>` : ''}</div>
             </td>
             <td class="px-6 py-4 text-xs text-gray-400">${s.last_seen}</td>
             <td class="px-6 py-4 text-right">

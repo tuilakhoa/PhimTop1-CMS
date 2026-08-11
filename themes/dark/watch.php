@@ -174,6 +174,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const episodeName = '<?= addslashes($currentEp['name']) ?>';
 
     function sendHeartbeat() {
+        let progress = 0;
+        const video = document.getElementById('video-player');
+        if (video) progress = Math.floor(video.currentTime);
+
         fetch('/api/v1/watching_session.php?action=heartbeat', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -185,7 +189,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 movie_name: movieName,
                 episode_name: episodeName,
                 user_name: userName,
-                is_logged_in: isLogged
+                is_logged_in: isLogged,
+                progress: progress
             })
         })
         .then(res => res.json())

@@ -86,6 +86,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
         episodeName: widget.episodeName,
         userName: auth.user?.name ?? 'Guest',
         isLoggedIn: auth.user != null,
+        getProgress: () => _videoController?.value.position.inSeconds ?? 0,
       );
     });
 

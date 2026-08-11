@@ -170,10 +170,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 4) {
+            if (!isset($row['db_version']) || $row['db_version'] < 5) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 4]);
-                $row['db_version'] = 4;
+                updateSettings(['db_version' => 5]);
+                $row['db_version'] = 5;
             }
             
             return array_merge($defaultSettings, $row);
@@ -355,6 +355,7 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN enableWatchingSession TINYINT(1) DEFAULT 1",
         "ALTER TABLE settings ADD COLUMN trackAnonymousSession TINYINT(1) DEFAULT 0",
         "ALTER TABLE settings ADD COLUMN useLogoAsFavicon TINYINT(1) DEFAULT 0",
+        "ALTER TABLE active_sessions ADD COLUMN progress INT DEFAULT 0",
         // Cleanup old deprecated columns from original setup
         "ALTER TABLE settings DROP COLUMN githubRepo",
         "ALTER TABLE settings DROP COLUMN cmsVersion",

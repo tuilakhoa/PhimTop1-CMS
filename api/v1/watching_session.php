@@ -36,6 +36,7 @@ if ($action === 'heartbeat') {
     $episode_name = $data['episode_name'] ?? '';
     $user_name = $data['user_name'] ?? 'Guest';
     $is_logged_in = isset($data['is_logged_in']) ? (int)$data['is_logged_in'] : 0;
+    $progress = isset($data['progress']) ? (int)$data['progress'] : 0;
 
     $trackAnonymous = isset($settings['trackAnonymousSession']) ? (int)$settings['trackAnonymousSession'] : 0;
     if ($is_logged_in === 0 && $trackAnonymous === 0) {
@@ -75,19 +76,20 @@ if ($action === 'heartbeat') {
             'episode_name' => $episode_name,
             'user_name' => $user_name,
             'is_logged_in' => $is_logged_in,
+            'progress' => $progress,
             'last_seen' => time(),
             'pending_command' => null
         ];
         $fs->setDocument('active_sessions', $device_id, $dataToSave);
     } else {
-        $sql = "INSERT INTO active_sessions (device_id, device_name, platform, movie_slug, movie_name, episode_name, user_name, is_logged_in, last_seen) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW()) 
+        $sql = "INSERT INTO active_sessions (device_id, device_name, platform, movie_slug, movie_name, episode_name, user_name, is_logged_in, progress, last_seen) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW()) 
                 ON DUPLICATE KEY UPDATE 
                 device_name = VALUES(device_name), platform = VALUES(platform), movie_slug = VALUES(movie_slug), movie_name = VALUES(movie_name), 
-                episode_name = VALUES(episode_name), user_name = VALUES(user_name), is_logged_in = VALUES(is_logged_in), last_seen = NOW()";
+                episode_name = VALUES(episode_name), user_name = VALUES(user_name), is_logged_in = VALUES(is_logged_in), progress = VALUES(progress), last_seen = NOW()";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$device_id, $device_name, $platform, $movie_slug, $movie_name, $episode_name, $user_name, $is_logged_in]);
+        $stmt->execute([$device_id, $device_name, $platform, $movie_slug, $movie_name, $episode_name, $user_name, $is_logged_in, $progress]);
 
         $stmtCmd = $pdo->prepare("SELECT pending_command FROM active_sessions WHERE device_id = ?");
         $stmtCmd->execute([$device_id]);
