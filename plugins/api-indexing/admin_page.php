@@ -52,7 +52,8 @@ if ($pdo) {
                     <select name="url" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-green-500 outline-none">
                         <?php foreach($movies as $m): 
                             $slugMovie = $settings['slugMovie'] ?? 'phim';
-                            $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]/{$slugMovie}/" . $m['slug'];
+                            $protocol = ($_SERVER['HTTP_HOST'] === 'localhost' || strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false) ? 'http' : 'https';
+                            $url = $protocol . "://$_SERVER[HTTP_HOST]/{$slugMovie}/" . $m['slug'];
                         ?>
                         <option value="<?= htmlspecialchars($url) ?>"><?= htmlspecialchars($m['name']) ?> (<?= date('d/m/Y H:i', strtotime($m['updated_at'])) ?>)</option>
                         <?php endforeach; ?>
