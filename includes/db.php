@@ -170,10 +170,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 3) {
+            if (!isset($row['db_version']) || $row['db_version'] < 4) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 3]);
-                $row['db_version'] = 3;
+                updateSettings(['db_version' => 4]);
+                $row['db_version'] = 4;
             }
             
             return array_merge($defaultSettings, $row);
