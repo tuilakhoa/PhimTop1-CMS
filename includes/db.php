@@ -56,6 +56,15 @@ function getPDO() {
     }
 }
 
+function getFirestore() {
+    $config = getDbConfig();
+    if ($config && isset($config['type']) && $config['type'] === 'firestore') {
+        require_once __DIR__ . '/firestore_helper.php';
+        return new FirestoreClient($config['projectId'], $config['serviceAccount']);
+    }
+    return null;
+}
+
 function getSettings() {
     $pdo = getPDO();
     $defaultSettings = [
@@ -76,6 +85,7 @@ function getSettings() {
         'seoDesc' => 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.',
         'seoKeywords' => 'xem phim, phim online, phim hay, phim vietsub',
         'logoUrl' => '',
+        'useLogoAsFavicon' => 0,
         'verifyGoogle' => '',
         'verifyBing' => '',
         'verifyYandex' => '',
@@ -93,6 +103,7 @@ function getSettings() {
         'cfAccountId' => '',
         'cfZoneId' => '',
         'gaMeasurementId' => '',
+        'gaPropertyId' => '',
         'tmdbApiKey' => 'b775c363e46a24e8c885479b0131c4d2',
         'googleIndexJson' => '',
         'indexNowKey' => '',
@@ -122,10 +133,20 @@ function getSettings() {
         'appBannerEnabled' => 0,
         'appDownloadUrl' => '',
         'appDownloadUrlTv' => '',
+        'appSchemaEnabled' => 0,
+        'appSchemaName' => '',
+        'appSchemaOs' => 'Android, iOS',
+        'appSchemaCategory' => 'EntertainmentApplication',
+        'appSchemaPrice' => '0',
+        'appSchemaCurrency' => 'VND',
+        'appSchemaRatingValue' => '4.8',
+        'appSchemaRatingCount' => '1250',
         'featuredType' => 'latest',
         'featuredMovieSlug' => '',
-        'featuredStyle' => 'single',
-        'featuredCount' => 5
+        'featuredStyle' => 'slider',
+        'featuredCount' => 5,
+        'enableWatchingSession' => 1,
+        'trackAnonymousSession' => 0
     ];
     
     $config = getDbConfig();
@@ -260,6 +281,7 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN cfAccountId VARCHAR(255)",
         "ALTER TABLE settings ADD COLUMN cfZoneId VARCHAR(255)",
         "ALTER TABLE settings ADD COLUMN gaMeasurementId VARCHAR(255)",
+        "ALTER TABLE settings ADD COLUMN gaPropertyId VARCHAR(255)",
         "ALTER TABLE settings ADD COLUMN tmdbApiKey VARCHAR(255) DEFAULT 'b775c363e46a24e8c885479b0131c4d2'",
         "ALTER TABLE settings ADD COLUMN googleIndexJson TEXT",
         "ALTER TABLE settings ADD COLUMN indexNowKey VARCHAR(255)",
@@ -292,6 +314,14 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN appBannerEnabled TINYINT(1) DEFAULT 0",
         "ALTER TABLE settings ADD COLUMN appDownloadUrl VARCHAR(255) DEFAULT ''",
         "ALTER TABLE settings ADD COLUMN appDownloadUrlTv VARCHAR(255) DEFAULT ''",
+        "ALTER TABLE settings ADD COLUMN appSchemaEnabled TINYINT(1) DEFAULT 0",
+        "ALTER TABLE settings ADD COLUMN appSchemaName VARCHAR(255) DEFAULT ''",
+        "ALTER TABLE settings ADD COLUMN appSchemaOs VARCHAR(255) DEFAULT 'Android, iOS'",
+        "ALTER TABLE settings ADD COLUMN appSchemaCategory VARCHAR(255) DEFAULT 'EntertainmentApplication'",
+        "ALTER TABLE settings ADD COLUMN appSchemaPrice VARCHAR(50) DEFAULT '0'",
+        "ALTER TABLE settings ADD COLUMN appSchemaCurrency VARCHAR(10) DEFAULT 'VND'",
+        "ALTER TABLE settings ADD COLUMN appSchemaRatingValue VARCHAR(10) DEFAULT '4.8'",
+        "ALTER TABLE settings ADD COLUMN appSchemaRatingCount VARCHAR(20) DEFAULT '1250'",
         "CREATE TABLE IF NOT EXISTS seo_metadata (
             id INT AUTO_INCREMENT PRIMARY KEY,
             type VARCHAR(50) NOT NULL,
@@ -305,10 +335,26 @@ function updateSettings($updates) {
             UNIQUE KEY type_item (type, item_id),
             UNIQUE KEY type_custom_slug (type, custom_slug)
         )",
+        "CREATE TABLE IF NOT EXISTS active_sessions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            device_id VARCHAR(100) UNIQUE NOT NULL,
+            device_name VARCHAR(255),
+            platform VARCHAR(50) DEFAULT 'web',
+            movie_slug VARCHAR(255),
+            movie_name VARCHAR(255),
+            episode_name VARCHAR(100),
+            user_name VARCHAR(255),
+            is_logged_in TINYINT(1) DEFAULT 0,
+            pending_command VARCHAR(50),
+            last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )",
         "ALTER TABLE settings ADD COLUMN featuredType VARCHAR(50) DEFAULT 'latest'",
         "ALTER TABLE settings ADD COLUMN featuredMovieSlug VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN featuredStyle VARCHAR(50) DEFAULT 'single'",
+        "ALTER TABLE settings ADD COLUMN featuredStyle VARCHAR(50) DEFAULT 'slider'",
         "ALTER TABLE settings ADD COLUMN featuredCount INT DEFAULT 5",
+        "ALTER TABLE settings ADD COLUMN enableWatchingSession TINYINT(1) DEFAULT 1",
+        "ALTER TABLE settings ADD COLUMN trackAnonymousSession TINYINT(1) DEFAULT 0",
+        "ALTER TABLE settings ADD COLUMN useLogoAsFavicon TINYINT(1) DEFAULT 0",
         // Cleanup old deprecated columns from original setup
         "ALTER TABLE settings DROP COLUMN githubRepo",
         "ALTER TABLE settings DROP COLUMN cmsVersion",
@@ -408,7 +454,7 @@ function fetchApiWithCache($url, $ttl = 900) {
     return null;
 }
 
-function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '') {
+function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = '', $country = '', $year = '') {
     $settings = getSettings();
     $apiSource = $settings['apiSource'] ?? 'kkphim';
     
@@ -418,25 +464,32 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '') {
     
     $url = '';
     
+    $queryParams = [];
+    if (!empty($category)) $queryParams[] = "category=" . urlencode($category);
+    if (!empty($country)) $queryParams[] = "country=" . urlencode($country);
+    if (!empty($year)) $queryParams[] = "year=" . urlencode($year);
+    
+    $queryString = !empty($queryParams) ? '&' . implode('&', $queryParams) : '';
+    
     if ($apiSource === 'nguonc') {
-        if ($type === 'home') $url = "https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=$page";
-        else if ($type === 'search') $url = "https://phim.nguonc.com/api/films/search?keyword=" . rawurlencode($keyword) . "&page=$page";
-        else if ($type === 'danh-sach') $url = "https://phim.nguonc.com/api/films/danh-sach/$slug?page=$page";
-        else if ($type === 'the-loai') $url = "https://phim.nguonc.com/api/films/the-loai/$slug?page=$page";
-        else if ($type === 'quoc-gia') $url = "https://phim.nguonc.com/api/films/quoc-gia/$slug?page=$page";
-        else if ($type === 'nam-phat-hanh') $url = "https://phim.nguonc.com/api/films/nam-phat-hanh/$slug?page=$page";
+        if ($type === 'home') $url = "https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=$page$queryString";
+        else if ($type === 'search') $url = "https://phim.nguonc.com/api/films/search?keyword=" . rawurlencode($keyword) . "&page=$page$queryString";
+        else if ($type === 'danh-sach') $url = "https://phim.nguonc.com/api/films/danh-sach/$slug?page=$page$queryString";
+        else if ($type === 'the-loai') $url = "https://phim.nguonc.com/api/films/the-loai/$slug?page=$page$queryString";
+        else if ($type === 'quoc-gia') $url = "https://phim.nguonc.com/api/films/quoc-gia/$slug?page=$page$queryString";
+        else if ($type === 'nam-phat-hanh') $url = "https://phim.nguonc.com/api/films/nam-phat-hanh/$slug?page=$page$queryString";
     } else if ($apiSource === 'ophim') {
-        if ($type === 'home') $url = "https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=$page";
-        else if ($type === 'search') $url = "https://ophim1.com/v1/api/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page";
-        else if (in_array($type, ['the-loai', 'quoc-gia'])) $url = "https://ophim1.com/v1/api/$type/$slug?page=$page";
-        else if ($type === 'nam-phat-hanh') $url = "https://ophim1.com/v1/api/nam/$slug?page=$page";
-        else $url = "https://ophim1.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page";
+        if ($type === 'home') $url = "https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=$page$queryString";
+        else if ($type === 'search') $url = "https://ophim1.com/v1/api/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page$queryString";
+        else if (in_array($type, ['the-loai', 'quoc-gia'])) $url = "https://ophim1.com/v1/api/$type/$slug?page=$page$queryString";
+        else if ($type === 'nam-phat-hanh') $url = "https://ophim1.com/v1/api/nam/$slug?page=$page$queryString";
+        else $url = "https://ophim1.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page$queryString";
     } else { // kkphim
-        if ($type === 'home') $url = "https://phimapi.com/v1/api/home?page=$page";
-        else if ($type === 'search') $url = "https://phimapi.com/v1/api/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page";
-        else if (in_array($type, ['the-loai', 'quoc-gia'])) $url = "https://phimapi.com/v1/api/$type/$slug?page=$page";
-        else if ($type === 'nam-phat-hanh') $url = "https://phimapi.com/v1/api/nam/$slug?page=$page";
-        else $url = "https://phimapi.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page";
+        if ($type === 'home') $url = "https://phimapi.com/v1/api/home?page=$page$queryString";
+        else if ($type === 'search') $url = "https://phimapi.com/v1/api/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page$queryString";
+        else if (in_array($type, ['the-loai', 'quoc-gia'])) $url = "https://phimapi.com/v1/api/$type/$slug?page=$page$queryString";
+        else if ($type === 'nam-phat-hanh') $url = "https://phimapi.com/v1/api/nam/$slug?page=$page$queryString";
+        else $url = "https://phimapi.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page$queryString";
     }
     
     $res = fetchApiWithCache($url, 900); // 15 mins cache for list
@@ -472,6 +525,15 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '') {
             $result['pagination'] = $data['data']['params']['pagination'];
         } else if (isset($data['pagination'])) {
             $result['pagination'] = $data['pagination'];
+        }
+        
+        // Swap thumb_url and poster_url for KKPhim/Ophim
+        if (!empty($result['items'])) {
+            foreach ($result['items'] as &$item) {
+                $temp = $item['thumb_url'] ?? '';
+                $item['thumb_url'] = $item['poster_url'] ?? '';
+                $item['poster_url'] = $temp;
+            }
         }
     }
     
@@ -545,6 +607,14 @@ function fetchApiMovieDetail($slug) {
     }
     if (!empty($result['movie']['poster_url']) && !preg_match('/^http/', $result['movie']['poster_url'])) {
         $result['movie']['poster_url'] = rtrim($result['domain'], '/') . '/' . ltrim($result['movie']['poster_url'], '/');
+    }
+    
+    if ($apiSource === 'kkphim' || $apiSource === 'ophim') {
+        if (!empty($result['movie'])) {
+            $temp = $result['movie']['thumb_url'] ?? '';
+            $result['movie']['thumb_url'] = $result['movie']['poster_url'] ?? '';
+            $result['movie']['poster_url'] = $temp;
+        }
     }
     
     return $result;

@@ -190,6 +190,12 @@ if (!empty($items)) {
         ];
         if (empty($m['slug'])) continue;
         
+        if ($source === 'kkphim' || $source === 'ophim') {
+            $temp = $m['thumb_url'] ?? '';
+            $m['thumb_url'] = $m['poster_url'] ?? '';
+            $m['poster_url'] = $temp;
+        }
+        
         if ($dl === 1) {
             $thumbLocal = '/uploads/movies/' . $m['slug'] . '-thumb.webp';
             $posterLocal = '/uploads/movies/' . $m['slug'] . '-poster.webp';

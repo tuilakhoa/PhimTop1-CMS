@@ -10,6 +10,18 @@ server {
         deny all;
     }
 
+    # Chặn index trang setup
+    location = /setup.php {
+        add_header X-Robots-Tag "noindex, nofollow";
+        
+        # Xử lý PHP cho setup
+        include fastcgi_params;
+        # AAPanel thường quản lý fastcgi_pass thông qua include file enable-php-xx.conf
+        # include enable-php-81.conf;
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock; 
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
     location / {
         # SEO URL Rewrites
         rewrite ^/phim/([^/]+)/?$ /movie.php?slug=$1 last;

@@ -64,15 +64,23 @@ if ($action === 'login') {
     $email = $input['email'] ?? '';
     $password = $input['password'] ?? '';
     
-    if (!$pdo) {
+    $user = null;
+    $fs = getFirestore();
+    if ($fs) {
+        $results = $fs->runQuery('members', 'email', 'EQUAL', $email, 1);
+        if (!empty($results)) {
+            $user = $results[0];
+            $user['id'] = $user['_id'];
+        }
+    } else if ($pdo) {
+        $stmt = $pdo->prepare("SELECT * FROM members WHERE email = ? LIMIT 1");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    } else {
         http_response_code(500);
         echo json_encode(['status' => 'error', 'message' => 'Database error']);
         exit;
     }
-    
-    $stmt = $pdo->prepare("SELECT * FROM members WHERE email = ? LIMIT 1");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // Very basic check, should use password_verify in production if passwords are hashed
     if ($user && ($user['password'] === $password || password_verify($password, $user['password']))) {
@@ -106,18 +114,40 @@ if ($action === 'register') {
         exit;
     }
     
-    $stmt = $pdo->prepare("SELECT id FROM members WHERE email = ?");
-    $stmt->execute([$email]);
-    if ($stmt->fetch()) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Email already registered']);
+    $fs = getFirestore();
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $userId = null;
+    
+    if ($fs) {
+        $results = $fs->runQuery('members', 'email', 'EQUAL', $email, 1);
+        if (!empty($results)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Email already registered']);
+            exit;
+        }
+        $userId = uniqid();
+        $fs->setDocument('members', $userId, [
+            'email' => $email,
+            'name' => $name,
+            'password' => $hashedPassword,
+            'role' => 'user'
+        ]);
+    } else if ($pdo) {
+        $stmt = $pdo->prepare("SELECT id FROM members WHERE email = ?");
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Email already registered']);
+            exit;
+        }
+        $stmt = $pdo->prepare("INSERT INTO members (email, name, password, role) VALUES (?, ?, ?, 'user')");
+        $stmt->execute([$email, $name, $hashedPassword]);
+        $userId = $pdo->lastInsertId();
+    } else {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => 'Database error']);
         exit;
     }
-    
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO members (email, name, password, role) VALUES (?, ?, ?, 'user')");
-    $stmt->execute([$email, $name, $hashedPassword]);
-    $userId = $pdo->lastInsertId();
     
     $token = generateToken($userId, $email, 'user');
     echo json_encode([
@@ -134,7 +164,7 @@ if ($action === 'register') {
 }
 
 if ($action === 'profile') {
-    $authHeader = $headers['Authorization'] ?? '';
+    $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
     $token = str_replace('Bearer ', '', $authHeader);
     
     $payload = verifyToken($token);
@@ -144,9 +174,16 @@ if ($action === 'profile') {
         exit;
     }
     
-    $stmt = $pdo->prepare("SELECT id, name, email, avatar, role FROM members WHERE id = ?");
-    $stmt->execute([$payload['user_id']]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = null;
+    $fs = getFirestore();
+    if ($fs) {
+        $user = $fs->getDocument('members', $payload['user_id']);
+        if ($user) $user['id'] = $payload['user_id'];
+    } else if ($pdo) {
+        $stmt = $pdo->prepare("SELECT id, name, email, avatar, role FROM members WHERE id = ?");
+        $stmt->execute([$payload['user_id']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
     
     if ($user) {
         echo json_encode([

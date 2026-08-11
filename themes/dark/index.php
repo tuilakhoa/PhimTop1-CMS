@@ -63,16 +63,18 @@ if (empty($featuredMovies) && !empty($movies)) {
                 <?php foreach($featuredMovies as $featured): ?>
                     <div class="swiper-slide relative w-full h-full">
                         <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent z-10"></div>
-                        <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover">
+                        <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover">
                         
                         <div class="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-4xl">
                             <span class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full w-fit mb-4 uppercase tracking-wider">Phim Nổi Bật</span>
                             <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
                                 <?= htmlspecialchars($featured['name'] ?? '') ?>
                             </h1>
+                            <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
                             <p class="text-gray-300 text-lg md:text-xl mb-8 max-w-2xl line-clamp-3">
-                                <?= htmlspecialchars(strip_tags(!empty($featured['content']) ? $featured['content'] : 'Nội dung đang cập nhật...')) ?>
+                                <?= htmlspecialchars(strip_tags($featured['content'])) ?>
                             </p>
+                            <?php endif; ?>
                             <div class="flex flex-wrap items-center gap-4">
                                 <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
                                     <i data-lucide="play" class="w-5 h-5 fill-current"></i>
@@ -108,16 +110,18 @@ if (empty($featuredMovies) && !empty($movies)) {
     <?php else: $featured = $featuredMovies[0]; ?>
         <div class="relative w-full h-[50vh] md:h-[60vh] rounded-2xl overflow-hidden mb-12 shadow-2xl">
             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent z-10"></div>
-            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover">
+            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover">
             
             <div class="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-4xl">
                 <span class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full w-fit mb-4 uppercase tracking-wider">Phim Nổi Bật</span>
                 <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
                     <?= htmlspecialchars($featured['name'] ?? '') ?>
                 </h1>
+                <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
                 <p class="text-gray-300 text-lg md:text-xl mb-8 max-w-2xl line-clamp-3">
-                    <?= htmlspecialchars(strip_tags(!empty($featured['content']) ? $featured['content'] : 'Nội dung đang cập nhật...')) ?>
+                    <?= htmlspecialchars(strip_tags($featured['content'])) ?>
                 </p>
+                <?php endif; ?>
                 <div class="flex flex-wrap items-center gap-4">
                     <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
                         <i data-lucide="play" class="w-5 h-5 fill-current"></i>
@@ -140,7 +144,7 @@ if (empty($featuredMovies) && !empty($movies)) {
         
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
             <?php foreach ($movies as $movie): 
-                $thumb = !empty($movie['thumb_url']) ? $movie['thumb_url'] : (!empty($movie['poster_url']) ? $movie['poster_url'] : '');
+                $thumb = !empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '');
                 if (!preg_match('/^http/', $thumb) && $thumb) {
                     if (preg_match('/^\/[a-zA-Z0-9_-]+\.(jpg|jpeg|png|webp)$/i', $thumb)) {
                         $thumb = 'https://image.tmdb.org/t/p/w500' . $thumb;

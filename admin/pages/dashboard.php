@@ -78,6 +78,28 @@ if ($cfApiConfigured) {
         }
     }
 }
+
+// Fetch Google Analytics Realtime Active Users
+$gaRealtimeData = '--';
+$gaPropertyId = $settings['gaPropertyId'] ?? '';
+$dbConfig = getDbConfig();
+$serviceAccount = $dbConfig['serviceAccount'] ?? [];
+$gaConfigured = !empty($gaPropertyId) && !empty($serviceAccount['private_key']);
+
+if ($gaConfigured) {
+    require_once __DIR__ . '/../includes/ga_helper.php';
+    $gaAccessToken = getGaAccessToken($serviceAccount);
+    if ($gaAccessToken) {
+        $realtimeUsers = getGaRealtimeUsers($gaPropertyId, $gaAccessToken);
+        if ($realtimeUsers !== false) {
+            $gaRealtimeData = number_format((int)$realtimeUsers);
+        } else {
+            $gaRealtimeData = 'Lỗi API';
+        }
+    } else {
+        $gaRealtimeData = 'Lỗi Khóa';
+    }
+}
 ?>
 <h2 class="text-2xl font-bold text-white mb-6">Tổng Quan Hệ Thống</h2>
 
@@ -162,13 +184,17 @@ if ($cfApiConfigured) {
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-gray-400 mb-1">Google Analytics</p>
-                <h3 class="text-sm font-medium text-white">Đang Hoạt Động</h3>
+                <h3 class="text-sm font-medium text-white">Online (30 phút qua)</h3>
             </div>
             <div class="w-10 h-10 bg-yellow-500/10 rounded-lg flex items-center justify-center text-yellow-500"><i data-lucide="activity" class="w-5 h-5"></i></div>
         </div>
         <div class="flex items-end justify-between">
-            <h2 class="text-3xl font-bold text-white">--</h2>
-            <span class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded">Cần Service Account</span>
+            <h2 class="text-3xl font-bold text-white"><?= $gaRealtimeData ?></h2>
+            <?php if (!$gaConfigured): ?>
+                <span class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded">Cần Property ID & JSON</span>
+            <?php else: ?>
+                <span class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">Đã Kết Nối</span>
+            <?php endif; ?>
         </div>
     </div>
 </div>

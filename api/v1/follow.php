@@ -41,7 +41,7 @@ function verifyToken($token) {
 }
 
 // Authenticate user
-$authHeader = $headers['Authorization'] ?? '';
+$authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
 $token = str_replace('Bearer ', '', $authHeader);
 $user = verifyToken($token);
 

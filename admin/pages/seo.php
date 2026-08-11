@@ -18,7 +18,7 @@
         </div>
         
         <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-300 mb-2">Logo Website & Favicon</label>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Logo Website</label>
             <?php if (!empty($settings['logoUrl'])): ?>
                 <div class="mb-3">
                     <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" class="h-12 object-contain bg-gray-800 p-2 rounded border border-gray-700" alt="Current Logo">
@@ -26,6 +26,46 @@
             <?php endif; ?>
             <input type="file" name="logoFile" accept="image/*" class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
             <p class="text-xs text-gray-500 mt-2">Tải lên file ảnh (PNG, JPG, WEBP). Khuyên dùng nền trong suốt.</p>
+        </div>
+
+        <div class="mb-6 bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Favicon Website</label>
+            
+            <div class="flex items-center mb-4">
+                <input type="checkbox" id="useLogoAsFavicon" name="useLogoAsFavicon" value="1" class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" <?= (!empty($settings['useLogoAsFavicon']) ? 'checked' : '') ?>>
+                <label for="useLogoAsFavicon" class="ml-2 text-sm font-medium text-gray-300">Dùng Logo làm Favicon (Tự động chuyển sang .ico)</label>
+            </div>
+            
+            <?php if (!empty($settings['faviconUrl'])): ?>
+                <div class="mb-3">
+                    <img src="<?= htmlspecialchars($settings['faviconUrl']) ?>" class="h-8 object-contain bg-gray-800 p-1 rounded border border-gray-700" alt="Current Favicon">
+                </div>
+            <?php endif; ?>
+            
+            <input type="file" name="faviconFile" accept="image/*,.ico" class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-600 file:text-white hover:file:bg-gray-700">
+            <p class="text-xs text-gray-500 mt-2">Tải lên ảnh hoặc file .ico để làm icon trên trình duyệt. Sẽ tự chuyển đổi qua .ico.</p>
+        </div>
+
+        <div class="mb-6 bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Apple Touch Icon</label>
+            <?php if (!empty($settings['appleTouchIconUrl'])): ?>
+                <div class="mb-3">
+                    <img src="<?= htmlspecialchars($settings['appleTouchIconUrl']) ?>" class="h-8 object-contain bg-gray-800 p-1 rounded border border-gray-700" alt="Apple Touch Icon">
+                </div>
+            <?php endif; ?>
+            <input type="file" name="appleTouchIconFile" accept="image/*" class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-600 file:text-white hover:file:bg-gray-700">
+            <p class="text-xs text-gray-500 mt-2">Biểu tượng khi người dùng thêm trang web vào màn hình chính trên iOS (apple-touch-icon).</p>
+        </div>
+
+        <div class="mb-6 bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Ảnh Mặc Định Khi Chia Sẻ (OG Image)</label>
+            <?php if (!empty($settings['ogImageUrl'])): ?>
+                <div class="mb-3">
+                    <img src="<?= htmlspecialchars($settings['ogImageUrl']) ?>" class="h-24 object-cover bg-gray-800 p-1 rounded border border-gray-700" alt="OG Image">
+                </div>
+            <?php endif; ?>
+            <input type="file" name="ogImageFile" accept="image/*" class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+            <p class="text-xs text-gray-500 mt-2">Dùng cho thẻ og:image, image itemprop khi chia sẻ lên mạng xã hội.</p>
         </div>
 
         <div class="mb-6">
@@ -42,6 +82,42 @@
             <label class="block text-sm font-medium text-gray-300 mb-2">Từ Khóa SEO (Meta Keywords)</label>
             <input type="text" name="seoKeywords" value="<?= htmlspecialchars($settings['seoKeywords'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-blue-500 outline-none">
             <p class="text-xs text-gray-500 mt-2">Ngăn cách các từ khóa bằng dấu phẩy (,).</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-gray-800/30 p-4 rounded-lg border border-gray-700/50">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Tiêu Đề Chia Sẻ (OG Title)</label>
+                <input type="text" name="ogTitle" value="<?= htmlspecialchars($settings['ogTitle'] ?? '') ?>" placeholder="Để trống sẽ dùng SEO Title" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Mô Tả Chia Sẻ (OG Desc)</label>
+                <input type="text" name="ogDesc" value="<?= htmlspecialchars($settings['ogDesc'] ?? '') ?>" placeholder="Để trống sẽ dùng Meta Desc" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">OG Type (Mặc định)</label>
+                <input type="text" name="ogType" value="<?= htmlspecialchars($settings['ogType'] ?? 'website') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">OG Locale</label>
+                <input type="text" name="ogLocale" value="<?= htmlspecialchars($settings['ogLocale'] ?? 'vi_VN') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Tác giả (Meta Author)</label>
+                <input type="text" name="seoAuthor" value="<?= htmlspecialchars($settings['seoAuthor'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Nhà xuất bản (Meta Publisher)</label>
+                <input type="text" name="seoPublisher" value="<?= htmlspecialchars($settings['seoPublisher'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Màu chủ đề (Theme Color)</label>
+                <input type="text" name="themeColor" value="<?= htmlspecialchars($settings['themeColor'] ?? '#0f0f0f') ?>" placeholder="#0f0f0f" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
+            </div>
+            <div class="col-span-1 md:col-span-2">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Tên miền Canonical (Tùy chọn)</label>
+                <input type="text" name="canonicalBaseUrl" value="<?= htmlspecialchars($settings['canonicalBaseUrl'] ?? '') ?>" placeholder="Ví dụ: https://phimtop1.com" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-1 focus:ring-blue-500 outline-none">
+                <p class="text-xs text-gray-500 mt-1">Dùng làm cơ sở cho the canonical và og:url. Nếu trống sẽ dùng URL hiện tại.</p>
+            </div>
         </div>
     </div>
     

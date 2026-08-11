@@ -179,4 +179,49 @@ class FirestoreClient {
         $response = $this->request('DELETE', "/{$collection}/{$docId}", null, true);
         return true; // DELETE in REST API typically returns {} on success
     }
+
+    public function runQuery($collection, $field, $operator, $value, $limit = 1) {
+        $valField = 'stringValue';
+        $valData = (string)$value;
+        if (is_int($value)) {
+            $valField = 'integerValue';
+            $valData = (string)$value;
+        } else if (is_bool($value)) {
+            $valField = 'booleanValue';
+            $valData = $value;
+        }
+
+        $body = [
+            'structuredQuery' => [
+                'from' => [['collectionId' => $collection]],
+                'where' => [
+                    'fieldFilter' => [
+                        'field' => ['fieldPath' => $field],
+                        'op' => $operator,
+                        'value' => [$valField => $valData]
+                    ]
+                ]
+            ]
+        ];
+
+        if ($limit > 0) {
+            $body['structuredQuery']['limit'] = $limit;
+        }
+
+        $data = $this->request('POST', ":runQuery", $body, true);
+        $results = [];
+        
+        if (is_array($data)) {
+            foreach ($data as $item) {
+                if (isset($item['document']) && isset($item['document']['fields'])) {
+                    $doc = $this->parseFields($item['document']['fields']);
+                    $parts = explode('/', $item['document']['name']);
+                    $doc['_id'] = end($parts);
+                    $results[] = $doc;
+                }
+            }
+        }
+        return $results;
+    }
 }
+

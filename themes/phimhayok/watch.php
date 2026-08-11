@@ -4,7 +4,8 @@
 $suggestions = [];
 $sugDomain = 'https://phimimg.com/';
 if (!empty($movie['category']) && is_array($movie['category'])) {
-    $firstCat = is_array($movie['category'][0]) ? ($movie['category'][0]['slug'] ?? '') : '';
+    $firstCatObj = reset($movie['category']);
+    $firstCat = is_array($firstCatObj) ? ($firstCatObj['slug'] ?? '') : (is_string($firstCatObj) ? $firstCatObj : '');
     if ($firstCat) {
         $sugRes = @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=6");
         if ($sugRes) {
@@ -179,5 +180,107 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
         </div>
     </div>
 </div>
+
+<!-- History Logging Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const appApiKey = '<?= addslashes($settings['appApiKey'] ?? '') ?>';
+    const movieSlug = '<?= addslashes($movie['slug']) ?>';
+    const movieName = '<?= addslashes($movie['name']) ?>';
+    const episodeName = '<?= addslashes($currentEp['name']) ?>';
+    const thumbUrl = '<?= addslashes($movie['thumb_url'] ?? '') ?>';
+    
+    // Lưu lịch sử xem vào LocalStorage (cho khách và thành viên)
+    try {
+        let history = JSON.parse(localStorage.getItem('phimhayok_watch_history')) || [];
+        // Loại bỏ phim này nếu đã có trong lịch sử để đưa lên đầu
+        history = history.filter(h => h.slug !== movieSlug);
+        history.unshift({
+            slug: movieSlug,
+            name: movieName,
+            episode: episodeName,
+            thumb: thumbUrl,
+            url: window.location.pathname,
+            time: new Date().getTime()
+        });
+        // Giữ tối đa 20 phim
+        if (history.length > 20) {
+            history = history.slice(0, 20);
+        }
+        localStorage.setItem('phimhayok_watch_history', JSON.stringify(history));
+    } catch(e) {
+        console.error('Error saving local history:', e);
+    }
+
+    <?php if (isset($_SESSION['user'])): ?>
+    // Lưu lịch sử xem vào Database qua API cho thành viên đã đăng nhập
+    fetch(`/api/v1/history.php?action=add&key=${appApiKey}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            movie_slug: movieSlug,
+            movie_name: movieName,
+            episode_name: episodeName,
+            thumb_url: thumbUrl
+        })
+    }).then(res => res.json())
+      .then(data => console.log('History logged to DB:', data))
+      .catch(err => console.error('Error logging history:', err));
+    <?php endif; ?>
+});
+</script>
+
+<!-- Realtime Watching Session Heartbeat -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let deviceId = localStorage.getItem('phimtop1_device_id');
+    if (!deviceId) {
+        deviceId = 'web-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
+        localStorage.setItem('phimtop1_device_id', deviceId);
+    }
+    
+    const isLogged = <?= isset($_SESSION['user']) ? 1 : 0 ?>;
+    const userName = '<?= addslashes($_SESSION['user']['name'] ?? 'Guest') ?>';
+    const movieSlug = '<?= addslashes($movie['slug']) ?>';
+    const movieName = '<?= addslashes($movie['name']) ?>';
+    const episodeName = '<?= addslashes($currentEp['name']) ?>';
+
+    function sendHeartbeat() {
+        fetch('/api/v1/watching_session.php?action=heartbeat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                device_id: deviceId,
+                device_name: navigator.userAgent.substring(0, 40) + '...',
+                platform: 'web',
+                movie_slug: movieSlug,
+                movie_name: movieName,
+                episode_name: episodeName,
+                user_name: userName,
+                is_logged_in: isLogged
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success' && data.command) {
+                executeCommand(data.command);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function executeCommand(cmd) {
+        const video = document.getElementById('video-player');
+        if (!video) return; // Cannot control iframe easily
+        if (cmd === 'play') video.play();
+        else if (cmd === 'pause' || cmd === 'stop') video.pause();
+    }
+
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 10000);
+});
+</script>
 
 <?php include __DIR__ . '/footer.php'; ?>

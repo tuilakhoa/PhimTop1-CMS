@@ -4,7 +4,8 @@
 $suggestions = [];
 $sugDomain = 'https://phimimg.com/';
 if (!empty($movie['category']) && is_array($movie['category'])) {
-    $firstCat = is_array($movie['category'][0]) ? ($movie['category'][0]['slug'] ?? '') : '';
+    $firstCatObj = reset($movie['category']);
+    $firstCat = is_array($firstCatObj) ? ($firstCatObj['slug'] ?? '') : (is_string($firstCatObj) ? $firstCatObj : '');
     if ($firstCat) {
         $sugRes = @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12");
         if ($sugRes) {

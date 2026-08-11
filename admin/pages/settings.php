@@ -56,6 +56,21 @@
             </select>
             <p class="text-xs text-gray-500 mt-2">Nếu bạn sửa mã nguồn riêng, hãy <b>TẮT</b> tính năng này để tránh bị ghi đè code khi có bản cập nhật mới.</p>
         </div>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Quản lý người dùng đang xem (Watching Sessions)</label>
+            <select name="enableWatchingSession" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow mb-4">
+                <option value="1" <?= (!isset($settings['enableWatchingSession']) || $settings['enableWatchingSession'] == 1) ? 'selected' : '' ?>>Bật (Cho phép theo dõi và điều khiển)</option>
+                <option value="0" <?= (isset($settings['enableWatchingSession']) && $settings['enableWatchingSession'] == 0) ? 'selected' : '' ?>>Tắt (Không theo dõi để giảm tải cho CSDL)</option>
+            </select>
+            
+            <label class="block text-sm font-medium text-gray-300 mb-2">Đối tượng theo dõi</label>
+            <select name="trackAnonymousSession" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <option value="0" <?= (!isset($settings['trackAnonymousSession']) || $settings['trackAnonymousSession'] == 0) ? 'selected' : '' ?>>Chỉ theo dõi người dùng đã đăng nhập (Giảm tải Database)</option>
+                <option value="1" <?= (isset($settings['trackAnonymousSession']) && $settings['trackAnonymousSession'] == 1) ? 'selected' : '' ?>>Theo dõi tất cả (Bao gồm Khách/Ẩn danh)</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-2">Tính năng này giúp giới hạn lượng dữ liệu ghi vào Database. Khuyến nghị chỉ theo dõi người dùng đã đăng nhập.</p>
+        </div>
     </div>
 
     <!-- Tab Theme Home -->
@@ -152,25 +167,37 @@
 
         <div id="db-firestore" class="space-y-4 <?= !$isFs ? 'hidden' : '' ?>">
             <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-4">
-                <h4 class="text-blue-400 font-semibold mb-2 flex items-center"><i data-lucide="info" class="w-4 h-4 mr-2"></i>Hướng dẫn lấy cấu hình Firestore:</h4>
+                <h4 class="text-blue-400 font-semibold mb-2 flex items-center"><i data-lucide="shield" class="w-4 h-4 mr-2"></i>Bảo Mật Firestore:</h4>
                 <ol class="list-decimal list-inside text-sm text-gray-300 space-y-1">
-                    <li>Truy cập <a href="https://console.firebase.google.com/" target="_blank" class="text-blue-400 hover:underline">Firebase Console</a> và tạo/chọn Project.</li>
-                    <li>Vào <b>Project settings</b> (Cài đặt dự án) > <b>Service accounts</b> (Tài khoản dịch vụ).</li>
-                    <li>Bấm <b>Generate new private key</b> (Tạo khoá riêng tư mới) để tải file JSON về máy.</li>
-                    <li>Mở file JSON vừa tải, copy toàn bộ nội dung và dán vào ô <b>Service Account JSON</b> bên dưới.</li>
-                    <li><b>Project ID</b> chính là mục <code class="text-red-400 bg-gray-800 px-1 rounded">project_id</code> nằm bên trong nội dung file JSON đó.</li>
-                    <li class="pt-2">Vào mục <b>Firestore Database</b> > <b>Rules</b> và xuất bản đoạn Rules sau để bảo mật hệ thống:
+                    <li>Vào mục <b>Firestore Database</b> > <b>Rules</b> và xuất bản đoạn Rules sau:
 <pre class="bg-gray-900 border border-gray-700 p-3 mt-2 rounded text-xs overflow-x-auto text-blue-300 font-mono">rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
-      allow read, write: if false; // Chỉ PHP Server (dùng JSON) mới có quyền đọc và ghi
+      allow read, write: if false; // Chỉ có quyền đọc ghi thông qua PHP Server
     }
   }
 }</pre>
                     </li>
                 </ol>
             </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-gray-800 space-y-4">
+            <h3 class="text-lg font-semibold text-white mb-2 flex items-center"><i data-lucide="key" class="w-5 h-5 mr-2 text-yellow-500"></i> Cấu Hình Google Cloud (Service Account)</h3>
+            <p class="text-xs text-gray-500 mb-4">Tài khoản dịch vụ này được sử dụng chung cho kết nối <b>Firestore Database</b> và API của <b>Google Analytics</b>.</p>
+            
+            <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-4">
+                <h4 class="text-yellow-400 font-semibold mb-2 flex items-center"><i data-lucide="info" class="w-4 h-4 mr-2"></i>Hướng dẫn lấy Service Account JSON:</h4>
+                <ol class="list-decimal list-inside text-sm text-gray-300 space-y-1">
+                    <li>Truy cập <a href="https://console.firebase.google.com/" target="_blank" class="text-yellow-400 hover:underline">Firebase Console</a> và tạo/chọn Project.</li>
+                    <li>Vào <b>Project settings</b> (Cài đặt dự án) > <b>Service accounts</b> (Tài khoản dịch vụ).</li>
+                    <li>Bấm <b>Generate new private key</b> (Tạo khoá mới) để tải file JSON về máy.</li>
+                    <li>Mở file JSON vừa tải, copy <b>toàn bộ nội dung</b> và dán vào ô <b>Service Account JSON</b> bên dưới.</li>
+                    <li><b>Project ID</b> chính là giá trị của mục <code class="text-red-400 bg-gray-800 px-1 rounded">project_id</code> nằm bên trong nội dung file JSON đó.</li>
+                </ol>
+            </div>
+            
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-1.5">Project ID</label>
                 <input type="text" name="projectId" value="<?= htmlspecialchars($dbConfig['projectId'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white outline-none">

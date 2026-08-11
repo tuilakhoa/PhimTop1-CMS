@@ -3,6 +3,19 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Cho phép đọc tự do (hiển thị phim cho người dùng)
     // KHÔNG cho phép ghi từ Client (Chỉ PHP Backend sử dụng Service Account mới được ghi)
+    // Chặn hoàn toàn truy cập public vào các bảng nhạy cảm (Chỉ Backend mới được phép)
+    match /members/{document=**} {
+      allow read, write: if false;
+    }
+    match /active_sessions/{document=**} {
+      allow read, write: if false;
+    }
+    match /settings/{document=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // Các collection còn lại (phim, danh mục) cho phép đọc public
     match /{document=**} {
       allow read: if true;
       allow write: if false; 

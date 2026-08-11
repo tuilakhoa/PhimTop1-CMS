@@ -25,7 +25,18 @@ global $pageTitle, $pageDesc, $pageKeywords;
 $seoTitle = $pageTitle ?? ($settings['seoTitle'] ?? 'PhimHayOK - Xem Phim Online');
 $seoDesc = $pageDesc ?? ($settings['seoDesc'] ?? 'Hệ thống xem phim trực tuyến chất lượng cao');
 $seoKeywords = $pageKeywords ?? ($settings['seoKeywords'] ?? 'xem phim, phim online');
-$siteName = 'PhimHayOK';
+$siteName = $settings['siteName'] ?? 'PhimHayOK';
+
+$currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+$canonicalUrl = !empty($settings['canonicalBaseUrl']) ? rtrim($settings['canonicalBaseUrl'], '/') . $_SERVER['REQUEST_URI'] : $currentUrl;
+
+global $ogImage, $ogType;
+$finalOgTitle = $pageTitle ?? (!empty($settings['ogTitle']) ? $settings['ogTitle'] : $seoTitle);
+$finalOgDesc = $pageDesc ?? (!empty($settings['ogDesc']) ? $settings['ogDesc'] : $seoDesc);
+$finalOgImage = $ogImage ?? ($settings['ogImageUrl'] ?? '');
+$finalOgType = $ogType ?? ($settings['ogType'] ?? 'website');
+$finalOgLocale = $settings['ogLocale'] ?? 'vi_VN';
+$themeColor = $settings['themeColor'] ?? '#0f0f0f';
 
 $pdo = getPDO();
 $genres = [];
@@ -45,6 +56,42 @@ if ($pdo) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title><?= htmlspecialchars($seoTitle) ?></title>
     <meta name="description" content="<?= htmlspecialchars($seoDesc) ?>">
+    <meta name="keywords" content="<?= htmlspecialchars($seoKeywords) ?>">
+    <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl) ?>">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / SEO Meta Tags -->
+    <meta property="og:title" content="<?= htmlspecialchars($finalOgTitle) ?>">
+    <meta property="og:description" content="<?= htmlspecialchars($finalOgDesc) ?>">
+    <meta property="og:url" content="<?= htmlspecialchars($canonicalUrl) ?>">
+    <meta property="og:type" content="<?= htmlspecialchars($finalOgType) ?>">
+    <meta property="og:locale" content="<?= htmlspecialchars($finalOgLocale) ?>">
+    <meta property="og:site_name" content="<?= htmlspecialchars($siteName) ?>">
+    <?php if ($finalOgImage): ?>
+    <meta property="og:image" content="<?= htmlspecialchars($finalOgImage) ?>">
+    <meta itemprop="image" content="<?= htmlspecialchars($finalOgImage) ?>">
+    <?php endif; ?>
+
+    <?php if (!empty($settings['seoAuthor'])): ?>
+    <meta name="author" content="<?= htmlspecialchars($settings['seoAuthor']) ?>">
+    <?php endif; ?>
+    <?php if (!empty($settings['seoPublisher'])): ?>
+    <meta name="publisher" content="<?= htmlspecialchars($settings['seoPublisher']) ?>">
+    <?php endif; ?>
+    <meta name="theme-color" content="<?= htmlspecialchars($themeColor) ?>">
+
+    <?php if (!empty($settings['appleTouchIconUrl'])): ?>
+    <link rel="apple-touch-icon" href="<?= htmlspecialchars($settings['appleTouchIconUrl']) ?>">
+    <?php endif; ?>
+    
+    <!-- Favicon -->
+    <?php if (!empty($settings['faviconUrl'])): ?>
+    <link rel="icon" href="<?= htmlspecialchars($settings['faviconUrl']) ?>">
+    <?php elseif (!empty($settings['logoUrl'])): ?>
+    <link rel="icon" href="<?= htmlspecialchars($settings['logoUrl']) ?>">
+    <?php else: ?>
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' rx='10' fill='%234b5563'/><svg x='8' y='8' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='20' height='14' x='2' y='3' rx='2'/><path d='M12 17v4'/><path d='M8 21h8'/><polygon points='10 7 15 10 10 13 10 7'/></svg></svg>">
+    <?php endif; ?>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -88,6 +135,28 @@ if ($pdo) {
     <?php endif; ?>
 
     <?php do_action('cms_head'); ?>
+
+    <?php if (!empty($settings['appSchemaEnabled'])): ?>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "<?= htmlspecialchars($settings['appSchemaName'] ?: ($settings['siteName'] ?? 'PhimTop1')) ?>",
+      "operatingSystem": "<?= htmlspecialchars($settings['appSchemaOs'] ?? 'Android, iOS') ?>",
+      "applicationCategory": "<?= htmlspecialchars($settings['appSchemaCategory'] ?? 'EntertainmentApplication') ?>",
+      "offers": {
+        "@type": "Offer",
+        "price": "<?= htmlspecialchars($settings['appSchemaPrice'] ?? '0') ?>",
+        "priceCurrency": "<?= htmlspecialchars($settings['appSchemaCurrency'] ?? 'VND') ?>"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "<?= htmlspecialchars($settings['appSchemaRatingValue'] ?? '4.8') ?>",
+        "ratingCount": "<?= htmlspecialchars($settings['appSchemaRatingCount'] ?? '1250') ?>"
+      }
+    }
+    </script>
+    <?php endif; ?>
 </head>
 <body class="<?= $bodyClass ?> min-h-screen flex flex-col">
     <!-- Header -->
@@ -168,15 +237,10 @@ if ($pdo) {
                     </button>
                 </form>
 
-                <?php if (!empty($settings['appDownloadUrl'])): ?>
-                <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="hidden md:flex items-center bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold py-2 px-4 rounded-full transition-colors shadow-[0_0_15px_rgba(234,179,8,0.3)] border border-yellow-400/50 mr-2">
-                    <i data-lucide="smartphone" class="w-4 h-4 mr-1.5"></i> Tải App Mobile
-                </a>
-                <?php endif; ?>
-                <?php if (!empty($settings['appDownloadUrlTv'])): ?>
-                <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="hidden md:flex items-center bg-[#1f1f1f] hover:bg-[#2f2f2f] text-gray-200 text-sm font-bold py-2 px-4 rounded-full transition-colors border border-gray-700">
-                    <i data-lucide="tv" class="w-4 h-4 mr-1.5"></i> Tải App TV
-                </a>
+                <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv'])): ?>
+                <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="hidden md:flex items-center bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold py-2 px-4 rounded-full transition-colors shadow-[0_0_15px_rgba(234,179,8,0.3)] border border-yellow-400/50 mr-2">
+                    <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Tải App
+                </button>
                 <?php endif; ?>
 
                 <?php include __DIR__ . '/../../includes/user_nav.php'; ?>
@@ -196,18 +260,44 @@ if ($pdo) {
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white">Phim Bộ</a>
                     <?php do_action('theme_mobile_menu'); ?>
                     
-                    <?php if (!empty($settings['appDownloadUrl'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-yellow-500/30 mt-2">
-                        <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng Mobile
-                    </a>
-                    <?php endif; ?>
-                    <?php if (!empty($settings['appDownloadUrlTv'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-center bg-[#1f1f1f] hover:bg-[#2f2f2f] text-gray-200 font-bold py-2.5 px-4 rounded-lg transition-colors border border-gray-800 mt-2">
-                        <i data-lucide="tv" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng TV
-                    </a>
+                    <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv'])): ?>
+                    <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="flex w-full items-center justify-center bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-yellow-500/30 mt-2">
+                        <i data-lucide="download" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng
+                    </button>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
+
     </nav>
+
+        <!-- Download App Modal -->
+        <div id="downloadAppModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div class="bg-[#141414] border border-gray-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
+                <button onclick="document.getElementById('downloadAppModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-black/50 rounded-full p-1 transition-colors z-10">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
+                        <i data-lucide="download-cloud" class="w-8 h-8 text-yellow-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Tải Ứng Dụng <?= htmlspecialchars($siteName) ?></h3>
+                    <p class="text-gray-400 text-sm mb-6">Trải nghiệm xem phim mượt mà và chất lượng cao hơn trên thiết bị của bạn.</p>
+                    
+                    <div class="grid grid-cols-1 gap-3">
+                        <?php if (!empty($settings['appDownloadUrl'])): ?>
+                        <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-4 rounded-xl transition-transform hover:scale-[1.02] shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+                            <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Phiên bản cho Điện Thoại
+                        </a>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($settings['appDownloadUrlTv'])): ?>
+                        <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-center bg-[#1f1f1f] hover:bg-[#2f2f2f] text-gray-200 font-bold py-3 px-4 rounded-xl transition-transform hover:scale-[1.02] border border-gray-700">
+                            <i data-lucide="tv" class="w-5 h-5 mr-2"></i> Phiên bản cho TV (Android Box)
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
     <main class="flex-grow pt-[72px] bg-black">

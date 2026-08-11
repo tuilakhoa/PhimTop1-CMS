@@ -22,3 +22,4 @@ test_update.php
 # PHP related
 vendor/
 composer.phar
+.firestore_token_*.json

@@ -18,6 +18,14 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     if (isset($_POST['seoTitle'])) $updates['seoTitle'] = $_POST['seoTitle'];
     if (isset($_POST['seoDesc'])) $updates['seoDesc'] = $_POST['seoDesc'];
     if (isset($_POST['seoKeywords'])) $updates['seoKeywords'] = $_POST['seoKeywords'];
+    if (isset($_POST['ogTitle'])) $updates['ogTitle'] = $_POST['ogTitle'];
+    if (isset($_POST['ogDesc'])) $updates['ogDesc'] = $_POST['ogDesc'];
+    if (isset($_POST['ogType'])) $updates['ogType'] = $_POST['ogType'];
+    if (isset($_POST['ogLocale'])) $updates['ogLocale'] = $_POST['ogLocale'];
+    if (isset($_POST['seoAuthor'])) $updates['seoAuthor'] = $_POST['seoAuthor'];
+    if (isset($_POST['seoPublisher'])) $updates['seoPublisher'] = $_POST['seoPublisher'];
+    if (isset($_POST['themeColor'])) $updates['themeColor'] = $_POST['themeColor'];
+    if (isset($_POST['canonicalBaseUrl'])) $updates['canonicalBaseUrl'] = $_POST['canonicalBaseUrl'];
     if (isset($_POST['verifyGoogle'])) $updates['verifyGoogle'] = $_POST['verifyGoogle'];
     if (isset($_POST['verifyBing'])) $updates['verifyBing'] = $_POST['verifyBing'];
     if (isset($_POST['verifyYandex'])) $updates['verifyYandex'] = $_POST['verifyYandex'];
@@ -32,6 +40,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     if (isset($_POST['cfAccountId'])) $updates['cfAccountId'] = $_POST['cfAccountId'];
     if (isset($_POST['cfZoneId'])) $updates['cfZoneId'] = $_POST['cfZoneId'];
     if (isset($_POST['gaMeasurementId'])) $updates['gaMeasurementId'] = $_POST['gaMeasurementId'];
+    if (isset($_POST['gaPropertyId'])) $updates['gaPropertyId'] = trim($_POST['gaPropertyId']);
 
     // Indexing APIs
     if (isset($_POST['googleIndexJson'])) $updates['googleIndexJson'] = $_POST['googleIndexJson'];
@@ -91,6 +100,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     if (isset($_POST['featuredMovieSlug'])) $updates['featuredMovieSlug'] = $_POST['featuredMovieSlug'];
     if (isset($_POST['featuredStyle'])) $updates['featuredStyle'] = $_POST['featuredStyle'];
     if (isset($_POST['featuredCount'])) $updates['featuredCount'] = (int)$_POST['featuredCount'];
+    if (isset($_POST['enableWatchingSession'])) $updates['enableWatchingSession'] = (int)$_POST['enableWatchingSession'];
+    if (isset($_POST['trackAnonymousSession'])) $updates['trackAnonymousSession'] = (int)$_POST['trackAnonymousSession'];
 
     // DB Config
     if (isset($_POST['dbType'])) {
@@ -109,16 +120,123 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
         }
         saveDbConfig($newDbConfig);
     }
-    // Handle Logo Upload
-    if (isset($_FILES['logoFile']) && $_FILES['logoFile']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = __DIR__ . '/../assets/';
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+    if (isset($_POST['useLogoAsFavicon'])) {
+        $updates['useLogoAsFavicon'] = (int)$_POST['useLogoAsFavicon'];
+    } else {
+        $updates['useLogoAsFavicon'] = 0;
+    }
+
+    $uploadDir = __DIR__ . '/../assets/';
+    if (!is_dir($uploadDir)) @mkdir($uploadDir, 0777, true);
+
+    $convertToIco = function($sourcePath, $destPath) {
+        if (!file_exists($sourcePath)) return false;
+        $mime = @mime_content_type($sourcePath);
         
+        if (extension_loaded('gd')) {
+            $image = null;
+            if ($mime === 'image/jpeg') $image = @imagecreatefromjpeg($sourcePath);
+            elseif ($mime === 'image/png') $image = @imagecreatefrompng($sourcePath);
+            elseif ($mime === 'image/webp') $image = @imagecreatefromwebp($sourcePath);
+            elseif ($mime === 'image/gif') $image = @imagecreatefromgif($sourcePath);
+            
+            if ($image) {
+                $w = imagesx($image);
+                $h = imagesy($image);
+                $size = min(256, max($w, $h));
+                $resized = imagecreatetruecolor($size, $size);
+                imagealphablending($resized, false);
+                imagesavealpha($resized, true);
+                $transparent = imagecolorallocatealpha($resized, 255, 255, 255, 127);
+                imagefilledrectangle($resized, 0, 0, $size, $size, $transparent);
+                
+                $ratio = min($size / $w, $size / $h);
+                $scaled_w = $w * $ratio;
+                $scaled_h = $h * $ratio;
+                $dst_x = ($size - $scaled_w) / 2;
+                $dst_y = ($size - $scaled_h) / 2;
+                
+                imagecopyresampled($resized, $image, $dst_x, $dst_y, 0, 0, $scaled_w, $scaled_h, $w, $h);
+                
+                ob_start();
+                imagepng($resized);
+                $pngData = ob_get_clean();
+                imagedestroy($image);
+                imagedestroy($resized);
+                
+                $icoHeader = pack("vvv", 0, 1, 1);
+                $icoDir = pack("CCCCvvVV", 0, 0, 0, 0, 1, 32, strlen($pngData), 22);
+                file_put_contents($destPath, $icoHeader . $icoDir . $pngData);
+                return true;
+            }
+        }
+        
+        if ($mime === 'image/png') {
+            $pngData = file_get_contents($sourcePath);
+            if (substr($pngData, 0, 8) === "\x89PNG\x0d\x0a\x1a\x0a") {
+                $icoHeader = pack("vvv", 0, 1, 1);
+                $icoDir = pack("CCCCvvVV", 0, 0, 0, 0, 1, 32, strlen($pngData), 22);
+                file_put_contents($destPath, $icoHeader . $icoDir . $pngData);
+                return true;
+            }
+        }
+        
+        return copy($sourcePath, $destPath);
+    };
+
+    // Handle Logo Upload
+    $logoUploadedPath = null;
+    if (isset($_FILES['logoFile']) && $_FILES['logoFile']['error'] === UPLOAD_ERR_OK) {
         $fileName = 'logo_' . time() . '.' . pathinfo($_FILES['logoFile']['name'], PATHINFO_EXTENSION);
         $targetPath = $uploadDir . $fileName;
         
         if (move_uploaded_file($_FILES['logoFile']['tmp_name'], $targetPath)) {
             $updates['logoUrl'] = '/assets/' . $fileName;
+            $logoUploadedPath = $targetPath;
+        }
+    }
+    
+    // Handle Favicon Upload
+    if (isset($_FILES['faviconFile']) && $_FILES['faviconFile']['error'] === UPLOAD_ERR_OK) {
+        $fileName = 'favicon_' . time() . '.ico';
+        $targetPath = $uploadDir . $fileName;
+        
+        if (move_uploaded_file($_FILES['faviconFile']['tmp_name'], $targetPath . '.tmp')) {
+            $convertToIco($targetPath . '.tmp', $targetPath);
+            @unlink($targetPath . '.tmp');
+            $updates['faviconUrl'] = '/assets/' . $fileName;
+            $updates['useLogoAsFavicon'] = 0; // Turn off auto logo conversion if user manually uploads a favicon
+        }
+    } elseif (!empty($updates['useLogoAsFavicon'])) {
+        $sourceLogo = $logoUploadedPath;
+        if (!$sourceLogo && !empty($settings['logoUrl'])) {
+            $sourceLogo = __DIR__ . '/..' . $settings['logoUrl'];
+        }
+        
+        if ($sourceLogo && file_exists($sourceLogo)) {
+            $fileName = 'favicon_logo_' . time() . '.ico';
+            $targetPath = $uploadDir . $fileName;
+            if ($convertToIco($sourceLogo, $targetPath)) {
+                $updates['faviconUrl'] = '/assets/' . $fileName;
+            }
+        }
+    }
+    
+    // Handle Apple Touch Icon Upload
+    if (isset($_FILES['appleTouchIconFile']) && $_FILES['appleTouchIconFile']['error'] === UPLOAD_ERR_OK) {
+        $fileName = 'apple_icon_' . time() . '.' . pathinfo($_FILES['appleTouchIconFile']['name'], PATHINFO_EXTENSION);
+        $targetPath = $uploadDir . $fileName;
+        if (move_uploaded_file($_FILES['appleTouchIconFile']['tmp_name'], $targetPath)) {
+            $updates['appleTouchIconUrl'] = '/assets/' . $fileName;
+        }
+    }
+    
+    // Handle OG Image Upload
+    if (isset($_FILES['ogImageFile']) && $_FILES['ogImageFile']['error'] === UPLOAD_ERR_OK) {
+        $fileName = 'og_' . time() . '.' . pathinfo($_FILES['ogImageFile']['name'], PATHINFO_EXTENSION);
+        $targetPath = $uploadDir . $fileName;
+        if (move_uploaded_file($_FILES['ogImageFile']['tmp_name'], $targetPath)) {
+            $updates['ogImageUrl'] = '/assets/' . $fileName;
         }
     }
     

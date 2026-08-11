@@ -1,6 +1,11 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
+    
+    # Pass Authorization header to PHP
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+    
     Options -MultiViews
     
     # Chặn truy cập trực tiếp vào thư mục includes và file config
@@ -29,6 +34,13 @@
     RewriteRule ^quoc-gia/([^/]+)/?$ category.php?slug=$1&type=quoc-gia [QSA,L]
     RewriteRule ^tim-kiem/?$ search.php [QSA,L]
 </IfModule>
+
+<IfModule mod_headers.c>
+    <Files "setup.php">
+        Header set X-Robots-Tag "noindex, nofollow"
+    </Files>
+</IfModule>
+
 <FilesMatch "^\.">
     Order allow,deny
     Deny from all

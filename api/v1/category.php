@@ -21,6 +21,9 @@ if (!empty($apiKey) && $clientApiKey !== $apiKey) {
 $type = $_GET['type'] ?? ''; // 'the-loai', 'quoc-gia', 'danh-sach'
 $slug = $_GET['slug'] ?? '';
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$category = $_GET['category'] ?? '';
+$country = $_GET['country'] ?? '';
+$year = $_GET['year'] ?? '';
 
 if (empty($type) || empty($slug)) {
     http_response_code(400);
@@ -47,7 +50,7 @@ if ($displayMode === 'crawl') {
     ];
 } else {
     // Fetch data from CMS helper
-    $data = fetchApiFilms($type, $slug, $page);
+    $data = fetchApiFilms($type, $slug, $page, '', $category, $country, $year);
 
     if ($data && !empty($data['items'])) {
         $repo = getMovieRepository();

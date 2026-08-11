@@ -88,14 +88,20 @@ if ($method === 'POST') {
     }
 
     // Try to get user name from token if not provided or to verify
-    $authHeader = $headers['Authorization'] ?? '';
+    $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
     if (!empty($authHeader)) {
         $token = str_replace('Bearer ', '', $authHeader);
         $user = verifyToken($token);
         if ($user) {
             if (empty($name)) {
+                $fs = getFirestore();
                 $pdo = getPDO();
-                if ($pdo) {
+                if ($fs) {
+                    $results = $fs->runQuery('members', 'email', 'EQUAL', $user['email'], 1);
+                    if (!empty($results) && isset($results[0]['name'])) {
+                        $name = $results[0]['name'];
+                    }
+                } else if ($pdo) {
                     $stmt = $pdo->prepare("SELECT name FROM members WHERE email = ?");
                     $stmt->execute([$user['email']]);
                     $dbUser = $stmt->fetch(PDO::FETCH_ASSOC);

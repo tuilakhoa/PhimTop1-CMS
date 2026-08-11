@@ -68,4 +68,64 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Load LocalStorage Watch History
+    try {
+        let history = JSON.parse(localStorage.getItem('phimhayok_watch_history')) || [];
+        if (history.length > 0) {
+            const section = document.getElementById('continue-watching-section');
+            const list = document.getElementById('continue-watching-list');
+            if (section && list) {
+                let html = '';
+                history.forEach(item => {
+                    const linkUrl = item.url ? item.url : `/phim/${item.slug}`;
+                    html += `
+                        <div class="swiper-slide w-[280px] md:w-[320px]">
+                            <a href="${linkUrl}" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
+                                <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
+                                    <img src="${item.thumb}" alt="${item.name}" loading="lazy" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                                    <div class="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                        <i data-lucide="play-circle" class="w-12 h-12 text-phim-yellow"></i>
+                                    </div>
+                                    <div class="absolute top-2 left-2">
+                                        <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm">
+                                            Tập ${item.episode}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow transition-colors">${item.name}</h3>
+                                </div>
+                            </a>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+                section.classList.remove('hidden');
+                
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+
+                // Init Swiper for History
+                new Swiper('.swiper-history', {
+                    slidesPerView: 'auto',
+                    spaceBetween: 16,
+                    navigation: {
+                        nextEl: '.swiper-history .swiper-button-next',
+                        prevEl: '.swiper-history .swiper-button-prev',
+                    },
+                    breakpoints: {
+                        320: { slidesPerView: 1.2 },
+                        640: { slidesPerView: 2.2 },
+                        768: { slidesPerView: 3.2 },
+                        1024: { slidesPerView: 4.2 },
+                        1280: { slidesPerView: 5.2 },
+                    }
+                });
+            }
+        }
+    } catch(e) {
+        console.error('Error loading history:', e);
+    }
 });

@@ -9,8 +9,8 @@
                 $menuGroups = [
                     'Quản Lý Nội Dung' => [
                         'dashboard' => ['icon' => 'layout-dashboard', 'title' => 'Tổng Quan'],
+                        'watching_sessions' => ['icon' => 'monitor-play', 'title' => 'Người Đang Xem'],
                         'movies' => ['icon' => 'film', 'title' => 'Quản Lý Phim'],
-
                         'categories' => ['icon' => 'list-tree', 'title' => 'Thể Loại & Quốc Gia'],
                         'comments' => ['icon' => 'message-square', 'title' => 'Quản Lý Bình Luận'],
                     ],

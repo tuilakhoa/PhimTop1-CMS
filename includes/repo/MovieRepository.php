@@ -49,6 +49,14 @@ class MovieRepository {
                 'totalPages' => ceil($total / $limit)
             ];
         } else {
+            if (!$this->pdo) {
+                return [
+                    'total' => 0,
+                    'items' => [],
+                    'totalPages' => 1
+                ];
+            }
+
             $where = "1=1";
             $params = [];
             
@@ -89,6 +97,8 @@ class MovieRepository {
         if ($this->isFirestore()) {
             return $this->fs->setDocument('movies', $data['slug'], $data);
         } else {
+            if (!$this->pdo) return false;
+            
             $sql = "INSERT INTO movies (id, name, origin_name, slug, thumb_url, poster_url, year, type, status, episode_current, quality, lang, chieu_rap, content, view, updated_at)
                 VALUES (:id, :name, :origin_name, :slug, :thumb_url, :poster_url, :year, :type, :status, :episode_current, :quality, :lang, :chieu_rap, :content, :view, :updated_at)
                 ON DUPLICATE KEY UPDATE 

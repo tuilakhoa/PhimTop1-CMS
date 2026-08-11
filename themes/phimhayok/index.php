@@ -39,6 +39,25 @@ if ($featuredStyle === 'single' && count($featuredMovies) > 0) {
 if (empty($featuredMovies) && !empty($movies)) {
     $featuredMovies = [$movies[0]];
 }
+
+// Fetch additional lists for Homepage
+$homeSliders = [
+    [
+        'title' => 'Phim Lẻ Mới',
+        'url' => '/' . ($settings["slugList"] ?? "danh-sach") . '/phim-le',
+        'data' => fetchApiFilms('danh-sach', 'phim-le', 1)['items'] ?? []
+    ],
+    [
+        'title' => 'Phim Bộ Mới',
+        'url' => '/' . ($settings["slugList"] ?? "danh-sach") . '/phim-bo',
+        'data' => fetchApiFilms('danh-sach', 'phim-bo', 1)['items'] ?? []
+    ],
+    [
+        'title' => 'Hoạt Hình',
+        'url' => '/' . ($settings["slugList"] ?? "danh-sach") . '/hoat-hinh',
+        'data' => fetchApiFilms('danh-sach', 'hoat-hinh', 1)['items'] ?? []
+    ]
+];
 ?>
 
 <?php if (!empty($featuredMovies)): ?>
@@ -48,7 +67,7 @@ if (empty($featuredMovies) && !empty($movies)) {
             <div class="swiper-wrapper">
                 <?php foreach($featuredMovies as $featured): ?>
                 <div class="swiper-slide relative w-full h-full">
-                    <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+                    <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
                     
@@ -57,9 +76,11 @@ if (empty($featuredMovies) && !empty($movies)) {
                             <h1 class="text-4xl md:text-7xl font-serif text-white mb-6 leading-tight drop-shadow-xl" style="font-family: 'Playfair Display', serif;">
                                 <?= htmlspecialchars($featured['name'] ?? '') ?>
                             </h1>
-                            <p class="text-gray-300 text-base md:text-lg mb-8 line-clamp-3 leading-relaxed max-w-xl">
-                                <?= htmlspecialchars(strip_tags(!empty($featured['content']) ? $featured['content'] : 'Nội dung đang cập nhật...')) ?>
-                            </p>
+                            <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
+                                <p class="text-gray-300 text-base md:text-lg mb-8 line-clamp-3 leading-relaxed max-w-xl">
+                                    <?= htmlspecialchars(strip_tags($featured['content'])) ?>
+                                </p>
+                            <?php endif; ?>
                             <div class="flex items-center space-x-4">
                                 <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center transition-transform hover:scale-105 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
                                     <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 text-black ml-2"></i>
@@ -83,7 +104,7 @@ if (empty($featuredMovies) && !empty($movies)) {
         </div>
     <?php else: $featured = $featuredMovies[0]; ?>
         <div class="absolute inset-0">
-            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
             <!-- Overlay gradients to make text readable -->
             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
@@ -96,9 +117,11 @@ if (empty($featuredMovies) && !empty($movies)) {
                     <?= htmlspecialchars($featured['name'] ?? '') ?>
                 </h1>
                 
-                <p class="text-gray-300 text-base md:text-lg mb-8 line-clamp-3 leading-relaxed max-w-xl">
-                    <?= htmlspecialchars(strip_tags(!empty($featured['content']) ? $featured['content'] : 'Nội dung đang cập nhật...')) ?>
-                </p>
+                <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
+                    <p class="text-gray-300 text-base md:text-lg mb-8 line-clamp-3 leading-relaxed max-w-xl">
+                        <?= htmlspecialchars(strip_tags($featured['content'])) ?>
+                    </p>
+                <?php endif; ?>
                 
                 <div class="flex items-center space-x-4">
                     <!-- Big Yellow Play Button -->
@@ -137,6 +160,23 @@ if (empty($featuredMovies) && !empty($movies)) {
 <?php endif; ?>
 
 <div class="px-4 md:px-12 lg:px-20 max-w-[1920px] mx-auto py-8 bg-black relative z-20 space-y-16">
+
+    <!-- Section: Tiếp Tục Xem (Local History) -->
+    <section id="continue-watching-section" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+                <i data-lucide="history" class="w-6 h-6 mr-2 text-phim-yellow"></i> Tiếp Tục Xem
+            </h2>
+        </div>
+        
+        <div class="swiper swiper-history">
+            <div class="swiper-wrapper pb-4" id="continue-watching-list">
+                <!-- JS will populate this -->
+            </div>
+            <div class="swiper-button-prev hidden md:flex"></div>
+            <div class="swiper-button-next hidden md:flex"></div>
+        </div>
+    </section>
 
     <!-- 2. Mới Nhất Trên Phimhayok (16:9 Swiper) -->
     <section>
@@ -298,11 +338,13 @@ if (empty($featuredMovies) && !empty($movies)) {
         
         <div class="swiper swiper-vertical-posters">
             <div class="swiper-wrapper pb-4">
-                <?php foreach (array_slice($movies, 0, 8) as $item): ?>
+                <?php foreach (array_slice($movies, 0, 8) as $item): 
+                    $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
+                ?>
                     <div class="swiper-slide w-[180px] md:w-[200px]">
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">
                             <div class="aspect-[2/3] relative overflow-hidden rounded-lg">
-                                <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
+                                <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
                                      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                                 
@@ -339,6 +381,64 @@ if (empty($featuredMovies) && !empty($movies)) {
             <div class="swiper-button-next hidden md:flex"></div>
         </div>
     </section>
+
+    <!-- 7. Dynamic Sliders from Settings/API -->
+    <?php foreach ($homeSliders as $sliderIdx => $slider): ?>
+        <?php if (!empty($slider['data'])): ?>
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl md:text-3xl font-bold text-white"><?= htmlspecialchars($slider['title']) ?></h2>
+                <a href="<?= htmlspecialchars($slider['url']) ?>" class="text-sm text-gray-500 hover:text-white flex items-center">
+                    Xem tất cả <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="swiper swiper-vertical-posters">
+                <div class="swiper-wrapper pb-4">
+                    <?php foreach ($slider['data'] as $item): 
+                        $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
+                    ?>
+                        <div class="swiper-slide w-[180px] md:w-[200px]">
+                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">
+                                <div class="aspect-[2/3] relative overflow-hidden rounded-lg">
+                                    <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
+                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                                    
+                                    <!-- Top Right Vietsub -->
+                                    <div class="absolute top-2 right-2">
+                                        <span class="bg-phim-yellow text-black text-[10px] font-bold px-2 py-1 rounded-sm shadow-md">
+                                            <?= htmlspecialchars($item['quality'] ?? 'HD') ?>
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Bottom Tags (Tập mới, Hot) -->
+                                    <div class="absolute bottom-2 left-0 right-0 flex justify-center space-x-1">
+                                        <?php if (!empty($item['episode_current'])): ?>
+                                            <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-sm"><?= htmlspecialchars($item['episode_current'] ?? '') ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 flex justify-between items-start">
+                                    <div class="flex-1 min-w-0 pr-2">
+                                        <h3 class="text-white font-bold text-sm truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                                        <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
+                                    </div>
+                                    <div class="shrink-0 bg-gray-800 text-gray-400 text-[10px] px-1.5 py-0.5 rounded mt-0.5">
+                                        <?= htmlspecialchars($item['year'] ?? date('Y')) ?>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <div class="swiper-button-prev hidden md:flex"></div>
+                <div class="swiper-button-next hidden md:flex"></div>
+            </div>
+        </section>
+        <?php endif; ?>
+    <?php endforeach; ?>
 
 </div>
 

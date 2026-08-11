@@ -70,10 +70,17 @@
             <i data-lucide="pie-chart" class="w-5 h-5 mr-2 text-green-500"></i> Google Analytics (GA4)
         </h3>
         
-        <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Measurement ID (Mã theo dõi)</label>
-            <input type="text" name="gaMeasurementId" value="<?= htmlspecialchars($settings['gaMeasurementId'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-green-500 outline-none" placeholder="G-XXXXXXXXXX">
-            <p class="text-xs text-gray-500 mt-2">Ví dụ: G-123456789. Hệ thống sẽ tự động chèn mã gtag.js độc lập.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Measurement ID (Frontend)</label>
+                <input type="text" name="gaMeasurementId" value="<?= htmlspecialchars($settings['gaMeasurementId'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-green-500 outline-none" placeholder="G-XXXXXXXXXX">
+                <p class="text-xs text-gray-500 mt-2">Dùng để tự động chèn mã gtag.js vào web.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Property ID (Backend/Dashboard)</label>
+                <input type="text" name="gaPropertyId" value="<?= htmlspecialchars($settings['gaPropertyId'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-green-500 outline-none" placeholder="123456789">
+                <p class="text-xs text-gray-500 mt-2">Dùng để rút dữ liệu biểu đồ lên Dashboard. <a href="https://analytics.google.com/" target="_blank" class="text-green-400 hover:underline">Vào GA > Quản trị > Cài đặt thuộc tính</a> để lấy.</p>
+            </div>
         </div>
     </div>
 
