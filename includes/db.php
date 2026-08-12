@@ -178,10 +178,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 5) {
+            if (!isset($row['db_version']) || $row['db_version'] < 6) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 5]);
-                $row['db_version'] = 5;
+                updateSettings(['db_version' => 6]);
+                $row['db_version'] = 6;
             }
             
             return array_merge($defaultSettings, $row);
@@ -372,10 +372,23 @@ function updateSettings($updates) {
         "ALTER TABLE settings ADD COLUMN trackAnonymousSession TINYINT(1) DEFAULT 0",
         "ALTER TABLE settings ADD COLUMN useLogoAsFavicon TINYINT(1) DEFAULT 0",
         "ALTER TABLE active_sessions ADD COLUMN progress INT DEFAULT 0",
+        "CREATE TABLE IF NOT EXISTS watch_parties (
+            room_code VARCHAR(50) PRIMARY KEY,
+            movie_slug VARCHAR(255) NOT NULL,
+            episode_name VARCHAR(100) NOT NULL,
+            creator_name VARCHAR(255) NOT NULL,
+            status VARCHAR(20) DEFAULT 'active',
+            is_public TINYINT(1) DEFAULT 0,
+            is_playing TINYINT(1) DEFAULT 0,
+            current_time INT DEFAULT 0,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )",
         // Cleanup old deprecated columns from original setup
         "ALTER TABLE settings DROP COLUMN githubRepo",
         "ALTER TABLE settings DROP COLUMN cmsVersion",
-        "ALTER TABLE settings DROP COLUMN updateServerUrl"
+        "ALTER TABLE settings DROP COLUMN updateServerUrl",
+        "ALTER TABLE watch_parties ADD COLUMN is_public TINYINT(1) DEFAULT 0"
     ];
 
     foreach ($migrations as $sql) {

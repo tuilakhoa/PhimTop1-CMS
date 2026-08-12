@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/tv_remote_service.dart';
 import '../services/watching_session_service.dart';
+import '../services/watch_party_service.dart';
 import '../providers/auth_provider.dart';
 
 class WatchMovieScreen extends StatefulWidget {
@@ -39,6 +40,10 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
   StreamSubscription? _remoteSubscription;
   StreamSubscription? _watchingSessionSubscription;
+
+  String? _wpRoomCode;
+  bool _wpIsHost = false;
+  Timer? _wpSyncTimer;
 
   @override
   void initState() {
@@ -134,6 +139,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   void dispose() {
     _remoteSubscription?.cancel();
     _watchingSessionSubscription?.cancel();
+    _wpSyncTimer?.cancel();
     WatchingSessionService().stopSession();
     // Revert to portrait only when leaving screen
     SystemChrome.setPreferredOrientations([
@@ -251,6 +257,228 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     );
   }
 
+  void _startWatchPartySync() {
+    _wpSyncTimer?.cancel();
+    if (_wpRoomCode == null || _videoController == null) return;
+    
+    _wpSyncTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      if (_videoController == null) return;
+      
+      if (_wpIsHost) {
+        await WatchPartyService.syncState(
+          _wpRoomCode!, 
+          _videoController!.value.isPlaying, 
+          _videoController!.value.position.inSeconds
+        );
+      } else {
+        final res = await WatchPartyService.getState(_wpRoomCode!);
+        if (res['status'] == 'success') {
+          final data = res['data'];
+          if (data['status'] != 'active') {
+            timer.cancel();
+            setState(() { _wpRoomCode = null; _wpIsHost = false; });
+            if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Phòng xem chung đã kết thúc.')));
+            return;
+          }
+          
+          final targetTime = data['current_time'] as int;
+          final isPlaying = data['is_playing'] == 1;
+          
+          final currentSec = _videoController!.value.position.inSeconds;
+          if ((currentSec - targetTime).abs() > 2) {
+            _videoController!.seekTo(Duration(seconds: targetTime));
+          }
+          
+          if (isPlaying && !_videoController!.value.isPlaying) {
+            _videoController!.play();
+          } else if (!isPlaying && _videoController!.value.isPlaying) {
+            _videoController!.pause();
+          }
+        }
+      }
+    });
+  }
+
+  void _showWatchPartyDialog() {
+    if (_wpRoomCode != null) {
+      // Already in a room, show active state
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.grey[900],
+          title: const Text('Phòng Xem Chung', style: TextStyle(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Mã phòng: $_wpRoomCode', style: const TextStyle(color: Colors.indigoAccent, fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text('Vai trò: ${_wpIsHost ? "Chủ phòng" : "Người xem"}', style: const TextStyle(color: Colors.white70)),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _wpSyncTimer?.cancel();
+                setState(() { _wpRoomCode = null; _wpIsHost = false; });
+                Navigator.pop(context);
+              },
+              child: const Text('Rời Phòng', style: TextStyle(color: Colors.red)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Đóng', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final codeCtrl = TextEditingController();
+    bool isPublic = false;
+    List<dynamic> publicRooms = [];
+    bool isLoadingRooms = true;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          if (isLoadingRooms) {
+            isLoadingRooms = false;
+            WatchPartyService.getPublicParties(widget.movieSlug).then((res) {
+              if (res['status'] == 'success') {
+                if (mounted) {
+                  setDialogState(() {
+                    publicRooms = res['data'] ?? [];
+                  });
+                }
+              }
+            });
+          }
+
+          return AlertDialog(
+            backgroundColor: Colors.grey[900],
+            title: const Text('Phòng Xem Chung', style: TextStyle(color: Colors.white)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, minimumSize: const Size(double.infinity, 45)),
+                    onPressed: () async {
+                      final auth = context.read<AuthProvider>();
+                      final userName = auth.user?.name ?? 'Guest';
+                      final res = await WatchPartyService.createParty(widget.movieSlug, widget.episodeName, userName, isPublic: isPublic);
+                      if (!mounted) return;
+                      Navigator.pop(context);
+                      if (res['status'] == 'success') {
+                        setState(() {
+                          _wpRoomCode = res['room_code'];
+                          _wpIsHost = true;
+                        });
+                        _startWatchPartySync();
+                        _showWatchPartyDialog();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: ${res['message']}')));
+                      }
+                    },
+                    child: const Text('Tạo Phòng Mới', style: TextStyle(color: Colors.white)),
+                  ),
+                  CheckboxListTile(
+                    title: const Text('Công khai phòng này', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    value: isPublic,
+                    onChanged: (val) {
+                      setDialogState(() {
+                        isPublic = val ?? false;
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: Colors.indigo,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text('HOẶC NHẬP MÃ', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  ),
+                  TextField(
+                    controller: codeCtrl,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      hintText: 'Nhập mã phòng',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.indigo)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[700], minimumSize: const Size(double.infinity, 45)),
+                    onPressed: () async {
+                      final code = codeCtrl.text.trim().toUpperCase();
+                      if (code.isEmpty) return;
+                      await _joinWatchParty(code, context);
+                    },
+                    child: const Text('Vào Phòng', style: TextStyle(color: Colors.white)),
+                  ),
+                  if (publicRooms.isNotEmpty) ...[
+                    const Padding(
+                      padding: EdgeInsets.only(top: 16, bottom: 8),
+                      child: Text('PHÒNG CÔNG KHAI', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    ),
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 150),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: publicRooms.length,
+                        itemBuilder: (ctx, i) {
+                          final room = publicRooms[i];
+                          return Card(
+                            color: Colors.grey[800],
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: ListTile(
+                              title: Text('Mã: ${room['room_code']}', style: const TextStyle(color: Colors.indigoAccent, fontWeight: FontWeight.bold, fontSize: 14)),
+                              subtitle: Text('Host: ${room['creator_name']} - Tập ${room['episode_name']}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                              trailing: ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[700]),
+                                onPressed: () => _joinWatchParty(room['room_code'], context),
+                                child: const Text('Vào', style: TextStyle(color: Colors.white)),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _joinWatchParty(String code, BuildContext dialogContext) async {
+    final res = await WatchPartyService.joinParty(code);
+    if (!mounted) return;
+    
+    if (res['status'] == 'success') {
+      if (res['data']['movie_slug'] != widget.movieSlug) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Phòng này đang xem phim khác!')));
+        return;
+      }
+      Navigator.pop(dialogContext);
+      setState(() {
+        _wpRoomCode = code;
+        _wpIsHost = false;
+      });
+      _startWatchPartySync();
+      _showWatchPartyDialog();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: ${res['message']}')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isTv = _isTvMode(context);
@@ -333,6 +561,24 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
+            if (_wpRoomCode != null)
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                alignment: Alignment.center,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.green),
+                  ),
+                  child: Text(_wpRoomCode!, style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            IconButton(
+              icon: Icon(Icons.group, color: _wpRoomCode != null ? Colors.indigoAccent : Colors.white),
+              onPressed: _showWatchPartyDialog,
+            ),
             IconButton(
               icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
               onPressed: () {

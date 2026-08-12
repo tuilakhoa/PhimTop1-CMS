@@ -4,11 +4,11 @@ $successMsg = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_social_login') {
     $updates = [];
-    $updates['enableGoogleLogin'] = (int)($_POST['enableGoogleLogin'] ?? 1);
+    $updates['enableGoogleLogin'] = (int)($_POST['enableGoogleLogin'] ?? 0);
     $updates['googleClientId'] = trim($_POST['googleClientId'] ?? '');
     $updates['googleClientSecret'] = trim($_POST['googleClientSecret'] ?? '');
     
-    $updates['enableMicrosoftLogin'] = (int)($_POST['enableMicrosoftLogin'] ?? 1);
+    $updates['enableMicrosoftLogin'] = (int)($_POST['enableMicrosoftLogin'] ?? 0);
     $updates['msClientId'] = trim($_POST['msClientId'] ?? '');
     $updates['msClientSecret'] = trim($_POST['msClientSecret'] ?? '');
     $updates['msTenantId'] = trim($_POST['msTenantId'] ?? 'common');
@@ -52,8 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <div class="mb-5">
         <label class="block text-sm font-medium text-gray-300 mb-1.5">Trạng thái Google Login</label>
         <select name="enableGoogleLogin" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
-            <option value="1" <?= (!isset($settings['enableGoogleLogin']) || $settings['enableGoogleLogin'] == 1) ? 'selected' : '' ?>>Bật</option>
-            <option value="0" <?= (isset($settings['enableGoogleLogin']) && $settings['enableGoogleLogin'] == 0) ? 'selected' : '' ?>>Tắt</option>
+            <option value="1" <?= (isset($settings['enableGoogleLogin']) && $settings['enableGoogleLogin'] == 1) ? 'selected' : '' ?>>Bật</option>
+            <option value="0" <?= (!isset($settings['enableGoogleLogin']) || $settings['enableGoogleLogin'] == 0) ? 'selected' : '' ?>>Tắt</option>
         </select>
     </div>
 
@@ -86,8 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <div class="mb-5">
         <label class="block text-sm font-medium text-gray-300 mb-1.5">Trạng thái Microsoft Login</label>
         <select name="enableMicrosoftLogin" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-blue-500 outline-none transition-shadow">
-            <option value="1" <?= (!isset($settings['enableMicrosoftLogin']) || $settings['enableMicrosoftLogin'] == 1) ? 'selected' : '' ?>>Bật</option>
-            <option value="0" <?= (isset($settings['enableMicrosoftLogin']) && $settings['enableMicrosoftLogin'] == 0) ? 'selected' : '' ?>>Tắt</option>
+            <option value="1" <?= (isset($settings['enableMicrosoftLogin']) && $settings['enableMicrosoftLogin'] == 1) ? 'selected' : '' ?>>Bật</option>
+            <option value="0" <?= (!isset($settings['enableMicrosoftLogin']) || $settings['enableMicrosoftLogin'] == 0) ? 'selected' : '' ?>>Tắt</option>
         </select>
     </div>
 

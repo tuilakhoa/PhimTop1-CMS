@@ -139,9 +139,13 @@ if ($action === 'list') {
             }
         }
     } else {
-        $stmt = $pdo->query("SELECT * FROM active_sessions WHERE last_seen > DATE_SUB(NOW(), INTERVAL 30 SECOND) ORDER BY last_seen DESC");
+        $stmt = $pdo->query("SELECT * FROM active_sessions WHERE last_seen > DATE_SUB(NOW(), INTERVAL 30 SECOND) ORDER BY device_id ASC");
         $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    usort($sessions, function($a, $b) {
+        return strcmp($a['device_id'] ?? '', $b['device_id'] ?? '');
+    });
     
     echo json_encode(['status' => 'success', 'data' => $sessions]);
     exit;

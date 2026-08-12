@@ -27,8 +27,8 @@ add_action('social_login_buttons', function() {
     $settings = getSettings();
     $googleClientId = $settings['googleClientId'] ?? '';
     $msClientId = $settings['msClientId'] ?? '';
-    $enableGoogleLogin = !isset($settings['enableGoogleLogin']) || $settings['enableGoogleLogin'] == 1;
-    $enableMicrosoftLogin = !isset($settings['enableMicrosoftLogin']) || $settings['enableMicrosoftLogin'] == 1;
+    $enableGoogleLogin = isset($settings['enableGoogleLogin']) && $settings['enableGoogleLogin'] == 1;
+    $enableMicrosoftLogin = isset($settings['enableMicrosoftLogin']) && $settings['enableMicrosoftLogin'] == 1;
 
     if (($googleClientId && $enableGoogleLogin) || ($msClientId && $enableMicrosoftLogin)) {
         echo '<div class="mt-6">
@@ -69,8 +69,8 @@ add_action('admin_social_login_buttons', function() {
     $settings = getSettings();
     $googleClientId = $settings['googleClientId'] ?? '';
     $msClientId = $settings['msClientId'] ?? '';
-    $enableGoogleLogin = !isset($settings['enableGoogleLogin']) || $settings['enableGoogleLogin'] == 1;
-    $enableMicrosoftLogin = !isset($settings['enableMicrosoftLogin']) || $settings['enableMicrosoftLogin'] == 1;
+    $enableGoogleLogin = isset($settings['enableGoogleLogin']) && $settings['enableGoogleLogin'] == 1;
+    $enableMicrosoftLogin = isset($settings['enableMicrosoftLogin']) && $settings['enableMicrosoftLogin'] == 1;
 
     if (($googleClientId && $enableGoogleLogin) || ($msClientId && $enableMicrosoftLogin)) {
         echo '<div class="mt-5">
@@ -156,8 +156,8 @@ add_action('api_auth', function($action) {
     $msClientId = $settings['msClientId'] ?? '';
     $msClientSecret = $settings['msClientSecret'] ?? '';
     $msTenantId = $settings['msTenantId'] ?? 'common';
-    $enableGoogleLogin = !isset($settings['enableGoogleLogin']) || $settings['enableGoogleLogin'] == 1;
-    $enableMicrosoftLogin = !isset($settings['enableMicrosoftLogin']) || $settings['enableMicrosoftLogin'] == 1;
+    $enableGoogleLogin = isset($settings['enableGoogleLogin']) && $settings['enableGoogleLogin'] == 1;
+    $enableMicrosoftLogin = isset($settings['enableMicrosoftLogin']) && $settings['enableMicrosoftLogin'] == 1;
 
     $googleRedirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=google_callback';
     $msRedirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=microsoft_callback';
@@ -321,8 +321,8 @@ add_action('admin_login_auth', function($action) {
     $msClientId = $settings['msClientId'] ?? '';
     $msClientSecret = $settings['msClientSecret'] ?? '';
     $msTenantId = $settings['msTenantId'] ?? 'common';
-    $enableGoogleLogin = !isset($settings['enableGoogleLogin']) || $settings['enableGoogleLogin'] == 1;
-    $enableMicrosoftLogin = !isset($settings['enableMicrosoftLogin']) || $settings['enableMicrosoftLogin'] == 1;
+    $enableGoogleLogin = isset($settings['enableGoogleLogin']) && $settings['enableGoogleLogin'] == 1;
+    $enableMicrosoftLogin = isset($settings['enableMicrosoftLogin']) && $settings['enableMicrosoftLogin'] == 1;
 
     $googleRedirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=google_callback';
     $msRedirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=microsoft_callback';
