@@ -21,7 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (appFlavor == 'mobile') return false;
     if (appFlavor == 'tv') return true;
     final size = MediaQuery.of(context).size;
-    return MediaQuery.of(context).orientation == Orientation.landscape && size.width > 800;
+    return MediaQuery.of(context).orientation == Orientation.landscape && size.width > 800 && size.shortestSide >= 500;
   }
 
   @override

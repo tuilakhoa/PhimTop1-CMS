@@ -10,6 +10,7 @@ import '../models/models.dart';
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/tv_remote_service.dart';
+import '../widgets/tv_virtual_keyboard.dart';
 import '../services/watching_session_service.dart';
 import '../services/watch_party_service.dart';
 import '../providers/auth_provider.dart';
@@ -153,7 +154,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
   bool _isTvMode(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return MediaQuery.of(context).orientation == Orientation.landscape && size.width > 800;
+    return MediaQuery.of(context).orientation == Orientation.landscape && size.width > 800 && size.shortestSide >= 500;
   }
 
   Widget _buildTvSuggestions(BuildContext context) {
@@ -299,41 +300,115 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     });
   }
 
+  
   void _showWatchPartyDialog() {
-    if (_wpRoomCode != null) {
-      // Already in a room, show active state
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: Colors.grey[900],
-          title: const Text('Phòng Xem Chung', style: TextStyle(color: Colors.white)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Mã phòng: $_wpRoomCode', style: const TextStyle(color: Colors.indigoAccent, fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text('Vai trò: ${_wpIsHost ? "Chủ phòng" : "Người xem"}', style: const TextStyle(color: Colors.white70)),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _wpSyncTimer?.cancel();
-                setState(() { _wpRoomCode = null; _wpIsHost = false; });
-                Navigator.pop(context);
-              },
-              child: const Text('Rời Phòng', style: TextStyle(color: Colors.red)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Đóng', style: TextStyle(color: Colors.white)),
-            ),
+    if (_isTvMode(context)) {
+      if (_wpRoomCode != null) {
+        _showTvActiveWatchPartyView();
+      } else {
+        _showTvSetupWatchPartyView();
+      }
+    } else {
+      if (_wpRoomCode != null) {
+        _showMobileActiveWatchPartyView();
+      } else {
+        _showMobileSetupWatchPartyView();
+      }
+    }
+  }
+
+  void _showMobileActiveWatchPartyView() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Phòng Xem Chung', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Mã phòng: $_wpRoomCode', style: const TextStyle(color: Colors.indigoAccent, fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('Vai trò: ${_wpIsHost ? "Chủ phòng" : "Người xem"}', style: const TextStyle(color: Colors.white70)),
           ],
         ),
-      );
-      return;
-    }
+        actions: [
+          TextButton(
+            onPressed: () {
+              _wpSyncTimer?.cancel();
+              setState(() { _wpRoomCode = null; _wpIsHost = false; });
+              Navigator.pop(context);
+            },
+            child: const Text('Rời Phòng', style: TextStyle(color: Colors.red)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
+  void _showTvActiveWatchPartyView() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Row(
+          children: [
+            Icon(Icons.tv, color: Colors.indigoAccent, size: 32),
+            SizedBox(width: 12),
+            Text('Phòng Xem Chung (TV)', style: TextStyle(color: Colors.white, fontSize: 24)),
+          ],
+        ),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Mã phòng: $_wpRoomCode', style: const TextStyle(color: Colors.indigoAccent, fontSize: 48, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Text('Vai trò: ${_wpIsHost ? "Chủ phòng" : "Người xem"}', style: const TextStyle(color: Colors.white70, fontSize: 20)),
+            ],
+          ),
+        ),
+        actions: [
+          Focus(
+            autofocus: true,
+            child: Builder(builder: (context) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Focus.of(context).hasFocus ? Colors.redAccent : Colors.red,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                ),
+                onPressed: () {
+                  _wpSyncTimer?.cancel();
+                  setState(() { _wpRoomCode = null; _wpIsHost = false; });
+                  Navigator.pop(context);
+                },
+                child: const Text('Rời Phòng', style: TextStyle(color: Colors.white, fontSize: 18)),
+              );
+            }),
+          ),
+          const SizedBox(width: 16),
+          Focus(
+            child: Builder(builder: (context) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Focus.of(context).hasFocus ? Colors.grey[600] : Colors.grey[800],
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Đóng', style: TextStyle(color: Colors.white, fontSize: 18)),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMobileSetupWatchPartyView() {
     final codeCtrl = TextEditingController();
     bool isPublic = false;
     List<dynamic> publicRooms = [];
@@ -455,6 +530,253 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
           );
         },
       ),
+    );
+  }
+
+  Future<void> _createPartyTv(bool isPublic, BuildContext dialogContext) async {
+    final auth = context.read<AuthProvider>();
+    final userName = auth.user?.name ?? 'Guest';
+    final res = await WatchPartyService.createParty(widget.movieSlug, widget.episodeName, userName, isPublic: isPublic);
+    if (!mounted) return;
+    Navigator.pop(dialogContext);
+    if (res['status'] == 'success') {
+      setState(() {
+        _wpRoomCode = res['room_code'];
+        _wpIsHost = true;
+      });
+      _startWatchPartySync();
+      _showWatchPartyDialog();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: ${res['message']}')));
+    }
+  }
+
+  void _showTvSetupWatchPartyView() {
+    String enteredCode = "";
+    List<dynamic> publicRooms = [];
+    bool isLoadingRooms = true;
+    bool isTypingCode = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          if (isLoadingRooms) {
+            isLoadingRooms = false;
+            WatchPartyService.getPublicParties(widget.movieSlug).then((res) {
+              if (res['status'] == 'success') {
+                if (mounted) {
+                  setDialogState(() {
+                    publicRooms = res['data'] ?? [];
+                  });
+                }
+              }
+            });
+          }
+
+          Widget leftColumn;
+          if (isTypingCode) {
+            leftColumn = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Mã: $enteredCode', style: const TextStyle(color: Colors.indigoAccent, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 4)),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: TvVirtualKeyboard(
+                    text: enteredCode,
+                    onTextChanged: (v) {
+                      setDialogState(() { enteredCode = v.toUpperCase(); });
+                    },
+                    onSearch: () {},
+                  ),
+                ),
+                Row(
+                  children: [
+                    _tvButton(
+                      title: 'Vào Phòng',
+                      icon: Icons.login,
+                      color: Colors.green[700]!,
+                      onPressed: () => _joinWatchParty(enteredCode, context),
+                    ),
+                    const SizedBox(width: 16),
+                    _tvButton(
+                      title: 'Quay Lại',
+                      icon: Icons.arrow_back,
+                      color: Colors.grey[700]!,
+                      onPressed: () { setDialogState(() { isTypingCode = false; enteredCode = ""; }); },
+                    ),
+                  ],
+                )
+              ],
+            );
+          } else {
+            leftColumn = Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _tvButton(
+                  title: 'Tạo Phòng CÔNG KHAI',
+                  icon: Icons.public,
+                  color: Colors.indigo,
+                  onPressed: () => _createPartyTv(true, context),
+                  autofocus: true,
+                ),
+                const SizedBox(height: 24),
+                _tvButton(
+                  title: 'Tạo Phòng RIÊNG TƯ',
+                  icon: Icons.lock,
+                  color: Colors.grey[800]!,
+                  onPressed: () => _createPartyTv(false, context),
+                ),
+                const SizedBox(height: 32),
+                const Text('HOẶC', style: TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 32),
+                _tvButton(
+                  title: 'Nhập Mã Phòng Để Vào',
+                  icon: Icons.keyboard,
+                  color: Colors.orange[800]!,
+                  onPressed: () {
+                    setDialogState(() {
+                      isTypingCode = true;
+                    });
+                  },
+                ),
+              ],
+            );
+          }
+
+          return Dialog(
+            backgroundColor: Colors.grey[900],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: MediaQuery.of(context).size.height * 0.9,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.tv, color: Colors.indigoAccent, size: 36),
+                          SizedBox(width: 16),
+                          Text('Phòng Xem Chung', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      Focus(
+                        child: Builder(builder: (context) {
+                          return IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                            onPressed: () => Navigator.pop(context),
+                            color: Focus.of(context).hasFocus ? Colors.red : Colors.white,
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
+                  const Divider(color: Colors.white24, height: 32),
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Left Column: Actions / Keyboard
+                        Expanded(
+                          flex: 1,
+                          child: leftColumn,
+                        ),
+                        const VerticalDivider(color: Colors.white24, width: 32),
+                        // Right Column: Public Rooms
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('CÁC PHÒNG CÔNG KHAI', style: TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 16),
+                              if (publicRooms.isEmpty)
+                                const Text('Không có phòng công khai nào.', style: TextStyle(color: Colors.white70, fontSize: 16))
+                              else
+                                Expanded(
+                                  child: ListView.builder(
+                                    itemCount: publicRooms.length,
+                                    itemBuilder: (ctx, i) {
+                                      final room = publicRooms[i];
+                                      return Focus(
+                                        child: Builder(builder: (context) {
+                                          final hasFocus = Focus.of(context).hasFocus;
+                                          return Card(
+                                            color: hasFocus ? Colors.indigoAccent : Colors.grey[800],
+                                            elevation: hasFocus ? 8 : 2,
+                                            margin: const EdgeInsets.only(bottom: 12),
+                                            child: InkWell(
+                                              onTap: () => _joinWatchParty(room['room_code'], context),
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(16.0),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text('Mã: ${room['room_code']}', style: TextStyle(color: hasFocus ? Colors.white : Colors.indigoAccent, fontWeight: FontWeight.bold, fontSize: 20)),
+                                                        const SizedBox(height: 4),
+                                                        Text('Host: ${room['creator_name']} - Tập ${room['episode_name']}', style: TextStyle(color: hasFocus ? Colors.white : Colors.white70, fontSize: 14)),
+                                                      ],
+                                                    ),
+                                                    Icon(Icons.login, color: hasFocus ? Colors.white : Colors.grey),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _tvButton({required String title, required IconData icon, required Color color, required VoidCallback onPressed, bool autofocus = false}) {
+    return Focus(
+      autofocus: autofocus,
+      child: Builder(builder: (context) {
+        final hasFocus = Focus.of(context).hasFocus;
+        return InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            decoration: BoxDecoration(
+              color: hasFocus ? Colors.white : color,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: hasFocus ? [BoxShadow(color: color.withOpacity(0.6), blurRadius: 12, spreadRadius: 2)] : [],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: hasFocus ? Colors.black : Colors.white, size: 28),
+                const SizedBox(width: 16),
+                Text(title, style: TextStyle(color: hasFocus ? Colors.black : Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 

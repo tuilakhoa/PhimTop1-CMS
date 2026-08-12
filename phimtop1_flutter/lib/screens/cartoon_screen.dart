@@ -100,7 +100,7 @@ class _CartoonScreenState extends State<CartoonScreen> {
 
   bool _isTvMode(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return MediaQuery.of(context).orientation == Orientation.landscape && size.width > 800;
+    return MediaQuery.of(context).orientation == Orientation.landscape && size.width > 800 && size.shortestSide >= 500;
   }
 
   @override
