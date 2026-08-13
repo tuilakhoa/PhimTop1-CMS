@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../core/constants.dart';
+import '../core/config.dart';
 
 class WatchPartyService {
   static Future<Map<String, dynamic>> createParty(String movieSlug, String episodeName, String creatorName, {bool isPublic = false}) async {
     try {
       final response = await http.post(
-        Uri.parse('${Constants.apiUrl.replaceAll('/v1/api', '')}/v1/watch_party.php?action=create'),
+        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=create'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'movie_slug': movieSlug,
@@ -25,7 +25,7 @@ class WatchPartyService {
   static Future<Map<String, dynamic>> joinParty(String roomCode) async {
     try {
       final response = await http.get(
-        Uri.parse('${Constants.apiUrl.replaceAll('/v1/api', '')}/v1/watch_party.php?action=join&room_code=$roomCode'),
+        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=join&room_code=$roomCode'),
       );
       
       return jsonDecode(response.body);
@@ -37,7 +37,7 @@ class WatchPartyService {
   static Future<Map<String, dynamic>> syncState(String roomCode, bool isPlaying, int currentTime) async {
     try {
       final response = await http.post(
-        Uri.parse('${Constants.apiUrl.replaceAll('/v1/api', '')}/v1/watch_party.php?action=sync'),
+        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=sync'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'room_code': roomCode,
@@ -55,7 +55,7 @@ class WatchPartyService {
   static Future<Map<String, dynamic>> getState(String roomCode) async {
     try {
       final response = await http.get(
-        Uri.parse('${Constants.apiUrl.replaceAll('/v1/api', '')}/v1/watch_party.php?action=state&room_code=$roomCode'),
+        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=state&room_code=$roomCode'),
       );
       
       return jsonDecode(response.body);
@@ -67,7 +67,7 @@ class WatchPartyService {
   static Future<Map<String, dynamic>> getPublicParties(String movieSlug) async {
     try {
       final response = await http.get(
-        Uri.parse('${Constants.apiUrl.replaceAll('/v1/api', '')}/v1/watch_party.php?action=list_public&movie_slug=$movieSlug'),
+        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=list_public&movie_slug=$movieSlug'),
       );
       
       return jsonDecode(response.body);

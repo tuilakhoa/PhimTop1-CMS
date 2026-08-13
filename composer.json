@@ -1,0 +1,25 @@
+{
+    "name": "phimtop1cms/phimtop1-cms",
+    "description": "PhimTop1 CMS - A monolithic PHP CMS for movie websites",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhimTop1\\": "includes/"
+        }
+    },
+    "authors": [
+        {
+            "name": "PhimTop1",
+            "email": "lpqkhoa@outlook.com"
+        }
+    ],
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    }
+}

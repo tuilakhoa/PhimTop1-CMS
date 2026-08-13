@@ -94,7 +94,7 @@ if ($action === 'list_public') {
         exit;
     }
     
-    $stmt = $pdo->prepare("SELECT room_code, episode_name, creator_name, current_time FROM watch_parties WHERE movie_slug = ? AND status = 'active' AND is_public = 1 ORDER BY last_updated DESC LIMIT 20");
+    $stmt = $pdo->prepare("SELECT room_code, episode_name, creator_name, `current_time` FROM watch_parties WHERE movie_slug = ? AND status = 'active' AND is_public = 1 ORDER BY last_updated DESC LIMIT 20");
     $stmt->execute([$movie_slug]);
     $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -140,7 +140,7 @@ if ($action === 'sync') {
         exit;
     }
     
-    $stmt = $pdo->prepare("UPDATE watch_parties SET is_playing = ?, current_time = ?, last_updated = NOW() WHERE room_code = ? AND status = 'active'");
+    $stmt = $pdo->prepare("UPDATE watch_parties SET is_playing = ?, `current_time` = ?, last_updated = NOW() WHERE room_code = ? AND status = 'active'");
     $stmt->execute([$is_playing, $current_time, $room_code]);
     
     echo json_encode(['status' => 'success']);

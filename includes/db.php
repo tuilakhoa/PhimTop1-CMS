@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/logger.php';
+set_error_handler("custom_error_handler");
+set_exception_handler("custom_exception_handler");
 
 if (!function_exists('getallheaders')) {
     function getallheaders() {
@@ -178,10 +181,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 6) {
+            if (!isset($row['db_version']) || $row['db_version'] < 8) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 6]);
-                $row['db_version'] = 6;
+                updateSettings(['db_version' => 8]);
+                $row['db_version'] = 8;
             }
             
             return array_merge($defaultSettings, $row);
@@ -203,199 +206,8 @@ function updateSettings($updates) {
 
     $pdo = getPDO();
     if (!$pdo || empty($updates)) return;
-    
-    // Auto-migrate schema if columns are missing
-    $migrations = [
-        "CREATE TABLE IF NOT EXISTS movies (
-            id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, origin_name VARCHAR(255),
-            slug VARCHAR(255) UNIQUE NOT NULL, thumb_url TEXT, poster_url TEXT, year INT, type VARCHAR(100),
-            status VARCHAR(100), episode_current VARCHAR(100), quality VARCHAR(100), lang VARCHAR(100),
-            chieu_rap TINYINT(1) DEFAULT 0, view INT DEFAULT 0, content TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )",
-        "CREATE TABLE IF NOT EXISTS categories (
-            slug VARCHAR(255) PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            type VARCHAR(50) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )",
-        "CREATE TABLE IF NOT EXISTS comments (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            movie_slug VARCHAR(255) NOT NULL,
-            user_name VARCHAR(100) NOT NULL,
-            content TEXT NOT NULL,
-            status VARCHAR(50) DEFAULT 'approved',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )",
-        "CREATE TABLE IF NOT EXISTS members (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            email VARCHAR(255) NOT NULL UNIQUE,
-            name VARCHAR(255) NOT NULL,
-            password VARCHAR(255) NULL,
-            avatar TEXT,
-            role VARCHAR(50) DEFAULT 'user',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )",
-        "CREATE TABLE IF NOT EXISTS watch_history (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_email VARCHAR(255) NOT NULL,
-            movie_slug VARCHAR(255) NOT NULL,
-            movie_name VARCHAR(255) NOT NULL,
-            episode_name VARCHAR(100) NOT NULL,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            UNIQUE KEY user_movie (user_email, movie_slug)
-        )",
-        "CREATE TABLE IF NOT EXISTS user_follows (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_email VARCHAR(255) NOT NULL,
-            item_slug VARCHAR(255) NOT NULL,
-            item_type VARCHAR(50) DEFAULT 'movie',
-            item_name VARCHAR(255) NOT NULL,
-            thumb_url TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE KEY user_item (user_email, item_slug)
-        )",
-        "CREATE TABLE IF NOT EXISTS notifications (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_email VARCHAR(255) NULL,
-            title VARCHAR(255) NOT NULL,
-            message TEXT NOT NULL,
-            url VARCHAR(255),
-            is_read TINYINT(1) DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )",
-        "ALTER TABLE settings ADD COLUMN siteName VARCHAR(255) DEFAULT 'PhimTop1'",
-        "ALTER TABLE members ADD COLUMN password VARCHAR(255) NULL",
-        "ALTER TABLE members ADD COLUMN role VARCHAR(50) DEFAULT 'user'",
-        "ALTER TABLE settings ADD COLUMN seoTitle TEXT",
-        "ALTER TABLE settings ADD COLUMN seoDesc TEXT",
-        "ALTER TABLE settings ADD COLUMN seoKeywords TEXT",
-        "ALTER TABLE settings ADD COLUMN ogTitle TEXT",
-        "ALTER TABLE settings ADD COLUMN ogDesc TEXT",
-        "ALTER TABLE settings ADD COLUMN ogType VARCHAR(50) DEFAULT 'website'",
-        "ALTER TABLE settings ADD COLUMN ogLocale VARCHAR(50) DEFAULT 'vi_VN'",
-        "ALTER TABLE settings ADD COLUMN seoAuthor VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN seoPublisher VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN themeColor VARCHAR(50) DEFAULT '#000000'",
-        "ALTER TABLE settings ADD COLUMN canonicalBaseUrl VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN logoUrl VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN verifyGoogle VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN verifyBing VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN verifyYandex VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN customHead TEXT",
-        "ALTER TABLE settings ADD COLUMN customBody TEXT",
-        "ALTER TABLE settings ADD COLUMN footerText TEXT",
-        "ALTER TABLE settings ADD COLUMN socialFacebook VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN socialYoutube VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN socialTwitter VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN socialTelegram VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN cfTurnstileKey VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN cfTurnstileSecret VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN db_version INT DEFAULT 1",
-        "ALTER TABLE settings ADD COLUMN cfAnalyticsToken VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN cfApiToken VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN cfAccountId VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN cfZoneId VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN gaMeasurementId VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN gaPropertyId VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN tmdbApiKey VARCHAR(255) DEFAULT 'b775c363e46a24e8c885479b0131c4d2'",
-        "ALTER TABLE settings ADD COLUMN googleIndexJson TEXT",
-        "ALTER TABLE settings ADD COLUMN indexNowKey VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN slugMovie VARCHAR(50) DEFAULT 'phim'",
-        "ALTER TABLE settings ADD COLUMN slugWatch VARCHAR(50) DEFAULT 'xem-phim'",
-        "ALTER TABLE settings ADD COLUMN slugComic VARCHAR(50) DEFAULT 'truyen'",
-        "ALTER TABLE settings ADD COLUMN slugRead VARCHAR(50) DEFAULT 'doc-truyen'",
-        "ALTER TABLE settings ADD COLUMN slugComicList VARCHAR(50) DEFAULT 'danh-sach-truyen'",
-        "ALTER TABLE settings ADD COLUMN slugList VARCHAR(50) DEFAULT 'danh-sach'",
-        "ALTER TABLE settings ADD COLUMN slugGenre VARCHAR(50) DEFAULT 'the-loai'",
-        "ALTER TABLE settings ADD COLUMN slugCountry VARCHAR(50) DEFAULT 'quoc-gia'",
-        "ALTER TABLE settings ADD COLUMN sitemapLimit INT DEFAULT 5000",
-        "ALTER TABLE settings ADD COLUMN sitemapIncludeMovies TINYINT(1) DEFAULT 1",
-        "ALTER TABLE settings ADD COLUMN sitemapIncludeCategories TINYINT(1) DEFAULT 1",
-        "ALTER TABLE settings ADD COLUMN sitemapLinksPerFile INT DEFAULT 1000",
-        "ALTER TABLE settings ADD COLUMN googleClientId VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN googleClientSecret VARCHAR(255)",
-        "ALTER TABLE settings ADD COLUMN googleAllowedEmails TEXT",
-        "ALTER TABLE settings ADD COLUMN updateServerUrl VARCHAR(255) DEFAULT 'tuilakhoa/PhimTop1-CMS'",
-        "ALTER TABLE settings ADD COLUMN allowAutoUpdate TINYINT(1) DEFAULT 1",
-        "ALTER TABLE settings ADD COLUMN apiSource VARCHAR(50) DEFAULT 'kkphim'",
-        "ALTER TABLE settings ADD COLUMN msClientId VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN msClientSecret VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN msTenantId VARCHAR(255) DEFAULT 'common'",
-        "ALTER TABLE settings ADD COLUMN geminiApiKey VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN openaiApiKey VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN aiProvider VARCHAR(50) DEFAULT 'gemini'",
-        "ALTER TABLE settings ADD COLUMN comicApiUrl VARCHAR(255) DEFAULT 'https://otruyenapi.com/v1/api'",
-        "ALTER TABLE settings ADD COLUMN appApiKey VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN appBannerEnabled TINYINT(1) DEFAULT 0",
-        "ALTER TABLE settings ADD COLUMN appDownloadUrl VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN appDownloadUrlTv VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN appSchemaEnabled TINYINT(1) DEFAULT 0",
-        "ALTER TABLE settings ADD COLUMN appSchemaName VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN appSchemaOs VARCHAR(255) DEFAULT 'Android, iOS'",
-        "ALTER TABLE settings ADD COLUMN appSchemaCategory VARCHAR(255) DEFAULT 'EntertainmentApplication'",
-        "ALTER TABLE settings ADD COLUMN appSchemaPrice VARCHAR(50) DEFAULT '0'",
-        "ALTER TABLE settings ADD COLUMN appSchemaCurrency VARCHAR(10) DEFAULT 'VND'",
-        "ALTER TABLE settings ADD COLUMN appSchemaRatingValue VARCHAR(10) DEFAULT '4.8'",
-        "ALTER TABLE settings ADD COLUMN appSchemaRatingCount VARCHAR(20) DEFAULT '1250'",
-        "CREATE TABLE IF NOT EXISTS seo_metadata (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            type VARCHAR(50) NOT NULL,
-            item_id VARCHAR(255) NOT NULL,
-            custom_slug VARCHAR(255) NULL,
-            seo_title VARCHAR(255) NULL,
-            seo_desc TEXT NULL,
-            seo_keywords TEXT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            UNIQUE KEY type_item (type, item_id),
-            UNIQUE KEY type_custom_slug (type, custom_slug)
-        )",
-        "CREATE TABLE IF NOT EXISTS active_sessions (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            device_id VARCHAR(100) UNIQUE NOT NULL,
-            device_name VARCHAR(255),
-            platform VARCHAR(50) DEFAULT 'web',
-            movie_slug VARCHAR(255),
-            movie_name VARCHAR(255),
-            episode_name VARCHAR(100),
-            user_name VARCHAR(255),
-            is_logged_in TINYINT(1) DEFAULT 0,
-            pending_command VARCHAR(50),
-            last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )",
-        "ALTER TABLE settings ADD COLUMN featuredType VARCHAR(50) DEFAULT 'latest'",
-        "ALTER TABLE settings ADD COLUMN featuredMovieSlug VARCHAR(255) DEFAULT ''",
-        "ALTER TABLE settings ADD COLUMN featuredStyle VARCHAR(50) DEFAULT 'slider'",
-        "ALTER TABLE settings ADD COLUMN featuredCount INT DEFAULT 5",
-        "ALTER TABLE settings ADD COLUMN enableWatchingSession TINYINT(1) DEFAULT 1",
-        "ALTER TABLE settings ADD COLUMN trackAnonymousSession TINYINT(1) DEFAULT 0",
-        "ALTER TABLE settings ADD COLUMN useLogoAsFavicon TINYINT(1) DEFAULT 0",
-        "ALTER TABLE active_sessions ADD COLUMN progress INT DEFAULT 0",
-        "CREATE TABLE IF NOT EXISTS watch_parties (
-            room_code VARCHAR(50) PRIMARY KEY,
-            movie_slug VARCHAR(255) NOT NULL,
-            episode_name VARCHAR(100) NOT NULL,
-            creator_name VARCHAR(255) NOT NULL,
-            status VARCHAR(20) DEFAULT 'active',
-            is_public TINYINT(1) DEFAULT 0,
-            is_playing TINYINT(1) DEFAULT 0,
-            current_time INT DEFAULT 0,
-            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )",
-        // Cleanup old deprecated columns from original setup
-        "ALTER TABLE settings DROP COLUMN githubRepo",
-        "ALTER TABLE settings DROP COLUMN cmsVersion",
-        "ALTER TABLE settings DROP COLUMN updateServerUrl",
-        "ALTER TABLE watch_parties ADD COLUMN is_public TINYINT(1) DEFAULT 0"
-    ];
-
-    foreach ($migrations as $sql) {
-        try {
-            $pdo->exec($sql);
-        } catch (Exception $e) {} // Ignore if columns already exist
-    }
+    require_once __DIR__ . '/migrate.php';
+    runMigrations();
 
     $setClause = [];
     $values = [];
@@ -451,15 +263,14 @@ function resolveCustomSlug($type, $customSlug) {
 }
 
 // API Fetch Helper
+require_once __DIR__ . '/cache_manager.php';
+
 function fetchApiWithCache($url, $ttl = 900) {
-    $cacheDir = __DIR__ . '/../cache/api';
-    if (!is_dir($cacheDir)) @mkdir($cacheDir, 0777, true);
+    $cache = new CacheManager();
+    $cachedData = $cache->get($url, $ttl);
     
-    $cacheFile = $cacheDir . '/' . md5($url) . '.json';
-    
-    if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $ttl) {
-        $cachedData = file_get_contents($cacheFile);
-        if ($cachedData) return $cachedData;
+    if ($cachedData) {
+        return $cachedData;
     }
     
     $ch = curl_init();
@@ -472,13 +283,14 @@ function fetchApiWithCache($url, $ttl = 900) {
     curl_close($ch);
     
     if ($res && $httpCode >= 200 && $httpCode < 300) {
-        file_put_contents($cacheFile, $res);
+        $cache->set($url, $res);
         return $res;
     }
     
     // Fallback to stale cache if API fails
-    if (file_exists($cacheFile)) {
-        return file_get_contents($cacheFile);
+    $staleData = $cache->getStale($url);
+    if ($staleData) {
+        return $staleData;
     }
     
     return null;

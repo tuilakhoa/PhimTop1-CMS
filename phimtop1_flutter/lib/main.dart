@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/theme.dart';
@@ -22,6 +23,10 @@ void main() async {
   
   final prefs = await SharedPreferences.getInstance();
   final hasAgreed = prefs.getBool('has_agreed_terms') ?? false;
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
 
   runApp(
     MultiProvider(

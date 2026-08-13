@@ -7,6 +7,14 @@
     <meta name="description" content="PhimTop1 CMS là bộ mã nguồn xây dựng website phim 100% PHP Monolithic. Tối ưu SEO, giao diện đẹp mắt, hiệu suất siêu nhanh không cần build React/Node.js.">
     <meta name="keywords" content="PhimTop1 CMS, web phim, mã nguồn web phim, PHP phim CMS, script phim">
     
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="PhimTop1">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
     

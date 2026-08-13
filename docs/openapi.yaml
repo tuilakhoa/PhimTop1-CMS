@@ -1,0 +1,129 @@
+openapi: 3.0.3
+info:
+  title: PhimTop1 CMS API
+  description: API endpoints for PhimTop1 CMS (Client and Admin)
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: Current Environment
+paths:
+  /home.php:
+    get:
+      summary: Get homepage data
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of featured/latest movies
+  /movie.php:
+    get:
+      summary: Get movie details
+      parameters:
+        - name: slug
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Movie details and episodes
+  /search.php:
+    get:
+      summary: Search movies
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results
+  /categories.php:
+    get:
+      summary: Get all categories (genres, countries, years)
+      responses:
+        '200':
+          description: Category lists
+  /category.php:
+    get:
+      summary: Get movies by category slug
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [the-loai, quoc-gia, nam-phat-hanh, danh-sach]
+        - name: slug
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movies in category
+  /auth.php:
+    post:
+      summary: User Authentication
+      parameters:
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [login, register, logout, profile]
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Authentication status
+  /watch_party.php:
+    get:
+      summary: Get watch party details
+    post:
+      summary: Create or interact with a watch party
+  /watching_session.php:
+    post:
+      summary: Heartbeat for currently playing session
+components:
+  schemas:
+    Movie:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        thumb_url:
+          type: string
+        poster_url:
+          type: string
+    Category:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        type:
+          type: string

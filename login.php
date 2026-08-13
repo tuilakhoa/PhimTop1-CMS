@@ -56,6 +56,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Nhập Admin - <?= htmlspecialchars($settings['siteName'] ?? 'PhimTop1') ?></title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="<?= htmlspecialchars($settings['siteName'] ?? 'PhimTop1') ?>">
+    <link rel="manifest" href="/site.webmanifest">
+    
+    <?php if (!empty($settings['faviconUrl'])): ?>
+    <link rel="icon" href="<?= htmlspecialchars($settings['faviconUrl']) ?>">
+    <?php elseif (!empty($settings['logoUrl'])): ?>
+    <link rel="icon" href="<?= htmlspecialchars($settings['logoUrl']) ?>">
+    <?php else: ?>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <?php endif; ?>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>

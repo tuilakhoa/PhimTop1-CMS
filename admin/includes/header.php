@@ -8,12 +8,19 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="<?= htmlspecialchars($settings['adminPath'] ?? '/admin') ?>/assets/css/admin.css?v=<?= time() ?>">
     <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="PhimTop1 Admin">
+    <link rel="manifest" href="/site.webmanifest">
+    
     <?php if (!empty($settings['faviconUrl'])): ?>
     <link rel="icon" href="<?= htmlspecialchars($settings['faviconUrl']) ?>">
     <?php elseif (!empty($settings['logoUrl'])): ?>
     <link rel="icon" href="<?= htmlspecialchars($settings['logoUrl']) ?>">
     <?php else: ?>
-    <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' rx='10' fill='%234b5563'/><svg x='8' y='8' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='20' height='14' x='2' y='3' rx='2'/><path d='M12 17v4'/><path d='M8 21h8'/><polygon points='10 7 15 10 10 13 10 7'/></svg></svg>">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="shortcut icon" href="/favicon.ico">
     <?php endif; ?>
 </head>
 <body class="bg-gray-950 text-gray-200 min-h-screen">
