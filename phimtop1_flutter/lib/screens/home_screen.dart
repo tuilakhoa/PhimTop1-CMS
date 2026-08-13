@@ -5,6 +5,7 @@ import '../providers/home_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/focusable_wrapper.dart';
 import '../widgets/tv_cast_button.dart';
+import '../widgets/featured_slider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,8 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final PageController _pageController = PageController(viewportFraction: 0.85);
-
   @override
   void initState() {
     super.initState();
@@ -26,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -106,36 +104,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Featured Slider
-                  if (provider.featuredMovies.isNotEmpty) ...[
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        "Phim Đề Cử",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
+                  if (provider.featuredMovies.isNotEmpty) 
+                    FeaturedSlider(
+                      movies: provider.featuredMovies,
+                      domain: provider.domain,
                     ),
-                    SizedBox(
-                      height: 250,
-                      child: PageView.builder(
-                        controller: _pageController,
-                        itemCount: provider.featuredMovies.length,
-                        itemBuilder: (context, index) {
-                          final movie = provider.featuredMovies[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: FocusableWrapper(
-                              onTap: () => context.push('/movie/${movie.slug}'),
-                              child: YoukuMovieCard(
-                                movie: movie,
-                                domain: provider.domain,
-                                isFeatured: true,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
 
                   _buildHorizontalList("Phim Mới Cập Nhật", provider.normalMovies, provider.domain),
                   _buildHorizontalList("Phim Bộ Mới Nhất", provider.phimBo, provider.domain),

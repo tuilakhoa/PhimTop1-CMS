@@ -73,6 +73,23 @@ if ($isPost) {
                     movie_slug VARCHAR(255), server_name VARCHAR(100), name VARCHAR(100), slug VARCHAR(255),
                     embed_url TEXT, m3u8_url TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )");
+                $pdo->exec("CREATE TABLE IF NOT EXISTS playlists (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_email VARCHAR(255) NOT NULL,
+                    name VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                )");
+                $pdo->exec("CREATE TABLE IF NOT EXISTS playlist_items (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    playlist_id INT NOT NULL,
+                    movie_slug VARCHAR(255) NOT NULL,
+                    movie_name VARCHAR(255) NOT NULL,
+                    thumb_url TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
+                    UNIQUE KEY playlist_movie (playlist_id, movie_slug)
+                )");
 
                 $hashed = password_hash($password, PASSWORD_BCRYPT);
                 $pdo->exec("TRUNCATE TABLE users");

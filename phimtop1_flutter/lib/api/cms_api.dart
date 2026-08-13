@@ -253,6 +253,107 @@ class CmsApiService {
       return false;
     }
   }
+
+  // Playlist APIs
+  Future<PlaylistResponse> getPlaylists(String token) async {
+    try {
+      final response = await _dio.get('api/v1/playlists.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'list',
+      }, options: Options(headers: {'Authorization': token}));
+      return PlaylistResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<PlaylistCheckResponse> checkPlaylist(String token, String slug) async {
+    try {
+      final response = await _dio.get('api/v1/playlists.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'check',
+        'slug': slug,
+      }, options: Options(headers: {'Authorization': token}));
+      return PlaylistCheckResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<int?> createPlaylist(String token, String name) async {
+    try {
+      final response = await _dio.post('api/v1/playlists.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'create',
+      }, data: {
+        'name': name,
+      }, options: Options(headers: {'Authorization': token}));
+      if (response.data['status'] == 'success') {
+        return int.tryParse(response.data['playlist_id']?.toString() ?? '');
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool> deletePlaylist(String token, int playlistId) async {
+    try {
+      final response = await _dio.post('api/v1/playlists.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'delete',
+      }, data: {
+        'playlist_id': playlistId,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> addToPlaylist(String token, int playlistId, String movieSlug, String movieName, String thumbUrl) async {
+    try {
+      final response = await _dio.post('api/v1/playlists.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'add_item',
+      }, data: {
+        'playlist_id': playlistId,
+        'movie_slug': movieSlug,
+        'movie_name': movieName,
+        'thumb_url': thumbUrl,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> removeFromPlaylist(String token, int playlistId, String movieSlug) async {
+    try {
+      final response = await _dio.post('api/v1/playlists.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'remove_item',
+      }, data: {
+        'playlist_id': playlistId,
+        'movie_slug': movieSlug,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<ApiResponse<HomeData>> fetchTrending({int page = 1}) async {
+    try {
+      final response = await _dio.get('api/v1/trending.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'page': page,
+      });
+      return ApiResponse.fromJson(response.data, (data) => HomeData.fromJson(data));
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 // Global instance

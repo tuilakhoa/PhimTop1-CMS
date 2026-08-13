@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # Check for updates to PHP packages (Composer)
+  - package-ecosystem: "composer"
+    directory: "/" # Location of composer.json
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "php"
+
+  # Check for updates to Flutter/Dart packages
+  - package-ecosystem: "pub"
+    directory: "/phimtop1_flutter" # Location of pubspec.yaml
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "flutter"
+
+  # Check for updates to GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"

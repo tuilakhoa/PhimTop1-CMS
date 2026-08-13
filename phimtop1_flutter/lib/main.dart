@@ -7,8 +7,10 @@ import 'core/router.dart';
 import 'providers/home_provider.dart';
 
 import 'providers/detail_provider.dart';
+import 'providers/trending_provider.dart';
 import 'providers/explore_provider.dart';
 import 'providers/auth_provider.dart';
+import 'providers/playlist_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/tv_remote_service.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +25,7 @@ void main() async {
   
   final prefs = await SharedPreferences.getInstance();
   final hasAgreed = prefs.getBool('has_agreed_terms') ?? false;
+  final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -34,16 +37,28 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => DetailProvider()),
+        ChangeNotifierProvider(create: (_) => TrendingProvider()),
         ChangeNotifierProvider(create: (_) => ExploreProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, PlaylistProvider>(
+          create: (context) => PlaylistProvider(authProvider: context.read<AuthProvider>()),
+          update: (context, auth, previous) {
+            final provider = previous ?? PlaylistProvider(authProvider: auth);
+            if (auth.token != null && provider.playlists.isEmpty && !provider.isLoading) {
+              provider.fetchPlaylists();
+            }
+            return provider;
+          },
+        ),
       ],
-      child: MyApp(hasAgreed: hasAgreed),
+      child: MyApp(hasAgreed: hasAgreed, hasSeenOnboarding: hasSeenOnboarding),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
   final bool hasAgreed;
-  const MyApp({super.key, required this.hasAgreed});
+  final bool hasSeenOnboarding;
+  const MyApp({super.key, required this.hasAgreed, required this.hasSeenOnboarding});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -55,7 +70,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _router = createRouter(widget.hasAgreed);
+    _router = createRouter(widget.hasAgreed, widget.hasSeenOnboarding);
     
     // Listen for cast commands
     TvRemoteService().onPlayCommand.listen((slug) {

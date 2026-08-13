@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/detail_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/playlist_provider.dart';
 import '../models/models.dart';
 import '../api/cms_api.dart';
 import '../core/config.dart';
@@ -93,6 +94,96 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
         }
       }
     }
+  }
+
+  void _showPlaylistModal(BuildContext context, String movieSlug, String movieName, String thumbUrl) {
+    final token = context.read<AuthProvider>().token;
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập để dùng danh sách phát')));
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[900],
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setStateModal) {
+          final provider = context.watch<PlaylistProvider>();
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white12))),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Danh sách phát", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        IconButton(icon: const Icon(Icons.close, color: Colors.grey), onPressed: () => Navigator.pop(context)),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: provider.isLoading && provider.playlists.isEmpty
+                        ? const Center(child: CircularProgressIndicator(color: Colors.red))
+                        : provider.playlists.isEmpty
+                            ? const Center(child: Text("Bạn chưa có danh sách phát nào.", style: TextStyle(color: Colors.grey)))
+                            : ListView.builder(
+                                itemCount: provider.playlists.length,
+                                itemBuilder: (context, index) {
+                                  final pl = provider.playlists[index];
+                                  final hasMovie = (pl.items ?? []).any((item) => item.movieSlug == movieSlug);
+                                  return ListTile(
+                                    title: Text(pl.name, style: const TextStyle(color: Colors.white)),
+                                    trailing: hasMovie
+                                        ? const Icon(Icons.check_circle, color: Colors.green)
+                                        : ElevatedButton(
+                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                                            onPressed: () async {
+                                              final success = await provider.addToPlaylist(pl.id, movieSlug, movieName, thumbUrl);
+                                              if (success) {
+                                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã thêm vào danh sách')));
+                                                Navigator.pop(context);
+                                              }
+                                            },
+                                            child: const Text("Thêm"),
+                                          ),
+                                  );
+                                },
+                              ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.white12))),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: TextEditingController(),
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(hintText: 'Tên danh sách mới', hintStyle: TextStyle(color: Colors.grey)),
+                            onSubmitted: (val) async {
+                              if (val.trim().isNotEmpty) {
+                                await provider.createPlaylist(val.trim());
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
   }
 
   bool _isTvMode(BuildContext context) {
@@ -352,7 +443,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                 color: provider.isFollowing ? Colors.red : Colors.white,
                               ),
                             ),
-                            _buildActionButton(Icons.comment, "Bình luận"),
+                            GestureDetector(
+                              onTap: () {
+                                final thumbUrl = movie.thumbUrl ?? movie.posterUrl ?? '';
+                                _showPlaylistModal(context, movie.slug, movie.name, thumbUrl);
+                              },
+                              child: _buildActionButton(Icons.playlist_add, "Thêm"),
+                            ),
                             GestureDetector(
                               onTap: () {
                                 Share.share('${AppConfig.baseUrl}phim/${movie.slug}');

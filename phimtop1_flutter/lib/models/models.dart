@@ -91,6 +91,7 @@ class MovieItem {
   final String? thumbUrl;
   final String? posterUrl;
   final int? year;
+  final int? view;
   final List<CategoryDto>? category;
 
   MovieItem.fromJson(Map<String, dynamic> json)
@@ -101,6 +102,7 @@ class MovieItem {
         thumbUrl = json['thumb_url'],
         posterUrl = json['poster_url'],
         year = int.tryParse(json['year']?.toString() ?? ''),
+        view = int.tryParse(json['view']?.toString() ?? '0'),
         category = (json['category'] as List?)?.map((e) => CategoryDto.fromJson(e)).toList();
 }
 
@@ -309,4 +311,53 @@ class NotificationListResponse {
   NotificationListResponse.fromJson(Map<String, dynamic> json)
       : status = json['status'] ?? '',
         data = (json['data'] as List?)?.map((e) => NotificationItem.fromJson(e)).toList();
+}
+
+// Playlist Models
+class PlaylistItem {
+  final int id;
+  final int playlistId;
+  final String movieSlug;
+  final String movieName;
+  final String? thumbUrl;
+  final String createdAt;
+
+  PlaylistItem.fromJson(Map<String, dynamic> json)
+      : id = int.tryParse(json['id']?.toString() ?? '') ?? 0,
+        playlistId = int.tryParse(json['playlist_id']?.toString() ?? '') ?? 0,
+        movieSlug = json['movie_slug'] ?? '',
+        movieName = json['movie_name'] ?? '',
+        thumbUrl = json['thumb_url'],
+        createdAt = json['created_at'] ?? '';
+}
+
+class Playlist {
+  final int id;
+  final String name;
+  final String createdAt;
+  final List<PlaylistItem>? items;
+
+  Playlist.fromJson(Map<String, dynamic> json)
+      : id = int.tryParse(json['id']?.toString() ?? '') ?? 0,
+        name = json['name'] ?? '',
+        createdAt = json['created_at'] ?? '',
+        items = (json['items'] as List?)?.map((e) => PlaylistItem.fromJson(e)).toList();
+}
+
+class PlaylistResponse {
+  final String status;
+  final List<Playlist>? data;
+
+  PlaylistResponse.fromJson(Map<String, dynamic> json)
+      : status = json['status'] ?? '',
+        data = (json['data'] as List?)?.map((e) => Playlist.fromJson(e)).toList();
+}
+
+class PlaylistCheckResponse {
+  final String status;
+  final List<int>? inPlaylists;
+
+  PlaylistCheckResponse.fromJson(Map<String, dynamic> json)
+      : status = json['status'] ?? '',
+        inPlaylists = (json['in_playlists'] as List?)?.map((e) => int.parse(e.toString())).toList();
 }

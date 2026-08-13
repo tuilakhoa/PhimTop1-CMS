@@ -121,6 +121,7 @@ if ($pdo) {
                     <div class="hidden md:flex items-center space-x-6">
                         <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="text-gray-300 hover:text-white transition-colors">Phim Lẻ</a>
                         <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="text-gray-300 hover:text-white transition-colors">Phim Bộ</a>
+                        <a href="/bang-xep-hang" class="text-[#00E359] font-semibold hover:text-white transition-colors flex items-center" title="Bảng Xếp Hạng"><i data-lucide="trending-up" class="w-4 h-4 mr-1"></i> BXH</a>
                         <?php do_action('theme_header_menu'); ?>
                         
                         <!-- Dropdown Thể Loại -->
@@ -195,6 +196,7 @@ if ($pdo) {
                 <div class="flex flex-col space-y-3 font-medium text-gray-300">
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white">Phim Lẻ</a>
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white">Phim Bộ</a>
+                    <a href="/bang-xep-hang" class="text-[#00E359] font-bold flex items-center"><i data-lucide="trending-up" class="w-4 h-4 mr-2"></i> Bảng Xếp Hạng</a>
                     <?php do_action('theme_mobile_menu'); ?>
                     
                     <?php if (!empty($settings['appDownloadUrl'])): ?>

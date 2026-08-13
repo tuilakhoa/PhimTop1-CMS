@@ -98,11 +98,11 @@ if ($action === 'add') {
     $existing = $stmt->fetch();
     
     if ($existing) {
-        $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-        $stmt->execute([$episodeName, $existing['id']]);
+        $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, thumb_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        $stmt->execute([$episodeName, $thumb, $existing['id']]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$user['email'], $slug, $name, $episodeName]);
+        $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, thumb_url) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$user['email'], $slug, $name, $episodeName, $thumb]);
     }
     
     echo json_encode(['status' => 'success']);

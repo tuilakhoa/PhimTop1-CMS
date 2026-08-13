@@ -27,6 +27,7 @@ class MainScreen extends StatelessWidget {
               labelType: NavigationRailLabelType.all,
               destinations: const [
                 NavigationRailDestination(icon: Icon(Icons.home), label: Text('Trang chủ')),
+                NavigationRailDestination(icon: Icon(Icons.trending_up), label: Text('BXH')),
                 NavigationRailDestination(icon: Icon(Icons.explore), label: Text('Khám phá')),
                 NavigationRailDestination(icon: Icon(Icons.animation), label: Text('Hoạt hình')),
                 NavigationRailDestination(icon: Icon(Icons.person), label: Text('Cá nhân')),
@@ -46,10 +47,12 @@ class MainScreen extends StatelessWidget {
           border: Border(top: BorderSide(color: Colors.white10, width: 0.5)),
         ),
         child: BottomNavigationBar(
-          currentIndex: _calculateSelectedIndex(context) > 3 ? 0 : _calculateSelectedIndex(context),
+          currentIndex: _calculateSelectedIndex(context) > 4 ? 0 : _calculateSelectedIndex(context),
           onTap: (int index) => _onItemTapped(index, context),
+          type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
+            BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: 'BXH'),
             BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Khám phá'),
             BottomNavigationBarItem(icon: Icon(Icons.animation), label: 'Hoạt hình'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
@@ -61,10 +64,11 @@ class MainScreen extends StatelessWidget {
 
   static int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
-    if (location.startsWith('/explore')) return 1;
-    if (location.startsWith('/cartoon')) return 2;
-    if (location.startsWith('/profile')) return 3;
-    if (location.startsWith('/search')) return 4;
+    if (location.startsWith('/trending')) return 1;
+    if (location.startsWith('/explore')) return 2;
+    if (location.startsWith('/cartoon')) return 3;
+    if (location.startsWith('/profile')) return 4;
+    if (location.startsWith('/search')) return 5;
     return 0; // home
   }
 
@@ -74,12 +78,15 @@ class MainScreen extends StatelessWidget {
         context.go('/');
         break;
       case 1:
-        context.go('/explore');
+        context.go('/trending');
         break;
       case 2:
-        context.go('/cartoon');
+        context.go('/explore');
         break;
       case 3:
+        context.go('/cartoon');
+        break;
+      case 4:
         context.go('/profile');
         break;
     }

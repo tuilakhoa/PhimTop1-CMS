@@ -8,6 +8,9 @@ header('Cache-Control: no-cache');
 header('Connection: keep-alive');
 header('X-Accel-Buffering: no'); // Disable Nginx buffering
 
+@set_time_limit(0);
+@ignore_user_abort(true);
+
 // Ensure implicit flush is on
 @ini_set('output_buffering', 'off');
 @ini_set('zlib.output_compression', false);
@@ -201,13 +204,15 @@ if ($successCount > 0) {
     $checker = new \App\Core\UpdateChecker();
     $checker->clearCache();
     
-    // Clear PHP OPcache to ensure the newly downloaded files are served immediately
-    if (function_exists('opcache_reset')) {
-        @opcache_reset();
-    }
-    if (function_exists('apcu_clear_cache')) {
-        @apcu_clear_cache();
-    }
+    // Clear PHP OPcache after script finishes to prevent connection drop
+    register_shutdown_function(function() {
+        if (function_exists('opcache_reset')) {
+            @opcache_reset();
+        }
+        if (function_exists('apcu_clear_cache')) {
+            @apcu_clear_cache();
+        }
+    });
 }
 
 if ($failCount === 0) {

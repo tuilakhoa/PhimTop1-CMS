@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS watch_history (
     movie_slug VARCHAR(255) NOT NULL,
     movie_name VARCHAR(255) NOT NULL,
     episode_name VARCHAR(100) NOT NULL,
+    thumb_url TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY user_movie (user_email, movie_slug)
 );

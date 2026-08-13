@@ -68,6 +68,9 @@ class ProfileScreen extends StatelessWidget {
               _buildMenuItem(Icons.favorite, "Phim đã thích", () {
                 context.push('/follow');
               }),
+              _buildMenuItem(Icons.playlist_play, "Danh sách phát", () {
+                context.push('/playlists');
+              }),
               _buildMenuItem(Icons.notifications, "Thông báo", () {
                 context.push('/notifications');
               }),

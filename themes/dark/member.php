@@ -35,31 +35,77 @@
                         </div>
                     </div>
                     
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                        <i data-lucide="bookmark" class="w-5 h-5 mr-2 text-red-500"></i> Đang theo dõi
-                    </h3>
-                    
-                    <?php if (empty($follows)): ?>
-                        <div class="text-center py-8 text-zinc-400 bg-zinc-800/30 rounded-xl border border-zinc-800/50">
-                            <i data-lucide="film" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
-                            <p>Bạn chưa theo dõi nội dung nào.</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            <?php foreach ($follows as $item): ?>
-                                <a href="<?= $item['item_type'] === 'comic' ? '/truyen-tranh/'.$item['item_slug'] : '/phim/'.$item['item_slug'] ?>" class="block group">
-                                    <div class="relative aspect-[2/3] rounded-xl overflow-hidden mb-2 bg-zinc-800">
-                                        <img src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-xs px-2 py-1 rounded text-white font-medium">
-                                            <?= $item['item_type'] === 'comic' ? 'Truyện' : 'Phim' ?>
+                    <!-- Tabs -->
+                    <div class="flex gap-4 mb-6 border-b border-zinc-800/50">
+                        <button class="tab-btn active text-white font-bold pb-2 border-b-2 border-red-500" data-target="tab-follows">Đang theo dõi</button>
+                        <button class="tab-btn text-zinc-400 font-bold pb-2 border-b-2 border-transparent hover:text-white" data-target="tab-playlists">Danh sách phát</button>
+                    </div>
+
+                    <!-- Follows Tab -->
+                    <div id="tab-follows" class="tab-content block">
+                        <?php if (empty($follows)): ?>
+                            <div class="text-center py-8 text-zinc-400 bg-zinc-800/30 rounded-xl border border-zinc-800/50">
+                                <i data-lucide="film" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                                <p>Bạn chưa theo dõi nội dung nào.</p>
+                            </div>
+                        <?php else: ?>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                <?php foreach ($follows as $item): ?>
+                                    <a href="<?= $item['item_type'] === 'comic' ? '/truyen-tranh/'.$item['item_slug'] : '/phim/'.$item['item_slug'] ?>" class="block group">
+                                        <div class="relative aspect-[2/3] rounded-xl overflow-hidden mb-2 bg-zinc-800">
+                                            <img src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-xs px-2 py-1 rounded text-white font-medium">
+                                                <?= $item['item_type'] === 'comic' ? 'Truyện' : 'Phim' ?>
+                                            </div>
                                         </div>
+                                        <h4 class="text-white font-medium text-sm line-clamp-1 group-hover:text-red-400 transition-colors"><?= htmlspecialchars($item['item_name']) ?></h4>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Playlists Tab -->
+                    <div id="tab-playlists" class="tab-content hidden space-y-6">
+                        <?php if (empty($playlists)): ?>
+                            <div class="text-center py-8 text-zinc-400 bg-zinc-800/30 rounded-xl border border-zinc-800/50">
+                                <i data-lucide="list" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                                <p>Bạn chưa có danh sách phát nào.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($playlists as $pl): ?>
+                                <div class="bg-zinc-800/50 rounded-xl border border-zinc-800/50 p-4">
+                                    <div class="flex justify-between items-center mb-4 border-b border-zinc-700/50 pb-2">
+                                        <h4 class="text-lg font-bold text-white flex items-center">
+                                            <i data-lucide="list-video" class="w-5 h-5 mr-2 text-red-500"></i> <?= htmlspecialchars($pl['name']) ?>
+                                        </h4>
+                                        <button onclick="deletePlaylist(<?= $pl['id'] ?>)" class="text-xs text-red-500 hover:text-red-400 font-medium transition-colors">Xóa danh sách</button>
                                     </div>
-                                    <h4 class="text-white font-medium text-sm line-clamp-1 group-hover:text-red-400 transition-colors"><?= htmlspecialchars($item['item_name']) ?></h4>
-                                </a>
+                                    
+                                    <?php if (empty($pl['items'])): ?>
+                                        <p class="text-sm text-zinc-500 italic">Chưa có phim nào trong danh sách.</p>
+                                    <?php else: ?>
+                                        <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-2">
+                                            <?php foreach ($pl['items'] as $item): ?>
+                                                <div class="shrink-0 w-[120px] relative group">
+                                                    <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($item['movie_slug']) ?>" class="block">
+                                                        <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-zinc-800 border border-zinc-700">
+                                                            <img src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" class="w-full h-full object-cover">
+                                                        </div>
+                                                        <h5 class="text-zinc-300 font-medium text-xs line-clamp-1 group-hover:text-white transition-colors"><?= htmlspecialchars($item['movie_name']) ?></h5>
+                                                    </a>
+                                                    <button onclick="removePlaylistItem(<?= $pl['id'] ?>, '<?= htmlspecialchars($item['movie_slug']) ?>')" class="absolute top-1 right-1 w-6 h-6 bg-red-600 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                                                        <i data-lucide="x" class="w-3 h-3"></i>
+                                                    </button>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <div class="bg-zinc-800/50 border-t border-zinc-800/50 p-6 text-center">
                     <a href="/" class="text-red-500 hover:text-red-400 font-medium transition-colors inline-flex items-center">
@@ -142,6 +188,49 @@
 
     <script>
         lucide.createIcons();
+
+        // Tabs Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active', 'text-white', 'border-red-500');
+                    b.classList.add('text-zinc-400', 'border-transparent');
+                });
+                btn.classList.add('active', 'text-white', 'border-red-500');
+                btn.classList.remove('text-zinc-400', 'border-transparent');
+
+                document.querySelectorAll('.tab-content').forEach(c => {
+                    c.classList.add('hidden');
+                    c.classList.remove('block');
+                });
+                document.getElementById(btn.dataset.target).classList.remove('hidden');
+                document.getElementById(btn.dataset.target).classList.add('block');
+            });
+        });
+
+        function deletePlaylist(id) {
+            if (!confirm('Bạn có chắc muốn xóa danh sách phát này?')) return;
+            fetch('/api/playlists.php?action=delete', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ playlist_id: id })
+            }).then(res => res.json()).then(res => {
+                if (res.status === 'success') location.reload();
+                else alert(res.message);
+            });
+        }
+
+        function removePlaylistItem(playlistId, movieSlug) {
+            if (!confirm('Bạn có chắc muốn xóa phim này khỏi danh sách?')) return;
+            fetch('/api/playlists.php?action=remove_item', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ playlist_id: playlistId, movie_slug: movieSlug })
+            }).then(res => res.json()).then(res => {
+                if (res.status === 'success') location.reload();
+                else alert(res.message);
+            });
+        }
         
         let currentMode = '<?= $mode ?>';
         

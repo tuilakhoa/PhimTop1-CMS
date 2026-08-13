@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import '../screens/main_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/trending_screen.dart';
 import '../screens/explore_screen.dart';
 import '../screens/cartoon_screen.dart';
 import '../screens/movie_detail_screen.dart';
@@ -17,6 +18,8 @@ import '../screens/terms_screen.dart';
 import '../screens/register_screen.dart';
 import '../screens/policy_screen.dart';
 import '../screens/watch_movie_screen.dart';
+import '../screens/playlist_screen.dart';
+import '../screens/onboarding_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -33,11 +36,11 @@ FirebaseAnalytics? get analytics {
   }
 }
 
-GoRouter createRouter(bool hasAgreed) {
+GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding) {
   final currentAnalytics = analytics;
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: hasAgreed ? '/' : '/terms',
+    initialLocation: hasAgreed ? (hasSeenOnboarding ? '/' : '/onboarding') : '/terms',
     observers: currentAnalytics != null ? [FirebaseAnalyticsObserver(analytics: currentAnalytics)] : [],
   routes: <RouteBase>[
     ShellRoute(
@@ -49,6 +52,10 @@ GoRouter createRouter(bool hasAgreed) {
         GoRoute(
           path: '/',
           builder: (BuildContext context, GoRouterState state) => const HomeScreen(),
+        ),
+        GoRoute(
+          path: '/trending',
+          builder: (BuildContext context, GoRouterState state) => const TrendingScreen(),
         ),
         GoRoute(
           path: '/explore',
@@ -109,6 +116,11 @@ GoRouter createRouter(bool hasAgreed) {
       builder: (BuildContext context, GoRouterState state) => const FollowScreen(),
     ),
     GoRoute(
+      path: '/playlists',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (BuildContext context, GoRouterState state) => const PlaylistScreen(),
+    ),
+    GoRoute(
       path: '/history',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (BuildContext context, GoRouterState state) => const HistoryScreen(),
@@ -127,6 +139,11 @@ GoRouter createRouter(bool hasAgreed) {
       path: '/terms',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (BuildContext context, GoRouterState state) => const TermsScreen(),
+    ),
+    GoRoute(
+      path: '/onboarding',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (BuildContext context, GoRouterState state) => const OnboardingScreen(),
     ),
   ],
 );

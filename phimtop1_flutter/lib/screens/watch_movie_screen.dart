@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
@@ -314,73 +315,119 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
       context: context,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E1E2C),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20, spreadRadius: 5),
-            ],
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.screen_share, color: Colors.indigoAccent, size: 48),
-              const SizedBox(height: 16),
-              const Text('Phòng Xem Chung', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.indigoAccent.withOpacity(0.3)),
-                ),
-                child: Text('Mã phòng: $_wpRoomCode', style: const TextStyle(color: Colors.indigoAccent, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 2)),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(_wpIsHost ? Icons.admin_panel_settings : Icons.person, color: Colors.white70, size: 20),
-                  const SizedBox(width: 8),
-                  Text('Vai trò: ${_wpIsHost ? "Chủ phòng" : "Người xem"}', style: const TextStyle(color: Colors.white70, fontSize: 16)),
+        elevation: 0,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF131320).withOpacity(0.7),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 30, spreadRadius: -5),
                 ],
               ),
-              const SizedBox(height: 32),
-              Row(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: const BorderSide(color: Colors.white24),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [Colors.indigoAccent.withOpacity(0.2), Colors.purpleAccent.withOpacity(0.2)],
                       ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Đóng', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    ),
+                    child: const Icon(Icons.screen_share_rounded, color: Colors.indigoAccent, size: 48),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Phòng Xem Chung', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                  const SizedBox(height: 28),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.indigoAccent.withOpacity(0.1), Colors.transparent],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.indigoAccent.withOpacity(0.4)),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text('MÃ PHÒNG', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                        const SizedBox(height: 8),
+                        Text('$_wpRoomCode', style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 6)),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      onPressed: () {
-                        _wpSyncTimer?.cancel();
-                        setState(() { _wpRoomCode = null; _wpIsHost = false; });
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Rời Phòng', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(_wpIsHost ? Icons.workspace_premium : Icons.person, color: _wpIsHost ? Colors.amber : Colors.white70, size: 20),
+                        const SizedBox(width: 8),
+                        Text('Vai trò: ${_wpIsHost ? "Chủ phòng" : "Người xem"}', style: TextStyle(color: _wpIsHost ? Colors.amber : Colors.white70, fontSize: 15, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 36),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            side: BorderSide(color: Colors.white.withOpacity(0.2), width: 1.5),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Đóng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(colors: [Color(0xFFFF3366), Color(0xFFFF6B6B)]),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(color: const Color(0xFFFF3366).withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                            onPressed: () {
+                              _wpSyncTimer?.cancel();
+                              setState(() { _wpRoomCode = null; _wpIsHost = false; });
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Rời Phòng', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -471,197 +518,237 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
           return Dialog(
             backgroundColor: Colors.transparent,
-            child: Container(
-              width: MediaQuery.of(context).size.width > 400 ? 400 : double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFF161621),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20, spreadRadius: 5),
-                ],
-                border: Border.all(color: Colors.indigo.withOpacity(0.3), width: 1),
-              ),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            elevation: 0,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  width: MediaQuery.of(context).size.width > 400 ? 400 : double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF131320).withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 30, spreadRadius: -5),
+                    ],
+                  ),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(28),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Row(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Icon(Icons.people_alt_rounded, color: Colors.indigoAccent, size: 28),
-                              SizedBox(width: 12),
-                              Text('Phòng Xem Chung', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          IconButton(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.close, color: Colors.white54),
-                            splashRadius: 20,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // Create Room Section
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.03),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          children: [
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.indigoAccent,
-                                minimumSize: const Size(double.infinity, 50),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                elevation: 0,
-                              ),
-                              onPressed: () async {
-                                final auth = context.read<AuthProvider>();
-                                final userName = auth.user?.name ?? 'Guest';
-                                final res = await WatchPartyService.createParty(widget.movieSlug, widget.episodeName, userName, isPublic: isPublic);
-                                if (!mounted) return;
-                                Navigator.pop(context);
-                                if (res['status'] == 'success') {
-                                  setState(() {
-                                    _wpRoomCode = res['room_code'];
-                                    _wpIsHost = true;
-                                  });
-                                  _startWatchPartySync();
-                                  _showWatchPartyDialog();
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: ${res['message']}')));
-                                }
-                              },
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              Row(
                                 children: [
-                                  Icon(Icons.add_circle_outline, color: Colors.white),
-                                  SizedBox(width: 8),
-                                  Text('Tạo Phòng Mới', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.indigoAccent.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(Icons.people_alt_rounded, color: Colors.indigoAccent, size: 24),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  const Text('Phòng Xem Chung', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
                                 ],
                               ),
+                              IconButton(
+                                onPressed: () => Navigator.pop(context),
+                                icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                                splashRadius: 24,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 28),
+                          
+                          // Create Room Section
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.03),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white.withOpacity(0.05)),
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(colors: [Color(0xFF667EEA), Color(0xFF764BA2)]),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(color: const Color(0xFF667EEA).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4)),
+                                    ],
+                                  ),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      minimumSize: const Size(double.infinity, 54),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    ),
+                                    onPressed: () async {
+                                      final auth = context.read<AuthProvider>();
+                                      final userName = auth.user?.name ?? 'Guest';
+                                      final res = await WatchPartyService.createParty(widget.movieSlug, widget.episodeName, userName, isPublic: isPublic);
+                                      if (!mounted) return;
+                                      Navigator.pop(context);
+                                      if (res['status'] == 'success') {
+                                        setState(() {
+                                          _wpRoomCode = res['room_code'];
+                                          _wpIsHost = true;
+                                        });
+                                        _startWatchPartySync();
+                                        _showWatchPartyDialog();
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: ${res['message']}')));
+                                      }
+                                    },
+                                    child: const Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.add_rounded, color: Colors.white, size: 22),
+                                        SizedBox(width: 8),
+                                        Text('Tạo Phòng Mới', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Theme(
+                                  data: ThemeData(unselectedWidgetColor: Colors.white38),
+                                  child: CheckboxListTile(
+                                    title: const Text('Công khai phòng này', style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500)),
+                                    value: isPublic,
+                                    onChanged: (val) {
+                                      setDialogState(() {
+                                        isPublic = val ?? false;
+                                      });
+                                    },
+                                    controlAffinity: ListTileControlAffinity.leading,
+                                    contentPadding: EdgeInsets.zero,
+                                    activeColor: const Color(0xFF667EEA),
+                                    checkColor: Colors.white,
+                                    dense: true,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Row(
+                              children: [
+                                Expanded(child: Divider(color: Colors.white.withOpacity(0.1))),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text('HOẶC', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                                ),
+                                Expanded(child: Divider(color: Colors.white.withOpacity(0.1))),
+                              ],
+                            ),
+                          ),
+                          
+                          // Join Room Section
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white.withOpacity(0.08)),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: codeCtrl,
+                                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2),
+                                    textAlign: TextAlign.center,
+                                    textCapitalization: TextCapitalization.characters,
+                                    decoration: InputDecoration(
+                                      hintText: 'NHẬP MÃ',
+                                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 14),
+                                      border: InputBorder.none,
+                                      contentPadding: const EdgeInsets.symmetric(vertical: 18),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                                    onPressed: () async {
+                                      final code = codeCtrl.text.trim().toUpperCase();
+                                      if (code.isEmpty) return;
+                                      await _joinWatchParty(code, context);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          // Public Rooms
+                          if (publicRooms.isNotEmpty) ...[
+                            const SizedBox(height: 28),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text('PHÒNG ĐANG MỞ', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1)),
                             ),
                             const SizedBox(height: 12),
-                            Theme(
-                              data: ThemeData(unselectedWidgetColor: Colors.white54),
-                              child: CheckboxListTile(
-                                title: const Text('Công khai phòng này', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                                value: isPublic,
-                                onChanged: (val) {
-                                  setDialogState(() {
-                                    isPublic = val ?? false;
-                                  });
+                            Container(
+                              constraints: const BoxConstraints(maxHeight: 220),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: publicRooms.length,
+                                itemBuilder: (ctx, i) {
+                                  final room = publicRooms[i];
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [Colors.white.withOpacity(0.05), Colors.white.withOpacity(0.02)],
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: Colors.white.withOpacity(0.05)),
+                                    ),
+                                    child: ListTile(
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                      title: Text('${room['room_code']}', style: const TextStyle(color: Colors.indigoAccent, fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: 1)),
+                                      subtitle: Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Text('${room['creator_name']} • Tập ${room['episode_name']}', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, fontWeight: FontWeight.w500)),
+                                      ),
+                                      trailing: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.indigoAccent.withOpacity(0.2),
+                                          foregroundColor: Colors.indigoAccent,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                                        ),
+                                        onPressed: () => _joinWatchParty(room['room_code'], context),
+                                        child: const Text('Tham gia', style: TextStyle(fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                  );
                                 },
-                                controlAffinity: ListTileControlAffinity.leading,
-                                contentPadding: EdgeInsets.zero,
-                                activeColor: Colors.indigoAccent,
-                                checkColor: Colors.white,
-                                dense: true,
                               ),
                             ),
                           ],
-                        ),
+                        ],
                       ),
-                      
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24),
-                        child: Row(
-                          children: [
-                            Expanded(child: Divider(color: Colors.white12)),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
-                              child: Text('HOẶC NHẬP MÃ', style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold)),
-                            ),
-                            Expanded(child: Divider(color: Colors.white12)),
-                          ],
-                        ),
-                      ),
-                      
-                      // Join Room Section
-                      TextField(
-                        controller: codeCtrl,
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2),
-                        textAlign: TextAlign.center,
-                        textCapitalization: TextCapitalization.characters,
-                        decoration: InputDecoration(
-                          hintText: 'Nhập mã phòng',
-                          hintStyle: const TextStyle(color: Colors.white24, letterSpacing: 0, fontWeight: FontWeight.normal),
-                          filled: true,
-                          fillColor: Colors.black26,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.indigoAccent)),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white12,
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                        onPressed: () async {
-                          final code = codeCtrl.text.trim().toUpperCase();
-                          if (code.isEmpty) return;
-                          await _joinWatchParty(code, context);
-                        },
-                        child: const Text('Vào Phòng', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                      ),
-                      
-                      // Public Rooms
-                      if (publicRooms.isNotEmpty) ...[
-                        const SizedBox(height: 24),
-                        const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text('PHÒNG ĐANG MỞ', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold)),
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          constraints: const BoxConstraints(maxHeight: 200),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: publicRooms.length,
-                            itemBuilder: (ctx, i) {
-                              final room = publicRooms[i];
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.05),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.white10),
-                                ),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                  title: Text('Mã: ${room['room_code']}', style: const TextStyle(color: Colors.indigoAccent, fontWeight: FontWeight.bold, fontSize: 16)),
-                                  subtitle: Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text('Host: ${room['creator_name']} • Tập ${room['episode_name']}', style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                                  ),
-                                  trailing: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.indigoAccent.withOpacity(0.2),
-                                      foregroundColor: Colors.indigoAccent,
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    ),
-                                    onPressed: () => _joinWatchParty(room['room_code'], context),
-                                    child: const Text('Tham gia'),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
               ),

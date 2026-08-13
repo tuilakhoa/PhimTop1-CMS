@@ -35,11 +35,18 @@ server {
         rewrite ^/sitemap\.xml$ /sitemap.php last;
 
         # SEO URL REWRITES
+        rewrite ^/bang-xep-hang/?$ /trending.php last;
         rewrite ^/phim/([^/]+)/?$ /movie.php?slug=$1 last;
         rewrite ^/xem-phim/([^/]+)/([^/]+)/?$ /watch.php?slug=$1&ep=$2 last;
+        rewrite ^/xem-phim/([^/]+)/?$ /watch.php?slug=$1 last;
+        rewrite ^/danh-sach-truyen/?$ /danh-sach-truyen.php last;
+        rewrite ^/truyen/([^/]+)/?$ /comic.php?slug=$1 last;
+        rewrite ^/doc-truyen/([^/]+)/?$ /read.php?slug=$1 last;
+        rewrite ^/doc-truyen/([^/]+)/([^/]+)/?$ /read.php?slug=$1&chap=$2 last;
         rewrite ^/danh-sach/([^/]+)/?$ /category.php?type=$1 last;
         rewrite ^/the-loai/([^/]+)/?$ /category.php?slug=$1&type=the-loai last;
         rewrite ^/quoc-gia/([^/]+)/?$ /category.php?slug=$1&type=quoc-gia last;
+        rewrite ^/tim-kiem/?$ /search.php last;
         
         # ẨN ĐUÔI .PHP VÀ FALLBACK
         try_files $uri $uri/ $uri.php /index.php?$query_string;

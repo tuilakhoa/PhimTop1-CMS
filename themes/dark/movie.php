@@ -159,6 +159,10 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
                             <i data-lucide="bookmark" id="icon-follow-movie" class="w-5 h-5"></i>
                             <span id="text-follow-movie">Theo dõi</span>
                         </button>
+                        <button id="btn-playlist-movie" class="hidden items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg border border-gray-700">
+                            <i data-lucide="list-plus" class="w-5 h-5"></i>
+                            <span>Danh sách phát</span>
+                        </button>
                     </div>
                 <?php endif; ?>
             </div>
@@ -347,8 +351,138 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
                 });
             });
         }
+        
+        // Playlist logic
+        const btnPlaylist = document.getElementById('btn-playlist-movie');
+        const modalPlaylist = document.getElementById('modal-playlist');
+        const closePlaylist = document.getElementById('close-playlist-modal');
+        const listPlaylist = document.getElementById('list-playlist');
+        const newPlaylistInput = document.getElementById('new-playlist-name');
+        const btnCreatePlaylist = document.getElementById('btn-create-playlist');
+        
+        if (btnPlaylist) {
+            // Show button if logged in (check via follow api check is a trick, but let's just show it if res.message !== Unauthorized)
+            fetch('/api/playlists.php?action=check&slug=' + movieSlug)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success' || (res.status === 'error' && res.message === 'Unauthorized')) {
+                        btnPlaylist.classList.remove('hidden');
+                        btnPlaylist.classList.add('inline-flex');
+                    }
+                });
+                
+            function openPlaylistModal() {
+                fetch('/api/playlists.php?action=check&slug=' + movieSlug)
+                .then(res => res.json())
+                .then(checkRes => {
+                    if (checkRes.status === 'error' && checkRes.message === 'Unauthorized') {
+                        window.location.href = '/member.php?mode=login&error=' + encodeURIComponent('Vui lòng đăng nhập để dùng danh sách phát.');
+                        return;
+                    }
+                    
+                    const inPlaylists = checkRes.in_playlists || [];
+                    
+                    fetch('/api/playlists.php?action=list')
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.status === 'success') {
+                            let html = '';
+                            if (res.data.length === 0) {
+                                html = '<div class="text-center text-gray-500 text-sm py-4">Bạn chưa có danh sách phát nào.</div>';
+                            } else {
+                                res.data.forEach(pl => {
+                                    const inPl = inPlaylists.includes(pl.id);
+                                    html += `
+                                        <div class="flex items-center justify-between bg-gray-700/50 p-3 rounded-lg border border-gray-600">
+                                            <span class="text-white font-medium">${pl.name}</span>
+                                            ${inPl 
+                                                ? `<span class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">Đã thêm</span>`
+                                                : `<button onclick="addToPlaylist(${pl.id})" class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded transition-colors">Thêm</button>`
+                                            }
+                                        </div>
+                                    `;
+                                });
+                            }
+                            listPlaylist.innerHTML = html;
+                            modalPlaylist.classList.remove('hidden');
+                            modalPlaylist.classList.add('flex');
+                        }
+                    });
+                });
+            }
+            
+            window.addToPlaylist = function(id) {
+                const thumbUrl = '<?= htmlspecialchars(!empty($movie['thumb_url']) ? $movie['thumb_url'] : (!empty($movie['poster_url']) ? $movie['poster_url'] : '')) ?>';
+                const name = '<?= htmlspecialchars($movie['name']) ?>';
+                
+                fetch('/api/playlists.php?action=add_item', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        playlist_id: id,
+                        movie_slug: movieSlug,
+                        movie_name: name,
+                        thumb_url: thumbUrl
+                    })
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        openPlaylistModal(); // Refresh list
+                    } else {
+                        alert(res.message);
+                    }
+                });
+            };
+            
+            btnPlaylist.addEventListener('click', openPlaylistModal);
+            
+            closePlaylist.addEventListener('click', () => {
+                modalPlaylist.classList.add('hidden');
+                modalPlaylist.classList.remove('flex');
+            });
+            
+            btnCreatePlaylist.addEventListener('click', () => {
+                const name = newPlaylistInput.value.trim();
+                if (!name) return alert('Vui lòng nhập tên danh sách phát');
+                
+                fetch('/api/playlists.php?action=create', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: name })
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        newPlaylistInput.value = '';
+                        openPlaylistModal();
+                    } else {
+                        alert(res.message);
+                    }
+                });
+            });
+        }
     });
     </script>
+    
+    <!-- Modal Playlist -->
+    <div id="modal-playlist" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                <h3 class="text-lg font-bold text-white flex items-center"><i data-lucide="list" class="w-5 h-5 mr-2 text-red-500"></i> Lưu vào danh sách phát</h3>
+                <button id="close-playlist-modal" class="text-gray-400 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar space-y-3" id="list-playlist">
+                <!-- Playlists will be loaded here -->
+            </div>
+            <div class="p-4 border-t border-gray-700 bg-gray-800/80">
+                <div class="flex gap-2">
+                    <input type="text" id="new-playlist-name" placeholder="Tên danh sách mới..." class="flex-1 bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-red-500 transition-colors">
+                    <button id="btn-create-playlist" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-red-600/20 whitespace-nowrap">Tạo mới</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <!-- Movie Suggestions -->
