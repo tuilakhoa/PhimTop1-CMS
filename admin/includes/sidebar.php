@@ -14,6 +14,7 @@
                         'movies' => ['icon' => 'film', 'title' => 'Quản Lý Phim'],
                         'categories' => ['icon' => 'list-tree', 'title' => 'Thể Loại & Quốc Gia'],
                         'comments' => ['icon' => 'message-square', 'title' => 'Quản Lý Bình Luận'],
+                        'feedbacks' => ['icon' => 'message-circle', 'title' => 'Quản Lý Phản Hồi'],
                     ],
                     'Công Cụ' => [
                         'crawl' => ['icon' => 'download-cloud', 'title' => 'Cào Dữ Liệu'],

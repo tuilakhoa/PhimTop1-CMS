@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../providers/home_provider.dart';
 import '../widgets/update_dialog.dart';
+import '../api/cms_api.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -81,6 +82,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (appFlavor == 'tv') return true;
     final size = MediaQuery.of(context).size;
     return MediaQuery.of(context).orientation == Orientation.landscape && size.width > 800 && size.shortestSide >= 500;
+  }
+
+  void _showFeedbackDialog() {
+    final token = context.read<AuthProvider>().token;
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập để gửi phản hồi')));
+      return;
+    }
+
+    final TextEditingController controller = TextEditingController();
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.grey[900],
+              title: const Text('Góp ý / Phản hồi', style: TextStyle(color: Colors.white)),
+              content: TextField(
+                controller: controller,
+                maxLines: 4,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: 'Nhập nội dung phản hồi (báo lỗi, góp ý, yêu cầu phim...)',
+                  hintStyle: TextStyle(color: Colors.grey),
+                  filled: true,
+                  fillColor: Colors.black26,
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting ? null : () => Navigator.pop(context),
+                  child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+                  onPressed: isSubmitting ? null : () async {
+                    if (controller.text.trim().isEmpty) return;
+                    setState(() => isSubmitting = true);
+                    final success = await cmsApi.submitFeedback(token, controller.text.trim());
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(success ? 'Cảm ơn bạn đã gửi phản hồi!' : 'Có lỗi xảy ra, vui lòng thử lại sau.'))
+                      );
+                    }
+                  },
+                  child: isSubmitting 
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text('Gửi', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
   }
 
   @override
@@ -183,6 +244,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: _checkUpdate,
               child: const Text("Kiểm tra cập nhật"),
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.feedback_outlined, color: Colors.grey),
+            title: const Text("Góp ý / Phản hồi", style: TextStyle(color: Colors.white)),
+            onTap: _showFeedbackDialog,
           ),
 
           const Divider(color: Colors.grey),

@@ -360,6 +360,19 @@ class CmsApiService {
       rethrow;
     }
   }
+
+  Future<bool> submitFeedback(String token, String message) async {
+    try {
+      final response = await _dio.post('api/v1/feedback.php', queryParameters: {
+        'key': AppConfig.apiKey,
+      }, data: {
+        'message': message,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 // Global instance

@@ -286,6 +286,27 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     exit;
 }
 
+// Handle Feedback Actions
+if (isset($_POST['action'])) {
+    if ($_POST['action'] === 'resolve_feedback') {
+        $id = (int)$_POST['id'];
+        $pdo = getPDO();
+        if ($pdo) {
+            $stmt = $pdo->prepare("UPDATE user_feedbacks SET status = 'resolved' WHERE id = ?");
+            $stmt->execute([$id]);
+            $successMsg = "Đã đánh dấu phản hồi là Đã xử lý.";
+        }
+    } else if ($_POST['action'] === 'delete_feedback') {
+        $id = (int)$_POST['id'];
+        $pdo = getPDO();
+        if ($pdo) {
+            $stmt = $pdo->prepare("DELETE FROM user_feedbacks WHERE id = ?");
+            $stmt->execute([$id]);
+            $successMsg = "Đã xóa phản hồi thành công.";
+        }
+    }
+}
+
 $currentPage = $_GET['page'] ?? 'dashboard';
 
 include __DIR__ . '/includes/header.php';
