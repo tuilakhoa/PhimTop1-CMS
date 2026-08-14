@@ -51,9 +51,13 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   Timer? _wpSyncTimer;
   Timer? _historySyncTimer;
 
+  String? _token;
+
   @override
   void initState() {
     super.initState();
+    _token = context.read<AuthProvider>().token;
+    
     // Allow landscape orientation when playing movie
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -148,17 +152,18 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
       await _videoController!.initialize();
       
       // Check history and seek if needed
-      final auth = context.read<AuthProvider>();
-      if (auth.token != null && widget.movieSlug.isNotEmpty) {
+      Duration? startAt;
+      if (_token != null && widget.movieSlug.isNotEmpty) {
         try {
-          final res = await cmsApi.getHistory(auth.token!);
+          final res = await cmsApi.getHistory(_token!);
           if (res.data != null) {
             final match = res.data!.firstWhere(
               (item) => item.movieSlug == widget.movieSlug && item.episodeSlug == widget.episodeSlug,
               orElse: () => HistoryItem.fromJson({}), // Dummy empty item
             );
             if (match.id != 0 && match.currentTime > 0) {
-              await _videoController!.seekTo(Duration(seconds: match.currentTime));
+              startAt = Duration(seconds: match.currentTime);
+              await _videoController!.seekTo(startAt); // fallback explicitly just in case
             }
           }
         } catch (_) {}
@@ -170,6 +175,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
             videoPlayerController: _videoController!,
             autoPlay: true,
             looping: false,
+            startAt: startAt,
             aspectRatio: _videoController!.value.aspectRatio,
             errorBuilder: (context, errorMessage) {
               return Center(
@@ -195,6 +201,20 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     _wpSyncTimer?.cancel();
     _historySyncTimer?.cancel();
     WatchingSessionService().stopSession();
+    
+    // Final save of the exact time before disposing
+    if (_token != null && _videoController != null && widget.movieSlug.isNotEmpty) {
+      cmsApi.addHistory(
+        _token!,
+        widget.movieSlug,
+        widget.title,
+        widget.episodeName,
+        episodeSlug: widget.episodeSlug,
+        currentTime: _videoController!.value.position.inSeconds,
+        duration: _videoController!.value.duration.inSeconds,
+      );
+    }
+
     // Revert to portrait only when leaving screen
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,

@@ -23,6 +23,20 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     <!-- Video Player Area -->
     <div class="bg-black rounded-lg md:rounded-xl overflow-hidden shadow-2xl border border-gray-900 mb-6">
         <div class="aspect-video w-full relative flex items-center justify-center bg-black group" id="player-container">
+<?php
+$startTime = 0;
+if (isset($_SESSION['user'])) {
+    $pdo = getPDO();
+    if ($pdo) {
+        $stmt = $pdo->prepare("SELECT current_time FROM watch_history WHERE user_email = ? AND movie_slug = ? AND episode_slug = ? LIMIT 1");
+        $stmt->execute([$_SESSION['user']['email'], $movie['slug'], $currentEp['slug']]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row && $row['current_time'] > 0) {
+            $startTime = (int)$row['current_time'];
+        }
+    }
+}
+?>
             <?php if ($isM3U8): ?>
                 <video id="video-player" class="w-full h-full outline-none" controls playsinline>
                     <source src="<?= htmlspecialchars($videoUrl) ?>" type="application/x-mpegURL">
@@ -32,12 +46,14 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
                 <script>
                     var video = document.getElementById('video-player');
                     var videoSrc = "<?= addslashes($videoUrl) ?>";
+                    var startTime = <?= $startTime ?>;
                     
                     if (Hls.isSupported()) {
                         var hls = new Hls();
                         hls.loadSource(videoSrc);
                         hls.attachMedia(video);
                         hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                            if (startTime > 0) video.currentTime = startTime;
                             video.play().catch(function(e) {
                                 console.log("Auto-play blocked by browser.");
                             });
@@ -46,6 +62,7 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
                         // For Safari
                         video.src = videoSrc;
                         video.addEventListener('loadedmetadata', function() {
+                            if (startTime > 0) video.currentTime = startTime;
                             video.play().catch(function(e) {
                                 console.log("Auto-play blocked by browser.");
                             });
@@ -191,47 +208,74 @@ document.addEventListener('DOMContentLoaded', function() {
     const movieSlug = '<?= addslashes($movie['slug']) ?>';
     const movieName = '<?= addslashes($movie['name']) ?>';
     const episodeName = '<?= addslashes($currentEp['name']) ?>';
-    const thumbUrl = '<?= addslashes($movie['thumb_url'] ?? '') ?>';
-    
-    // Lưu lịch sử xem vào LocalStorage (cho khách và thành viên)
-    try {
-        let history = JSON.parse(localStorage.getItem('phimhayok_watch_history')) || [];
-        // Loại bỏ phim này nếu đã có trong lịch sử để đưa lên đầu
-        history = history.filter(h => h.slug !== movieSlug);
-        history.unshift({
-            slug: movieSlug,
-            name: movieName,
-            episode: episodeName,
-            thumb: thumbUrl,
-            url: window.location.pathname,
-            time: new Date().getTime()
-        });
-        // Giữ tối đa 20 phim
-        if (history.length > 20) {
-            history = history.slice(0, 20);
+    // Function to log history
+    function logHistory() {
+        let currentTime = 0;
+        let duration = 0;
+        const video = document.getElementById('video-player');
+        if (video) {
+            currentTime = Math.floor(video.currentTime || 0);
+            duration = Math.floor(video.duration || 0);
         }
-        localStorage.setItem('phimhayok_watch_history', JSON.stringify(history));
-    } catch(e) {
-        console.error('Error saving local history:', e);
+
+        // Lưu lịch sử xem vào LocalStorage (cho khách và thành viên)
+        try {
+            let history = JSON.parse(localStorage.getItem('phimhayok_watch_history')) || [];
+            // Loại bỏ phim này nếu đã có trong lịch sử để đưa lên đầu
+            history = history.filter(h => h.slug !== movieSlug);
+            history.unshift({
+                slug: movieSlug,
+                name: movieName,
+                episode: episodeName,
+                thumb: thumbUrl,
+                url: window.location.pathname,
+                time: new Date().getTime(),
+                currentTime: currentTime
+            });
+            // Giữ tối đa 20 phim
+            if (history.length > 20) {
+                history = history.slice(0, 20);
+            }
+            localStorage.setItem('phimhayok_watch_history', JSON.stringify(history));
+        } catch(e) {
+            console.error('Error saving local history:', e);
+        }
+
+        <?php if (isset($_SESSION['user'])): ?>
+        // Lưu lịch sử xem vào Database qua API cho thành viên đã đăng nhập
+        fetch(`/api/v1/history.php?action=add&key=${appApiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                movie_slug: movieSlug,
+                movie_name: movieName,
+                episode_name: episodeName,
+                episode_slug: '<?= addslashes($currentEp['slug']) ?>',
+                thumb_url: thumbUrl,
+                current_time: currentTime,
+                duration: duration
+            })
+        }).catch(err => console.error('Error logging history:', err));
+        <?php endif; ?>
     }
 
-    <?php if (isset($_SESSION['user'])): ?>
-    // Lưu lịch sử xem vào Database qua API cho thành viên đã đăng nhập
-    fetch(`/api/v1/history.php?action=add&key=${appApiKey}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            movie_slug: movieSlug,
-            movie_name: movieName,
-            episode_name: episodeName,
-            thumb_url: thumbUrl
-        })
-    }).then(res => res.json())
-      .then(data => console.log('History logged to DB:', data))
-      .catch(err => console.error('Error logging history:', err));
-    <?php endif; ?>
+    // Log immediately
+    logHistory();
+
+    // Log every 15 seconds if playing
+    setInterval(() => {
+        const video = document.getElementById('video-player');
+        if (video && !video.paused) {
+            logHistory();
+        }
+    }, 15000);
+
+    // Log when leaving the page to capture the exact second
+    window.addEventListener('beforeunload', function() {
+        logHistory();
+    });
 });
 </script>
 

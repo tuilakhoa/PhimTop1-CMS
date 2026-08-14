@@ -6,6 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../core/config.dart';
 import '../services/tv_remote_service.dart';
+import 'dart:io';
+import 'package:package_info_plus/package_info_plus.dart';
+import '../providers/home_provider.dart';
+import '../widgets/update_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -16,6 +20,61 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final TvRemoteService _tvService = TvRemoteService();
+  String _version = "Đang tải...";
+  int _buildNumber = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() {
+        _version = info.version;
+        _buildNumber = int.tryParse(info.buildNumber) ?? 0;
+      });
+    }
+  }
+
+  Future<void> _checkUpdate() async {
+    final provider = context.read<HomeProvider>();
+    final bool isIOS = Platform.isIOS;
+    final int targetBuild = isIOS ? provider.appBuildNumberIos : provider.appBuildNumber;
+    final String targetVersion = isIOS ? provider.appLatestVersionIos : provider.appLatestVersion;
+    final bool forceUpdate = isIOS ? provider.appForceUpdateIos : provider.appForceUpdate;
+    final String downloadUrl = isIOS ? provider.appDownloadUrlIos : provider.appDownloadUrl;
+
+    if (downloadUrl.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Không có thông tin cập nhật')));
+      }
+      return;
+    }
+
+    if (targetBuild > _buildNumber) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: !forceUpdate,
+          builder: (context) {
+            return UpdateDialog(
+              version: targetVersion,
+              message: provider.appUpdateMessage,
+              downloadUrl: downloadUrl,
+              forceUpdate: forceUpdate,
+            );
+          },
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bạn đang dùng phiên bản mới nhất')));
+      }
+    }
+  }
 
   bool _isTvMode(BuildContext context) {
     if (appFlavor == 'mobile') return false;
@@ -114,7 +173,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.info_outline, color: Colors.grey),
             title: const Text("Phiên bản", style: TextStyle(color: Colors.white)),
-            trailing: const Text("1.0.0", style: TextStyle(color: Colors.grey)),
+            subtitle: Text("v$_version ($_buildNumber)", style: const TextStyle(color: Colors.grey)),
+            trailing: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              onPressed: _checkUpdate,
+              child: const Text("Kiểm tra cập nhật"),
+            ),
           ),
 
           const Divider(color: Colors.grey),

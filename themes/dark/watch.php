@@ -203,6 +203,11 @@ document.addEventListener('DOMContentLoaded', function() {
             logHistory();
         }
     }, 15000);
+
+    // Log when leaving the page to capture the exact second
+    window.addEventListener('beforeunload', function() {
+        logHistory();
+    });
 });
 </script>
 <?php endif; ?>

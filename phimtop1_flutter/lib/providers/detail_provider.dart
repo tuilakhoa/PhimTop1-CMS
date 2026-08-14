@@ -14,7 +14,7 @@ class DetailProvider with ChangeNotifier {
   int currentEpisodeIndex = 0;
   int currentServerIndex = 0;
 
-  Future<void> fetchDetail(String slug) async {
+  Future<void> fetchDetail(String slug, {String? token}) async {
     isLoading = true;
     error = null;
     notifyListeners();
@@ -29,6 +29,28 @@ class DetailProvider with ChangeNotifier {
         images = data.images;
         currentEpisodeIndex = 0;
         currentServerIndex = 0;
+
+        if (token != null) {
+          try {
+            final historyRes = await cmsApi.getHistory(token);
+            if (historyRes.data != null) {
+              final match = historyRes.data!.firstWhere(
+                (item) => item.movieSlug == slug,
+                orElse: () => HistoryItem.fromJson({}),
+              );
+              if (match.id != 0 && match.episodeSlug.isNotEmpty) {
+                for (int s = 0; s < episodes.length; s++) {
+                  final idx = episodes[s].serverData.indexWhere((ep) => ep.slug == match.episodeSlug);
+                  if (idx != -1) {
+                    currentServerIndex = s;
+                    currentEpisodeIndex = idx;
+                    break;
+                  }
+                }
+              }
+            }
+          } catch (_) {}
+        }
       } else {
         error = "Không tìm thấy phim";
       }

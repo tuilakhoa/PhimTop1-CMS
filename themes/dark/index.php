@@ -172,8 +172,12 @@ if (empty($featuredMovies) && !empty($movies)) {
                 <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-4">
                     <?php foreach ($historyItems as $item): 
                         $progress = $item['duration'] > 0 ? min(1, max(0, $item['current_time'] / $item['duration'])) * 100 : 0;
+                        // Build direct watch link using episode_slug if available, fallback to movie page
+                        $historyLink = !empty($item['episode_slug']) 
+                            ? '/' . ($settings["slugWatch"] ?? "xem-phim") . '/' . urlencode($item['movie_slug']) . '/' . urlencode($item['episode_slug'])
+                            : '/' . ($settings["slugMovie"] ?? "phim") . '/' . urlencode($item['movie_slug']);
                     ?>
-                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['movie_slug']) ?>" class="group shrink-0 w-64 block">
+                        <a href="<?= $historyLink ?>" class="group shrink-0 w-64 block">
                             <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#111] mb-3">
                                 <img src="<?= htmlspecialchars(getPhimImgUrl($item['thumb_url'])) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
