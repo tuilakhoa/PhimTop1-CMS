@@ -23,6 +23,14 @@ class AppInitData {
   final int enableComics;
   final bool? isComicPluginActive;
   final String version;
+  final String appLatestVersion;
+  final int appBuildNumber;
+  final bool appForceUpdate;
+  final String appLatestVersionIos;
+  final int appBuildNumberIos;
+  final bool appForceUpdateIos;
+  final String appDownloadUrlIos;
+  final String appUpdateMessage;
 
   AppInitData.fromJson(Map<String, dynamic> json)
       : siteName = json['siteName'] ?? '',
@@ -32,7 +40,15 @@ class AppInitData {
         appDownloadUrl = json['appDownloadUrl'] ?? '',
         enableComics = json['enableComics'] ?? 0,
         isComicPluginActive = json['isComicPluginActive'],
-        version = json['version'] ?? '';
+        version = json['version'] ?? '',
+        appLatestVersion = json['appLatestVersion'] ?? '1.0.0',
+        appBuildNumber = json['appBuildNumber'] ?? 1,
+        appForceUpdate = json['appForceUpdate'] ?? false,
+        appLatestVersionIos = json['appLatestVersionIos'] ?? '1.0.0',
+        appBuildNumberIos = json['appBuildNumberIos'] ?? 1,
+        appForceUpdateIos = json['appForceUpdateIos'] ?? false,
+        appDownloadUrlIos = json['appDownloadUrlIos'] ?? '',
+        appUpdateMessage = json['appUpdateMessage'] ?? 'Đã có phiên bản mới, vui lòng cập nhật!';
 }
 
 class HomeData {

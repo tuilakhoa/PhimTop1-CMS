@@ -10,6 +10,10 @@ import '../core/config.dart';
 import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
 import '../models/models.dart';
+import 'dart:io';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../widgets/update_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,14 +24,55 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<HistoryItem> _history = [];
+  bool _hasCheckedUpdate = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HomeProvider>().fetchHomeData();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<HomeProvider>().fetchHomeData();
+      if (mounted) {
+        _checkUpdate();
+      }
       _fetchHistory();
     });
+  }
+
+  Future<void> _checkUpdate() async {
+    if (_hasCheckedUpdate) return;
+    _hasCheckedUpdate = true;
+    
+    final provider = context.read<HomeProvider>();
+    
+    final bool isIOS = Platform.isIOS;
+    final int targetBuild = isIOS ? provider.appBuildNumberIos : provider.appBuildNumber;
+    final String targetVersion = isIOS ? provider.appLatestVersionIos : provider.appLatestVersion;
+    final bool forceUpdate = isIOS ? provider.appForceUpdateIos : provider.appForceUpdate;
+    final String downloadUrl = isIOS ? provider.appDownloadUrlIos : provider.appDownloadUrl;
+
+    if (downloadUrl.isEmpty) return;
+
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final currentBuildNumber = int.tryParse(packageInfo.buildNumber) ?? 0;
+      
+      if (targetBuild > currentBuildNumber) {
+        if (!mounted) return;
+        
+        showDialog(
+          context: context,
+          barrierDismissible: !forceUpdate,
+          builder: (context) {
+            return UpdateDialog(
+              version: targetVersion,
+              message: provider.appUpdateMessage,
+              downloadUrl: downloadUrl,
+              forceUpdate: forceUpdate,
+            );
+          },
+        );
+      }
+    } catch (_) {}
   }
 
   Future<void> _fetchHistory() async {

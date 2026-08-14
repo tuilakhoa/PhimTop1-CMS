@@ -48,6 +48,10 @@ dependencies:
   simple_pip_mode: ^1.1.0
   network_info_plus: ^8.2.1
   speech_to_text: ^7.4.0
+  package_info_plus: any
+  url_launcher: any
+  path_provider: any
+  open_filex: any
 
 dev_dependencies:
   flutter_test:

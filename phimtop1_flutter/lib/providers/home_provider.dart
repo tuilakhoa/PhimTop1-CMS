@@ -15,6 +15,18 @@ class HomeProvider with ChangeNotifier {
   List<MovieItem> tvShows = [];
   String domain = "";
   String logoUrl = "";
+  
+  String appLatestVersion = "1.0.0";
+  int appBuildNumber = 1;
+  bool appForceUpdate = false;
+  
+  String appLatestVersionIos = "1.0.0";
+  int appBuildNumberIos = 1;
+  bool appForceUpdateIos = false;
+  String appDownloadUrlIos = "";
+
+  String appUpdateMessage = "";
+  String appDownloadUrl = "";
 
   Future<void> fetchHomeData() async {
     isLoading = true;
@@ -25,6 +37,17 @@ class HomeProvider with ChangeNotifier {
       final initRes = await cmsApi.getAppInit();
       if (initRes.data != null) {
         logoUrl = initRes.data!.logoUrl;
+        appLatestVersion = initRes.data!.appLatestVersion;
+        appBuildNumber = initRes.data!.appBuildNumber;
+        appForceUpdate = initRes.data!.appForceUpdate;
+        
+        appLatestVersionIos = initRes.data!.appLatestVersionIos;
+        appBuildNumberIos = initRes.data!.appBuildNumberIos;
+        appForceUpdateIos = initRes.data!.appForceUpdateIos;
+        appDownloadUrlIos = initRes.data!.appDownloadUrlIos;
+
+        appUpdateMessage = initRes.data!.appUpdateMessage;
+        appDownloadUrl = initRes.data!.appDownloadUrl;
       }
 
       final homeResponse = await cmsApi.getHome();

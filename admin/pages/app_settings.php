@@ -28,9 +28,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'appSchemaOs' => $appSchemaOs,
         'appSchemaCategory' => $appSchemaCategory,
         'appSchemaPrice' => $appSchemaPrice,
-        'appSchemaCurrency' => $appSchemaCurrency,
-        'appSchemaRatingValue' => $appSchemaRatingValue,
-        'appSchemaRatingCount' => $appSchemaRatingCount
+        'appLatestVersion' => trim($_POST['appLatestVersion'] ?? '1.0.0'),
+        'appBuildNumber' => (int)($_POST['appBuildNumber'] ?? 1),
+        'appForceUpdate' => isset($_POST['appForceUpdate']) ? 1 : 0,
+        
+        'appLatestVersionIos' => trim($_POST['appLatestVersionIos'] ?? '1.0.0'),
+        'appBuildNumberIos' => (int)($_POST['appBuildNumberIos'] ?? 1),
+        'appForceUpdateIos' => isset($_POST['appForceUpdateIos']) ? 1 : 0,
+        'appDownloadUrlIos' => trim($_POST['appDownloadUrlIos'] ?? ''),
+
+        'appUpdateMessage' => trim($_POST['appUpdateMessage'] ?? '')
     ]);
     
     $success = "Cập nhật cấu hình App thành công!";
@@ -128,6 +135,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <p class="text-xs text-gray-500 mt-1 font-normal">Khi người dùng truy cập web bằng trình duyệt điện thoại, một nút "Mở trong App" sẽ hiện ra.</p>
                     </div>
                 </label>
+            </div>
+
+            <div class="border-t border-gray-800 pt-6 mt-6">
+                <h4 class="text-md font-semibold text-white mb-4">Cơ Chế Cập Nhật Tự Động (Auto-Update App)</h4>
+                
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Thông Báo Cập Nhật Chung</label>
+                    <textarea name="appUpdateMessage" rows="2" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:ring-1 focus:ring-red-500 outline-none" placeholder="Đã có phiên bản mới với nhiều tính năng hấp dẫn..."><?= htmlspecialchars($settings['appUpdateMessage'] ?? 'Đã có phiên bản mới, vui lòng cập nhật!') ?></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    <!-- ANDROID SECTION -->
+                    <div class="bg-gray-800/30 border border-gray-700 p-4 rounded-xl">
+                        <h5 class="text-green-500 font-semibold mb-3 flex items-center">
+                            <i data-lucide="smartphone" class="w-4 h-4 mr-1.5"></i> Android
+                        </h5>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Phiên Bản Mới (VD: 1.1.0)</label>
+                                <input type="text" name="appLatestVersion" value="<?= htmlspecialchars($settings['appLatestVersion'] ?? '1.0.0') ?>" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:ring-1 focus:ring-green-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Build Number Mới (VD: 2)</label>
+                                <input type="number" name="appBuildNumber" value="<?= htmlspecialchars($settings['appBuildNumber'] ?? '1') ?>" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:ring-1 focus:ring-green-500 outline-none">
+                            </div>
+                        </div>
+                        <label class="flex items-center cursor-pointer mb-2">
+                            <div class="relative">
+                                <input type="checkbox" name="appForceUpdate" value="1" class="sr-only" <?= (!empty($settings['appForceUpdate']) ? 'checked' : '') ?>>
+                                <div class="block bg-gray-700 w-8 h-4.5 rounded-full checkbox-bg"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-2.5 h-2.5 rounded-full transition checkbox-dot"></div>
+                            </div>
+                            <div class="ml-2 text-xs font-medium text-gray-300">Bắt buộc cập nhật Android</div>
+                        </label>
+                        <p class="text-[11px] text-gray-500">Link tải Android sử dụng "Link Tải App Mobile" ở trên.</p>
+                    </div>
+
+                    <!-- IOS SECTION -->
+                    <div class="bg-gray-800/30 border border-gray-700 p-4 rounded-xl">
+                        <h5 class="text-blue-500 font-semibold mb-3 flex items-center">
+                            <i data-lucide="apple" class="w-4 h-4 mr-1.5"></i> iOS
+                        </h5>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Phiên Bản Mới (VD: 1.1.0)</label>
+                                <input type="text" name="appLatestVersionIos" value="<?= htmlspecialchars($settings['appLatestVersionIos'] ?? '1.0.0') ?>" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:ring-1 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Build Number Mới (VD: 2)</label>
+                                <input type="number" name="appBuildNumberIos" value="<?= htmlspecialchars($settings['appBuildNumberIos'] ?? '1') ?>" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:ring-1 focus:ring-blue-500 outline-none">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Link tải App Store / TestFlight</label>
+                            <input type="text" name="appDownloadUrlIos" value="<?= htmlspecialchars($settings['appDownloadUrlIos'] ?? '') ?>" placeholder="https://apps.apple.com/..." class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:ring-1 focus:ring-blue-500 outline-none">
+                        </div>
+                        <label class="flex items-center cursor-pointer">
+                            <div class="relative">
+                                <input type="checkbox" name="appForceUpdateIos" value="1" class="sr-only" <?= (!empty($settings['appForceUpdateIos']) ? 'checked' : '') ?>>
+                                <div class="block bg-gray-700 w-8 h-4.5 rounded-full checkbox-bg"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-2.5 h-2.5 rounded-full transition checkbox-dot"></div>
+                            </div>
+                            <div class="ml-2 text-xs font-medium text-gray-300">Bắt buộc cập nhật iOS</div>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
