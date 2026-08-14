@@ -71,6 +71,16 @@ if ($displayMode === 'crawl') {
         }
         $data['images'] = $movieImages;
         
+        $peoples = [];
+        $peoplesRes = fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/peoples", 86400);
+        if ($peoplesRes) {
+            $pData = json_decode($peoplesRes, true);
+            if (!empty($pData['data']['peoples'])) {
+                $peoples = $pData['data']['peoples'];
+            }
+        }
+        $data['peoples'] = $peoples;
+        
     } else if (!$data) {
         try {
             $repo = getMovieRepository();

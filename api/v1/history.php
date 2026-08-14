@@ -61,7 +61,18 @@ if (!$user) {
     exit;
 }
 
+$enableContinueWatching = isset($settings['enableContinueWatching']) ? (int)$settings['enableContinueWatching'] : 1;
 $action = $_GET['action'] ?? 'list';
+
+if (!$enableContinueWatching) {
+    if ($action === 'list') {
+        echo json_encode(['status' => 'success', 'data' => []]);
+        exit;
+    }
+    echo json_encode(['status' => 'error', 'message' => 'Tính năng Xem Tiếp đang bị tắt.']);
+    exit;
+}
+
 $pdo = getPDO();
 
 if ($action === 'list') {

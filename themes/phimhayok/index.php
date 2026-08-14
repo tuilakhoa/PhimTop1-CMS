@@ -162,6 +162,8 @@ $homeSliders = [
 <div class="px-4 md:px-12 lg:px-20 max-w-[1920px] mx-auto py-12 bg-black relative z-20 space-y-24">
 
     <!-- Section: Tiếp Tục Xem (Local History) -->
+    <?php $enableContinueWatching = isset($settings['enableContinueWatching']) ? (int)$settings['enableContinueWatching'] : 1; ?>
+    <?php if ($enableContinueWatching): ?>
     <section id="continue-watching-section" class="hidden">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-white flex items-center">
@@ -177,6 +179,7 @@ $homeSliders = [
             <div class="swiper-button-next hidden md:flex"></div>
         </div>
     </section>
+    <?php endif; ?>
 
     <!-- 2. Mới Nhất Trên Phimhayok (16:9 Swiper) -->
     <section>

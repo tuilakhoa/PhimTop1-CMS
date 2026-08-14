@@ -509,7 +509,61 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         const SizedBox(height: 24),
 
                         // Actors
-                        if (movie.actor != null && movie.actor!.isNotEmpty) ...[
+                        if (provider.peoples != null && provider.peoples!.isNotEmpty) ...[
+                          const Text("Diễn viên", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 140,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: provider.peoples!.length,
+                              itemBuilder: (context, index) {
+                                final person = provider.peoples![index];
+                                return Container(
+                                  width: 90,
+                                  margin: const EdgeInsets.only(right: 12),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 70,
+                                        height: 70,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.grey[800],
+                                          border: Border.all(color: Colors.white24, width: 2),
+                                          image: person.profilePath.isNotEmpty 
+                                              ? DecorationImage(
+                                                  image: CachedNetworkImageProvider("https://image.tmdb.org/t/p/w185${person.profilePath}"),
+                                                  fit: BoxFit.cover,
+                                                ) 
+                                              : null,
+                                        ),
+                                        child: person.profilePath.isEmpty ? const Icon(Icons.person, color: Colors.white54, size: 40) : null,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        person.name,
+                                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (person.character.isNotEmpty)
+                                        Text(
+                                          person.character,
+                                          style: const TextStyle(color: Colors.grey, fontSize: 10),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ] else if (movie.actor != null && movie.actor!.isNotEmpty) ...[
                           const Text("Diễn viên", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                           const SizedBox(height: 12),
                           SizedBox(

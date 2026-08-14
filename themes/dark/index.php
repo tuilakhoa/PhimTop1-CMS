@@ -153,7 +153,8 @@ if (empty($featuredMovies) && !empty($movies)) {
         <div class="lg:col-span-3">
             <?php
             $historyItems = [];
-            if (isset($_SESSION['user'])) {
+            $enableContinueWatching = isset($settings['enableContinueWatching']) ? (int)$settings['enableContinueWatching'] : 1;
+            if ($enableContinueWatching && isset($_SESSION['user'])) {
                 $pdo = getPDO();
                 if ($pdo) {
                     $stmt = $pdo->prepare("SELECT * FROM watch_history WHERE user_email = ? ORDER BY updated_at DESC LIMIT 5");
