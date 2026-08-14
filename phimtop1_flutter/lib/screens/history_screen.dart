@@ -117,17 +117,65 @@ class _HistoryScreenState extends State<HistoryScreen> {
       itemCount: _history.length,
       itemBuilder: (context, index) {
         final item = _history[index];
-        return ListTile(
-          leading: const Icon(Icons.history, color: Colors.grey),
-          title: Text(item.movieName, style: const TextStyle(color: Colors.white)),
-          subtitle: Text(item.episodeName, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-          trailing: Text(
-            item.updatedAt.split(' ').first,
-            style: const TextStyle(color: Colors.grey, fontSize: 10),
-          ),
+        final progress = item.duration > 0 ? (item.currentTime / item.duration).clamp(0.0, 1.0) : 0.0;
+        
+        return InkWell(
           onTap: () {
             context.push('/movie/${item.movieSlug}');
           },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: item.thumbUrl.isNotEmpty
+                      ? Image.network(
+                          item.thumbUrl.startsWith('http') ? item.thumbUrl : 'https://phimimg.com/${item.thumbUrl}',
+                          width: 100,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(width: 100, height: 60, color: Colors.grey[800], child: const Icon(Icons.movie, color: Colors.grey)),
+                        )
+                      : Container(
+                          width: 100,
+                          height: 60,
+                          color: Colors.grey[800],
+                          child: const Icon(Icons.movie, color: Colors.grey),
+                        ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item.movieName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 4),
+                      Text(item.episodeName, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                      if (item.duration > 0) ...[
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(2),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            backgroundColor: Colors.white24,
+                            color: Colors.red,
+                            minHeight: 3,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  item.updatedAt.split(' ').first,
+                  style: const TextStyle(color: Colors.white54, fontSize: 10),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

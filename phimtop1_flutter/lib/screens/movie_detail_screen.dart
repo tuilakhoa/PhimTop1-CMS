@@ -64,6 +64,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               movie.slug, 
               movie.name, 
               episode.name,
+              episodeSlug: episode.slug,
               thumbUrl: thumbUrl
             );
           }
@@ -77,6 +78,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   title: provider.movie?.name ?? "",
                   movieSlug: provider.movie?.slug ?? "",
                   episodeName: episode.name,
+                  episodeSlug: episode.slug,
                 ),
               ),
             );

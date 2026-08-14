@@ -4,6 +4,7 @@ checkSetup();
 
 $slug = $_GET['slug'] ?? '';
 $ep = $_GET['ep'] ?? '';
+$displayEp = preg_replace('/^tap-/', '', $ep);
 
 if (!$slug || !$ep) {
     header("Location: index.php");
@@ -26,7 +27,7 @@ if (($settings['displayMode'] ?? 'api') === 'crawl') {
         
         global $pageTitle, $pageDesc, $pageKeywords;
         $siteName = $settings['siteName'] ?? 'PhimTop1';
-        $pageTitle = 'Xem Phim ' . ($movie['name'] ?? '') . ' Tập ' . htmlspecialchars($ep) . ' - ' . $siteName;
+        $pageTitle = 'Xem Phim ' . ($movie['name'] ?? '') . ' Tập ' . htmlspecialchars($displayEp) . ' - ' . $siteName;
         
         $contentDesc = strip_tags(html_entity_decode($movie['content'] ?? ''));
         if (mb_strlen($contentDesc) > 160) {
@@ -42,7 +43,7 @@ if (($settings['displayMode'] ?? 'api') === 'crawl') {
         
         global $pageTitle, $pageDesc, $pageKeywords;
         $siteName = $settings['siteName'] ?? 'PhimTop1';
-        $pageTitle = 'Xem Phim ' . ($movie['name'] ?? $movie['title'] ?? '') . ' Tập ' . htmlspecialchars($ep) . ' - ' . $siteName;
+        $pageTitle = 'Xem Phim ' . ($movie['name'] ?? $movie['title'] ?? '') . ' Tập ' . htmlspecialchars($displayEp) . ' - ' . $siteName;
         
         $contentDesc = strip_tags(html_entity_decode($movie['content'] ?? ''));
         if (mb_strlen($contentDesc) > 160) {
@@ -96,13 +97,13 @@ if (!$seoOverride) {
 if ($seoOverride) {
     if (!empty($seoOverride['seo_title'])) {
         // Allow dynamic injection of episode number if {ep} is in the string
-        $pageTitle = str_replace('{ep}', htmlspecialchars($ep), $seoOverride['seo_title']);
+        $pageTitle = str_replace('{ep}', htmlspecialchars($displayEp), $seoOverride['seo_title']);
     }
     if (!empty($seoOverride['seo_desc'])) {
-        $pageDesc = str_replace('{ep}', htmlspecialchars($ep), $seoOverride['seo_desc']);
+        $pageDesc = str_replace('{ep}', htmlspecialchars($displayEp), $seoOverride['seo_desc']);
     }
     if (!empty($seoOverride['seo_keywords'])) {
-        $pageKeywords = str_replace('{ep}', htmlspecialchars($ep), $seoOverride['seo_keywords']);
+        $pageKeywords = str_replace('{ep}', htmlspecialchars($displayEp), $seoOverride['seo_keywords']);
     }
 }
 

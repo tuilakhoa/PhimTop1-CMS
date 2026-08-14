@@ -81,6 +81,9 @@ if ($action === 'add') {
     
     // We should also save the thumbnail to show in the list
     $thumb = $input['thumb_url'] ?? '';
+    $episodeSlug = $input['episode_slug'] ?? '';
+    $currentTime = (int)($input['current_time'] ?? 0);
+    $duration = (int)($input['duration'] ?? 0);
     
     if (empty($slug) || empty($name)) {
         http_response_code(400);
@@ -98,11 +101,11 @@ if ($action === 'add') {
     $existing = $stmt->fetch();
     
     if ($existing) {
-        $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, thumb_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-        $stmt->execute([$episodeName, $thumb, $existing['id']]);
+        $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $existing['id']]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, thumb_url) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$user['email'], $slug, $name, $episodeName, $thumb]);
+        $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, episode_slug, thumb_url, current_time, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$user['email'], $slug, $name, $episodeName, $episodeSlug, $thumb, $currentTime, $duration]);
     }
     
     echo json_encode(['status' => 'success']);

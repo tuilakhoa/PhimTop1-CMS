@@ -102,9 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
         btnCheckUpdate.addEventListener('click', () => checkUpdate(true));
     }
     
-    // Auto-update logic using SSE (Server-Sent Events)
+    // Auto-update logic using AJAX
     window.doAutoUpdate = function(downloadUrl) {
-        if (!confirm("Hệ thống sẽ tải và cài đặt bản cập nhật tự động. Việc này có thể mất vài phút. Bạn có chắc chắn muốn tiến hành?")) {
+        if (!confirm("Hệ thống sẽ tải và cài đặt bản cập nhật. Việc này có thể mất vài phút. Bạn có chắc chắn muốn tiến hành?")) {
             return;
         }
         
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (btnDoUpdate) {
             btnDoUpdate.disabled = true;
             btnDoUpdate.classList.add('opacity-50', 'cursor-not-allowed', 'transform-none');
-            btnDoUpdate.innerHTML = '<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Đang xử lý...';
+            btnDoUpdate.innerHTML = '<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Đang tải và cài đặt (chờ vài phút)...';
         }
         lucide.createIcons();
         
@@ -128,8 +128,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 50);
         
         logOutput.innerHTML = '';
-        progressBar.style.width = '0%';
-        progressBar.className = 'bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full transition-all duration-500 relative';
+        progressBar.style.width = '30%'; // Fake progress for UX
+        progressBar.className = 'bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full transition-all duration-500 relative animate-pulse';
         
         const appendLog = (msg, type) => {
             const el = document.createElement('div');
@@ -170,53 +170,51 @@ document.addEventListener('DOMContentLoaded', function() {
             logOutput.scrollTop = logOutput.scrollHeight;
         };
         
-        appendLog('Khởi động tiến trình cập nhật tự động (vui lòng không tắt trình duyệt)...', 'info');
+        appendLog('Khởi động tiến trình cập nhật tự động bằng AJAX...', 'info');
+        appendLog('Đang lấy dữ liệu và tải tệp tin. Có thể mất từ 1-2 phút, vui lòng KHÔNG tắt trang web.', 'warning');
+        
         const basePath = typeof ADMIN_PATH !== 'undefined' ? ADMIN_PATH : '/admin';
-        const source = new EventSource(`${basePath}/api/do_update.php?download_url=` + encodeURIComponent(downloadUrl));
         
-        source.onmessage = function(event) {
-            try {
-                const data = JSON.parse(event.data);
-                
-                if (data.message) {
-                    appendLog(data.message, data.type || 'info');
-                }
-                
-                if (data.progress) {
-                    progressBar.style.width = data.progress + '%';
-                    if (data.progress >= 100) {
-                        progressBar.className = 'bg-gradient-to-r from-green-500 to-emerald-400 h-full rounded-full transition-all duration-500 relative shadow-[0_0_15px_rgba(16,185,129,0.5)]';
-                    }
-                }
-                
-                if (data.complete) {
-                    source.close();
-                    if (data.type === 'success') {
-                        if (btnDoUpdate) {
-                            btnDoUpdate.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Cài Đặt Hoàn Tất';
-                            btnDoUpdate.className = "px-6 py-2.5 bg-green-600 rounded-xl text-white font-bold flex items-center shadow-lg shadow-green-500/30";
-                        }
-                        lucide.createIcons();
-                        appendLog('Trang web sẽ tự động tải lại trong 3 giây...', 'info');
-                        setTimeout(() => window.location.reload(), 3000);
-                    } else {
-                        if (btnDoUpdate) {
-                            btnDoUpdate.disabled = false;
-                            btnDoUpdate.classList.remove('opacity-50', 'cursor-not-allowed');
-                            btnDoUpdate.innerHTML = '<i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Thử Lại';
-                            btnDoUpdate.className = "px-6 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-white font-bold flex items-center border border-gray-600 transition-colors";
-                        }
-                        lucide.createIcons();
-                    }
-                }
-            } catch (e) {
-                console.error("Lỗi phân tích cú pháp SSE", e);
+        fetch(`${basePath}/api/do_update.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ download_url: downloadUrl })
+        })
+        .then(res => res.json())
+        .then(data => {
+            progressBar.style.width = '100%';
+            progressBar.className = 'bg-gradient-to-r from-green-500 to-emerald-400 h-full rounded-full transition-all duration-500 relative shadow-[0_0_15px_rgba(16,185,129,0.5)]';
+            
+            if (data.logs && data.logs.length > 0) {
+                data.logs.forEach(log => appendLog(log.message, log.type));
             }
-        };
-        
-        source.onerror = function() {
-            appendLog('Mất kết nối với máy chủ trong quá trình cập nhật! Quá trình có thể vẫn đang chạy ngầm.', 'error');
-            source.close();
+            
+            appendLog(data.message, data.status === 'error' ? 'error' : 'success');
+            
+            if (data.status === 'success' || data.status === 'warning') {
+                if (btnDoUpdate) {
+                    btnDoUpdate.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Cài Đặt Hoàn Tất';
+                    btnDoUpdate.className = "px-6 py-2.5 bg-green-600 rounded-xl text-white font-bold flex items-center shadow-lg shadow-green-500/30";
+                }
+                appendLog('Trang web sẽ tự động tải lại trong 3 giây...', 'info');
+                setTimeout(() => window.location.reload(), 3000);
+            } else {
+                if (btnDoUpdate) {
+                    btnDoUpdate.disabled = false;
+                    btnDoUpdate.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btnDoUpdate.innerHTML = '<i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Thử Lại';
+                    btnDoUpdate.className = "px-6 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-white font-bold flex items-center border border-gray-600 transition-colors";
+                }
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            progressBar.style.width = '100%';
+            progressBar.className = 'bg-red-500 h-full rounded-full transition-all duration-500 relative';
+            appendLog('Có lỗi xảy ra trong quá trình cập nhật (Timeout hoặc lỗi mạng).', 'error');
+            
             if (btnDoUpdate) {
                 btnDoUpdate.disabled = false;
                 btnDoUpdate.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -224,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 btnDoUpdate.className = "px-6 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-white font-bold flex items-center border border-gray-600 transition-colors";
             }
             lucide.createIcons();
-        };
+        });
     };
     
     // Auto check on load

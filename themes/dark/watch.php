@@ -19,11 +19,26 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     }
 }
 ?>
-<div class="container mx-auto px-4 py-8 max-w-6xl">
+<div class="bg-[#000000] min-h-screen text-gray-200 font-sans pb-20">
+    <div class="max-w-[1400px] mx-auto px-6 md:px-12 pt-8 lg:pt-12">
     
     <!-- Video Player -->
-    <div class="mb-6 bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
+    <div class="mb-8 bg-[#0a0a0a] rounded-2xl overflow-hidden border border-gray-900">
         <div class="aspect-video w-full bg-black relative flex items-center justify-center group" id="player-container">
+<?php
+$startTime = 0;
+if (isset($_SESSION['user'])) {
+    $pdo = getPDO();
+    if ($pdo) {
+        $stmt = $pdo->prepare("SELECT current_time FROM watch_history WHERE user_email = ? AND movie_slug = ? AND episode_slug = ? LIMIT 1");
+        $stmt->execute([$_SESSION['user']['email'], $movie['slug'], $currentEp['slug']]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row && $row['current_time'] > 0) {
+            $startTime = (int)$row['current_time'];
+        }
+    }
+}
+?>
             <?php if ($isM3U8): ?>
                 <video id="video-player" class="w-full h-full outline-none" controls playsinline>
                     <source src="<?= htmlspecialchars($videoUrl) ?>" type="application/x-mpegURL">
@@ -33,12 +48,16 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
                 <script>
                     var video = document.getElementById('video-player');
                     var videoSrc = "<?= addslashes($videoUrl) ?>";
+                    var startTime = <?= $startTime ?>;
                     
                     if (Hls.isSupported()) {
                         var hls = new Hls();
                         hls.loadSource(videoSrc);
                         hls.attachMedia(video);
                         hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                            if (startTime > 0) {
+                                video.currentTime = startTime;
+                            }
                             video.play().catch(function(e) {
                                 console.log("Auto-play blocked by browser.");
                             });
@@ -47,6 +66,9 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
                         // For Safari
                         video.src = videoSrc;
                         video.addEventListener('loadedmetadata', function() {
+                            if (startTime > 0) {
+                                video.currentTime = startTime;
+                            }
                             video.play().catch(function(e) {
                                 console.log("Auto-play blocked by browser.");
                             });
@@ -68,17 +90,17 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
             <?php endif; ?>
         </div>
         
-        <div class="p-5 bg-gray-900 border-t border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="p-5 md:p-8 bg-[#111] border-t border-gray-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-white mb-1"><a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($slug) ?>" class="hover:text-red-500 transition-colors"><?= htmlspecialchars($movie['name']) ?></a></h1>
-                <h2 class="text-lg text-gray-300">Đang xem: Tập <?= htmlspecialchars($currentEp['name']) ?></h2>
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight"><a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($slug) ?>" class="hover:text-gray-300 transition-colors"><?= htmlspecialchars($movie['name']) ?></a></h1>
+                <h2 class="text-base text-gray-500 font-medium">Đang xem: Tập <?= htmlspecialchars($currentEp['name']) ?></h2>
             </div>
             <div class="flex items-center space-x-3">
-                <button onclick="toggleWatchPartyDialog()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium border border-indigo-500 flex items-center transition-colors">
-                    <i data-lucide="users" class="w-4 h-4 mr-1"></i> Xem Chung
+                <button onclick="toggleWatchPartyDialog()" class="px-5 py-2.5 bg-[#1a1a1a] hover:bg-white text-gray-300 hover:text-black rounded-lg text-sm font-medium border border-gray-800 hover:border-white flex items-center transition-colors">
+                    <i data-lucide="users" class="w-4 h-4 mr-2"></i> Xem Chung
                 </button>
-                <span class="px-3 py-1.5 bg-gray-800 text-gray-300 rounded-lg text-sm font-medium border border-gray-700 hidden sm:inline-block">
-                    <i data-lucide="server" class="w-4 h-4 inline mr-1 text-blue-400"></i> Server: <?= htmlspecialchars($episodes[0]['server_name'] ?? 'HLS/Embed') ?>
+                <span class="px-4 py-2.5 bg-[#1a1a1a] text-gray-400 rounded-lg text-sm font-medium border border-gray-800 hidden sm:inline-flex items-center">
+                    <i data-lucide="server" class="w-4 h-4 mr-2"></i> Server: <?= htmlspecialchars($episodes[0]['server_name'] ?? 'HLS/Embed') ?>
                 </span>
             </div>
         </div>
@@ -86,22 +108,22 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     
     <!-- Episode List -->
     <?php if (!empty($episodes[0]['server_data'])): ?>
-        <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold text-white flex items-center">
-                    <i data-lucide="list-video" class="w-5 h-5 mr-2 text-red-500"></i> Danh sách tập
+        <div class="bg-[#111] rounded-2xl p-6 md:p-8 border border-gray-900 mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-white flex items-center tracking-tight">
+                    <i data-lucide="list-video" class="w-5 h-5 mr-3 text-white"></i> Danh sách tập
                 </h3>
             </div>
             
-            <div class="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto custom-scrollbar p-2">
+            <div class="flex flex-wrap gap-3 max-h-[400px] overflow-y-auto custom-scrollbar">
                 <?php foreach ($episodes[0]['server_data'] as $e): 
                     $isActive = $currentEp['slug'] === $e['slug'];
                     $classes = $isActive 
-                        ? "bg-red-600 text-white shadow-lg shadow-red-600/30 font-bold transform scale-105 ring-2 ring-red-400 ring-offset-2 ring-offset-gray-900" 
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700";
+                        ? "bg-white text-black font-medium border border-white" 
+                        : "bg-[#1a1a1a] text-gray-400 hover:text-white border border-gray-800 hover:border-gray-500";
                 ?>
                     <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>" 
-                       class="px-5 py-2.5 rounded-lg transition-all <?= $classes ?>">
+                       class="px-5 py-2.5 rounded-lg transition-colors text-sm <?= $classes ?>">
                         <?= htmlspecialchars($e['name']) ?>
                     </a>
                 <?php endforeach; ?>
@@ -112,25 +134,26 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     <!-- Movie Suggestions -->
     <?php if (!empty($suggestions)): ?>
     <div class="mt-12 mb-12">
-        <h3 class="text-xl font-bold text-white mb-6 border-l-4 border-red-500 pl-3">Có Thể Bạn Sẽ Thích</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <h3 class="text-2xl font-bold text-white mb-8 tracking-tight">Có Thể Bạn Sẽ Thích</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-10">
             <?php foreach ($suggestions as $item): ?>
-                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group flex flex-col relative overflow-hidden rounded-xl bg-gray-800 transition-all hover:scale-105 hover:shadow-xl hover:shadow-red-500/20">
-                    <div class="relative aspect-[2/3] w-full overflow-hidden">
-                        <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group flex flex-col">
+                    <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
+                        <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        
                         <div class="absolute top-2 left-2">
-                            <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"><?= htmlspecialchars($item['quality'] ?? 'HD') ?></span>
+                            <span class="bg-black/70 backdrop-blur-md text-white text-[10px] font-medium px-2 py-0.5 rounded"><?= htmlspecialchars($item['quality'] ?? 'HD') ?></span>
                         </div>
                     </div>
-                    <div class="p-3 relative z-10 flex flex-col flex-grow">
-                        <h3 class="text-sm font-semibold text-white line-clamp-1 mb-1 group-hover:text-red-400 transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-medium text-gray-100 line-clamp-1 group-hover:text-white transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
                     </div>
                 </a>
             <?php endforeach; ?>
         </div>
     </div>
     <?php endif; ?>
+    </div>
 </div>
 
 <!-- History Logging Script -->
@@ -141,22 +164,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const movieSlug = '<?= addslashes($movie['slug']) ?>';
     const movieName = '<?= addslashes($movie['name']) ?>';
     const episodeName = '<?= addslashes($currentEp['name']) ?>';
+    const episodeSlug = '<?= addslashes($currentEp['slug']) ?>';
     const thumbUrl = '<?= addslashes($movie['thumb_url'] ?? '') ?>';
 
-    fetch(`/api/v1/history.php?action=add&key=${appApiKey}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            movie_slug: movieSlug,
-            movie_name: movieName,
-            episode_name: episodeName,
-            thumb_url: thumbUrl
-        })
-    }).then(res => res.json())
-      .then(data => console.log('History logged:', data))
-      .catch(err => console.error('Error logging history:', err));
+    function logHistory() {
+        let currentTime = 0;
+        let duration = 0;
+        const video = document.getElementById('video-player');
+        if (video) {
+            currentTime = Math.floor(video.currentTime || 0);
+            duration = Math.floor(video.duration || 0);
+        }
+
+        fetch(`/api/v1/history.php?action=add&key=${appApiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                movie_slug: movieSlug,
+                movie_name: movieName,
+                episode_name: episodeName,
+                episode_slug: episodeSlug,
+                thumb_url: thumbUrl,
+                current_time: currentTime,
+                duration: duration
+            })
+        }).catch(err => console.error('Error logging history:', err));
+    }
+
+    // Log immediately on load
+    logHistory();
+
+    // Log every 15 seconds if playing
+    setInterval(() => {
+        const video = document.getElementById('video-player');
+        if (video && !video.paused) {
+            logHistory();
+        }
+    }, 15000);
 });
 </script>
 <?php endif; ?>

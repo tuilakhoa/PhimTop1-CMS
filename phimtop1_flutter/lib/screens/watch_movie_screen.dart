@@ -15,12 +15,14 @@ import '../widgets/tv_virtual_keyboard.dart';
 import '../services/watching_session_service.dart';
 import '../services/watch_party_service.dart';
 import '../providers/auth_provider.dart';
+import '../api/cms_api.dart';
 
 class WatchMovieScreen extends StatefulWidget {
   final String m3u8Link;
   final String title;
   final String movieSlug;
   final String episodeName;
+  final String episodeSlug;
 
   const WatchMovieScreen({
     super.key,
@@ -28,6 +30,7 @@ class WatchMovieScreen extends StatefulWidget {
     required this.title,
     this.movieSlug = '',
     this.episodeName = '',
+    this.episodeSlug = '',
   });
 
   @override
@@ -46,6 +49,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   String? _wpRoomCode;
   bool _wpIsHost = false;
   Timer? _wpSyncTimer;
+  Timer? _historySyncTimer;
 
   @override
   void initState() {
@@ -95,6 +99,31 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
         isLoggedIn: auth.user != null,
         getProgress: () => _videoController?.value.position.inSeconds ?? 0,
       );
+
+      // Setup History Sync
+      if (auth.user != null && auth.token != null && widget.movieSlug.isNotEmpty) {
+        // initial log
+        cmsApi.addHistory(
+          auth.token!,
+          widget.movieSlug,
+          widget.title,
+          widget.episodeName,
+          episodeSlug: widget.episodeSlug,
+        );
+
+        _historySyncTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+          if (!mounted || _videoController == null || !_videoController!.value.isPlaying) return;
+          cmsApi.addHistory(
+            auth.token!,
+            widget.movieSlug,
+            widget.title,
+            widget.episodeName,
+            episodeSlug: widget.episodeSlug,
+            currentTime: _videoController!.value.position.inSeconds,
+            duration: _videoController!.value.duration.inSeconds,
+          );
+        });
+      }
     });
 
     // Listen to admin commands
@@ -112,9 +141,30 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     });
   }
 
-  void _initPlayer() {
-    _videoController = VideoPlayerController.networkUrl(Uri.parse(widget.m3u8Link))
-      ..initialize().then((_) {
+  void _initPlayer() async {
+    _videoController = VideoPlayerController.networkUrl(Uri.parse(widget.m3u8Link));
+    
+    try {
+      await _videoController!.initialize();
+      
+      // Check history and seek if needed
+      final auth = context.read<AuthProvider>();
+      if (auth.token != null && widget.movieSlug.isNotEmpty) {
+        try {
+          final res = await cmsApi.getHistory(auth.token!);
+          if (res.data != null) {
+            final match = res.data!.firstWhere(
+              (item) => item.movieSlug == widget.movieSlug && item.episodeSlug == widget.episodeSlug,
+              orElse: () => HistoryItem.fromJson({}), // Dummy empty item
+            );
+            if (match.id != 0 && match.currentTime > 0) {
+              await _videoController!.seekTo(Duration(seconds: match.currentTime));
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (mounted) {
         setState(() {
           _chewieController = ChewieController(
             videoPlayerController: _videoController!,
@@ -131,10 +181,11 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
             },
           );
         });
-      }).catchError((e) {
-        debugPrint("WatchMovieScreen Init Error: $e");
-        if (mounted) setState(() {});
-      });
+      }
+    } catch (e) {
+      debugPrint("WatchMovieScreen Init Error: $e");
+      if (mounted) setState(() {});
+    }
   }
 
   @override
@@ -142,6 +193,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     _remoteSubscription?.cancel();
     _watchingSessionSubscription?.cancel();
     _wpSyncTimer?.cancel();
+    _historySyncTimer?.cancel();
     WatchingSessionService().stopSession();
     // Revert to portrait only when leaving screen
     SystemChrome.setPreferredOrientations([

@@ -260,14 +260,22 @@ class HistoryItem {
   final String movieSlug;
   final String movieName;
   final String episodeName;
+  final String episodeSlug;
+  final int currentTime;
+  final int duration;
   final String updatedAt;
+  final String thumbUrl;
 
   HistoryItem.fromJson(Map<String, dynamic> json)
       : id = int.tryParse(json['id']?.toString() ?? '') ?? 0,
         movieSlug = json['movie_slug'] ?? '',
         movieName = json['movie_name'] ?? '',
         episodeName = json['episode_name'] ?? '',
-        updatedAt = json['updated_at'] ?? '';
+        episodeSlug = json['episode_slug'] ?? '',
+        currentTime = int.tryParse(json['current_time']?.toString() ?? '0') ?? 0,
+        duration = int.tryParse(json['duration']?.toString() ?? '0') ?? 0,
+        updatedAt = json['updated_at'] ?? '',
+        thumbUrl = json['thumb_url'] ?? '';
 }
 
 class HistoryResponse {

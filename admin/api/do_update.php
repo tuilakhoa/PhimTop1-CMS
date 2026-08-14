@@ -2,36 +2,18 @@
 require_once __DIR__ . '/../../includes/db.php';
 requireAdmin();
 
-// Set headers for Server-Sent Events
-header('Content-Type: text/event-stream');
-header('Cache-Control: no-cache');
-header('Connection: keep-alive');
-header('X-Accel-Buffering: no'); // Disable Nginx buffering
-
+header('Content-Type: application/json');
 @set_time_limit(0);
 @ignore_user_abort(true);
 
-// Ensure implicit flush is on
-@ini_set('output_buffering', 'off');
-@ini_set('zlib.output_compression', false);
-while (@ob_end_flush());
-ob_implicit_flush(1);
+if (session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
+}
 
-function emitLog($message, $type = 'info', $progress = null, $complete = false) {
-    $data = [
-        'message' => $message,
-        'type' => $type
-    ];
-    if ($progress !== null) $data['progress'] = $progress;
-    if ($complete) $data['complete'] = true;
-    
-    echo "data: " . json_encode($data) . "\n\n";
-    @ob_flush();
-    flush();
-    
-    if ($complete) {
-        exit;
-    }
+$logs = [];
+function addLog($msg, $type = 'info') {
+    global $logs;
+    $logs[] = ['message' => $msg, 'type' => $type];
 }
 
 $targetTag = $_GET['download_url'] ?? '';
@@ -41,25 +23,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (empty($targetTag)) {
-    emitLog('Không tìm thấy phiên bản mục tiêu.', 'error', null, true);
+    echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy phiên bản mục tiêu.', 'logs' => $logs]);
+    exit;
 }
 
-// 1. Get Repo Configuration
 $settings = getSettings();
 if (isset($settings['allowAutoUpdate']) && $settings['allowAutoUpdate'] == 0) {
-    emitLog('Tính năng cập nhật tự động đã bị TẮT bởi Quản trị viên trong phần Cài đặt.', 'error', null, true);
+    echo json_encode(['status' => 'error', 'message' => 'Tính năng cập nhật tự động đã bị TẮT.', 'logs' => $logs]);
+    exit;
 }
 $repo = 'tuilakhoa/PhimTop1-CMS';
 
-// Need to read config/update.php to get current version
 $configFile = __DIR__ . '/../../config/update.php';
 $configUpdate = file_exists($configFile) ? require $configFile : ['current_version' => '1.0.0'];
 $currentVersion = $configUpdate['current_version'] ?? '1.0.0';
 
-emitLog("Khởi tạo quá trình cập nhật (Github API)...", 'info', 5);
-emitLog("Đang kết nối Github Repository: $repo", 'info', 10);
+addLog("Khởi tạo cập nhật (Github API)...");
 
-// 2. Fetch Diff from Github
 function callGithub($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -74,24 +54,19 @@ function callGithub($url) {
     return false;
 }
 
-// Try with 'v' prefix first, then without
 $baseTag = 'v' . ltrim($currentVersion, 'v');
 $compareUrl = "https://api.github.com/repos/$repo/compare/$baseTag...$targetTag";
 $diff = callGithub($compareUrl);
 
 if (!$diff) {
-    // Try without 'v'
     $baseTag = ltrim($currentVersion, 'v');
     $compareUrl = "https://api.github.com/repos/$repo/compare/$baseTag...$targetTag";
     $diff = callGithub($compareUrl);
 }
 
 if (!$diff) {
-    emitLog("Không thể so sánh phiên bản ($baseTag...$targetTag). Github API có thể bị giới hạn hoặc tag không tồn tại.", 'error', null, true);
-}
-
-if (empty($diff['files'])) {
-    emitLog('Không tìm thấy tệp tin nào thay đổi giữa 2 phiên bản.', 'warning', 100, true);
+    echo json_encode(['status' => 'error', 'message' => "Không thể kết nối hoặc so sánh phiên bản ($baseTag...$targetTag).", 'logs' => $logs]);
+    exit;
 }
 
 $changedFiles = [];
@@ -105,20 +80,15 @@ foreach ($diff['files'] as $file) {
 }
 
 $totalFiles = count($changedFiles) + count($removedFiles);
-emitLog('Phát hiện ' . $totalFiles . ' tệp tin thay đổi qua Github Diff.', 'success', 20);
+addLog("Phát hiện $totalFiles tệp tin thay đổi.");
 
-// 3. Download Files
 $rootDir = realpath(__DIR__ . '/../../');
 $successCount = 0;
 $failCount = 0;
 
-$progressStep = 70 / ($totalFiles > 0 ? $totalFiles : 1);
-$currentProgress = 20;
-
 foreach ($changedFiles as $filename) {
-    // Raw Github URL format: https://raw.githubusercontent.com/user/repo/tag/filename
     $fileUrl = "https://raw.githubusercontent.com/$repo/$targetTag/" . str_replace(' ', '%20', $filename);
-    // Map github 'admin/' path to actual admin folder on server
+    
     $actualFilename = $filename;
     $adminFolderName = ltrim($settings['adminPath'] ?? '/admin', '/');
     if ($adminFolderName !== 'admin' && strpos($filename, 'admin/') === 0) {
@@ -127,9 +97,6 @@ foreach ($changedFiles as $filename) {
     
     $targetPath = $rootDir . '/' . $actualFilename;
     
-    emitLog("Đang tải: $filename", 'info', $currentProgress);
-    
-    // Download raw file
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $fileUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -140,28 +107,22 @@ foreach ($changedFiles as $filename) {
     curl_close($ch);
     
     if ($fileContent === false || $httpCode !== 200) {
-        emitLog("Lỗi tải $filename (HTTP $httpCode)", 'error', clone $currentProgress);
         $failCount++;
+        addLog("Lỗi tải $filename", 'error');
     } else {
         $targetDir = dirname($targetPath);
-        if (!is_dir($targetDir)) {
-            @mkdir($targetDir, 0755, true);
-        }
+        if (!is_dir($targetDir)) @mkdir($targetDir, 0755, true);
         
         if (@file_put_contents($targetPath, $fileContent) !== false) {
             $successCount++;
         } else {
-            emitLog("Lỗi ghi đè $filename (Kiểm tra quyền CHMOD)", 'error', clone $currentProgress);
             $failCount++;
+            addLog("Lỗi ghi $filename", 'error');
         }
     }
-    
-    $currentProgress += $progressStep;
 }
 
-// 3.5 Delete Removed Files
 foreach ($removedFiles as $filename) {
-    // Map github 'admin/' path to actual admin folder on server
     $actualFilename = $filename;
     $adminFolderName = ltrim($settings['adminPath'] ?? '/admin', '/');
     if ($adminFolderName !== 'admin' && strpos($filename, 'admin/') === 0) {
@@ -169,54 +130,40 @@ foreach ($removedFiles as $filename) {
     }
     
     $targetPath = $rootDir . '/' . $actualFilename;
-    emitLog("Đang xoá: $filename", 'info', clone $currentProgress);
-    
     if (file_exists($targetPath)) {
         if (@unlink($targetPath)) {
             $successCount++;
-            
-            // Try to remove empty parent directory
             $parentDir = dirname($targetPath);
-            if (is_dir($parentDir) && count(scandir($parentDir)) == 2) { // only . and ..
-                @rmdir($parentDir);
-            }
+            if (is_dir($parentDir) && count(scandir($parentDir)) == 2) @rmdir($parentDir);
         } else {
-            emitLog("Lỗi xoá $filename (Kiểm tra quyền CHMOD)", 'warning', clone $currentProgress);
+            addLog("Lỗi xoá $filename", 'warning');
         }
     } else {
-        // File already doesn't exist, count as success
         $successCount++;
     }
-    
-    $currentProgress += $progressStep;
 }
 
-emitLog("Đã xử lý xong: Thành công ($successCount), Thất bại ($failCount).", $failCount > 0 ? 'warning' : 'success', 90);
-
-// 4. Post-Update: Save new version & Clear Cache
-if ($successCount > 0) {
+if ($successCount > 0 || $totalFiles == 0) {
     $cleanLatest = ltrim($targetTag, 'v');
     $newConfigContent = "<?php\nreturn [\n    'current_version' => '$cleanLatest'\n];\n";
     @file_put_contents($configFile, $newConfigContent);
-    emitLog("Đã cập nhật cấu hình hệ thống lên phiên bản $cleanLatest.", 'info', 95);
+    addLog("Đã cập nhật hệ thống lên v$cleanLatest.", 'success');
     
     require_once __DIR__ . '/../../app/Core/UpdateChecker.php';
     $checker = new \App\Core\UpdateChecker();
     $checker->clearCache();
     
-    // Clear PHP OPcache after script finishes to prevent connection drop
-    register_shutdown_function(function() {
-        if (function_exists('opcache_reset')) {
-            @opcache_reset();
-        }
-        if (function_exists('apcu_clear_cache')) {
-            @apcu_clear_cache();
-        }
-    });
+    if (function_exists('opcache_reset')) @opcache_reset();
+    if (function_exists('apcu_clear_cache')) @apcu_clear_cache();
 }
 
-if ($failCount === 0) {
-    emitLog('Cập nhật hệ thống thành công! Trình duyệt sẽ tải lại sau giây lát.', 'success', 100, true);
-} else {
-    emitLog('Cập nhật hoàn tất nhưng có một số tệp tin bị lỗi.', 'warning', 100, true);
-}
+$status = $failCount === 0 ? 'success' : 'warning';
+$message = $failCount === 0 ? 'Cập nhật hệ thống thành công!' : 'Cập nhật hoàn tất nhưng có một số tệp tin bị lỗi.';
+
+echo json_encode([
+    'status' => $status,
+    'message' => $message,
+    'successCount' => $successCount,
+    'failCount' => $failCount,
+    'logs' => $logs
+]);

@@ -159,7 +159,7 @@ $homeSliders = [
 </div>
 <?php endif; ?>
 
-<div class="px-4 md:px-12 lg:px-20 max-w-[1920px] mx-auto py-8 bg-black relative z-20 space-y-16">
+<div class="px-4 md:px-12 lg:px-20 max-w-[1920px] mx-auto py-12 bg-black relative z-20 space-y-24">
 
     <!-- Section: Tiếp Tục Xem (Local History) -->
     <section id="continue-watching-section" class="hidden">
@@ -279,51 +279,71 @@ $homeSliders = [
         </div>
     </section>
 
-    <!-- 5. Top 10 Thịnh Hành (Vertical Posters + Big Numbers) -->
-    <section>
-        <div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-white flex items-center">
-                <span class="text-red-500 mr-2 text-2xl">🔥</span> Top 10 Thịnh Hành Tại Việt Nam Hôm Nay
+    <!-- 5. Bảng Xếp Hạng (Leaderboard) -->
+    <section class="bg-gradient-to-b from-[#0a0a0a] to-[#000000] rounded-3xl p-6 md:p-10 lg:p-12 border border-gray-900 shadow-2xl relative overflow-hidden">
+        <!-- Background decorative blur -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-phim-yellow/5 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-red-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 relative z-10 gap-6">
+            <h2 class="text-3xl md:text-4xl font-black text-white flex items-center tracking-tight">
+                <i data-lucide="bar-chart-2" class="w-8 h-8 mr-3 text-phim-yellow"></i> Bảng Xếp Hạng
             </h2>
-            <div class="flex space-x-2">
-                <button class="w-8 h-8 rounded bg-[#1a1a1a] flex items-center justify-center text-white hover:bg-gray-800"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
-                <button class="w-8 h-8 rounded bg-[#1a1a1a] flex items-center justify-center text-white hover:bg-gray-800"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+            
+            <!-- Tabs -->
+            <div class="flex bg-[#141414] p-1.5 rounded-xl border border-gray-800 shadow-inner">
+                <button class="px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors">Ngày</button>
+                <button class="px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm">Tuần</button>
+                <button class="px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm">Tháng</button>
             </div>
         </div>
         
-        <div class="swiper swiper-top10">
-            <div class="swiper-wrapper pb-12 pt-4 pl-4">
-                <?php 
-                $rank = 1;
-                foreach (array_slice($movies, 0, 10) as $item): 
-                ?>
-                    <div class="swiper-slide w-[180px] md:w-[220px]">
-                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block relative group">
-                            <div class="aspect-[2/3] relative rounded-lg overflow-hidden ml-8">
-                                <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                                
-                                <!-- Small Tags at bottom center of poster -->
-                                <div class="absolute bottom-3 left-0 right-0 flex justify-center space-x-2">
-                                    <span class="bg-gray-900 text-gray-300 text-[10px] font-bold px-1.5 py-0.5 rounded">T13</span>
-                                    <span class="bg-gray-900 text-gray-300 text-[10px] font-bold px-1.5 py-0.5 rounded"><?= htmlspecialchars($item['year'] ?? date('Y')) ?></span>
-                                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16 relative z-10">
+            <?php 
+            $rankCategories = [
+                ['title' => 'Top Phim Lẻ', 'data' => array_slice($movies, 0, 5)],
+                ['title' => 'Top Phim Bộ', 'data' => array_slice($movies, 5, 5) ?: array_slice($movies, 0, 5)],
+                ['title' => 'Top Hoạt Hình', 'data' => array_slice($movies, 10, 5) ?: array_slice($movies, 0, 5)]
+            ];
+            foreach ($rankCategories as $catIdx => $category):
+            ?>
+            <div class="space-y-8">
+                <h3 class="text-2xl font-bold text-gray-100 flex items-center">
+                    <span class="w-1.5 h-6 bg-phim-yellow rounded-full mr-3"></span>
+                    <?= $category['title'] ?>
+                </h3>
+                <div class="space-y-6">
+                    <?php 
+                    $rank = 1;
+                    foreach ($category['data'] as $item): 
+                        $thumb = !empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? '');
+                        $rankColor = $rank === 1 ? 'text-yellow-400 drop-shadow-[0_0_12px_rgba(250,204,21,0.6)]' : 
+                                    ($rank === 2 ? 'text-gray-300 drop-shadow-[0_0_12px_rgba(209,213,219,0.5)]' : 
+                                    ($rank === 3 ? 'text-amber-600 drop-shadow-[0_0_12px_rgba(217,119,6,0.6)]' : 'text-gray-700'));
+                    ?>
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex items-center group p-3 -mx-3 rounded-2xl hover:bg-[#1a1a1a] transition-colors duration-300">
+                        <div class="w-12 text-center shrink-0">
+                            <span class="text-4xl font-black italic <?= $rankColor ?> transition-transform group-hover:scale-110 inline-block"><?= $rank ?></span>
+                        </div>
+                        <div class="w-20 h-28 shrink-0 mx-5 rounded-xl overflow-hidden relative shadow-lg shadow-black/50">
+                            <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-white text-base md:text-lg font-bold truncate group-hover:text-phim-yellow transition-colors leading-tight mb-1.5"><?= htmlspecialchars($item['name']) ?></h4>
+                            <p class="text-gray-500 text-sm truncate"><?= htmlspecialchars($item['origin_name']) ?></p>
+                            <div class="flex items-center mt-3">
+                                <span class="bg-gray-800 text-gray-300 text-xs font-medium px-2 py-1 rounded mr-3 border border-gray-700"><?= htmlspecialchars($item['year'] ?? date('Y')) ?></span>
+                                <span class="text-gray-500 text-xs flex items-center">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5 mr-1.5"></i> <?= number_format(rand(1000, 99999)) ?>
+                                </span>
                             </div>
-                            
-                            <!-- Huge Number -->
-                            <div class="absolute -left-6 bottom-4 md:-left-8 md:bottom-8 text-8xl md:text-[140px] font-black italic text-stroke drop-shadow-xl z-10 select-none group-hover:text-white transition-colors duration-300" style="-webkit-text-stroke: 4px #404040; color: #000;">
-                                <?= $rank ?>
-                            </div>
-                            
-                            <!-- Title below -->
-                            <div class="mt-4 ml-8 text-center">
-                                <h3 class="text-white font-bold text-sm truncate"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
-                                <p class="text-gray-500 text-xs truncate"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
-                            </div>
-                        </a>
-                    </div>
-                <?php $rank++; endforeach; ?>
+                        </div>
+                    </a>
+                    <?php $rank++; endforeach; ?>
+                </div>
             </div>
+            <?php endforeach; ?>
         </div>
     </section>
 

@@ -18,13 +18,14 @@ $currentYear = (int)date('Y');
 for ($y = $currentYear; $y >= 2010; $y--) $filterYears[$y] = (string)$y;
 $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)', 'modified.time-asc' => 'Thời gian cập nhật (Cũ nhất)', 'year-desc' => 'Năm phát hành (Mới nhất)', 'year-asc' => 'Năm phát hành (Cũ nhất)'];
 ?>
-<div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-white border-l-4 border-red-500 pl-3"><?= htmlspecialchars($title) ?></h2>
-    </div>
-    
-    <!-- Filter Form -->
-    <div class="bg-gray-800 rounded-xl p-4 mb-8">
+<div class="bg-[#000000] min-h-screen text-gray-200 font-sans pb-20">
+    <div class="max-w-[1400px] mx-auto px-6 md:px-12 pt-8 lg:pt-12">
+        <div class="flex items-center justify-between mb-8 border-b border-gray-900 pb-4">
+            <h2 class="text-2xl font-bold text-white tracking-tight"><?= htmlspecialchars($title) ?></h2>
+        </div>
+        
+        <!-- Filter Form -->
+        <div class="bg-[#111] border border-gray-900 rounded-xl p-5 mb-10">
         <form action="" method="GET" class="flex flex-wrap gap-4 items-end">
             <!-- Preserve other query string params except page and filters -->
             <?php foreach ($_GET as $k => $v): 
@@ -70,78 +71,70 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
             </div>
 
             <div class="flex-none w-full md:w-auto">
-                <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center border border-red-500">
+                <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-white hover:bg-gray-200 text-black font-medium rounded-lg transition-colors flex items-center justify-center">
                     <i data-lucide="filter" class="w-4 h-4 mr-2"></i> Lọc Phim
                 </button>
             </div>
         </form>
     </div>
     
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-        <?php foreach ($movies as $movie): 
-            $thumb = !empty($movie['thumb_url']) ? $movie['thumb_url'] : (!empty($movie['poster_url']) ? $movie['poster_url'] : '');
-            if (!preg_match('/^http/', $thumb) && $thumb) {
-                if (preg_match('/^\/[a-zA-Z0-9_-]+\.(jpg|jpeg|png|webp)$/i', $thumb)) {
-                    $thumb = 'https://image.tmdb.org/t/p/w500' . $thumb;
-                } else {
-                    $domain = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
-                    $thumb = rtrim($domain, '/') . '/' . ltrim($thumb, '/');
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-10">
+            <?php foreach ($movies as $movie): 
+                $thumb = !empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '');
+                if (!preg_match('/^http/', $thumb) && $thumb) {
+                    if (preg_match('/^\/[a-zA-Z0-9_-]+\.(jpg|jpeg|png|webp)$/i', $thumb)) {
+                        $thumb = 'https://image.tmdb.org/t/p/w500' . $thumb;
+                    } else {
+                        $domain = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+                        $thumb = rtrim($domain, '/') . '/' . ltrim($thumb, '/');
+                    }
                 }
-            }
-        ?>
-            <a href="/<?= $settings['slugMovie'] ?? 'phim' ?>/<?= htmlspecialchars($movie['slug']) ?>" class="group flex flex-col relative overflow-hidden rounded-xl bg-gray-800 transition-all hover:scale-105 hover:shadow-xl hover:shadow-red-500/20">
-                <div class="relative aspect-[2/3] w-full overflow-hidden">
-                    <img src="<?= htmlspecialchars($thumb) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
-                    
-                    <div class="absolute top-2 left-2 flex flex-col gap-1">
-                        <?php if (!empty($movie['quality'])): ?>
-                            <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"><?= htmlspecialchars($movie['quality']) ?></span>
-                        <?php endif; ?>
-                        <?php if (!empty($movie['lang'])): ?>
-                            <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"><?= htmlspecialchars($movie['lang']) ?></span>
+            ?>
+                <a href="/<?= $settings['slugMovie'] ?? 'phim' ?>/<?= htmlspecialchars($movie['slug']) ?>" class="group flex flex-col">
+                    <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
+                        <img src="<?= htmlspecialchars($thumb) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        
+                        <div class="absolute top-2 left-2 flex gap-1.5">
+                            <?php if (!empty($movie['quality'])): ?>
+                                <span class="bg-black/70 backdrop-blur-md text-white text-[10px] font-medium px-2 py-0.5 rounded"><?= htmlspecialchars($movie['quality']) ?></span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <?php if (!empty($movie['episode_current'])): ?>
+                            <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md text-white text-[10px] font-medium px-2 py-1 rounded">
+                                <?= htmlspecialchars($movie['episode_current']) ?>
+                            </div>
                         <?php endif; ?>
                     </div>
                     
-                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div class="w-12 h-12 bg-red-600/90 rounded-full flex items-center justify-center transform scale-50 group-hover:scale-100 transition-transform duration-300 shadow-lg">
-                            <i data-lucide="play" class="w-6 h-6 text-white fill-current ml-1"></i>
-                        </div>
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-medium text-gray-100 line-clamp-1 mb-1 group-hover:text-white transition-colors" title="<?= htmlspecialchars($movie['name']) ?>">
+                            <?= htmlspecialchars($movie['name']) ?>
+                        </h3>
+                        <p class="text-xs text-gray-500 line-clamp-1">
+                            <?= !empty($movie['year']) ? $movie['year'] . ' • ' : '' ?><?= htmlspecialchars($movie['origin_name'] ?? '') ?>
+                        </p>
                     </div>
-                    
-                    <?php if (!empty($movie['episode_current'])): ?>
-                        <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded border border-white/10">
-                            <?= htmlspecialchars($movie['episode_current']) ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-                
-                <div class="p-3 relative z-10 flex flex-col flex-grow">
-                    <h3 class="text-sm font-semibold text-white line-clamp-1 mb-1 group-hover:text-red-400 transition-colors" title="<?= htmlspecialchars($movie['name']) ?>">
-                        <?= htmlspecialchars($movie['name']) ?>
-                    </h3>
-                    <p class="text-xs text-gray-400 line-clamp-1">
-                        <?= htmlspecialchars($movie['origin_name'] ?? '') ?> 
-                        <?= !empty($movie['year']) ? '(' . $movie['year'] . ')' : '' ?>
-                    </p>
-                </div>
-            </a>
-        <?php endforeach; ?>
-    </div>
-    
-    <?php if (empty($movies)): ?>
-        <div class="text-center py-12 text-gray-400">Không có phim nào để hiển thị.</div>
-    <?php endif; ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+        
+        <?php if (empty($movies)): ?>
+            <div class="text-center py-20 text-gray-500 border border-gray-900 rounded-2xl">
+                Không có phim nào để hiển thị.
+            </div>
+        <?php endif; ?>
 
-    <!-- Pagination Simple -->
-    <div class="flex justify-center mt-12 gap-2">
-        <?php if (($currentPage ?? $page) > 1): ?>
-            <a href="?type=<?= urlencode($type) ?>&slug=<?= urlencode($slug) ?>&page=<?= ($currentPage ?? $page) - 1 ?>" class="px-4 py-2 bg-gray-800 hover:bg-red-600 text-white rounded transition-colors">Trang trước</a>
-        <?php endif; ?>
-        <span class="px-4 py-2 text-gray-400">Trang <?= $currentPage ?? $page ?> / <?= $totalPages ?? 1 ?></span>
-        <?php if (($currentPage ?? $page) < ($totalPages ?? 1)): ?>
-            <a href="?type=<?= urlencode($type) ?>&slug=<?= urlencode($slug) ?>&page=<?= ($currentPage ?? $page) + 1 ?>" class="px-4 py-2 bg-gray-800 hover:bg-red-600 text-white rounded transition-colors">Trang sau</a>
-        <?php endif; ?>
+        <!-- Pagination Simple -->
+        <div class="flex justify-center mt-12 gap-2">
+            <?php if (($currentPage ?? $page) > 1): ?>
+                <a href="?type=<?= urlencode($type) ?>&slug=<?= urlencode($slug) ?>&page=<?= ($currentPage ?? $page) - 1 ?>" class="px-4 py-2 bg-[#111] border border-gray-900 hover:bg-white hover:text-black hover:border-white text-gray-300 rounded font-medium transition-colors">Trang trước</a>
+            <?php endif; ?>
+            <span class="px-4 py-2 text-gray-500 font-medium">Trang <?= $currentPage ?? $page ?> / <?= $totalPages ?? 1 ?></span>
+            <?php if (($currentPage ?? $page) < ($totalPages ?? 1)): ?>
+                <a href="?type=<?= urlencode($type) ?>&slug=<?= urlencode($slug) ?>&page=<?= ($currentPage ?? $page) + 1 ?>" class="px-4 py-2 bg-[#111] border border-gray-900 hover:bg-white hover:text-black hover:border-white text-gray-300 rounded font-medium transition-colors">Trang sau</a>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 

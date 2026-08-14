@@ -56,9 +56,10 @@ $tmdbVote = $movie['tmdb']['vote_average'] ?? 0;
 $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
 ?>
 
-<div class="container mx-auto px-4 py-8">
+<div class="bg-[#000000] min-h-screen text-gray-200 font-sans pb-20">
+    <div class="max-w-[1400px] mx-auto px-6 md:px-12 pt-8 lg:pt-12">
     <!-- Movie Details Header -->
-    <div class="relative w-full rounded-2xl overflow-hidden mb-12 shadow-2xl bg-gray-900">
+    <div class="relative w-full rounded-2xl overflow-hidden mb-12 bg-[#111] border border-gray-900">
         <div class="absolute inset-0 z-0">
             <img src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '')) ?>" 
                  alt="Poster" class="w-full h-full object-cover opacity-30 blur-sm">
@@ -99,17 +100,17 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
                 <?php endif; ?>
                 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-sm">
-                    <div class="bg-gray-800/50 p-3 rounded-lg border border-gray-700/50">
-                        <span class="text-gray-500 block mb-1">Trạng thái</span>
-                        <span class="text-white font-semibold"><?= htmlspecialchars($movie['episode_current'] ?? 'N/A') ?></span>
+                    <div class="bg-[#1a1a1a] p-3 rounded-xl border border-gray-800">
+                        <span class="text-gray-500 block mb-1 text-xs uppercase font-medium tracking-wider">Trạng thái</span>
+                        <span class="text-white font-medium"><?= htmlspecialchars($movie['episode_current'] ?? 'N/A') ?></span>
                     </div>
-                    <div class="bg-gray-800/50 p-3 rounded-lg border border-gray-700/50">
-                        <span class="text-gray-500 block mb-1">Thời lượng</span>
-                        <span class="text-white font-semibold"><?= htmlspecialchars($movie['time'] ?? 'N/A') ?></span>
+                    <div class="bg-[#1a1a1a] p-3 rounded-xl border border-gray-800">
+                        <span class="text-gray-500 block mb-1 text-xs uppercase font-medium tracking-wider">Thời lượng</span>
+                        <span class="text-white font-medium"><?= htmlspecialchars($movie['time'] ?? 'N/A') ?></span>
                     </div>
-                    <div class="bg-gray-800/50 p-3 rounded-lg border border-gray-700/50">
-                        <span class="text-gray-500 block mb-1">Loại</span>
-                        <span class="text-white font-semibold"><?= htmlspecialchars($movie['type'] ?? 'N/A') ?></span>
+                    <div class="bg-[#1a1a1a] p-3 rounded-xl border border-gray-800">
+                        <span class="text-gray-500 block mb-1 text-xs uppercase font-medium tracking-wider">Loại</span>
+                        <span class="text-white font-medium"><?= htmlspecialchars($movie['type'] ?? 'N/A') ?></span>
                     </div>
                 </div>
                 
@@ -149,19 +150,19 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
                 <?php endif; ?>
                 
                 <?php if (!empty($episodes) && !empty($episodes[0]['server_data'])): ?>
-                    <div class="flex flex-wrap gap-4">
+                    <div class="flex flex-wrap gap-4 mt-6">
                         <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($episodes[0]['server_data'][0]['slug']) ?>" 
-                           class="inline-flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg shadow-red-600/30">
+                           class="inline-flex items-center justify-center space-x-2 bg-white hover:bg-gray-200 text-black px-8 py-3.5 rounded-xl font-medium transition-colors">
                             <i data-lucide="play" class="w-5 h-5 fill-current"></i>
-                            <span>Xem Ngay</span>
+                            <span>Phát Ngay</span>
                         </a>
-                        <button id="btn-follow-movie" class="hidden items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg border border-gray-700">
+                        <button id="btn-follow-movie" class="hidden items-center justify-center space-x-2 bg-[#1a1a1a] hover:bg-[#222] text-white px-6 py-3.5 rounded-xl font-medium transition-colors border border-gray-800">
                             <i data-lucide="bookmark" id="icon-follow-movie" class="w-5 h-5"></i>
                             <span id="text-follow-movie">Theo dõi</span>
                         </button>
-                        <button id="btn-playlist-movie" class="hidden items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg border border-gray-700">
+                        <button id="btn-playlist-movie" class="hidden items-center justify-center space-x-2 bg-[#1a1a1a] hover:bg-[#222] text-white px-6 py-3.5 rounded-xl font-medium transition-colors border border-gray-800">
                             <i data-lucide="list-plus" class="w-5 h-5"></i>
-                            <span>Danh sách phát</span>
+                            <span>Thêm vào Danh sách</span>
                         </button>
                     </div>
                 <?php endif; ?>
@@ -171,14 +172,14 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
     
     <!-- Episode List (Below Details) -->
     <?php if (!empty($episodes[0]['server_data'])): ?>
-        <div class="mb-12 bg-gray-900 rounded-2xl p-6 border border-gray-800">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center">
-                <i data-lucide="list-video" class="w-5 h-5 mr-2 text-red-500"></i> Chọn tập phim
+        <div class="mb-12 bg-[#111] rounded-2xl p-6 md:p-8 border border-gray-900">
+            <h3 class="text-lg font-bold text-white mb-6 flex items-center tracking-tight">
+                <i data-lucide="list-video" class="w-5 h-5 mr-3 text-white"></i> Chọn tập phim
             </h3>
-            <div class="flex flex-wrap gap-2 p-2">
+            <div class="flex flex-wrap gap-3">
                 <?php foreach ($episodes[0]['server_data'] as $e): ?>
                     <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>" 
-                       class="px-4 py-2 rounded-lg transition-all bg-gray-800 text-gray-300 hover:bg-red-600 hover:text-white hover:shadow-lg hover:shadow-red-600/30 font-medium">
+                       class="px-5 py-2.5 rounded-lg transition-colors bg-[#1a1a1a] border border-gray-800 text-gray-300 hover:bg-white hover:text-black hover:border-white font-medium text-sm">
                         <?= htmlspecialchars($e['name']) ?>
                     </a>
                 <?php endforeach; ?>
@@ -187,26 +188,26 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
     <?php endif; ?>
 
     <!-- Comments (Dynamic UI) -->
-    <div class="mb-12 bg-gray-900 rounded-2xl p-6 border border-gray-800">
-        <h3 class="text-lg font-bold text-white mb-6 flex items-center">
-            <i data-lucide="message-square" class="w-5 h-5 mr-2 text-red-500"></i> Bình luận (<span id="comment-count">0</span>)
+    <div class="mb-12 bg-[#111] rounded-2xl p-6 md:p-8 border border-gray-900">
+        <h3 class="text-lg font-bold text-white mb-6 flex items-center tracking-tight">
+            <i data-lucide="message-square" class="w-5 h-5 mr-3 text-white"></i> Bình luận (<span id="comment-count">0</span>)
         </h3>
         
-        <div class="relative bg-gray-800 rounded-xl p-4 border border-gray-700">
-            <input type="text" id="comment-name" class="w-full bg-transparent text-white text-sm outline-none mb-3 pb-2 border-b border-gray-700 hidden" placeholder="Nhập tên của bạn...">
-            <textarea id="comment-content" rows="3" class="w-full bg-transparent text-white text-sm outline-none resize-none placeholder-gray-400" placeholder="Vui lòng nhập nội dung bình luận..."></textarea>
-            <div class="flex items-center justify-between mt-3 border-t border-gray-700 pt-4">
-                <label class="flex items-center text-gray-400 text-sm cursor-pointer hover:text-white transition-colors">
-                    <input type="checkbox" id="comment-anon" checked class="mr-2 rounded border-gray-600 bg-gray-700 text-red-500 focus:ring-red-500"> Ẩn danh ?
+        <div class="relative bg-[#1a1a1a] rounded-xl p-5 border border-gray-800">
+            <input type="text" id="comment-name" class="w-full bg-transparent text-white text-sm outline-none mb-4 pb-3 border-b border-gray-800 hidden" placeholder="Nhập tên của bạn...">
+            <textarea id="comment-content" rows="3" class="w-full bg-transparent text-white text-sm outline-none resize-none placeholder-gray-500" placeholder="Viết bình luận..."></textarea>
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
+                <label class="flex items-center text-gray-500 text-sm cursor-pointer hover:text-white transition-colors">
+                    <input type="checkbox" id="comment-anon" checked class="mr-2 rounded border-gray-700 bg-[#222] text-white focus:ring-0 focus:ring-offset-0"> Ẩn danh
                 </label>
-                <button id="btn-submit-comment" class="bg-red-600 text-white font-bold px-5 py-2 rounded-lg text-sm flex items-center hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20">
-                    Gửi bình luận <i data-lucide="send" class="w-4 h-4 ml-2"></i>
+                <button id="btn-submit-comment" class="bg-white text-black font-medium px-6 py-2.5 rounded-lg text-sm flex items-center hover:bg-gray-200 transition-colors">
+                    Gửi <i data-lucide="send" class="w-4 h-4 ml-2"></i>
                 </button>
             </div>
         </div>
         
         <div id="comments-list" class="mt-8 space-y-6">
-            <div class="text-center text-gray-500 text-sm py-4">Đang tải bình luận...</div>
+            <div class="text-center text-gray-500 text-sm py-8">Đang tải bình luận...</div>
         </div>
     </div>
     
@@ -488,25 +489,26 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
     <!-- Movie Suggestions -->
     <?php if (!empty($suggestions)): ?>
     <div class="mb-12">
-        <h3 class="text-2xl font-bold text-white mb-6 border-l-4 border-red-500 pl-3">Có Thể Bạn Sẽ Thích</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        <h3 class="text-2xl font-bold text-white mb-8 tracking-tight">Có Thể Bạn Sẽ Thích</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-10">
             <?php foreach ($suggestions as $item): ?>
-                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group flex flex-col relative overflow-hidden rounded-xl bg-gray-800 transition-all hover:scale-105 hover:shadow-xl hover:shadow-red-500/20">
-                    <div class="relative aspect-[2/3] w-full overflow-hidden">
-                        <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group flex flex-col">
+                    <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
+                        <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        
                         <div class="absolute top-2 left-2">
-                            <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"><?= htmlspecialchars($item['quality'] ?? 'HD') ?></span>
+                            <span class="bg-black/70 backdrop-blur-md text-white text-[10px] font-medium px-2 py-0.5 rounded"><?= htmlspecialchars($item['quality'] ?? 'HD') ?></span>
                         </div>
                     </div>
-                    <div class="p-3 relative z-10 flex flex-col flex-grow">
-                        <h3 class="text-sm font-semibold text-white line-clamp-1 mb-1 group-hover:text-red-400 transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-medium text-gray-100 line-clamp-1 group-hover:text-white transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
                     </div>
                 </a>
             <?php endforeach; ?>
         </div>
     </div>
     <?php endif; ?>
+    </div>
 </div>
 
 <?php include __DIR__ . '/footer.php'; ?>

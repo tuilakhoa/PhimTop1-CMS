@@ -225,7 +225,7 @@ class CmsApiService {
     }
   }
 
-  Future<bool> addHistory(String token, String movieSlug, String movieName, String episodeName, {String thumbUrl = ''}) async {
+  Future<bool> addHistory(String token, String movieSlug, String movieName, String episodeName, {String episodeSlug = '', String thumbUrl = '', int currentTime = 0, int duration = 0}) async {
     try {
       final response = await _dio.post('api/v1/history.php', queryParameters: {
         'key': AppConfig.apiKey,
@@ -234,7 +234,10 @@ class CmsApiService {
         'movie_slug': movieSlug,
         'movie_name': movieName,
         'episode_name': episodeName,
+        'episode_slug': episodeSlug,
         'thumb_url': thumbUrl,
+        'current_time': currentTime,
+        'duration': duration,
       }, options: Options(headers: {'Authorization': token}));
       return response.data['status'] == 'success';
     } catch (e) {

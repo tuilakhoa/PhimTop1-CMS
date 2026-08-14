@@ -8,8 +8,13 @@ class TermsScreen extends StatelessWidget {
   Future<void> _agreeAndContinue(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_agreed_terms', true);
+    final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
     if (context.mounted) {
-      context.go('/');
+      if (hasSeenOnboarding) {
+        context.go('/');
+      } else {
+        context.go('/onboarding');
+      }
     }
   }
 
