@@ -505,6 +505,76 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         ),
                         
                         const SizedBox(height: 24),
+
+                        // Actors
+                        if (movie.actor != null && movie.actor!.isNotEmpty) ...[
+                          const Text("Diễn viên", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 120,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: movie.actor!.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  width: 90,
+                                  margin: const EdgeInsets.only(right: 12),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 70,
+                                        height: 70,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.grey[800],
+                                          border: Border.all(color: Colors.white24, width: 2),
+                                        ),
+                                        child: const Icon(Icons.person, color: Colors.white54, size: 40),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        movie.actor![index],
+                                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
+                        // Backdrops
+                        if (provider.images != null && provider.images!.backdrops.isNotEmpty) ...[
+                          const Text("Hình ảnh", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 150,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: provider.images!.backdrops.length,
+                              itemBuilder: (context, index) {
+                                final imgPath = provider.images!.backdrops[index].filePath;
+                                return Container(
+                                  width: 250,
+                                  margin: const EdgeInsets.only(right: 12),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    image: DecorationImage(
+                                      image: CachedNetworkImageProvider("https://image.tmdb.org/t/p/w780$imgPath"),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
                         // Episodes
                         if (provider.episodes.isNotEmpty) ...[
                           const Text("Chọn tập", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),

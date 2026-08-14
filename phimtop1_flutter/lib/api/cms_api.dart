@@ -261,6 +261,9 @@ class CmsApiService {
         'key': AppConfig.apiKey,
         'action': 'list',
       }, options: Options(headers: {'Authorization': token}));
+      if (response.data == null || response.data is! Map<String, dynamic>) {
+        throw Exception('Dữ liệu từ máy chủ không hợp lệ (null)');
+      }
       return PlaylistResponse.fromJson(response.data);
     } catch (e) {
       rethrow;

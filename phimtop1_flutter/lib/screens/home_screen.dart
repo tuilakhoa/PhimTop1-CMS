@@ -6,6 +6,7 @@ import '../widgets/movie_card.dart';
 import '../widgets/focusable_wrapper.dart';
 import '../widgets/tv_cast_button.dart';
 import '../widgets/featured_slider.dart';
+import '../core/config.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -62,21 +63,39 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildTextLogo(BuildContext context) {
+    return Row(
+      children: [
+        const Text(
+          "PHIM",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "TOP1",
+          style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            const Text(
-              "PHIM",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "TOP1",
-              style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
-            ),
-          ],
+        title: Consumer<HomeProvider>(
+          builder: (context, provider, child) {
+            if (provider.logoUrl.isNotEmpty) {
+              final logo = provider.logoUrl;
+              final fullUrl = logo.startsWith('http') ? logo : '${AppConfig.baseUrl}${logo.startsWith('/') ? '' : '/'}$logo';
+              return Image.network(
+                fullUrl,
+                height: 32,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => _buildTextLogo(context),
+              );
+            }
+            return _buildTextLogo(context);
+          },
         ),
         actions: [
           const TvCastButton(),
@@ -111,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
 
                   _buildHorizontalList("Phim Mới Cập Nhật", provider.normalMovies, provider.domain),
+                  _buildHorizontalList("Bảng Xếp Hạng", provider.trendingMovies, provider.domain),
                   _buildHorizontalList("Phim Bộ Mới Nhất", provider.phimBo, provider.domain),
                   _buildHorizontalList("Phim Lẻ Mới Nhất", provider.phimLe, provider.domain),
                   _buildHorizontalList("TV Shows", provider.tvShows, provider.domain),

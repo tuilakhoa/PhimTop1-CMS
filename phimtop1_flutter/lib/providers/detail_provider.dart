@@ -9,6 +9,7 @@ class DetailProvider with ChangeNotifier {
   MovieDetail? movie;
   List<Episode> episodes = [];
   String domain = "";
+  MovieImages? images;
   
   int currentEpisodeIndex = 0;
   int currentServerIndex = 0;
@@ -25,6 +26,7 @@ class DetailProvider with ChangeNotifier {
         movie = data.movie;
         episodes = data.episodes ?? [];
         domain = data.domain;
+        images = data.images;
         currentEpisodeIndex = 0;
         currentServerIndex = 0;
       } else {

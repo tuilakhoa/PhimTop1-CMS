@@ -52,6 +52,8 @@ if ($pdo) {
     <meta name="keywords" content="<?= htmlspecialchars($seoKeywords) ?>">
     <?php if (!empty($settings['appleTouchIconUrl'])): ?>
     <link rel="apple-touch-icon" sizes="180x180" href="<?= htmlspecialchars($settings['appleTouchIconUrl']) ?>">
+    <?php elseif (!empty($settings['useLogoAsFavicon']) && !empty($settings['logoUrl'])): ?>
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= htmlspecialchars($settings['logoUrl']) ?>">
     <?php else: ?>
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <?php endif; ?>
@@ -61,7 +63,7 @@ if ($pdo) {
     <!-- Favicon -->
     <?php if (!empty($settings['faviconUrl'])): ?>
     <link rel="icon" href="<?= htmlspecialchars($settings['faviconUrl']) ?>">
-    <?php elseif (!empty($settings['logoUrl'])): ?>
+    <?php elseif (!empty($settings['useLogoAsFavicon']) && !empty($settings['logoUrl'])): ?>
     <link rel="icon" href="<?= htmlspecialchars($settings['logoUrl']) ?>">
     <?php else: ?>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">

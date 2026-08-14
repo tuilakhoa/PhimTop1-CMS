@@ -8,11 +8,13 @@ class HomeProvider with ChangeNotifier {
   
   List<MovieItem> featuredMovies = [];
   List<MovieItem> normalMovies = [];
+  List<MovieItem> trendingMovies = [];
   List<MovieItem> phimBo = [];
   List<MovieItem> phimLe = [];
   List<MovieItem> hoatHinh = [];
   List<MovieItem> tvShows = [];
   String domain = "";
+  String logoUrl = "";
 
   Future<void> fetchHomeData() async {
     isLoading = true;
@@ -20,12 +22,20 @@ class HomeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      final initRes = await cmsApi.getAppInit();
+      if (initRes.data != null) {
+        logoUrl = initRes.data!.logoUrl;
+      }
+
       final homeResponse = await cmsApi.getHome();
       if (homeResponse.data != null) {
         featuredMovies = homeResponse.data!.featuredMovies ?? [];
         normalMovies = homeResponse.data!.items;
         domain = homeResponse.data!.domain;
       }
+      
+      final trendingRes = await cmsApi.fetchTrending();
+      if (trendingRes.data != null) trendingMovies = trendingRes.data!.items.take(12).toList();
       
       final phimBoRes = await cmsApi.getCategory("danh-sach", "phim-bo");
       if (phimBoRes.data != null) phimBo = phimBoRes.data!.items.take(12).toList();

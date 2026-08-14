@@ -1,0 +1,49 @@
+name: Build iOS App (Unsigned)
+
+on:
+  workflow_dispatch: # Cho phép bấm nút "Run workflow" thủ công trên Github
+  push:
+    paths:
+      - 'phimtop1_flutter/**'
+    branches:
+      - main # Tự động chạy khi bạn push code mới lên nhánh main
+
+jobs:
+  build-ios:
+    name: Build iOS Unsigned
+    runs-on: macos-latest # Sử dụng máy Mac ảo của GitHub
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.x' # Phiên bản bạn đang sử dụng trên máy
+          channel: 'stable'
+
+      - name: Install Dependencies
+        working-directory: ./phimtop1_flutter
+        run: flutter pub get
+
+      - name: Build iOS (Unsigned)
+        working-directory: ./phimtop1_flutter
+        # Lệnh build bản Release và tắt cơ chế ký chứng chỉ (no-codesign)
+        run: flutter build ios --release --no-codesign
+
+      # Đóng gói thành file .ipa (bản chất là nén thư mục Payload chứa Runner.app)
+      - name: Create IPA payload
+        working-directory: ./phimtop1_flutter/build/ios/iphoneos
+        run: |
+          mkdir Payload
+          mv Runner.app Payload/
+          zip -qq -r phimtop1-unsigned.ipa Payload
+
+      # Upload kết quả lên GitHub để tải về
+      - name: Upload iOS Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-ipa
+          path: phimtop1_flutter/build/ios/iphoneos/phimtop1-unsigned.ipa
+          retention-days: 7

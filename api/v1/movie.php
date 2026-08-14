@@ -45,6 +45,32 @@ if ($displayMode === 'crawl') {
     if ($data && !empty($data['movie'])) {
         $repo = getMovieRepository();
         $repo->saveMovie($data['movie']);
+        
+        $movie = $data['movie'];
+        $movieImages = ['backdrops' => [], 'posters' => []];
+        $tmdbId = $movie['tmdb']['id'] ?? null;
+        $tmdbType = $movie['tmdb']['type'] ?? 'movie';
+        $tmdbApiKey = $settings['tmdbApiKey'] ?? '';
+
+        if ($tmdbId && $tmdbApiKey) {
+            $tmdbRes = fetchApiWithCache("https://api.themoviedb.org/3/{$tmdbType}/{$tmdbId}/images?api_key=" . urlencode($tmdbApiKey), 86400);
+            if ($tmdbRes) {
+                $tmdbData = json_decode($tmdbRes, true);
+                if (isset($tmdbData['backdrops'])) $movieImages['backdrops'] = $tmdbData['backdrops'];
+                if (isset($tmdbData['posters'])) $movieImages['posters'] = $tmdbData['posters'];
+            }
+        } else {
+            $imgRes = fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images", 86400);
+            if ($imgRes) {
+                $imgData = json_decode($imgRes, true);
+                if (isset($imgData['data'])) {
+                    $movieImages['backdrops'] = $imgData['data']['backdrops'] ?? [];
+                    $movieImages['posters'] = $imgData['data']['posters'] ?? [];
+                }
+            }
+        }
+        $data['images'] = $movieImages;
+        
     } else if (!$data) {
         try {
             $repo = getMovieRepository();
@@ -54,7 +80,8 @@ if ($displayMode === 'crawl') {
                     'movie' => $movie,
                     'episodes' => [], // Local cache might not have full episodes
                     'domain' => '',
-                    'seoOnPage' => []
+                    'seoOnPage' => [],
+                    'images' => ['backdrops' => [], 'posters' => []]
                 ];
             }
         } catch (Throwable $e) {}

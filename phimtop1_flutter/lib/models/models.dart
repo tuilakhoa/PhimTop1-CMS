@@ -110,11 +110,13 @@ class MovieDetailData {
   final String domain;
   final MovieDetail? movie;
   final List<Episode>? episodes;
+  final MovieImages? images;
 
   MovieDetailData.fromJson(Map<String, dynamic> json)
       : domain = json['domain'] ?? '',
         movie = json['movie'] != null ? MovieDetail.fromJson(json['movie']) : null,
-        episodes = (json['episodes'] as List?)?.map((e) => Episode.fromJson(e)).toList();
+        episodes = (json['episodes'] as List?)?.map((e) => Episode.fromJson(e)).toList(),
+        images = json['images'] != null ? MovieImages.fromJson(json['images']) : null;
 }
 
 class MovieDetail {
@@ -142,6 +144,22 @@ class MovieDetail {
         actor = (json['actor'] as List?)?.map((e) => e.toString()).toList(),
         time = json['time'],
         episodeCurrent = json['episode_current'];
+}
+
+class MovieImageItem {
+  final String filePath;
+
+  MovieImageItem.fromJson(Map<String, dynamic> json)
+      : filePath = json['file_path'] ?? '';
+}
+
+class MovieImages {
+  final List<MovieImageItem> backdrops;
+  final List<MovieImageItem> posters;
+
+  MovieImages.fromJson(Map<String, dynamic> json)
+      : backdrops = (json['backdrops'] as List?)?.map((e) => MovieImageItem.fromJson(e)).toList() ?? [],
+        posters = (json['posters'] as List?)?.map((e) => MovieImageItem.fromJson(e)).toList() ?? [];
 }
 
 class Episode {

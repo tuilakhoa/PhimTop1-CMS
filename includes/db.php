@@ -95,8 +95,8 @@ function getSettings() {
         'seoPublisher' => '',
         'themeColor' => '#000000',
         'canonicalBaseUrl' => '',
-        'logoUrl' => '',
-        'useLogoAsFavicon' => 0,
+        'logoUrl' => '/assets/images/logo.png',
+        'useLogoAsFavicon' => 1,
         'verifyGoogle' => '',
         'verifyBing' => '',
         'verifyYandex' => '',
@@ -181,10 +181,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 9) {
+            if (!isset($row['db_version']) || $row['db_version'] < 10) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 9]);
-                $row['db_version'] = 9;
+                updateSettings(['db_version' => 10]);
+                $row['db_version'] = 10;
             }
             
             return array_merge($defaultSettings, $row);
