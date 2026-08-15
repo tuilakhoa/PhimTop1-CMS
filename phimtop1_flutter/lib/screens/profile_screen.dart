@@ -32,6 +32,13 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     child: const Text("Đăng nhập", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
+                  const SizedBox(height: 32),
+                  ListTile(
+                    leading: const Icon(Icons.download_done, color: Colors.white),
+                    title: const Text("Phim đã tải (Ngoại tuyến)", style: TextStyle(color: Colors.white, fontSize: 16)),
+                    trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                    onTap: () => context.push('/downloads'),
+                  ),
                 ],
               ),
             );
@@ -76,6 +83,9 @@ class ProfileScreen extends StatelessWidget {
               }),
               _buildMenuItem(Icons.history, "Lịch sử xem", () {
                 context.push('/history');
+              }),
+              _buildMenuItem(Icons.download_done, "Phim đã tải", () {
+                context.push('/downloads');
               }),
               _buildMenuItem(Icons.settings, "Cài đặt", () {
                 context.push('/settings');

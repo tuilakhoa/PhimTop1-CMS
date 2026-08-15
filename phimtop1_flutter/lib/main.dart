@@ -11,6 +11,7 @@ import 'providers/trending_provider.dart';
 import 'providers/explore_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/playlist_provider.dart';
+import 'providers/download_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/tv_remote_service.dart';
 import 'package:go_router/go_router.dart';
@@ -39,6 +40,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => DetailProvider()),
         ChangeNotifierProvider(create: (_) => TrendingProvider()),
         ChangeNotifierProvider(create: (_) => ExploreProvider()),
+        ChangeNotifierProvider(create: (_) => DownloadProvider()),
         ChangeNotifierProxyProvider<AuthProvider, PlaylistProvider>(
           create: (context) => PlaylistProvider(authProvider: context.read<AuthProvider>()),
           update: (context, auth, previous) {

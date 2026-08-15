@@ -20,6 +20,7 @@ import '../screens/policy_screen.dart';
 import '../screens/watch_movie_screen.dart';
 import '../screens/playlist_screen.dart';
 import '../screens/onboarding_screen.dart';
+import '../screens/downloads_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -144,6 +145,11 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding) {
       path: '/onboarding',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (BuildContext context, GoRouterState state) => const OnboardingScreen(),
+    ),
+    GoRoute(
+      path: '/downloads',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (BuildContext context, GoRouterState state) => const DownloadsScreen(),
     ),
   ],
 );

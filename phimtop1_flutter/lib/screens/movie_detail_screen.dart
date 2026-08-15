@@ -11,6 +11,8 @@ import 'watch_movie_screen.dart';
 import 'watch_embed_screen.dart';
 import 'package:share_plus/share_plus.dart';
 import '../services/tv_remote_service.dart';
+import '../providers/download_provider.dart';
+import '../models/download_task.dart';
 
 class MovieDetailScreen extends StatefulWidget {
   final String slug;
@@ -184,6 +186,116 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         ),
                       ],
                     ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
+  void _showDownloadModal(BuildContext context, DetailProvider provider) {
+    final movie = provider.movie;
+    if (movie == null) return;
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[900],
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setStateModal) {
+          final downloadProvider = context.watch<DownloadProvider>();
+          final serverData = provider.episodes.isNotEmpty ? provider.episodes[provider.currentServerIndex].serverData : [];
+          
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white12))),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Tải xuống ngoại tuyến", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        IconButton(icon: const Icon(Icons.close, color: Colors.grey), onPressed: () => Navigator.pop(context)),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: serverData.isEmpty
+                        ? const Center(child: Text("Không có tập phim nào.", style: TextStyle(color: Colors.grey)))
+                        : ListView.builder(
+                            itemCount: serverData.length,
+                            itemBuilder: (context, index) {
+                              final ep = serverData[index];
+                              final taskId = '${movie.slug}_${ep.slug}';
+                              final task = downloadProvider.getTask(taskId);
+                              
+                              Widget trailing = IconButton(
+                                icon: const Icon(Icons.download, color: Colors.white),
+                                onPressed: () {
+                                  if (ep.linkM3u8.isNotEmpty) {
+                                    final thumbUrl = movie.thumbUrl ?? movie.posterUrl ?? '';
+                                    downloadProvider.startDownload(
+                                      movieSlug: movie.slug,
+                                      movieName: movie.name,
+                                      episodeSlug: ep.slug,
+                                      episodeName: ep.name,
+                                      thumbUrl: thumbUrl.startsWith('http') ? thumbUrl : '${provider.domain}$thumbUrl',
+                                      m3u8Url: ep.linkM3u8,
+                                      totalDurationSeconds: 7200, // Estimate 2 hours
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tập này không hỗ trợ tải')));
+                                  }
+                                },
+                              );
+
+                              if (task != null) {
+                                if (task.status == DownloadStatus.completed) {
+                                  trailing = const Icon(Icons.check_circle, color: Colors.green);
+                                } else if (task.status == DownloadStatus.downloading) {
+                                  trailing = Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('${(task.progress * 100).toStringAsFixed(0)}%', style: const TextStyle(color: Colors.amber)),
+                                      const SizedBox(width: 8),
+                                      IconButton(
+                                        icon: const Icon(Icons.stop_circle, color: Colors.red),
+                                        onPressed: () => downloadProvider.cancelDownload(taskId),
+                                      ),
+                                    ],
+                                  );
+                                } else if (task.status == DownloadStatus.pending) {
+                                  trailing = const Text('Chờ tải...', style: TextStyle(color: Colors.grey));
+                                } else if (task.status == DownloadStatus.failed) {
+                                  trailing = IconButton(
+                                    icon: const Icon(Icons.refresh, color: Colors.red),
+                                    onPressed: () => downloadProvider.startDownload(
+                                      movieSlug: task.movieSlug,
+                                      movieName: task.movieName,
+                                      episodeSlug: task.episodeSlug,
+                                      episodeName: task.episodeName,
+                                      thumbUrl: task.thumbUrl,
+                                      m3u8Url: task.m3u8Url,
+                                      totalDurationSeconds: 7200,
+                                    ),
+                                  );
+                                }
+                              }
+
+                              return ListTile(
+                                title: Text(ep.name, style: const TextStyle(color: Colors.white)),
+                                trailing: trailing,
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -554,6 +666,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           _showPlaylistModal(context, movie.slug, movie.name, imageUrl);
                         },
                         child: _buildActionButton(Icons.playlist_add_rounded, "Thêm"),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          _showDownloadModal(context, provider);
+                        },
+                        child: _buildActionButton(Icons.download_rounded, "Tải về"),
                       ),
                       GestureDetector(
                         onTap: () {
