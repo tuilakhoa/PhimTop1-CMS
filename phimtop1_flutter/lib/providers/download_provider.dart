@@ -180,7 +180,7 @@ class DownloadProvider extends ChangeNotifier {
       _processQueue();
 
     } catch (e) {
-      if (CancelToken.isCancel(e as DioException?)) {
+      if (e is DioException && CancelToken.isCancel(e)) {
         pendingTask.status = DownloadStatus.canceled;
       } else {
         pendingTask.status = DownloadStatus.failed;

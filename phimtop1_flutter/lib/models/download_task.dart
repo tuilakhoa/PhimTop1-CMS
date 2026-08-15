@@ -10,7 +10,7 @@ class DownloadTask {
   final String episodeName;
   final String thumbUrl;
   final String m3u8Url;
-  final String savePath;
+  String savePath;
   
   DownloadStatus status;
   double progress;
