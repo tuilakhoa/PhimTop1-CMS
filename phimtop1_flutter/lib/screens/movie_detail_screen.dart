@@ -321,20 +321,41 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         children: [
                           const Text("Chọn tập:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                           SizedBox(
-                            width: 250,
+                            width: 280,
+                            height: 48,
                             child: TextField(
                               controller: _episodeSearchController,
-                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                              textAlignVertical: TextAlignVertical.center,
                               decoration: InputDecoration(
-                                hintText: "Tìm tập phim...",
-                                hintStyle: const TextStyle(color: Colors.grey),
-                                prefixIcon: const Icon(Icons.search, color: Colors.grey, size: 20),
+                                hintText: "Tìm kiếm tập phim...",
+                                hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 15),
+                                prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor, size: 22),
+                                suffixIcon: _episodeSearchQuery.isNotEmpty 
+                                    ? IconButton(
+                                        icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 20),
+                                        onPressed: () {
+                                          _episodeSearchController.clear();
+                                          setState(() {
+                                            _episodeSearchQuery = "";
+                                          });
+                                        },
+                                      ) 
+                                    : null,
                                 filled: true,
                                 fillColor: Colors.white.withOpacity(0.1),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(24),
+                                  borderSide: BorderSide(color: Colors.white.withOpacity(0.15), width: 1),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                  borderSide: BorderSide(color: Colors.white.withOpacity(0.15), width: 1),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                  borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
                                 ),
                               ),
                               onChanged: (val) {
@@ -715,20 +736,41 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     children: [
                       const Text("Chọn tập", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                       SizedBox(
-                        width: 160,
+                        width: 180,
+                        height: 40,
                         child: TextField(
                           controller: _episodeSearchController,
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                          textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
-                            hintText: "Tìm tập...",
-                            hintStyle: const TextStyle(color: Colors.white54),
-                            prefixIcon: const Icon(Icons.search, color: Colors.white54, size: 20),
+                            hintText: "Tìm kiếm tập...",
+                            hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13),
+                            prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor, size: 20),
+                            suffixIcon: _episodeSearchQuery.isNotEmpty 
+                                ? IconButton(
+                                    icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 16),
+                                    onPressed: () {
+                                      _episodeSearchController.clear();
+                                      setState(() {
+                                        _episodeSearchQuery = "";
+                                      });
+                                    },
+                                  ) 
+                                : null,
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.05),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                            fillColor: Colors.white.withOpacity(0.08),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1.5),
                             ),
                           ),
                           onChanged: (val) {
