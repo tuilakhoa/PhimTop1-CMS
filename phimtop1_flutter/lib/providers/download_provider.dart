@@ -3,11 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ffmpeg_kit_flutter_min/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_min/ffmpeg_kit_config.dart';
-import 'package:ffmpeg_kit_flutter_min/return_code.dart';
-import 'package:ffmpeg_kit_flutter_min/session.dart';
-import 'package:ffmpeg_kit_flutter_min/statistics.dart';
+import 'package:dio/dio.dart';
 import '../models/download_task.dart';
 
 class DownloadProvider extends ChangeNotifier {
@@ -16,6 +12,8 @@ class DownloadProvider extends ChangeNotifier {
 
   static const String _prefsKey = 'download_tasks_v1';
   bool _isDownloading = false;
+  final Dio _dio = Dio();
+  CancelToken? _cancelToken;
 
   DownloadProvider() {
     _loadTasks();
@@ -28,7 +26,6 @@ class DownloadProvider extends ChangeNotifier {
     for (var jsonStr in tasksJson) {
       try {
         final task = DownloadTask.fromJson(jsonStr);
-        // Reset downloading states if app was killed
         if (task.status == DownloadStatus.downloading || task.status == DownloadStatus.pending) {
           task.status = DownloadStatus.failed;
         }
@@ -62,16 +59,16 @@ class DownloadProvider extends ChangeNotifier {
     required String episodeName,
     required String thumbUrl,
     required String m3u8Url,
-    required double totalDurationSeconds, // Needed for progress
+    required double totalDurationSeconds,
   }) async {
     final id = '${movieSlug}_$episodeSlug';
     
     if (getTask(id) != null && getTask(id)!.status == DownloadStatus.completed) {
-      return; // Already downloaded
+      return;
     }
 
     final directory = await getApplicationDocumentsDirectory();
-    final savePath = '${directory.path}/$id.mp4';
+    final savePath = '${directory.path}/$id/index.m3u8';
 
     final task = DownloadTask(
       id: id,
@@ -85,15 +82,14 @@ class DownloadProvider extends ChangeNotifier {
       status: DownloadStatus.pending,
     );
 
-    // Remove old task if exists
     _tasks.removeWhere((t) => t.id == id);
     _tasks.add(task);
     await _saveTasks();
 
-    _processQueue(totalDurationSeconds);
+    _processQueue();
   }
 
-  Future<void> _processQueue(double totalDurationSeconds) async {
+  Future<void> _processQueue() async {
     if (_isDownloading) return;
 
     final pendingTask = _tasks.firstWhere(
@@ -101,73 +97,105 @@ class DownloadProvider extends ChangeNotifier {
       orElse: () => DownloadTask(id: '', movieSlug: '', movieName: '', episodeSlug: '', episodeName: '', thumbUrl: '', m3u8Url: '', savePath: ''),
     );
 
-    if (pendingTask.id.isEmpty) return; // No pending tasks
+    if (pendingTask.id.isEmpty) return;
 
     _isDownloading = true;
     pendingTask.status = DownloadStatus.downloading;
     pendingTask.progress = 0.0;
     notifyListeners();
 
+    _cancelToken = CancelToken();
+
     try {
-      // Ensure no existing file
-      final file = File(pendingTask.savePath);
-      if (await file.exists()) {
-        await file.delete();
+      final directory = await getApplicationDocumentsDirectory();
+      final movieDir = Directory('${directory.path}/${pendingTask.id}');
+      if (await movieDir.exists()) {
+        await movieDir.delete(recursive: true);
+      }
+      await movieDir.create(recursive: true);
+
+      String m3u8Url = pendingTask.m3u8Url;
+      Uri baseUri = Uri.parse(m3u8Url);
+
+      Response response = await _dio.get(m3u8Url, cancelToken: _cancelToken);
+      String m3u8Content = response.data.toString();
+
+      // Check if it's a master playlist
+      if (m3u8Content.contains('#EXT-X-STREAM-INF')) {
+        final lines = m3u8Content.split('\n');
+        for (int i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith('#EXT-X-STREAM-INF') && i + 1 < lines.length) {
+            String subPlaylist = lines[i + 1].trim();
+            baseUri = baseUri.resolve(subPlaylist);
+            response = await _dio.get(baseUri.toString(), cancelToken: _cancelToken);
+            m3u8Content = response.data.toString();
+            break;
+          }
+        }
       }
 
-      // FFmpeg command to copy m3u8 stream to mp4
-      final command = '-i "${pendingTask.m3u8Url}" -c copy -bsf:a aac_adtstoasc "${pendingTask.savePath}"';
+      final lines = m3u8Content.split('\n');
+      List<String> tsFiles = [];
+      for (var line in lines) {
+        if (!line.startsWith('#') && line.trim().isNotEmpty) {
+          tsFiles.add(line.trim());
+        }
+      }
 
-      await FFmpegKit.executeAsync(
-        command,
-        (Session session) async {
-          final returnCode = await session.getReturnCode();
-          if (ReturnCode.isSuccess(returnCode)) {
-            pendingTask.status = DownloadStatus.completed;
-            pendingTask.progress = 1.0;
-          } else if (ReturnCode.isCancel(returnCode)) {
-            pendingTask.status = DownloadStatus.canceled;
-            if (await file.exists()) await file.delete();
-          } else {
-            pendingTask.status = DownloadStatus.failed;
-            if (await file.exists()) await file.delete();
-            final logs = await session.getLogsAsString();
-            debugPrint("FFmpeg Error: $logs");
-          }
+      if (tsFiles.isEmpty) {
+        throw Exception("No TS files found in playlist");
+      }
+
+      List<String> newM3u8Lines = [];
+      int downloaded = 0;
+
+      for (var line in lines) {
+        if (!line.startsWith('#') && line.trim().isNotEmpty) {
+          String tsUrl = line.trim();
+          Uri tsUri = baseUri.resolve(tsUrl);
           
-          _isDownloading = false;
-          await _saveTasks();
-          _processQueue(totalDurationSeconds); // Process next
-        },
-        (log) {
-          // print(log.getMessage());
-        },
-        (Statistics statistics) {
-          // Calculate progress based on time
-          if (totalDurationSeconds > 0) {
-            final timeInMilliseconds = statistics.getTime();
-            if (timeInMilliseconds > 0) {
-              final progress = (timeInMilliseconds / 1000.0) / totalDurationSeconds;
-              if (progress > pendingTask.progress) {
-                pendingTask.progress = progress > 1.0 ? 1.0 : progress;
-                notifyListeners();
-              }
-            }
-          }
-        },
-      );
-    } catch (e) {
-      pendingTask.status = DownloadStatus.failed;
+          String tsName = 'segment_$downloaded.ts';
+          String tsPath = '${movieDir.path}/$tsName';
+
+          await _dio.download(tsUri.toString(), tsPath, cancelToken: _cancelToken);
+          newM3u8Lines.add(tsName);
+
+          downloaded++;
+          pendingTask.progress = downloaded / tsFiles.length;
+          notifyListeners();
+        } else {
+          newM3u8Lines.add(line);
+        }
+      }
+
+      final localM3u8File = File('${movieDir.path}/index.m3u8');
+      await localM3u8File.writeAsString(newM3u8Lines.join('\n'));
+
+      pendingTask.savePath = localM3u8File.path;
+      pendingTask.status = DownloadStatus.completed;
+      pendingTask.progress = 1.0;
+
       _isDownloading = false;
       await _saveTasks();
-      _processQueue(totalDurationSeconds);
+      _processQueue();
+
+    } catch (e) {
+      if (CancelToken.isCancel(e as DioException?)) {
+        pendingTask.status = DownloadStatus.canceled;
+      } else {
+        pendingTask.status = DownloadStatus.failed;
+        debugPrint("Download Error: $e");
+      }
+      _isDownloading = false;
+      await _saveTasks();
+      _processQueue();
     }
   }
 
   Future<void> cancelDownload(String id) async {
     final task = getTask(id);
     if (task != null && task.status == DownloadStatus.downloading) {
-      FFmpegKit.cancel(); // Cancels all running sessions
+      _cancelToken?.cancel();
     } else if (task != null) {
       deleteDownload(id);
     }
@@ -176,9 +204,10 @@ class DownloadProvider extends ChangeNotifier {
   Future<void> deleteDownload(String id) async {
     final task = getTask(id);
     if (task != null) {
-      final file = File(task.savePath);
-      if (await file.exists()) {
-        await file.delete();
+      final directory = await getApplicationDocumentsDirectory();
+      final movieDir = Directory('${directory.path}/$id');
+      if (await movieDir.exists()) {
+        await movieDir.delete(recursive: true);
       }
       _tasks.remove(task);
       await _saveTasks();
