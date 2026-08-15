@@ -100,7 +100,6 @@ class DownloadsScreen extends StatelessWidget {
                         episodeName: task.episodeName,
                         episodeSlug: task.episodeSlug,
                         thumbUrl: task.thumbUrl,
-                        isOffline: true, // Note: You need to add this param to WatchMovieScreen if you want it to handle local files differently, but video_player handles file:// paths out of the box if formatted correctly.
                       ),
                     ),
                   );

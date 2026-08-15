@@ -139,7 +139,7 @@ class DownloadProvider extends ChangeNotifier {
           await _saveTasks();
           _processQueue(totalDurationSeconds); // Process next
         },
-        (Log log) {
+        (log) {
           // print(log.getMessage());
         },
         (Statistics statistics) {
