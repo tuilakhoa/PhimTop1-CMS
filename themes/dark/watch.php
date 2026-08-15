@@ -109,13 +109,17 @@ if (isset($_SESSION['user'])) {
     <!-- Episode List -->
     <?php if (!empty($episodes[0]['server_data'])): ?>
         <div class="bg-[#111] rounded-2xl p-6 md:p-8 border border-gray-900 mb-12">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-3">
                 <h3 class="text-lg font-bold text-white flex items-center tracking-tight">
                     <i data-lucide="list-video" class="w-5 h-5 mr-3 text-white"></i> Danh sách tập
                 </h3>
+                <div class="relative">
+                    <input type="text" id="search-episode" placeholder="Tìm tập phim..." class="bg-[#1a1a1a] text-sm text-white px-3 py-1.5 rounded-lg border border-gray-800 outline-none focus:border-white w-full md:w-48">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
+                </div>
             </div>
             
-            <div class="flex flex-wrap gap-3 max-h-[400px] overflow-y-auto custom-scrollbar">
+            <div class="flex flex-wrap gap-3 max-h-[400px] overflow-y-auto custom-scrollbar" id="episode-list">
                 <?php foreach ($episodes[0]['server_data'] as $e): 
                     $isActive = $currentEp['slug'] === $e['slug'];
                     $classes = $isActive 
@@ -128,6 +132,25 @@ if (isset($_SESSION['user'])) {
                     </a>
                 <?php endforeach; ?>
             </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const searchEp = document.getElementById('search-episode');
+                    if (searchEp) {
+                        searchEp.addEventListener('input', function(e) {
+                            const keyword = e.target.value.toLowerCase().trim();
+                            const eps = document.querySelectorAll('#episode-list a');
+                            eps.forEach(ep => {
+                                const text = ep.textContent.toLowerCase().trim();
+                                if (text.includes(keyword)) {
+                                    ep.style.display = '';
+                                } else {
+                                    ep.style.display = 'none';
+                                }
+                            });
+                        });
+                    }
+                });
+            </script>
         </div>
     <?php endif; ?>
 

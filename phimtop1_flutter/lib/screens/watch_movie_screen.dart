@@ -23,6 +23,7 @@ class WatchMovieScreen extends StatefulWidget {
   final String movieSlug;
   final String episodeName;
   final String episodeSlug;
+  final String thumbUrl;
 
   const WatchMovieScreen({
     super.key,
@@ -31,6 +32,7 @@ class WatchMovieScreen extends StatefulWidget {
     this.movieSlug = '',
     this.episodeName = '',
     this.episodeSlug = '',
+    this.thumbUrl = '',
   });
 
   @override
@@ -113,6 +115,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
           widget.title,
           widget.episodeName,
           episodeSlug: widget.episodeSlug,
+          thumbUrl: widget.thumbUrl,
         );
 
         _historySyncTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
@@ -123,6 +126,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
             widget.title,
             widget.episodeName,
             episodeSlug: widget.episodeSlug,
+            thumbUrl: widget.thumbUrl,
             currentTime: _videoController!.value.position.inSeconds,
             duration: _videoController!.value.duration.inSeconds,
           );
@@ -177,11 +181,26 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
             looping: false,
             startAt: startAt,
             aspectRatio: _videoController!.value.aspectRatio,
+            allowPlaybackSpeedChanging: true,
+            playbackSpeeds: const [0.5, 0.75, 1, 1.25, 1.5, 2.0],
+            materialProgressColors: ChewieProgressColors(
+              playedColor: Theme.of(context).primaryColor,
+              handleColor: Colors.white,
+              backgroundColor: Colors.white24,
+              bufferedColor: Colors.white60,
+            ),
             errorBuilder: (context, errorMessage) {
               return Center(
-                child: Text(
-                  errorMessage,
-                  style: const TextStyle(color: Colors.white),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline_rounded, color: Colors.white54, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      errorMessage,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ],
                 ),
               );
             },
@@ -210,6 +229,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
         widget.title,
         widget.episodeName,
         episodeSlug: widget.episodeSlug,
+        thumbUrl: widget.thumbUrl,
         currentTime: _videoController!.value.position.inSeconds,
         duration: _videoController!.value.duration.inSeconds,
       );

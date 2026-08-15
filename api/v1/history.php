@@ -88,7 +88,7 @@ if ($action === 'add') {
     $input = json_decode(file_get_contents('php://input'), true);
     $slug = $input['movie_slug'] ?? '';
     $name = $input['movie_name'] ?? '';
-    $episodeName = $input['episode_name'] ?? 'Tập 1';
+    $episodeName = !empty($input['episode_name']) ? $input['episode_name'] : 'Tập 1';
     
     // We should also save the thumbnail to show in the list
     $thumb = $input['thumb_url'] ?? '';
@@ -107,11 +107,14 @@ if ($action === 'add') {
     // "id, user_email, movie_slug, movie_name, episode_name, updated_at"
     
     // Check if it already exists to update episode_name and updated_at
-    $stmt = $pdo->prepare("SELECT id FROM watch_history WHERE user_email = ? AND movie_slug = ?");
+    $stmt = $pdo->prepare("SELECT id, thumb_url FROM watch_history WHERE user_email = ? AND movie_slug = ?");
     $stmt->execute([$user['email'], $slug]);
     $existing = $stmt->fetch();
     
     if ($existing) {
+        if (empty($thumb) && !empty($existing['thumb_url'])) {
+            $thumb = $existing['thumb_url'];
+        }
         $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
         $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $existing['id']]);
     } else {

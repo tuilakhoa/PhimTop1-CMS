@@ -75,8 +75,8 @@ class ExploreScreen extends StatelessWidget {
       {"slug": "tv-shows", "name": "TV Shows"},
     ];
 
-    final genres = provider.allCategories.where((c) => c.type == "the-loai").toList();
-    final countries = provider.allCategories.where((c) => c.type == "quoc-gia").toList();
+    final genres = provider.allCategories.where((c) => c.type == "genre").toList();
+    final countries = provider.allCategories.where((c) => c.type == "country").toList();
     
     // Generate years from current year down to 2010
     final currentYear = DateTime.now().year;

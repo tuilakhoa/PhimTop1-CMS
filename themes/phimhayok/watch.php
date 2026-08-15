@@ -123,13 +123,17 @@ if (isset($_SESSION['user'])) {
         <div class="lg:col-span-2 space-y-6">
             <?php if (!empty($episodes[0]['server_data'])): ?>
                 <div class="bg-[#141414] rounded-xl p-5 md:p-6 border border-gray-900">
-                    <div class="flex items-center justify-between mb-5 border-b border-gray-800 pb-3">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-5 border-b border-gray-800 pb-3 gap-3">
                         <h3 class="text-lg font-bold text-white flex items-center uppercase tracking-wider">
                             <i data-lucide="list-video" class="w-5 h-5 mr-2 text-red-600"></i> Danh sách tập
                         </h3>
+                        <div class="relative">
+                            <input type="text" id="search-episode" placeholder="Tìm tập phim..." class="bg-[#202020] text-sm text-white px-3 py-1.5 rounded-lg border border-gray-700 outline-none focus:border-red-600 w-full md:w-48">
+                            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
+                        </div>
                     </div>
                     
-                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-5 xl:grid-cols-7 gap-2.5 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-5 xl:grid-cols-7 gap-2.5 max-h-[400px] overflow-y-auto custom-scrollbar pr-2" id="episode-list">
                         <?php foreach ($episodes[0]['server_data'] as $e): 
                             $isActive = $currentEp['slug'] === $e['slug'];
                             $classes = $isActive 
@@ -142,6 +146,25 @@ if (isset($_SESSION['user'])) {
                             </a>
                         <?php endforeach; ?>
                     </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const searchEp = document.getElementById('search-episode');
+                            if (searchEp) {
+                                searchEp.addEventListener('input', function(e) {
+                                    const keyword = e.target.value.toLowerCase().trim();
+                                    const eps = document.querySelectorAll('#episode-list a');
+                                    eps.forEach(ep => {
+                                        const text = ep.textContent.toLowerCase().trim();
+                                        if (text.includes(keyword)) {
+                                            ep.style.display = '';
+                                        } else {
+                                            ep.style.display = 'none';
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                    </script>
                 </div>
             <?php endif; ?>
         </div>
@@ -208,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const movieSlug = '<?= addslashes($movie['slug']) ?>';
     const movieName = '<?= addslashes($movie['name']) ?>';
     const episodeName = '<?= addslashes($currentEp['name']) ?>';
+    const thumbUrl = '<?= addslashes($movie['thumb_url'] ?? '') ?>';
     // Function to log history
     function logHistory() {
         let currentTime = 0;

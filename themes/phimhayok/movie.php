@@ -167,18 +167,24 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
             
             <!-- Episodes List -->
 <div class="mb-10" id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
                     <h3 class="text-xl font-bold text-white">Danh sách tập</h3>
-                    <button class="text-gray-400 hover:text-white text-sm flex items-center transition-colors">
-                        <i data-lucide="arrow-down-up" class="w-4 h-4 mr-1"></i> Sắp xếp
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <div class="relative">
+                            <input type="text" id="search-episode" placeholder="Tìm tập phim..." class="bg-[#202020] text-sm text-white px-3 py-1.5 rounded-lg border border-gray-700 outline-none focus:border-[#fcc526] w-full md:w-48">
+                            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
+                        </div>
+                        <button class="text-gray-400 hover:text-white text-sm flex items-center transition-colors shrink-0">
+                            <i data-lucide="arrow-down-up" class="w-4 h-4 mr-1"></i> Sắp xếp
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="bg-[#141414] rounded-xl p-5 border border-gray-800 shadow-lg">
                     <h4 class="text-[#fcc526] font-medium mb-4 flex items-center">
                         <i data-lucide="menu" class="w-4 h-4 mr-2"></i> Phần 1
                     </h4>
-                    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5">
+                    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5 max-h-[400px] overflow-y-auto custom-scrollbar" id="episode-list">
                         <?php 
                         $server = $episodes[0] ?? ['server_data' => []];
                         foreach ($server['server_data'] as $ep): 
@@ -194,6 +200,25 @@ $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
                         <?php endif; ?>
                     </div>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const searchEp = document.getElementById('search-episode');
+                        if (searchEp) {
+                            searchEp.addEventListener('input', function(e) {
+                                const keyword = e.target.value.toLowerCase().trim();
+                                const eps = document.querySelectorAll('#episode-list a');
+                                eps.forEach(ep => {
+                                    const text = ep.textContent.toLowerCase().trim();
+                                    if (text.includes(keyword)) {
+                                        ep.style.display = '';
+                                    } else {
+                                        ep.style.display = 'none';
+                                    }
+                                });
+                            });
+                        }
+                    });
+                </script>
             </div>
             
             <!-- Comments (Dynamic UI) -->
