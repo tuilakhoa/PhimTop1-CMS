@@ -17,7 +17,13 @@ $apiKey = $settings['appApiKey'] ?? '';
 // Verify App API Key if set
 $headers = getallheaders();
 $clientApiKey = $headers['X-App-API-Key'] ?? ($_GET['key'] ?? '');
-if (!empty($apiKey) && $clientApiKey !== $apiKey) {
+
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    session_start();
+}
+$isWebUser = isset($_SESSION['user']) || isset($_SESSION['admin']);
+
+if (!$isWebUser && !empty($apiKey) && $clientApiKey !== $apiKey) {
     http_response_code(403);
     echo json_encode(['status' => 'error', 'message' => 'Invalid API Key']);
     exit;
