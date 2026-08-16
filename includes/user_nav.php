@@ -36,6 +36,9 @@ $settings = getSettings();
                         <p class="text-sm font-bold text-white truncate"><?= htmlspecialchars($_SESSION['user']['name']) ?></p>
                         <p class="text-xs text-gray-400 truncate mt-0.5"><?= htmlspecialchars($_SESSION['user']['email']) ?></p>
                     </div>
+                    <a href="/profiles.php" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors mb-1">
+                        <i data-lucide="users" class="w-4 h-4 mr-2"></i> Hồ sơ người xem
+                    </a>
                     <a href="/history.php" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors mb-1">
                         <i data-lucide="history" class="w-4 h-4 mr-2"></i> Lịch sử xem phim
                     </a>

@@ -29,7 +29,7 @@ class MainScreen extends StatelessWidget {
                 NavigationRailDestination(icon: Icon(Icons.home), label: Text('Trang chủ')),
                 NavigationRailDestination(icon: Icon(Icons.trending_up), label: Text('BXH')),
                 NavigationRailDestination(icon: Icon(Icons.explore), label: Text('Khám phá')),
-                NavigationRailDestination(icon: Icon(Icons.play_circle_fill_rounded), label: Text('Shorts')),
+                NavigationRailDestination(icon: Icon(Icons.animation), label: Text('Hoạt hình')),
                 NavigationRailDestination(icon: Icon(Icons.person), label: Text('Cá nhân')),
               ],
             ),
@@ -54,7 +54,7 @@ class MainScreen extends StatelessWidget {
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
             BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: 'BXH'),
             BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Khám phá'),
-            BottomNavigationBarItem(icon: Icon(Icons.play_circle_fill_rounded), label: 'Shorts'),
+            BottomNavigationBarItem(icon: Icon(Icons.animation), label: 'Hoạt hình'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
           ],
         ),
@@ -66,7 +66,7 @@ class MainScreen extends StatelessWidget {
     final String location = GoRouterState.of(context).uri.path;
     if (location.startsWith('/trending')) return 1;
     if (location.startsWith('/explore')) return 2;
-    if (location.startsWith('/shorts')) return 3;
+    if (location.startsWith('/cartoon')) return 3;
     if (location.startsWith('/profile')) return 4;
     if (location.startsWith('/search')) return 5;
     return 0; // home
@@ -84,7 +84,7 @@ class MainScreen extends StatelessWidget {
         context.go('/explore');
         break;
       case 3:
-        context.go('/shorts');
+        context.go('/cartoon');
         break;
       case 4:
         context.go('/profile');

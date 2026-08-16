@@ -5,7 +5,7 @@ import '../screens/main_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/trending_screen.dart';
 import '../screens/explore_screen.dart';
-import '../screens/shorts_screen.dart';
+import '../screens/cartoon_screen.dart';
 import '../screens/movie_detail_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/login_screen.dart';
@@ -64,8 +64,8 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding) {
           builder: (BuildContext context, GoRouterState state) => const ExploreScreen(),
         ),
         GoRoute(
-          path: '/shorts',
-          builder: (BuildContext context, GoRouterState state) => const ShortsScreen(),
+          path: '/cartoon',
+          builder: (BuildContext context, GoRouterState state) => const CartoonScreen(),
         ),
         GoRoute(
           path: '/profile',
