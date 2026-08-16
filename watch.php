@@ -76,6 +76,21 @@ if (isset($_SESSION['user']) && !empty($_SESSION['user']['email'])) {
     $pdo = getPDO();
     if ($pdo) {
         try {
+            $pdo->query("SELECT profile_id FROM watch_history LIMIT 1");
+        } catch (PDOException $e) {
+            try {
+                $pdo->exec("CREATE TABLE IF NOT EXISTS watch_history (id INT AUTO_INCREMENT PRIMARY KEY, user_email VARCHAR(255) NOT NULL, movie_slug VARCHAR(255) NOT NULL, movie_name VARCHAR(255) NOT NULL, episode_name VARCHAR(255) NOT NULL, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)");
+                $pdo->exec("ALTER TABLE watch_history ADD COLUMN profile_id INT DEFAULT 0");
+                $pdo->exec("ALTER TABLE watch_history ADD COLUMN episode_slug VARCHAR(255)");
+                $pdo->exec("ALTER TABLE watch_history ADD COLUMN thumb_url TEXT");
+                $pdo->exec("ALTER TABLE watch_history ADD COLUMN current_time INT DEFAULT 0");
+                $pdo->exec("ALTER TABLE watch_history ADD COLUMN duration INT DEFAULT 0");
+                $pdo->exec("ALTER TABLE watch_history DROP INDEX user_movie");
+                $pdo->exec("ALTER TABLE watch_history ADD UNIQUE KEY user_movie_profile (user_email, movie_slug, profile_id)");
+            } catch (PDOException $ex) {}
+        }
+        
+        try {
             $profileId = isset($_SESSION['current_profile']) ? (int)$_SESSION['current_profile']['id'] : 0;
             $stmt = $pdo->prepare("SELECT id FROM watch_history WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
             $stmt->execute([$_SESSION['user']['email'], $slug, $profileId]);
