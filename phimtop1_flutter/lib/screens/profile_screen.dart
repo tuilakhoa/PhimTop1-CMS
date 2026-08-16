@@ -86,7 +86,7 @@ class ProfileScreen extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.expand_more, color: Colors.white),
                     onPressed: () {
-                      context.push('/profiles'); // We can navigate to profiles screen which already has switch and add profile logic.
+                      context.push('/select_profile'); // We can navigate to profiles screen which already has switch and add profile logic.
                     },
                   ),
                 ],
