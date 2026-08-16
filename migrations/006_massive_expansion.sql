@@ -2,8 +2,8 @@
 CREATE TABLE IF NOT EXISTS user_profiles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_email VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    avatar TEXT,
+    profile_name VARCHAR(255) NOT NULL,
+    avatar_url TEXT,
     is_kids_mode TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

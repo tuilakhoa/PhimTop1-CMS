@@ -61,8 +61,30 @@ $action = $_GET['action'] ?? 'list';
 $pdo = getPDO();
 
 if ($action === 'list') {
-    $stmt = $pdo->prepare("SELECT * FROM user_profiles WHERE user_email = ?");
-    $stmt->execute([$user['email']]);
+    if (!$pdo) {
+        $defaultAvatar = 'https://ui-avatars.com/api/?name=' . urlencode($user['name'] ?? 'User') . '&background=random';
+        echo json_encode(['status' => 'success', 'data' => [
+            ['id' => 1, 'profile_name' => 'Default', 'avatar_url' => $defaultAvatar, 'is_kids_mode' => 0]
+        ]]);
+        exit;
+    }
+
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM user_profiles WHERE user_email = ?");
+        $stmt->execute([$user['email']]);
+    } catch (PDOException $e) {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS user_profiles (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_email VARCHAR(255) NOT NULL,
+            profile_name VARCHAR(255) NOT NULL,
+            avatar_url TEXT,
+            is_kids_mode TINYINT(1) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )");
+        $stmt = $pdo->prepare("SELECT * FROM user_profiles WHERE user_email = ?");
+        $stmt->execute([$user['email']]);
+    }
+
     $profiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Auto-create a default profile if none exists
@@ -81,6 +103,12 @@ if ($action === 'list') {
 }
 
 if ($action === 'create') {
+    if (!$pdo) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Hệ thống Firestore chưa hỗ trợ tạo nhiều hồ sơ.']);
+        exit;
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
     $profileName = $input['profile_name'] ?? '';
     $isKidsMode = isset($input['is_kids_mode']) ? (int)$input['is_kids_mode'] : 0;
@@ -108,6 +136,12 @@ if ($action === 'create') {
 }
 
 if ($action === 'delete') {
+    if (!$pdo) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Hệ thống Firestore chưa hỗ trợ xóa hồ sơ.']);
+        exit;
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
     $profileId = $input['profile_id'] ?? 0;
 
@@ -127,6 +161,16 @@ if ($action === 'delete') {
 }
 
 if ($action === 'select') {
+    if (!$pdo) {
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            session_start();
+        }
+        $defaultAvatar = 'https://ui-avatars.com/api/?name=' . urlencode($user['name'] ?? 'User') . '&background=random';
+        $_SESSION['current_profile'] = ['id' => 1, 'profile_name' => 'Default', 'avatar_url' => $defaultAvatar, 'is_kids_mode' => 0];
+        echo json_encode(['status' => 'success', 'profile' => $_SESSION['current_profile']]);
+        exit;
+    }
+
     // Web only - Sets session variable for the current profile
     $input = json_decode(file_get_contents('php://input'), true);
     $profileId = $input['profile_id'] ?? 0;
