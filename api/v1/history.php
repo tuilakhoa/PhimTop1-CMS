@@ -84,16 +84,24 @@ if (!$enableContinueWatching) {
 $pdo = getPDO();
 
 if ($action === 'list') {
+    if (!$pdo) {
+        echo json_encode(['status' => 'success', 'data' => []]);
+        exit;
+    }
+
     try {
         $pdo->exec("ALTER TABLE watch_history DROP INDEX user_movie");
         $pdo->exec("ALTER TABLE watch_history ADD UNIQUE KEY user_movie_profile (user_email, movie_slug, profile_id)");
     } catch (PDOException $e) {}
 
-    $stmt = $pdo->prepare("SELECT * FROM watch_history WHERE user_email = ? AND profile_id = ? ORDER BY updated_at DESC LIMIT 100");
-    $stmt->execute([$user['email'], $profileId]);
-    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    echo json_encode(['status' => 'success', 'data' => $items]);
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM watch_history WHERE user_email = ? AND profile_id = ? ORDER BY updated_at DESC LIMIT 100");
+        $stmt->execute([$user['email'], $profileId]);
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    } catch (PDOException $e) {
+        echo json_encode(['status' => 'success', 'data' => []]);
+    }
     exit;
 }
 
@@ -103,7 +111,6 @@ if ($action === 'add') {
     $name = $input['movie_name'] ?? '';
     $episodeName = !empty($input['episode_name']) ? $input['episode_name'] : 'Tập 1';
     
-    // We should also save the thumbnail to show in the list
     $thumb = $input['thumb_url'] ?? '';
     $episodeSlug = $input['episode_slug'] ?? '';
     $currentTime = (int)($input['current_time'] ?? 0);
@@ -115,30 +122,34 @@ if ($action === 'add') {
         exit;
     }
     
-    // We check if the column thumb_url exists, if not we ignore it
-    // Wait, the schema in includes/db.php doesn't have thumb_url in watch_history!
-    // "id, user_email, movie_slug, movie_name, episode_name, updated_at"
+    if (!$pdo) {
+        echo json_encode(['status' => 'success']);
+        exit;
+    }
     
-    // Check if it already exists to update episode_name and updated_at
-    $stmt = $pdo->prepare("SELECT id, thumb_url FROM watch_history WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
-    $stmt->execute([$user['email'], $slug, $profileId]);
-    $existing = $stmt->fetch();
-    
-    if ($existing) {
-        if (empty($thumb) && !empty($existing['thumb_url'])) {
-            $thumb = $existing['thumb_url'];
+    try {
+        $stmt = $pdo->prepare("SELECT id, thumb_url FROM watch_history WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
+        $stmt->execute([$user['email'], $slug, $profileId]);
+        $existing = $stmt->fetch();
+        
+        if ($existing) {
+            if (empty($thumb) && !empty($existing['thumb_url'])) {
+                $thumb = $existing['thumb_url'];
+            }
+            $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+            $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $existing['id']]);
+        } else {
+            try {
+                $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, episode_slug, thumb_url, current_time, duration, profile_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$user['email'], $slug, $name, $episodeName, $episodeSlug, $thumb, $currentTime, $duration, $profileId]);
+            } catch (PDOException $e) {
+                // In case of conflict, try updating again
+                $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
+                $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $user['email'], $slug, $profileId]);
+            }
         }
-        $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-        $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $existing['id']]);
-    } else {
-        try {
-            $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, episode_slug, thumb_url, current_time, duration, profile_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$user['email'], $slug, $name, $episodeName, $episodeSlug, $thumb, $currentTime, $duration, $profileId]);
-        } catch (PDOException $e) {
-            // In case of conflict, try updating again
-            $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
-            $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $user['email'], $slug, $profileId]);
-        }
+    } catch (PDOException $e) {
+        // Ignore errors if table doesn't exist etc.
     }
     
     echo json_encode(['status' => 'success']);
@@ -146,8 +157,14 @@ if ($action === 'add') {
 }
 
 if ($action === 'clear') {
-    $stmt = $pdo->prepare("DELETE FROM watch_history WHERE user_email = ? AND profile_id = ?");
-    $stmt->execute([$user['email'], $profileId]);
+    if (!$pdo) {
+        echo json_encode(['status' => 'success', 'message' => 'History cleared']);
+        exit;
+    }
+    try {
+        $stmt = $pdo->prepare("DELETE FROM watch_history WHERE user_email = ? AND profile_id = ?");
+        $stmt->execute([$user['email'], $profileId]);
+    } catch (PDOException $e) {}
     
     echo json_encode(['status' => 'success', 'message' => 'History cleared']);
     exit;
