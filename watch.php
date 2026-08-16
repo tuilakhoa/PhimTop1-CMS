@@ -96,12 +96,13 @@ if (isset($_SESSION['user']) && !empty($_SESSION['user']['email'])) {
             $stmt->execute([$_SESSION['user']['email'], $slug, $profileId]);
             $existing = $stmt->fetch();
             
+            $thumbUrl = $movie['thumb_url'] ?? $movie['poster_url'] ?? '';
             if ($existing) {
-                $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, movie_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-                $stmt->execute([$currentEp['name'] ?? $ep, $movie['name'] ?? $slug, $existing['id']]);
+                $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, movie_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+                $stmt->execute([$currentEp['name'] ?? $ep, $ep, $thumbUrl, $movie['name'] ?? $slug, $existing['id']]);
             } else {
-                $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, profile_id) VALUES (?, ?, ?, ?, ?)");
-                $stmt->execute([$_SESSION['user']['email'], $slug, $movie['name'] ?? $slug, $currentEp['name'] ?? $ep, $profileId]);
+                $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, episode_slug, thumb_url, profile_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$_SESSION['user']['email'], $slug, $movie['name'] ?? $slug, $currentEp['name'] ?? $ep, $ep, $thumbUrl, $profileId]);
             }
         } catch (Exception $e) {}
     }
