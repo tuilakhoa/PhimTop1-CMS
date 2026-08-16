@@ -449,11 +449,13 @@ class UserProfile {
   final String profileName;
   final String avatarUrl;
   final bool isKidsMode;
+  final bool hasPin;
 
   UserProfile.fromJson(Map<String, dynamic> json)
       : id = int.tryParse(json['id']?.toString() ?? '') ?? 0,
         userEmail = json['user_email'] ?? '',
         profileName = json['profile_name'] ?? '',
         avatarUrl = json['avatar_url'] ?? '',
-        isKidsMode = (json['is_kids_mode']?.toString() == '1');
+        isKidsMode = (json['is_kids_mode']?.toString() == '1'),
+        hasPin = (json['has_pin']?.toString() == '1');
 }

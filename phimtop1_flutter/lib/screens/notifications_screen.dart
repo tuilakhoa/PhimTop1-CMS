@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../api/cms_api.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/error_view.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -89,7 +90,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       return const Center(child: CircularProgressIndicator(color: Colors.red));
     }
     if (_error != null) {
-      return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      if (_error == "Bạn cần đăng nhập để xem thông báo") {
+        return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      }
+      return ErrorView(error: _error!, onRetry: _fetchNotifications);
     }
     if (_notifications.isEmpty) {
       return const Center(child: Text("Không có thông báo nào", style: TextStyle(color: Colors.white)));

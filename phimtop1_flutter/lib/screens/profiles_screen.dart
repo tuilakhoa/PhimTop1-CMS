@@ -40,42 +40,120 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
 
   Future<void> _handleProfileClick(UserProfile profile) async {
     if (_isManageMode) {
-      final confirm = await showDialog<bool>(
+      final action = await showDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: Colors.grey[900],
-          title: const Text('Xóa hồ sơ?', style: TextStyle(color: Colors.white)),
-          content: Text('Bạn có chắc chắn muốn xóa hồ sơ "${profile.profileName}"?', style: const TextStyle(color: Colors.white70)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Xóa', style: TextStyle(color: Colors.red)),
-            ),
-          ],
+          title: Text('Quản lý hồ sơ ${profile.profileName}', style: const TextStyle(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.lock, color: Colors.white),
+                title: Text(profile.hasPin ? 'Đổi/Xóa mã PIN' : 'Tạo mã PIN', style: const TextStyle(color: Colors.white)),
+                onTap: () => Navigator.pop(ctx, 'pin'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Xóa hồ sơ', style: TextStyle(color: Colors.red)),
+                onTap: () => Navigator.pop(ctx, 'delete'),
+              ),
+            ],
+          ),
         ),
       );
 
-      if (confirm == true) {
-        final token = context.read<AuthProvider>().token;
-        final success = await cmsApi.deleteProfile(token!, profile.id);
-        if (success) {
-          _fetchProfiles();
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Không thể xóa hồ sơ cuối cùng')));
+      if (action == 'delete') {
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: Colors.grey[900],
+            title: const Text('Xóa hồ sơ?', style: TextStyle(color: Colors.white)),
+            content: Text('Bạn có chắc chắn muốn xóa hồ sơ "${profile.profileName}"?', style: const TextStyle(color: Colors.white70)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        );
+
+        if (confirm == true) {
+          final token = context.read<AuthProvider>().token;
+          final success = await cmsApi.deleteProfile(token!, profile.id);
+          if (success) {
+            _fetchProfiles();
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Không thể xóa hồ sơ cuối cùng')));
+            }
+          }
+        }
+      } else if (action == 'pin') {
+        final newPin = await _showPinInputDialog(context, 'Nhập mã PIN (4 số, để trống để xóa)');
+        if (newPin != null) {
+          final token = context.read<AuthProvider>().token!;
+          // Call API to update profile with pinCode
+          final success = await cmsApi.updateProfile(token, profile.id, profile.profileName, profile.avatarUrl, pinCode: newPin.isEmpty ? '' : newPin);
+          if (success) {
+            _fetchProfiles();
+          } else {
+            if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lỗi khi cập nhật mã PIN')));
           }
         }
       }
     } else {
+      if (profile.hasPin) {
+        final pin = await _showPinInputDialog(context, 'Nhập mã PIN');
+        if (pin == null || pin.isEmpty) return;
+        
+        final token = context.read<AuthProvider>().token!;
+        final success = await cmsApi.verifyPin(token, profile.id, pin);
+        if (!success) {
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mã PIN không đúng')));
+          return;
+        }
+      }
+      
       await context.read<AuthProvider>().setProfile(profile);
       if (mounted) {
         context.go('/');
       }
     }
+  }
+
+  Future<String?> _showPinInputDialog(BuildContext context, String title) {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 18)),
+        content: TextField(
+          controller: controller,
+          obscureText: true,
+          keyboardType: TextInputType.number,
+          maxLength: 4,
+          autofocus: true,
+          style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 16),
+          textAlign: TextAlign.center,
+          decoration: const InputDecoration(
+            counterText: "",
+            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
+            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy', style: TextStyle(color: Colors.grey))),
+          TextButton(onPressed: () => Navigator.pop(ctx, controller.text), child: const Text('Xác nhận', style: TextStyle(color: Colors.blueAccent))),
+        ],
+      ),
+    );
   }
 
   void _showAddProfileModal() {
@@ -280,6 +358,16 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
                       border: Border.all(color: Colors.white, width: 2),
                     ),
                     child: const Center(child: Icon(Icons.edit, color: Colors.white, size: 32)),
+                  ),
+                )
+              else if (profile.hasPin)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(child: Icon(Icons.lock, color: Colors.white, size: 24)),
                   ),
                 ),
             ],

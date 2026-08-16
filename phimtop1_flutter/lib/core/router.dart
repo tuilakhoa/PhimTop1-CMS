@@ -22,6 +22,7 @@ import '../screens/playlist_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/downloads_screen.dart';
 import '../screens/profiles_screen.dart';
+import '../screens/app_lock_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -38,13 +39,18 @@ FirebaseAnalytics? get analytics {
   }
 }
 
-GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding) {
+GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
   final currentAnalytics = analytics;
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: hasAgreed ? (hasSeenOnboarding ? '/' : '/onboarding') : '/terms',
+    initialLocation: hasAppLock ? '/app_lock' : (hasAgreed ? (hasSeenOnboarding ? '/' : '/onboarding') : '/terms'),
     observers: currentAnalytics != null ? [FirebaseAnalyticsObserver(analytics: currentAnalytics)] : [],
   routes: <RouteBase>[
+    GoRoute(
+      path: '/app_lock',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const AppLockScreen(),
+    ),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (BuildContext context, GoRouterState state, Widget child) {

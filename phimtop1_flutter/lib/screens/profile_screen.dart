@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../api/cms_api.dart';
+import '../models/models.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -50,12 +52,24 @@ class ProfileScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.grey[800],
-                    child: Text(
-                      user.name.isNotEmpty ? user.name[0].toUpperCase() : "?",
-                      style: const TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
+                  GestureDetector(
+                    onTap: () {
+                      _showUpdateAvatarDialog(context, auth);
+                    },
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.grey[800],
+                      backgroundImage: auth.currentProfile != null && auth.currentProfile!.avatarUrl.isNotEmpty
+                          ? NetworkImage(auth.currentProfile!.avatarUrl)
+                          : null,
+                      child: (auth.currentProfile == null || auth.currentProfile!.avatarUrl.isEmpty)
+                          ? Text(
+                              auth.currentProfile?.profileName.isNotEmpty == true 
+                                  ? auth.currentProfile!.profileName[0].toUpperCase() 
+                                  : (user.name.isNotEmpty ? user.name[0].toUpperCase() : "?"),
+                              style: const TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -63,11 +77,17 @@ class ProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(user.name, style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text(auth.currentProfile?.profileName ?? user.name, style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         Text(user.email, style: const TextStyle(fontSize: 16, color: Colors.grey)),
                       ],
                     ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.expand_more, color: Colors.white),
+                    onPressed: () {
+                      context.push('/profiles'); // We can navigate to profiles screen which already has switch and add profile logic.
+                    },
                   ),
                 ],
               ),
@@ -111,6 +131,71 @@ class ProfileScreen extends StatelessWidget {
       title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16)),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,
+    );
+  }
+
+  void _showUpdateAvatarDialog(BuildContext context, AuthProvider auth) {
+    final TextEditingController urlController = TextEditingController(text: auth.currentProfile?.avatarUrl ?? '');
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Đổi ảnh đại diện', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Nhập URL ảnh mới (có thể dùng link Gravatar):', style: TextStyle(color: Colors.white70, fontSize: 14)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: urlController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'https://...',
+                hintStyle: const TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.05),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (auth.currentProfile == null || auth.token == null) return;
+              final newUrl = urlController.text.trim();
+              if (newUrl.isEmpty) return;
+              
+              final profile = auth.currentProfile!;
+              // Call API
+              final success = await cmsApi.updateProfile(auth.token!, profile.id, profile.profileName, newUrl);
+              if (success) {
+                final updatedProfile = UserProfile.fromJson({
+                  'id': profile.id,
+                  'user_email': profile.userEmail,
+                  'profile_name': profile.profileName,
+                  'avatar_url': newUrl,
+                  'is_kids_mode': profile.isKidsMode ? 1 : 0,
+                  'has_pin': profile.hasPin ? 1 : 0,
+                });
+                await auth.setProfile(updatedProfile);
+                if (ctx.mounted) Navigator.pop(ctx);
+              } else {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Lỗi khi cập nhật ảnh đại diện')));
+                }
+              }
+            },
+            child: const Text('Lưu', style: TextStyle(color: Colors.blueAccent)),
+          ),
+        ],
+      ),
     );
   }
 }

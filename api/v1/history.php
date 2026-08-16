@@ -63,8 +63,8 @@ if (!$user) {
 
 $enableContinueWatching = isset($settings['enableContinueWatching']) ? (int)$settings['enableContinueWatching'] : 1;
 $action = $_GET['action'] ?? 'list';
-
-$profileId = (int)($headers['X-Profile-Id'] ?? $_SERVER['HTTP_X_PROFILE_ID'] ?? ($_SESSION['current_profile']['id'] ?? 0));
+$sessionProfileId = (isset($_SESSION['current_profile']) && isset($_SESSION['current_profile']['id'])) ? $_SESSION['current_profile']['id'] : 0;
+$profileId = (int)($headers['X-Profile-Id'] ?? $_SERVER['HTTP_X_PROFILE_ID'] ?? $sessionProfileId);
 
 if (!$enableContinueWatching) {
     if ($action === 'list') {
@@ -78,6 +78,11 @@ if (!$enableContinueWatching) {
 $pdo = getPDO();
 
 if ($action === 'list') {
+    try {
+        $pdo->exec("ALTER TABLE watch_history DROP INDEX user_movie");
+        $pdo->exec("ALTER TABLE watch_history ADD UNIQUE KEY user_movie_profile (user_email, movie_slug, profile_id)");
+    } catch (PDOException $e) {}
+
     $stmt = $pdo->prepare("SELECT * FROM watch_history WHERE user_email = ? AND profile_id = ? ORDER BY updated_at DESC LIMIT 100");
     $stmt->execute([$user['email'], $profileId]);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -120,8 +125,14 @@ if ($action === 'add') {
         $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
         $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $existing['id']]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, episode_slug, thumb_url, current_time, duration, profile_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$user['email'], $slug, $name, $episodeName, $episodeSlug, $thumb, $currentTime, $duration, $profileId]);
+        try {
+            $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, episode_slug, thumb_url, current_time, duration, profile_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$user['email'], $slug, $name, $episodeName, $episodeSlug, $thumb, $currentTime, $duration, $profileId]);
+        } catch (PDOException $e) {
+            // In case of conflict, try updating again
+            $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
+            $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $user['email'], $slug, $profileId]);
+        }
     }
     
     echo json_encode(['status' => 'success']);

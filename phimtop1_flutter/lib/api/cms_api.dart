@@ -481,6 +481,38 @@ class CmsApiService {
       return false;
     }
   }
+
+  Future<bool> updateProfile(String token, int profileId, String profileName, String avatarUrl, {String? pinCode}) async {
+    try {
+      final response = await _dio.post('api/v1/profiles.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'update',
+      }, data: {
+        'profile_id': profileId,
+        'profile_name': profileName,
+        'avatar_url': avatarUrl,
+        if (pinCode != null) 'pin_code': pinCode,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> verifyPin(String token, int profileId, String pinCode) async {
+    try {
+      final response = await _dio.post('api/v1/profiles.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'verify_pin',
+      }, data: {
+        'profile_id': profileId,
+        'pin_code': pinCode,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 // Global instance

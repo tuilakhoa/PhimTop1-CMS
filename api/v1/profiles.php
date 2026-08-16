@@ -79,10 +79,17 @@ if ($action === 'list') {
             profile_name VARCHAR(255) NOT NULL,
             avatar_url TEXT,
             is_kids_mode TINYINT(1) DEFAULT 0,
+            pin_code VARCHAR(10) NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
         $stmt = $pdo->prepare("SELECT * FROM user_profiles WHERE user_email = ?");
         $stmt->execute([$user['email']]);
+    }
+    
+    try {
+        $pdo->exec("ALTER TABLE user_profiles ADD COLUMN pin_code VARCHAR(10) NULL");
+    } catch (PDOException $e) {
+        // ignore
     }
 
     $profiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -96,6 +103,11 @@ if ($action === 'list') {
         $stmt = $pdo->prepare("SELECT * FROM user_profiles WHERE user_email = ?");
         $stmt->execute([$user['email']]);
         $profiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    foreach ($profiles as &$p) {
+        $p['has_pin'] = !empty($p['pin_code']) ? 1 : 0;
+        unset($p['pin_code']);
     }
 
     echo json_encode(['status' => 'success', 'data' => $profiles]);
@@ -160,6 +172,47 @@ if ($action === 'delete') {
     exit;
 }
 
+if ($action === 'update') {
+    if (!$pdo) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Hệ thống Firestore chưa hỗ trợ cập nhật hồ sơ.']);
+        exit;
+    }
+
+    $input = json_decode(file_get_contents('php://input'), true);
+    $profileId = $input['profile_id'] ?? 0;
+    $profileName = $input['profile_name'] ?? '';
+    $avatarUrl = $input['avatar_url'] ?? '';
+    
+    if (empty($profileId) || empty($profileName)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Profile ID và tên không được để trống']);
+        exit;
+    }
+
+    if (isset($input['pin_code'])) {
+        $stmt = $pdo->prepare("UPDATE user_profiles SET profile_name = ?, avatar_url = ?, pin_code = ? WHERE id = ? AND user_email = ?");
+        $stmt->execute([$profileName, $avatarUrl, $input['pin_code'], $profileId, $user['email']]);
+    } else {
+        $stmt = $pdo->prepare("UPDATE user_profiles SET profile_name = ?, avatar_url = ? WHERE id = ? AND user_email = ?");
+        $stmt->execute([$profileName, $avatarUrl, $profileId, $user['email']]);
+    }
+    
+    // Update session if it's the current profile
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        session_start();
+    }
+    if (isset($_SESSION['current_profile']) && $_SESSION['current_profile']['id'] == $profileId) {
+        $_SESSION['current_profile']['profile_name'] = $profileName;
+        if (!empty($avatarUrl)) {
+            $_SESSION['current_profile']['avatar_url'] = $avatarUrl;
+        }
+    }
+    
+    echo json_encode(['status' => 'success']);
+    exit;
+}
+
 if ($action === 'select') {
     if (!$pdo) {
         if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
@@ -188,6 +241,30 @@ if ($action === 'select') {
     } else {
         http_response_code(404);
         echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy hồ sơ']);
+    }
+    exit;
+}
+
+if ($action === 'verify_pin') {
+    if (!$pdo) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Hệ thống Firestore chưa hỗ trợ.']);
+        exit;
+    }
+
+    $input = json_decode(file_get_contents('php://input'), true);
+    $profileId = $input['profile_id'] ?? 0;
+    $pinCode = $input['pin_code'] ?? '';
+
+    $stmt = $pdo->prepare("SELECT pin_code FROM user_profiles WHERE id = ? AND user_email = ?");
+    $stmt->execute([$profileId, $user['email']]);
+    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($profile && $profile['pin_code'] === $pinCode) {
+        echo json_encode(['status' => 'success']);
+    } else {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Mã PIN không đúng']);
     }
     exit;
 }

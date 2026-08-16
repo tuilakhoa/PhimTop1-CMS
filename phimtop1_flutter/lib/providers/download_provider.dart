@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_background/flutter_background.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../models/download_task.dart';
 
 class DownloadProvider extends ChangeNotifier {
@@ -16,9 +17,82 @@ class DownloadProvider extends ChangeNotifier {
   bool _isDownloading = false;
   final Dio _dio = Dio();
   CancelToken? _cancelToken;
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  bool _isNotificationInitialized = false;
 
   DownloadProvider() {
     _loadTasks();
+  }
+
+  Future<void> _initNotifications() async {
+    if (_isNotificationInitialized) return;
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'download_channel', 
+      'Tiến trình Tải Phim', 
+      description: 'Thông báo trạng thái tải phim về máy',
+      importance: Importance.low,
+    );
+    await _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+        
+    _isNotificationInitialized = true;
+  }
+
+  Future<void> _showProgressNotification(int id, String title, int progress) async {
+    await _initNotifications();
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'download_channel',
+      'Tiến trình Tải Phim',
+      channelDescription: 'Thông báo trạng thái tải phim về máy',
+      channelShowBadge: false,
+      importance: Importance.low,
+      priority: Priority.low,
+      onlyAlertOnce: true,
+      showProgress: true,
+      maxProgress: 100,
+      progress: progress,
+      icon: '@mipmap/ic_launcher',
+    );
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    await _flutterLocalNotificationsPlugin.show(id, title, '$progress% Đã tải', platformChannelSpecifics);
+  }
+  
+  Future<void> _showCompletedNotification(int id, String title) async {
+    await _initNotifications();
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+        const AndroidNotificationDetails(
+      'download_channel',
+      'Tiến trình Tải Phim',
+      channelDescription: 'Thông báo trạng thái tải phim về máy',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      icon: '@mipmap/ic_launcher',
+    );
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    await _flutterLocalNotificationsPlugin.show(id, title, 'Tải phim hoàn tất!', platformChannelSpecifics);
+  }
+  
+  Future<void> _showFailedNotification(int id, String title) async {
+    await _initNotifications();
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+        const AndroidNotificationDetails(
+      'download_channel',
+      'Tiến trình Tải Phim',
+      channelDescription: 'Thông báo trạng thái tải phim về máy',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      icon: '@mipmap/ic_launcher',
+    );
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    await _flutterLocalNotificationsPlugin.show(id, title, 'Tải phim thất bại', platformChannelSpecifics);
   }
 
   Future<void> _loadTasks() async {
@@ -234,6 +308,8 @@ class DownloadProvider extends ChangeNotifier {
                       pendingTask.timeRemaining = _formatTime(remainingSeconds.round());
                       pendingTask.progress = progress;
                       notifyListeners();
+                      
+                      _showProgressNotification(pendingTask.id.hashCode, pendingTask.movieName, (progress * 100).toInt());
                     }
                  }
               }
@@ -260,14 +336,17 @@ class DownloadProvider extends ChangeNotifier {
 
       _isDownloading = false;
       await _saveTasks();
+      await _showCompletedNotification(pendingTask.id.hashCode, pendingTask.movieName);
       _processQueue();
 
     } catch (e) {
       if (e is DioException && CancelToken.isCancel(e)) {
         pendingTask.status = DownloadStatus.canceled;
+        await _flutterLocalNotificationsPlugin.cancel(pendingTask.id.hashCode);
       } else {
         pendingTask.status = DownloadStatus.failed;
         debugPrint("Download Error: $e");
+        await _showFailedNotification(pendingTask.id.hashCode, pendingTask.movieName);
       }
       _isDownloading = false;
       await _saveTasks();
@@ -282,6 +361,7 @@ class DownloadProvider extends ChangeNotifier {
     } else if (task != null) {
       deleteDownload(id);
     }
+    await _flutterLocalNotificationsPlugin.cancel(id.hashCode);
   }
 
   Future<void> deleteDownload(String id) async {

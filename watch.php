@@ -76,8 +76,18 @@ if (isset($_SESSION['user']) && !empty($_SESSION['user']['email'])) {
     $pdo = getPDO();
     if ($pdo) {
         try {
-            $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE episode_name = VALUES(episode_name), movie_name = VALUES(movie_name)");
-            $stmt->execute([$_SESSION['user']['email'], $slug, $movie['name'] ?? $slug, $currentEp['name'] ?? $ep]);
+            $profileId = isset($_SESSION['current_profile']) ? (int)$_SESSION['current_profile']['id'] : 0;
+            $stmt = $pdo->prepare("SELECT id FROM watch_history WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
+            $stmt->execute([$_SESSION['user']['email'], $slug, $profileId]);
+            $existing = $stmt->fetch();
+            
+            if ($existing) {
+                $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, movie_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+                $stmt->execute([$currentEp['name'] ?? $ep, $movie['name'] ?? $slug, $existing['id']]);
+            } else {
+                $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, profile_id) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$_SESSION['user']['email'], $slug, $movie['name'] ?? $slug, $currentEp['name'] ?? $ep, $profileId]);
+            }
         } catch (Exception $e) {}
     }
 }

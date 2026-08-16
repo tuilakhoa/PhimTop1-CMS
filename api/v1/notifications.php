@@ -55,9 +55,10 @@ $action = $_GET['action'] ?? 'list';
 $pdo = getPDO();
 
 if ($action === 'list') {
+    $userEmail = $user['email'] ?? '';
     // Get notifications for this user OR system-wide notifications (where user_email IS NULL)
     $stmt = $pdo->prepare("SELECT * FROM notifications WHERE user_email = ? OR user_email IS NULL ORDER BY created_at DESC LIMIT 50");
-    $stmt->execute([$user['email']]);
+    $stmt->execute([$userEmail]);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode(['status' => 'success', 'data' => $items]);
@@ -68,13 +69,15 @@ if ($action === 'mark_read') {
     $input = json_decode(file_get_contents('php://input'), true);
     $notifId = $input['notification_id'] ?? 0;
     
+    $userEmail = $user['email'] ?? '';
+    
     if ($notifId > 0) {
         $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND (user_email = ? OR user_email IS NULL)");
-        $stmt->execute([$notifId, $user['email']]);
+        $stmt->execute([$notifId, $userEmail]);
     } else {
         // Mark all as read
         $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_email = ?");
-        $stmt->execute([$user['email']]);
+        $stmt->execute([$userEmail]);
     }
     
     echo json_encode(['status' => 'success', 'message' => 'Marked as read']);

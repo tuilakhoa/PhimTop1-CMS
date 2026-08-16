@@ -12,6 +12,8 @@ import '../providers/home_provider.dart';
 import '../widgets/update_dialog.dart';
 import '../api/cms_api.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -23,6 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final TvRemoteService _tvService = TvRemoteService();
   String _version = "Đang tải...";
   int _buildNumber = 0;
+  bool _hasAppLock = false;
 
   @override
   void initState() {
@@ -32,10 +35,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadVersion() async {
     final info = await PackageInfo.fromPlatform();
+    final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
         _version = info.version;
         _buildNumber = int.tryParse(info.buildNumber) ?? 0;
+        _hasAppLock = prefs.getString('app_lock_pin') != null;
       });
     }
   }
@@ -212,6 +217,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _toggleAppLock() async {
+    if (_hasAppLock) {
+      // Bỏ khóa
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('app_lock_pin');
+      setState(() { _hasAppLock = false; });
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã tắt khóa ứng dụng')));
+    } else {
+      // Cài PIN mới
+      final controller = TextEditingController();
+      final pin = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: Colors.grey[900],
+          title: const Text('Cài đặt mã PIN (4 số)', style: TextStyle(color: Colors.white, fontSize: 18)),
+          content: TextField(
+            controller: controller,
+            obscureText: true,
+            keyboardType: TextInputType.number,
+            maxLength: 4,
+            autofocus: true,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 16),
+            decoration: const InputDecoration(
+              counterText: "",
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy', style: TextStyle(color: Colors.grey))),
+            TextButton(
+              onPressed: () {
+                if (controller.text.length == 4) Navigator.pop(ctx, controller.text);
+              },
+              child: const Text('Xác nhận', style: TextStyle(color: Colors.blueAccent)),
+            ),
+          ],
+        ),
+      );
+
+      if (pin != null && pin.length == 4) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('app_lock_pin', pin);
+        setState(() { _hasAppLock = true; });
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã bật khóa ứng dụng')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -317,6 +372,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.feedback_outlined, color: Colors.grey),
             title: const Text("Góp ý / Phản hồi", style: TextStyle(color: Colors.white)),
             onTap: _showFeedbackDialog,
+          ),
+          ListTile(
+            leading: const Icon(Icons.lock_outline, color: Colors.grey),
+            title: const Text("Khóa ứng dụng", style: TextStyle(color: Colors.white)),
+            trailing: Switch(
+              value: _hasAppLock,
+              activeColor: Theme.of(context).primaryColor,
+              onChanged: (val) => _toggleAppLock(),
+            ),
           ),
 
           const Divider(color: Colors.grey),

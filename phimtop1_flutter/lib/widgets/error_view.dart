@@ -12,22 +12,27 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isOffline = error.toLowerCase().contains("socket") || 
+                     error.toLowerCase().contains("network") || 
+                     error.toLowerCase().contains("connection") ||
+                     error.toLowerCase().contains("host");
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
+            Icon(isOffline ? Icons.wifi_off : Icons.error_outline, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text(
-              "Không có kết nối mạng hoặc lỗi máy chủ",
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              isOffline ? "Không có kết nối mạng" : "Đã xảy ra lỗi",
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              "Vui lòng kiểm tra lại kết nối internet của bạn.",
+              isOffline ? "Vui lòng kiểm tra lại kết nối internet của bạn." : error,
               style: TextStyle(color: Colors.grey[400], fontSize: 14),
               textAlign: TextAlign.center,
             ),

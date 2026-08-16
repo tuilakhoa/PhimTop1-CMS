@@ -27,6 +27,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final hasAgreed = prefs.getBool('has_agreed_terms') ?? false;
   final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+  final hasAppLock = prefs.getString('app_lock_pin') != null;
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -52,7 +53,7 @@ void main() async {
           },
         ),
       ],
-      child: MyApp(hasAgreed: hasAgreed, hasSeenOnboarding: hasSeenOnboarding),
+      child: MyApp(hasAgreed: hasAgreed, hasSeenOnboarding: hasSeenOnboarding, hasAppLock: hasAppLock),
     ),
   );
 }
@@ -60,7 +61,8 @@ void main() async {
 class MyApp extends StatefulWidget {
   final bool hasAgreed;
   final bool hasSeenOnboarding;
-  const MyApp({super.key, required this.hasAgreed, required this.hasSeenOnboarding});
+  final bool hasAppLock;
+  const MyApp({super.key, required this.hasAgreed, required this.hasSeenOnboarding, required this.hasAppLock});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -72,7 +74,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _router = createRouter(widget.hasAgreed, widget.hasSeenOnboarding);
+    _router = createRouter(widget.hasAgreed, widget.hasSeenOnboarding, widget.hasAppLock);
     
     // Listen for cast commands
     TvRemoteService().onPlayCommand.listen((slug) {
