@@ -1,6 +1,12 @@
 <?php
+session_start();
 require_once __DIR__ . '/includes/db.php';
 checkSetup();
+
+if (isset($_SESSION['user']) && !isset($_SESSION['current_profile'])) {
+    header('Location: /profiles.php');
+    exit;
+}
 
 $settings = getSettings();
 $movies = [];

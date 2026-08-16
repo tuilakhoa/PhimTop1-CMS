@@ -65,13 +65,13 @@ class ExploreProvider with ChangeNotifier {
 
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      _fetchMovies();
+      fetchMovies();
     });
     
     notifyListeners();
   }
 
-  Future<void> _fetchMovies() async {
+  Future<void> fetchMovies({bool reset = false}) async {
     if (keyword.trim().isEmpty && activeType == "phim-moi-cap-nhat" && activeGenre.isEmpty && activeCountry.isEmpty && activeYear.isEmpty) {
       movies = [];
       notifyListeners();

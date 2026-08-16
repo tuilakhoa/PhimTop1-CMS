@@ -198,6 +198,53 @@ if (empty($featuredMovies) && !empty($movies)) {
             </div>
             <?php endif; ?>
 
+            <!-- AI Recommend Section -->
+            <div id="ai-recommend-container" class="mb-12 hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-white tracking-tight flex items-center">
+                        <i data-lucide="sparkles" class="w-6 h-6 mr-2 text-cyan-400"></i> Dành Riêng Cho Bạn
+                    </h2>
+                </div>
+                <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-4" id="ai-recommend-list">
+                    <!-- JS will populate -->
+                </div>
+            </div>
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                fetch('/api/v1/recommend.php?action=personal&limit=10')
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success' && res.data && res.data.length > 0) {
+                        const list = document.getElementById('ai-recommend-list');
+                        const container = document.getElementById('ai-recommend-container');
+                        let html = '';
+                        res.data.forEach(item => {
+                            let thumb = item.thumb_url || item.poster_url;
+                            if (thumb && !thumb.startsWith('http')) {
+                                thumb = 'https://phimimg.com/' + thumb;
+                            }
+                            html += `
+                                <a href="/phim/${item.slug}" class="group shrink-0 w-40 sm:w-48 block">
+                                    <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
+                                        <img src="${thumb}" alt="${item.name}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <i data-lucide="play-circle" class="w-10 h-10 text-white"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-sm font-medium text-gray-100 line-clamp-1 mb-1 group-hover:text-white">${item.name}</h3>
+                                    <p class="text-xs text-gray-500 line-clamp-1">${item.origin_name || ''}</p>
+                                </a>
+                            `;
+                        });
+                        list.innerHTML = html;
+                        container.classList.remove('hidden');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                })
+                .catch(err => console.error(err));
+            });
+            </script>
+
             <div class="flex items-center justify-between mb-8">
                 <h2 class="text-2xl font-bold text-white tracking-tight">Mới Cập Nhật</h2>
                 <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="text-sm font-medium text-gray-500 hover:text-white transition-colors">

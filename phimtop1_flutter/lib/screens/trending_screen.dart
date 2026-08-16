@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/error_view.dart';
 import '../providers/trending_provider.dart';
 import '../widgets/focusable_wrapper.dart';
 
@@ -44,7 +45,10 @@ class _TrendingScreenState extends State<TrendingScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (provider.error != null && provider.movies.isEmpty) {
-            return Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)));
+            return ErrorView(
+              error: provider.error!,
+              onRetry: () => provider.fetchTrending(refresh: true),
+            );
           }
           if (provider.movies.isEmpty) {
             return const Center(child: Text('Chưa có dữ liệu lượt xem phim.'));

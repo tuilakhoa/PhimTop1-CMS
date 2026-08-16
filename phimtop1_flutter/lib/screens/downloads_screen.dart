@@ -72,7 +72,13 @@ class DownloadsScreen extends StatelessWidget {
                 children: [
                   LinearProgressIndicator(value: task.progress, backgroundColor: Colors.white12),
                   const SizedBox(height: 4),
-                  Text('${(task.progress * 100).toStringAsFixed(1)}%', style: const TextStyle(color: Colors.amber, fontSize: 12)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('${(task.progress * 100).toStringAsFixed(1)}%', style: const TextStyle(color: Colors.amber, fontSize: 12)),
+                      Text('${task.speed} • ${task.timeRemaining}', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                    ],
+                  ),
                 ],
               )
             else if (task.status == DownloadStatus.completed)

@@ -5,6 +5,7 @@ import '../api/cms_api.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import 'package:go_router/go_router.dart';
+import '../widgets/error_view.dart';
 
 class FollowScreen extends StatefulWidget {
   const FollowScreen({super.key});
@@ -65,7 +66,10 @@ class _FollowScreenState extends State<FollowScreen> {
       return const Center(child: CircularProgressIndicator(color: Colors.red));
     }
     if (_error != null) {
-      return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      if (_error == "Bạn cần đăng nhập để xem danh sách") {
+        return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      }
+      return ErrorView(error: _error!, onRetry: _fetchFollows);
     }
     if (_follows.isEmpty) {
       return const Center(child: Text("Bạn chưa thích bộ phim nào", style: TextStyle(color: Colors.white)));

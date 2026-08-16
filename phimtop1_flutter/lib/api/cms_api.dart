@@ -4,8 +4,22 @@ import '../models/models.dart';
 
 class CmsApiService {
   final Dio _dio;
+  String? _profileId;
 
-  CmsApiService() : _dio = Dio(BaseOptions(baseUrl: AppConfig.baseUrl));
+  CmsApiService() : _dio = Dio(BaseOptions(baseUrl: AppConfig.baseUrl)) {
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        if (_profileId != null) {
+          options.headers['X-Profile-Id'] = _profileId;
+        }
+        return handler.next(options);
+      },
+    ));
+  }
+
+  void setProfileId(String? id) {
+    _profileId = id;
+  }
 
   Future<ApiResponse<AppInitData>> getAppInit() async {
     try {
@@ -367,6 +381,100 @@ class CmsApiService {
         'key': AppConfig.apiKey,
       }, data: {
         'message': message,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<ApiResponse<HomeData>> getRecommendations({String? token}) async {
+    try {
+      final options = token != null ? Options(headers: {'Authorization': token}) : null;
+      final response = await _dio.get('api/v1/recommend.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'personal',
+      }, options: options);
+      // The API returns {status: 'success', data: [...]} which matches HomeData structure (items array inside data, wait, HomeData expects items in 'data' but 'data' is the array itself?)
+      // Let's create a custom parser since recommend.php returns 'data' as the array itself, not an object with 'items'.
+      return ApiResponse.fromJson(response.data, (data) {
+        return HomeData.fromJson({
+          'items': data,
+          'titlePage': 'Recommendations',
+          'domain': AppConfig.baseUrl,
+        });
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+  Future<ReviewResponse> getReviews(String slug) async {
+    try {
+      final response = await _dio.get('api/v1/reviews.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'list',
+        'movie_slug': slug,
+      });
+      return ReviewResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> postReview(String token, String slug, int rating, String content) async {
+    try {
+      final response = await _dio.post('api/v1/reviews.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'add',
+      }, data: {
+        'movie_slug': slug,
+        'rating': rating,
+        'content': content,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Profile APIs
+  Future<List<UserProfile>> getProfiles(String token) async {
+    try {
+      final response = await _dio.get('api/v1/profiles.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'list',
+      }, options: Options(headers: {'Authorization': token}));
+      if (response.data['status'] == 'success') {
+        return (response.data['data'] as List).map((e) => UserProfile.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<bool> createProfile(String token, String profileName, bool isKidsMode) async {
+    try {
+      final response = await _dio.post('api/v1/profiles.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'create',
+      }, data: {
+        'profile_name': profileName,
+        'is_kids_mode': isKidsMode ? 1 : 0,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteProfile(String token, int profileId) async {
+    try {
+      final response = await _dio.post('api/v1/profiles.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'delete',
+      }, data: {
+        'profile_id': profileId,
       }, options: Options(headers: {'Authorization': token}));
       return response.data['status'] == 'success';
     } catch (e) {

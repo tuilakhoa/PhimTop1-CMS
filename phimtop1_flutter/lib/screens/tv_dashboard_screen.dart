@@ -6,6 +6,7 @@ import '../services/tv_remote_service.dart';
 import '../widgets/youtube_tv_movie_card.dart';
 import '../models/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/error_view.dart';
 
 class TvDashboardScreen extends StatefulWidget {
   final Widget child;
@@ -273,7 +274,7 @@ class _TvDashboardScreenState extends State<TvDashboardScreen> {
     return Consumer<HomeProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) return const Center(child: CircularProgressIndicator());
-        if (provider.error != null) return Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)));
+        if (provider.error != null) return ErrorView(error: provider.error!, onRetry: provider.fetchHomeData);
 
         return ListView(
           padding: const EdgeInsets.only(bottom: 60, left: 16),

@@ -22,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
     
     final success = await context.read<AuthProvider>().login(_emailCtrl.text, _passCtrl.text);
     if (success && mounted) {
-      context.pop(); // Go back to profile screen
+      context.go('/select_profile');
     } else if (mounted) {
       final error = context.read<AuthProvider>().error;
       if (error != null) {

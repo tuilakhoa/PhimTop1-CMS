@@ -4,6 +4,8 @@ import '../api/cms_api.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import 'package:go_router/go_router.dart';
+import '../services/widget_service.dart';
+import '../widgets/error_view.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -39,6 +41,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         _history = response.data ?? [];
         _isLoading = false;
       });
+      if (response.data != null) {
+        WidgetService.updateContinueWatchingWidget(response.data!);
+      }
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -71,6 +76,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           _history.clear();
           _isLoading = false;
         });
+        WidgetService.updateContinueWatchingWidget([]);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa lịch sử')));
         }
@@ -107,7 +113,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return const Center(child: CircularProgressIndicator(color: Colors.red));
     }
     if (_error != null) {
-      return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      if (_error == "Bạn cần đăng nhập để xem lịch sử") {
+        return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      }
+      return ErrorView(error: _error!, onRetry: _fetchHistory);
     }
     if (_history.isEmpty) {
       return const Center(child: Text("Chưa có lịch sử xem phim", style: TextStyle(color: Colors.white)));

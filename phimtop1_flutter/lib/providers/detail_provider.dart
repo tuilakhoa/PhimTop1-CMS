@@ -66,12 +66,29 @@ class DetailProvider with ChangeNotifier {
 
   bool isFollowing = false;
   List<CommentItem> comments = [];
+  List<ReviewItem> reviews = [];
+  double averageRating = 0;
+  int totalReviews = 0;
 
   Future<void> fetchComments(String slug) async {
     try {
       final response = await cmsApi.getComments(slug);
       if (response.success && response.data != null) {
         comments = response.data!;
+        notifyListeners();
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> fetchReviews(String slug) async {
+    try {
+      final response = await cmsApi.getReviews(slug);
+      if (response.status == 'success') {
+        reviews = response.data ?? [];
+        averageRating = response.average;
+        totalReviews = response.total;
         notifyListeners();
       }
     } catch (e) {
@@ -121,6 +138,19 @@ class DetailProvider with ChangeNotifier {
       final response = await cmsApi.postComment(slug, content, token: token, name: name);
       if (response.success) {
         await fetchComments(slug);
+        return true;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return false;
+  }
+
+  Future<bool> postReview(String token, String slug, int rating, String content) async {
+    try {
+      final success = await cmsApi.postReview(token, slug, rating, content);
+      if (success) {
+        await fetchReviews(slug);
         return true;
       }
     } catch (e) {

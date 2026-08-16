@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../core/config.dart';
 import '../widgets/focusable_wrapper.dart';
 import '../widgets/tv_cast_button.dart';
+import '../widgets/error_view.dart';
 import '../widgets/youtube_tv_movie_card.dart';
 
 class CartoonScreen extends StatefulWidget {
@@ -125,19 +126,7 @@ class _CartoonScreenState extends State<CartoonScreen> {
     }
 
     if (error != null && movies.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(error!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _fetchData,
-              child: const Text("Thử lại"),
-            )
-          ],
-        ),
-      );
+      return ErrorView(error: error!, onRetry: _fetchData);
     }
 
     if (movies.isEmpty) {

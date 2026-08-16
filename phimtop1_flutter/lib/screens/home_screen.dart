@@ -14,6 +14,8 @@ import 'dart:io';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/update_dialog.dart';
+import '../services/widget_service.dart';
+import '../widgets/error_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -84,6 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _history = res.data!.take(10).toList();
           });
+          WidgetService.updateContinueWatchingWidget(res.data!);
         }
       } catch (_) {}
     }
@@ -270,7 +273,10 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (provider.error != null) {
-            return Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)));
+            return ErrorView(
+              error: provider.error!,
+              onRetry: provider.fetchHomeData,
+            );
           }
 
           return RefreshIndicator(
@@ -290,6 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   _buildHorizontalList("Phim Mới Cập Nhật", provider.normalMovies, provider.domain),
                   _buildHorizontalList("Bảng Xếp Hạng", provider.trendingMovies, provider.domain),
+                  if (provider.recommendedMovies.isNotEmpty) _buildHorizontalList("Phim Dành Riêng Cho Bạn (AI Gợi Ý)", provider.recommendedMovies, provider.domain),
                   _buildHorizontalList("Phim Bộ Mới Nhất", provider.phimBo, provider.domain),
                   _buildHorizontalList("Phim Lẻ Mới Nhất", provider.phimLe, provider.domain),
                   _buildHorizontalList("TV Shows", provider.tvShows, provider.domain),

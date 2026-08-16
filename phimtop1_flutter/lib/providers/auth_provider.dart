@@ -6,6 +6,7 @@ import '../models/models.dart';
 class AuthProvider with ChangeNotifier {
   User? user;
   String? token;
+  UserProfile? currentProfile;
   bool isLoading = false;
   String? error;
 
@@ -26,6 +27,17 @@ class AuthProvider with ChangeNotifier {
         'name': userName,
         'email': userEmail,
       });
+      final profileIdStr = prefs.getString('profile_id');
+      if (profileIdStr != null) {
+        currentProfile = UserProfile.fromJson({
+          'id': int.tryParse(profileIdStr),
+          'user_email': userEmail,
+          'profile_name': prefs.getString('profile_name') ?? '',
+          'avatar_url': prefs.getString('profile_avatar') ?? '',
+          'is_kids_mode': prefs.getBool('profile_kids_mode') == true ? 1 : 0,
+        });
+        cmsApi.setProfileId(currentProfile!.id.toString());
+      }
       notifyListeners();
     }
   }
@@ -94,11 +106,24 @@ class AuthProvider with ChangeNotifier {
     return false;
   }
 
+  Future<void> setProfile(UserProfile profile) async {
+    currentProfile = profile;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_id', profile.id.toString());
+    await prefs.setString('profile_name', profile.profileName);
+    await prefs.setString('profile_avatar', profile.avatarUrl);
+    await prefs.setBool('profile_kids_mode', profile.isKidsMode);
+    cmsApi.setProfileId(profile.id.toString());
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     user = null;
     token = null;
+    currentProfile = null;
+    cmsApi.setProfileId(null);
     notifyListeners();
   }
 }

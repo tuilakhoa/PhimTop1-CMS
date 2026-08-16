@@ -6,6 +6,7 @@ import '../widgets/movie_card.dart';
 import '../widgets/focusable_wrapper.dart';
 import '../widgets/tv_cast_button.dart';
 import '../widgets/youtube_tv_movie_card.dart';
+import '../widgets/error_view.dart';
 
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({super.key});
@@ -39,7 +40,7 @@ class ExploreScreen extends StatelessWidget {
                 child: provider.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : provider.error != null
-                        ? Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)))
+                        ? ErrorView(error: provider.error!, onRetry: () => provider.fetchMovies(reset: true))
                         : provider.movies.isEmpty && !provider.isTrendingLoading && provider.trendingMovies.isNotEmpty && _isFiltersEmpty(provider)
                             ? _buildTrending(provider, context)
                             : provider.movies.isEmpty

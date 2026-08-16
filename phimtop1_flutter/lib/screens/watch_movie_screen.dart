@@ -16,6 +16,7 @@ import '../services/watching_session_service.dart';
 import '../services/watch_party_service.dart';
 import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
+import '../services/widget_service.dart';
 
 class WatchMovieScreen extends StatefulWidget {
   final String m3u8Link;
@@ -232,7 +233,13 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
         thumbUrl: widget.thumbUrl,
         currentTime: _videoController!.value.position.inSeconds,
         duration: _videoController!.value.duration.inSeconds,
-      );
+      ).then((_) {
+        cmsApi.getHistory(_token!).then((res) {
+          if (res.data != null) {
+            WidgetService.updateContinueWatchingWidget(res.data!);
+          }
+        });
+      });
     }
 
     // Revert to portrait only when leaving screen

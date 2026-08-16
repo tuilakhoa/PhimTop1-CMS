@@ -5,7 +5,7 @@ import '../screens/main_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/trending_screen.dart';
 import '../screens/explore_screen.dart';
-import '../screens/cartoon_screen.dart';
+import '../screens/shorts_screen.dart';
 import '../screens/movie_detail_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/login_screen.dart';
@@ -21,6 +21,7 @@ import '../screens/watch_movie_screen.dart';
 import '../screens/playlist_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/downloads_screen.dart';
+import '../screens/profiles_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -63,8 +64,8 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding) {
           builder: (BuildContext context, GoRouterState state) => const ExploreScreen(),
         ),
         GoRoute(
-          path: '/cartoon',
-          builder: (BuildContext context, GoRouterState state) => const CartoonScreen(),
+          path: '/shorts',
+          builder: (BuildContext context, GoRouterState state) => const ShortsScreen(),
         ),
         GoRoute(
           path: '/profile',
@@ -150,6 +151,11 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding) {
       path: '/downloads',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (BuildContext context, GoRouterState state) => const DownloadsScreen(),
+    ),
+    GoRoute(
+      path: '/select_profile',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (BuildContext context, GoRouterState state) => const ProfilesScreen(),
     ),
   ],
 );

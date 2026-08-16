@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/playlist_provider.dart';
 import '../models/models.dart';
+import '../widgets/error_view.dart';
 
 class PlaylistScreen extends StatefulWidget {
   const PlaylistScreen({super.key});
@@ -86,7 +87,10 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
             return const Center(child: CircularProgressIndicator(color: Colors.red));
           }
           if (provider.error != null && provider.playlists.isEmpty) {
-            return Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)));
+            return ErrorView(
+              error: provider.error!,
+              onRetry: provider.fetchPlaylists,
+            );
           }
           if (provider.playlists.isEmpty) {
             return const Center(child: Text("Bạn chưa có danh sách phát nào", style: TextStyle(color: Colors.white)));

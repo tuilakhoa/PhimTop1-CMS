@@ -14,6 +14,8 @@ class DownloadTask {
   
   DownloadStatus status;
   double progress;
+  String speed;
+  String timeRemaining;
 
   DownloadTask({
     required this.id,
@@ -26,6 +28,8 @@ class DownloadTask {
     required this.savePath,
     this.status = DownloadStatus.pending,
     this.progress = 0.0,
+    this.speed = '',
+    this.timeRemaining = '',
   });
 
   Map<String, dynamic> toMap() {
@@ -40,6 +44,8 @@ class DownloadTask {
       'savePath': savePath,
       'status': status.index,
       'progress': progress,
+      'speed': speed,
+      'timeRemaining': timeRemaining,
     };
   }
 
@@ -55,6 +61,8 @@ class DownloadTask {
       savePath: map['savePath'],
       status: DownloadStatus.values[map['status']],
       progress: map['progress'],
+      speed: map['speed'] ?? '',
+      timeRemaining: map['timeRemaining'] ?? '',
     );
   }
 

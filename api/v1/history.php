@@ -64,6 +64,8 @@ if (!$user) {
 $enableContinueWatching = isset($settings['enableContinueWatching']) ? (int)$settings['enableContinueWatching'] : 1;
 $action = $_GET['action'] ?? 'list';
 
+$profileId = (int)($headers['X-Profile-Id'] ?? $_SERVER['HTTP_X_PROFILE_ID'] ?? ($_SESSION['current_profile']['id'] ?? 0));
+
 if (!$enableContinueWatching) {
     if ($action === 'list') {
         echo json_encode(['status' => 'success', 'data' => []]);
@@ -76,8 +78,8 @@ if (!$enableContinueWatching) {
 $pdo = getPDO();
 
 if ($action === 'list') {
-    $stmt = $pdo->prepare("SELECT * FROM watch_history WHERE user_email = ? ORDER BY updated_at DESC LIMIT 100");
-    $stmt->execute([$user['email']]);
+    $stmt = $pdo->prepare("SELECT * FROM watch_history WHERE user_email = ? AND profile_id = ? ORDER BY updated_at DESC LIMIT 100");
+    $stmt->execute([$user['email'], $profileId]);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode(['status' => 'success', 'data' => $items]);
@@ -107,8 +109,8 @@ if ($action === 'add') {
     // "id, user_email, movie_slug, movie_name, episode_name, updated_at"
     
     // Check if it already exists to update episode_name and updated_at
-    $stmt = $pdo->prepare("SELECT id, thumb_url FROM watch_history WHERE user_email = ? AND movie_slug = ?");
-    $stmt->execute([$user['email'], $slug]);
+    $stmt = $pdo->prepare("SELECT id, thumb_url FROM watch_history WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
+    $stmt->execute([$user['email'], $slug, $profileId]);
     $existing = $stmt->fetch();
     
     if ($existing) {
@@ -118,8 +120,8 @@ if ($action === 'add') {
         $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
         $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $existing['id']]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, episode_slug, thumb_url, current_time, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$user['email'], $slug, $name, $episodeName, $episodeSlug, $thumb, $currentTime, $duration]);
+        $stmt = $pdo->prepare("INSERT INTO watch_history (user_email, movie_slug, movie_name, episode_name, episode_slug, thumb_url, current_time, duration, profile_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$user['email'], $slug, $name, $episodeName, $episodeSlug, $thumb, $currentTime, $duration, $profileId]);
     }
     
     echo json_encode(['status' => 'success']);
@@ -127,8 +129,8 @@ if ($action === 'add') {
 }
 
 if ($action === 'clear') {
-    $stmt = $pdo->prepare("DELETE FROM watch_history WHERE user_email = ?");
-    $stmt->execute([$user['email']]);
+    $stmt = $pdo->prepare("DELETE FROM watch_history WHERE user_email = ? AND profile_id = ?");
+    $stmt->execute([$user['email'], $profileId]);
     
     echo json_encode(['status' => 'success', 'message' => 'History cleared']);
     exit;

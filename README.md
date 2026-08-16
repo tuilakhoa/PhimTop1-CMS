@@ -108,3 +108,15 @@ service cloud.firestore {
 CMS có tích hợp công cụ cập nhật (File Sync). 
 - Vào trang **Quản Trị -> Cập Nhật**.
 - Bạn có thể tải file lên ghi đè thủ công, hoặc để hệ thống tự động đồng bộ (Auto Sync) các tệp mới từ GitHub thông qua cấu hình `update.json`.
+
+## 6. Build App Android (Flutter)
+Để build bản App Android (APK) từ mã nguồn thư mục `phimtop1_flutter`, hãy sử dụng lệnh sau:
+
+```bash
+cd phimtop1_flutter
+flutter build apk
+```
+
+Các file APK sẽ được tạo ra trong:
+- Mobile: `phimtop1_flutter/build/app/outputs/flutter-apk/app-mobile-release.apk`
+- TV: `phimtop1_flutter/build/app/outputs/flutter-apk/app-tv-release.apk`

@@ -181,6 +181,23 @@ $homeSliders = [
     </section>
     <?php endif; ?>
 
+    <!-- Section: Phim Dành Riêng Cho Bạn (AI Gợi Ý) -->
+    <section id="ai-recommend-section" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+                <i data-lucide="sparkles" class="w-6 h-6 mr-2 text-cyan-400"></i> Dành Riêng Cho Bạn
+            </h2>
+        </div>
+        
+        <div class="swiper swiper-recommend">
+            <div class="swiper-wrapper pb-4" id="ai-recommend-list">
+                <!-- JS will populate this -->
+            </div>
+            <div class="swiper-button-prev hidden md:flex"></div>
+            <div class="swiper-button-next hidden md:flex"></div>
+        </div>
+    </section>
+
     <!-- 2. Mới Nhất Trên Phimhayok (16:9 Swiper) -->
     <section>
         <div class="flex items-center justify-between mb-6">

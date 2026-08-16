@@ -416,3 +416,44 @@ class PlaylistCheckResponse {
       : status = json['status'] ?? '',
         inPlaylists = (json['in_playlists'] as List?)?.map((e) => int.parse(e.toString())).toList();
 }
+
+class ReviewItem {
+  final String userName;
+  final int ratingScore;
+  final String content;
+  final String createdAt;
+
+  ReviewItem.fromJson(Map<String, dynamic> json)
+      : userName = json['user_name'] ?? '',
+        ratingScore = int.tryParse(json['rating_score']?.toString() ?? '0') ?? 0,
+        content = json['content'] ?? '',
+        createdAt = json['created_at'] ?? '';
+}
+
+class ReviewResponse {
+  final String status;
+  final List<ReviewItem>? data;
+  final double average;
+  final int total;
+
+  ReviewResponse.fromJson(Map<String, dynamic> json)
+      : status = json['status'] ?? '',
+        data = (json['data'] as List?)?.map((e) => ReviewItem.fromJson(e)).toList(),
+        average = double.tryParse(json['average']?.toString() ?? '0') ?? 0,
+        total = int.tryParse(json['total']?.toString() ?? '0') ?? 0;
+}
+
+class UserProfile {
+  final int id;
+  final String userEmail;
+  final String profileName;
+  final String avatarUrl;
+  final bool isKidsMode;
+
+  UserProfile.fromJson(Map<String, dynamic> json)
+      : id = int.tryParse(json['id']?.toString() ?? '') ?? 0,
+        userEmail = json['user_email'] ?? '',
+        profileName = json['profile_name'] ?? '',
+        avatarUrl = json['avatar_url'] ?? '',
+        isKidsMode = (json['is_kids_mode']?.toString() == '1');
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../api/cms_api.dart';
 import '../models/models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeProvider with ChangeNotifier {
   bool isLoading = true;
@@ -9,6 +10,7 @@ class HomeProvider with ChangeNotifier {
   List<MovieItem> featuredMovies = [];
   List<MovieItem> normalMovies = [];
   List<MovieItem> trendingMovies = [];
+  List<MovieItem> recommendedMovies = [];
   List<MovieItem> phimBo = [];
   List<MovieItem> phimLe = [];
   List<MovieItem> hoatHinh = [];
@@ -59,6 +61,15 @@ class HomeProvider with ChangeNotifier {
       
       final trendingRes = await cmsApi.fetchTrending();
       if (trendingRes.data != null) trendingMovies = trendingRes.data!.items.take(12).toList();
+      
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('auth_token');
+        final recommendRes = await cmsApi.getRecommendations(token: token);
+        if (recommendRes.data != null) recommendedMovies = recommendRes.data!.items.take(12).toList();
+      } catch (e) {
+        // Ignore recommend errors
+      }
       
       final phimBoRes = await cmsApi.getCategory("danh-sach", "phim-bo");
       if (phimBoRes.data != null) phimBo = phimBoRes.data!.items.take(12).toList();

@@ -7,6 +7,7 @@ import '../widgets/movie_card.dart';
 import '../widgets/focusable_wrapper.dart';
 import '../widgets/youtube_tv_movie_card.dart';
 import '../widgets/tv_virtual_keyboard.dart';
+import '../widgets/error_view.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -251,7 +252,7 @@ class _SearchScreenState extends State<SearchScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (provider.error != null) {
-          return Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)));
+          return ErrorView(error: provider.error!, onRetry: () => provider.fetchMovies(reset: true));
         }
 
         final isSearching = provider.keyword.isNotEmpty;

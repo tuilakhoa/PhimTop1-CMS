@@ -129,3 +129,60 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Error loading history:', e);
     }
 });
+
+    // Load AI Recommendations
+    try {
+        fetch('/api/v1/recommend.php?action=personal&limit=12')
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'success' && res.data && res.data.length > 0) {
+                    const section = document.getElementById('ai-recommend-section');
+                    const list = document.getElementById('ai-recommend-list');
+                    if (section && list) {
+                        let html = '';
+                        res.data.forEach(item => {
+                            let thumbUrl = item.thumb_url || item.poster_url;
+                            if (thumbUrl && !thumbUrl.startsWith('http')) {
+                                // Assume phimimg if missing
+                                thumbUrl = 'https://phimimg.com/' + thumbUrl;
+                            }
+                            html += `
+                                <div class="swiper-slide w-[180px] md:w-[200px]">
+                                    <a href="/phim/${item.slug}" class="block group relative cursor-pointer">
+                                        <div class="aspect-[2/3] relative overflow-hidden rounded-lg">
+                                            <img src="${thumbUrl}" alt="${item.name}" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <h3 class="text-white font-bold text-sm truncate group-hover:text-phim-yellow transition-colors">${item.name}</h3>
+                                            <p class="text-gray-500 text-xs truncate mt-0.5">${item.origin_name || ''}</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            `;
+                        });
+                        list.innerHTML = html;
+                        section.classList.remove('hidden');
+                        
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                        new Swiper('.swiper-recommend', {
+                            slidesPerView: 'auto',
+                            spaceBetween: 16,
+                            navigation: {
+                                nextEl: '.swiper-recommend .swiper-button-next',
+                                prevEl: '.swiper-recommend .swiper-button-prev',
+                            },
+                            breakpoints: {
+                                320: { slidesPerView: 2.2 },
+                                640: { slidesPerView: 3.2 },
+                                768: { slidesPerView: 4.2 },
+                                1024: { slidesPerView: 5.2 },
+                                1280: { slidesPerView: 7.2 },
+                            }
+                        });
+                    }
+                }
+            })
+            .catch(err => console.error('Error loading recommendations:', err));
+    } catch(e) {}
