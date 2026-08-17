@@ -164,8 +164,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <label class="flex items-center cursor-pointer mb-2">
                             <div class="relative">
                                 <input type="checkbox" name="appForceUpdate" value="1" class="sr-only" <?= (!empty($settings['appForceUpdate']) ? 'checked' : '') ?>>
-                                <div class="block bg-gray-700 w-8 h-4.5 rounded-full checkbox-bg"></div>
-                                <div class="dot absolute left-1 top-1 bg-white w-2.5 h-2.5 rounded-full transition checkbox-dot"></div>
+                                <div class="block bg-gray-700 w-10 h-6 rounded-full checkbox-bg"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition checkbox-dot"></div>
                             </div>
                             <div class="ml-2 text-xs font-medium text-gray-300">Bắt buộc cập nhật Android</div>
                         </label>
@@ -194,8 +194,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <label class="flex items-center cursor-pointer">
                             <div class="relative">
                                 <input type="checkbox" name="appForceUpdateIos" value="1" class="sr-only" <?= (!empty($settings['appForceUpdateIos']) ? 'checked' : '') ?>>
-                                <div class="block bg-gray-700 w-8 h-4.5 rounded-full checkbox-bg"></div>
-                                <div class="dot absolute left-1 top-1 bg-white w-2.5 h-2.5 rounded-full transition checkbox-dot"></div>
+                                <div class="block bg-gray-700 w-10 h-6 rounded-full checkbox-bg"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition checkbox-dot"></div>
                             </div>
                             <div class="ml-2 text-xs font-medium text-gray-300">Bắt buộc cập nhật iOS</div>
                         </label>

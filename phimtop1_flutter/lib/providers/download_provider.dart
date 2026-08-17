@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../models/download_task.dart';
 
 class DownloadProvider extends ChangeNotifier {
@@ -128,7 +129,7 @@ class DownloadProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> startDownload({
+  Future<String?> startDownload({
     required String movieSlug,
     required String movieName,
     required String episodeSlug,
@@ -140,7 +141,18 @@ class DownloadProvider extends ChangeNotifier {
     final id = '${movieSlug}_$episodeSlug';
     
     if (getTask(id) != null && getTask(id)!.status == DownloadStatus.completed) {
-      return;
+      return "Tập phim này đã được tải.";
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final bool wifiOnly = prefs.getBool('wifi_only_download') ?? true;
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    final isMobile = connectivityResult.contains(ConnectivityResult.mobile);
+
+    if (isMobile) {
+      if (wifiOnly) {
+        return "Tải xuống thất bại. Bạn đang dùng mạng di động và cài đặt 'Chỉ tải qua Wi-Fi' đang bật.";
+      }
     }
 
     final directory = await getApplicationDocumentsDirectory();
@@ -163,6 +175,11 @@ class DownloadProvider extends ChangeNotifier {
     await _saveTasks();
 
     _processQueue();
+
+    if (isMobile && !wifiOnly) {
+      return "CẢNH BÁO: Đang tải phim bằng dữ liệu di động.";
+    }
+    return null; // No errors or warnings
   }
 
   String _formatBytes(int bytes) {

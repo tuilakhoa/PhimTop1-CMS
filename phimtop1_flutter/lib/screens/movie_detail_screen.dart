@@ -241,10 +241,10 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                               
                               Widget trailing = IconButton(
                                 icon: const Icon(Icons.download, color: Colors.white),
-                                onPressed: () {
+                                onPressed: () async {
                                   if (ep.linkM3u8.isNotEmpty) {
                                     final thumbUrl = movie.thumbUrl ?? movie.posterUrl ?? '';
-                                    downloadProvider.startDownload(
+                                    final message = await downloadProvider.startDownload(
                                       movieSlug: movie.slug,
                                       movieName: movie.name,
                                       episodeSlug: ep.slug,
@@ -253,6 +253,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                       m3u8Url: ep.linkM3u8,
                                       totalDurationSeconds: 7200, // Estimate 2 hours
                                     );
+                                    if (message != null && mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                        content: Text(message),
+                                        backgroundColor: message.contains('thất bại') || message.contains('CẢNH BÁO') ? Colors.red : null,
+                                      ));
+                                    }
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tập này không hỗ trợ tải')));
                                   }
@@ -279,15 +285,23 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                 } else if (task.status == DownloadStatus.failed) {
                                   trailing = IconButton(
                                     icon: const Icon(Icons.refresh, color: Colors.red),
-                                    onPressed: () => downloadProvider.startDownload(
-                                      movieSlug: task.movieSlug,
-                                      movieName: task.movieName,
-                                      episodeSlug: task.episodeSlug,
-                                      episodeName: task.episodeName,
-                                      thumbUrl: task.thumbUrl,
-                                      m3u8Url: task.m3u8Url,
-                                      totalDurationSeconds: 7200,
-                                    ),
+                                    onPressed: () async {
+                                      final message = await downloadProvider.startDownload(
+                                        movieSlug: task.movieSlug,
+                                        movieName: task.movieName,
+                                        episodeSlug: task.episodeSlug,
+                                        episodeName: task.episodeName,
+                                        thumbUrl: task.thumbUrl,
+                                        m3u8Url: task.m3u8Url,
+                                        totalDurationSeconds: 7200,
+                                      );
+                                      if (message != null && mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content: Text(message),
+                                          backgroundColor: message.contains('thất bại') || message.contains('CẢNH BÁO') ? Colors.red : null,
+                                        ));
+                                      }
+                                    },
                                   );
                                 }
                               }

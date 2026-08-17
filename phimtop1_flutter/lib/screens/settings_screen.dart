@@ -26,6 +26,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _version = "Đang tải...";
   int _buildNumber = 0;
   bool _hasAppLock = false;
+  bool _wifiOnlyDownload = true;
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _version = info.version;
         _buildNumber = int.tryParse(info.buildNumber) ?? 0;
         _hasAppLock = prefs.getString('app_lock_pin') != null;
+        _wifiOnlyDownload = prefs.getBool('wifi_only_download') ?? true;
       });
     }
   }
@@ -380,6 +382,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               value: _hasAppLock,
               activeColor: Theme.of(context).primaryColor,
               onChanged: (val) => _toggleAppLock(),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.wifi, color: Colors.grey),
+            title: const Text("Chỉ tải qua Wi-Fi", style: TextStyle(color: Colors.white)),
+            subtitle: const Text("Tạm dừng tải nếu dùng mạng di động", style: TextStyle(color: Colors.grey, fontSize: 12)),
+            trailing: Switch(
+              value: _wifiOnlyDownload,
+              activeColor: Theme.of(context).primaryColor,
+              onChanged: (val) async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('wifi_only_download', val);
+                setState(() { _wifiOnlyDownload = val; });
+              },
             ),
           ),
 

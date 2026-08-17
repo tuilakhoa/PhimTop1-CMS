@@ -131,6 +131,87 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildLargeHorizontalList(String title, List<dynamic> movies, String domain) {
+    if (movies.isEmpty) return const SizedBox();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 24.0, bottom: 16.0),
+          child: Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: Colors.amber, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.amberAccent),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 250,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            itemCount: movies.length,
+            itemBuilder: (context, index) {
+              final movie = movies[index];
+              return FocusableWrapper(
+                onTap: () => context.push('/movie/${movie.slug}'),
+                child: YoukuMovieCard(
+                  movie: movie,
+                  domain: domain,
+                  isFeatured: true,
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGridList(String title, List<dynamic> movies, String domain) {
+    if (movies.isEmpty) return const SizedBox();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 24.0, bottom: 16.0),
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ),
+        SizedBox(
+          height: 560,
+          child: GridView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 280 / 160,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+            ),
+            itemCount: movies.length,
+            itemBuilder: (context, index) {
+              final movie = movies[index];
+              return FocusableWrapper(
+                onTap: () => context.push('/movie/${movie.slug}'),
+                child: YoukuMovieCard(
+                  movie: movie,
+                  domain: domain,
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildHistoryList() {
     if (_history.isEmpty) return const SizedBox();
     return Column(
@@ -295,10 +376,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (_history.isNotEmpty) _buildHistoryList(),
 
                   _buildHorizontalList("Phim Mới Cập Nhật", provider.normalMovies, provider.domain),
-                  _buildHorizontalList("Bảng Xếp Hạng", provider.trendingMovies, provider.domain),
-                  if (provider.recommendedMovies.isNotEmpty) _buildHorizontalList("Phim Dành Riêng Cho Bạn (AI Gợi Ý)", provider.recommendedMovies, provider.domain),
+                  _buildGridList("Bảng Xếp Hạng", provider.trendingMovies, provider.domain),
+                  if (provider.recommendedMovies.isNotEmpty) _buildLargeHorizontalList("Dành Riêng Cho Bạn", provider.recommendedMovies, provider.domain),
                   _buildHorizontalList("Phim Bộ Mới Nhất", provider.phimBo, provider.domain),
-                  _buildHorizontalList("Phim Lẻ Mới Nhất", provider.phimLe, provider.domain),
+                  _buildGridList("Phim Lẻ Mới Nhất", provider.phimLe, provider.domain),
                   _buildHorizontalList("TV Shows", provider.tvShows, provider.domain),
                   _buildHorizontalList("Phim Hoạt Hình", provider.hoatHinh, provider.domain),
                   const SizedBox(height: 32),
