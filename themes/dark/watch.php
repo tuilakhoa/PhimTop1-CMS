@@ -48,15 +48,10 @@ if (isset($_SESSION['user'])) {
 }
 ?>
 
-<div class="bg-[#111319] min-h-screen text-gray-200 font-sans pb-20 pt-[70px] md:pt-[80px]">
-    <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto">
-        <div class="flex flex-col xl:flex-row gap-6">
-            
-            <!-- Left Column: Main Content (Player) -->
-            <div class="w-full xl:w-[72%]">
-                
-                <!-- Video Player -->
-                <div class="mb-6 bg-black rounded-lg overflow-hidden border border-[#2d2f36]">
+<div class="bg-[#0a0a0a] pt-[60px] md:pt-[70px]">
+    <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto pt-6">
+        <!-- Video Player -->
+        <div class="w-full bg-black rounded-xl overflow-hidden shadow-2xl border border-[#2d2f36]">
                     <div class="aspect-video w-full relative flex items-center justify-center group" id="player-container">
                         <?php if ($isM3U8): ?>
                             <video id="video-player" class="w-full h-full outline-none bg-black" controls playsinline>
@@ -109,7 +104,17 @@ if (isset($_SESSION['user'])) {
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="bg-[#111319] min-h-screen text-gray-200 font-sans pb-20 pt-8">
+    <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto">
+        <div class="flex flex-col xl:flex-row gap-8">
+            
+            <!-- Left Column: Main Content -->
+            <div class="w-full xl:w-[72%]">
                 <!-- Movie Info -->
                 <div class="mb-8">
                     <div class="flex items-center justify-between mb-2">
