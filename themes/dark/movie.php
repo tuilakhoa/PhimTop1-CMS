@@ -32,7 +32,6 @@ $tmdbType = $movie['tmdb']['type'] ?? 'movie';
 $tmdbApiKey = $settings['tmdbApiKey'] ?? '';
 
 if ($tmdbId && $tmdbApiKey) {
-    // Fetch directly from TMDB using the provided API Key
     $tmdbRes = @file_get_contents("https://api.themoviedb.org/3/{$tmdbType}/{$tmdbId}/images?api_key=" . urlencode($tmdbApiKey));
     if ($tmdbRes) {
         $tmdbData = json_decode($tmdbRes, true);
@@ -40,7 +39,6 @@ if ($tmdbId && $tmdbApiKey) {
         if (isset($tmdbData['posters'])) $movieImages['posters'] = $tmdbData['posters'];
     }
 } else {
-    // Fallback to PhimAPI
     $imgRes = @file_get_contents("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images");
     if ($imgRes) {
         $imgData = json_decode($imgRes, true);
@@ -51,489 +49,276 @@ if ($tmdbId && $tmdbApiKey) {
     }
 }
 
-// Extract TMDB info
+// Extract meta
 $tmdbVote = $movie['tmdb']['vote_average'] ?? 0;
 $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
+
+$year = $movie['year'] ?? '';
+$country = (!empty($movie['country']) && is_array($movie['country'])) ? $movie['country'][0]['name'] : '';
+$episodes_total = $movie['episode_total'] ?? '';
+$quality = $movie['quality'] ?? '';
+$categories = [];
+if (!empty($movie['category']) && is_array($movie['category'])) {
+    foreach ($movie['category'] as $c) {
+        $categories[] = is_array($c) ? ($c['name'] ?? '') : $c;
+    }
+}
+$categories_str = implode(' - ', array_filter($categories));
+
+$meta_tags = array_filter([$quality, $year, $country, $episodes_total, $categories_str]);
+
+// Get the first episode link for the Play button
+$first_ep_link = '#';
+if (!empty($episodes[0]['server_data'])) {
+    $first_ep_link = '/' . ($settings["slugWatch"] ?? "xem-phim") . '/' . urlencode($slug) . '/' . urlencode($episodes[0]['server_data'][0]['slug']);
+}
 ?>
 
-<div class="bg-[#000000] min-h-screen text-gray-200 font-sans pb-20">
-    <div class="max-w-[1400px] mx-auto px-6 md:px-12 pt-8 lg:pt-12">
-    <!-- Movie Details Header -->
-    <div class="relative w-full rounded-2xl overflow-hidden mb-12 bg-[#111] border border-gray-900">
-        <div class="absolute inset-0 z-0">
-            <img src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '')) ?>" 
-                 alt="Poster" class="w-full h-full object-cover opacity-30 blur-sm">
-            <div class="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/80 to-transparent"></div>
-        </div>
-        
-        <div class="relative z-10 p-6 md:p-12 flex flex-col md:flex-row gap-8">
-            <div class="flex-shrink-0 w-48 md:w-64 mx-auto md:mx-0">
-                <img src="<?= htmlspecialchars(!empty($movie['thumb_url']) ? $movie['thumb_url'] : (!empty($movie['poster_url']) ? $movie['poster_url'] : '')) ?>" 
-                     alt="Thumb" class="w-full rounded-xl shadow-2xl border-2 border-gray-700/50">
-            </div>
+<div class="bg-[#111319] min-h-screen text-gray-200 font-sans pb-20 pt-[70px] md:pt-[80px]">
+    <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto">
+        <div class="flex flex-col xl:flex-row gap-6">
             
-            <div class="flex-grow min-w-0">
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <?php if (!empty($movie['quality'])): ?>
-                        <span class="inline-flex items-center whitespace-nowrap w-fit px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-md"><?= htmlspecialchars($movie['quality']) ?></span>
-                    <?php endif; ?>
-                    <?php if (!empty($movie['lang'])): ?>
-                        <span class="inline-flex items-center whitespace-nowrap w-fit px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-md"><?= htmlspecialchars($movie['lang']) ?></span>
-                    <?php endif; ?>
-                    <?php if (!empty($movie['year'])): ?>
-                        <span class="inline-flex items-center whitespace-nowrap w-fit px-3 py-1 bg-gray-800 text-white text-xs font-bold rounded-md"><?= htmlspecialchars($movie['year']) ?></span>
-                    <?php endif; ?>
+            <!-- Left Column: Main Content -->
+            <div class="w-full xl:w-[72%]">
+                <!-- "Player" Area (Banner) -->
+                <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden mb-6 group">
+                    <img src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '')) ?>" 
+                         alt="Poster" class="w-full h-full object-cover opacity-60">
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <?php if ($first_ep_link !== '#'): ?>
+                        <a href="<?= $first_ep_link ?>" class="w-16 h-16 md:w-20 md:h-20 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-[#ff8f00] hover:scale-110 transition-all duration-300">
+                            <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 ml-2 fill-current"></i>
+                        </a>
+                        <p class="mt-4 text-white text-lg font-medium drop-shadow-md">Nhấn để xem phim</p>
+                        <?php else: ?>
+                        <p class="text-white text-lg font-medium drop-shadow-md">Phim chưa có tập nào</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Movie Info -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <h1 class="text-2xl md:text-3xl font-bold text-white"><?= htmlspecialchars($movie['name']) ?></h1>
+                        <button class="flex items-center text-gray-400 hover:text-white transition-colors p-2 rounded-md hover:bg-[#22242d]">
+                            <i data-lucide="share-2" class="w-4 h-4 mr-1.5"></i> <span class="text-sm">Chia sẻ</span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-2 text-[13px] text-gray-400 mb-5">
+                        <?php foreach ($meta_tags as $idx => $tag): ?>
+                            <?php if ($idx === 0): ?>
+                                <span class="border border-gray-600 px-1.5 py-0.5 rounded text-gray-300"><?= htmlspecialchars($tag) ?></span>
+                            <?php else: ?>
+                                <span>|</span>
+                                <span><?= htmlspecialchars($tag) ?></span>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <!-- Cast (Inline) -->
+                    <div class="mb-5">
+                        <?php include __DIR__ . '/components/actors.php'; ?>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="text-[14px] text-gray-400 leading-relaxed relative">
+                        <div id="movie-desc" class="line-clamp-3">
+                            <?= !empty($movie['content']) ? strip_tags($movie['content'], '<p><br><b><i>') : 'Chưa có tóm tắt.' ?>
+                        </div>
+                        <button id="btn-read-more" class="text-[#ff8f00] hover:text-[#ffaa33] text-sm mt-1 focus:outline-none flex items-center font-medium">Đọc thêm <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i></button>
+                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const desc = document.getElementById('movie-desc');
+                            const btn = document.getElementById('btn-read-more');
+                            if (desc && btn) {
+                                btn.addEventListener('click', function() {
+                                    if (desc.classList.contains('line-clamp-3')) {
+                                        desc.classList.remove('line-clamp-3');
+                                        btn.innerHTML = 'Thu gọn <i data-lucide="chevron-up" class="w-4 h-4 ml-1"></i>';
+                                        lucide.createIcons();
+                                    } else {
+                                        desc.classList.add('line-clamp-3');
+                                        btn.innerHTML = 'Đọc thêm <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>';
+                                        lucide.createIcons();
+                                    }
+                                });
+                            }
+                        });
+                    </script>
                 </div>
                 
-                <h1 class="text-3xl md:text-5xl font-bold text-white mb-2"><?= htmlspecialchars($movie['name']) ?></h1>
-                <p class="text-xl text-gray-400 mb-4 italic"><?= htmlspecialchars($movie['origin_name'] ?? '') ?></p>
-                
-                <?php if ($tmdbVote > 0): ?>
-                <div class="flex items-center gap-2 mb-6">
-                    <span class="inline-flex items-center text-yellow-500 font-bold bg-yellow-500/10 px-2 py-1 rounded">
-                        <i data-lucide="star" class="w-4 h-4 mr-1 fill-current"></i> <?= number_format($tmdbVote, 1) ?>
-                    </span>
-                    <span class="text-gray-400 text-sm">(<?= number_format($tmdbCount) ?> votes)</span>
+                <!-- Suggestions -->
+                <?php if (!empty($suggestions)): ?>
+                <div class="mb-10">
+                    <h3 class="text-xl font-bold text-white mb-4">Đề xuất cho bạn</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <?php foreach ($suggestions as $item): ?>
+                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group flex flex-col">
+                                <div class="relative w-full aspect-[16/9] overflow-hidden rounded-md bg-[#22242d] mb-2">
+                                    <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    <div class="absolute top-1 right-1">
+                                        <span class="bg-[#ff4d4f] text-white text-[10px] font-bold px-1.5 py-0.5 rounded"><?= htmlspecialchars($item['quality'] ?? 'HD') ?></span>
+                                    </div>
+                                    <div class="absolute bottom-1 right-1">
+                                        <span class="bg-black/80 text-white text-[11px] px-1.5 py-0.5 rounded"><?= htmlspecialchars($item['episode_current'] ?? 'N/A') ?></span>
+                                    </div>
+                                </div>
+                                <h3 class="text-sm font-medium text-gray-200 line-clamp-1 group-hover:text-[#ff8f00] transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-                <?php else: ?>
-                <div class="mb-6"></div>
                 <?php endif; ?>
                 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-sm">
-                    <div class="bg-[#1a1a1a] p-3 rounded-xl border border-gray-800">
-                        <span class="text-gray-500 block mb-1 text-xs uppercase font-medium tracking-wider">Trạng thái</span>
-                        <span class="text-white font-medium"><?= htmlspecialchars($movie['episode_current'] ?? 'N/A') ?></span>
-                    </div>
-                    <div class="bg-[#1a1a1a] p-3 rounded-xl border border-gray-800">
-                        <span class="text-gray-500 block mb-1 text-xs uppercase font-medium tracking-wider">Thời lượng</span>
-                        <span class="text-white font-medium"><?= htmlspecialchars($movie['time'] ?? 'N/A') ?></span>
-                    </div>
-                    <div class="bg-[#1a1a1a] p-3 rounded-xl border border-gray-800">
-                        <span class="text-gray-500 block mb-1 text-xs uppercase font-medium tracking-wider">Loại</span>
-                        <span class="text-white font-medium"><?= htmlspecialchars($movie['type'] ?? 'N/A') ?></span>
-                    </div>
-                </div>
-                
-                <div class="mb-8 text-gray-300 leading-relaxed break-words">
-                    <?= !empty($movie['content']) ? strip_tags($movie['content'], '<p><br><b><i>') : 'Chưa có tóm tắt.' ?>
-                </div>
-
-                <!-- Cast / Peoples Component -->
-                <?php include __DIR__ . '/components/actors.php'; ?>
-
                 <!-- Image Gallery -->
                 <?php if (!empty($movieImages['backdrops']) || !empty($movieImages['posters'])): ?>
-                <div class="mb-8">
-                    <h3 class="text-xl font-bold mb-3 text-white border-l-4 border-red-500 pl-2">Hình Ảnh Phim</h3>
+                <div class="mb-10">
+                    <h3 class="text-xl font-bold text-white mb-4">Hình Ảnh Phim</h3>
                     <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-4 snap-x">
                         <?php 
                         $bCount = 0;
                         foreach ($movieImages['backdrops'] as $img): 
-                            if ($bCount++ >= 10) break;
+                            if ($bCount++ >= 6) break;
                         ?>
-                            <div class="shrink-0 w-[240px] md:w-[280px] rounded-xl overflow-hidden border border-gray-700 snap-start">
-                                <img src="https://image.tmdb.org/t/p/w780<?= htmlspecialchars($img['file_path']) ?>" alt="Backdrop" loading="lazy" class="w-full h-[135px] md:h-[157px] object-cover hover:scale-110 transition-transform duration-500">
-                            </div>
-                        <?php endforeach; ?>
-                        
-                        <?php 
-                        $pCount = 0;
-                        foreach ($movieImages['posters'] as $img): 
-                            if ($pCount++ >= 5) break;
-                        ?>
-                            <div class="shrink-0 w-[100px] md:w-[120px] rounded-xl overflow-hidden border border-gray-700 snap-start">
-                                <img src="https://image.tmdb.org/t/p/w342<?= htmlspecialchars($img['file_path']) ?>" alt="Poster" loading="lazy" class="w-full aspect-[2/3] object-cover hover:scale-110 transition-transform duration-500">
+                            <div class="shrink-0 w-[240px] md:w-[280px] rounded-md overflow-hidden bg-[#22242d] snap-start border border-[#2d2f36]">
+                                <img src="https://image.tmdb.org/t/p/w780<?= htmlspecialchars($img['file_path']) ?>" alt="Backdrop" loading="lazy" class="w-full h-[135px] md:h-[157px] object-cover hover:scale-105 transition-transform duration-300">
                             </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
                 <?php endif; ?>
-                
-                <?php if (!empty($episodes) && !empty($episodes[0]['server_data'])): ?>
-                    <div class="flex flex-wrap gap-4 mt-6">
-                        <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($episodes[0]['server_data'][0]['slug']) ?>" 
-                           class="inline-flex items-center justify-center space-x-2 bg-white hover:bg-gray-200 text-black px-8 py-3.5 rounded-xl font-medium transition-colors">
-                            <i data-lucide="play" class="w-5 h-5 fill-current"></i>
-                            <span>Phát Ngay</span>
-                        </a>
-                        <button id="btn-follow-movie" class="hidden items-center justify-center space-x-2 bg-[#1a1a1a] hover:bg-[#222] text-white px-6 py-3.5 rounded-xl font-medium transition-colors border border-gray-800">
-                            <i data-lucide="bookmark" id="icon-follow-movie" class="w-5 h-5"></i>
-                            <span id="text-follow-movie">Theo dõi</span>
-                        </button>
-                        <button id="btn-playlist-movie" class="hidden items-center justify-center space-x-2 bg-[#1a1a1a] hover:bg-[#222] text-white px-6 py-3.5 rounded-xl font-medium transition-colors border border-gray-800">
-                            <i data-lucide="list-plus" class="w-5 h-5"></i>
-                            <span>Thêm vào Danh sách</span>
-                        </button>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Episode List (Below Details) -->
-    <?php if (!empty($episodes[0]['server_data'])): ?>
-        <div class="mb-12 bg-[#111] rounded-2xl p-6 md:p-8 border border-gray-900">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-3">
-                <h3 class="text-lg font-bold text-white flex items-center tracking-tight">
-                    <i data-lucide="list-video" class="w-5 h-5 mr-3 text-white"></i> Chọn tập phim
-                </h3>
-                <div class="relative">
-                    <input type="text" id="search-episode" placeholder="Tìm tập phim..." class="bg-[#1a1a1a] text-sm text-white px-3 py-1.5 rounded-lg border border-gray-800 outline-none focus:border-white w-full md:w-48">
-                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-3 max-h-[400px] overflow-y-auto custom-scrollbar" id="episode-list">
-                <?php foreach ($episodes[0]['server_data'] as $e): ?>
-                    <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>" 
-                       class="px-5 py-2.5 rounded-lg transition-colors bg-[#1a1a1a] border border-gray-800 text-gray-300 hover:bg-white hover:text-black hover:border-white font-medium text-sm">
-                        <?= htmlspecialchars($e['name']) ?>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const searchEp = document.getElementById('search-episode');
-                    if (searchEp) {
-                        searchEp.addEventListener('input', function(e) {
-                            const keyword = e.target.value.toLowerCase().trim();
-                            const eps = document.querySelectorAll('#episode-list a');
-                            eps.forEach(ep => {
-                                const text = ep.textContent.toLowerCase().trim();
-                                if (text.includes(keyword)) {
-                                    ep.style.display = '';
-                                } else {
-                                    ep.style.display = 'none';
-                                }
-                            });
-                        });
-                    }
-                });
-            </script>
-        </div>
-    <?php endif; ?>
 
-    <!-- Comments (Dynamic UI) -->
-    <div class="mb-12 bg-[#111] rounded-2xl p-6 md:p-8 border border-gray-900">
-        <h3 class="text-lg font-bold text-white mb-6 flex items-center tracking-tight">
-            <i data-lucide="message-square" class="w-5 h-5 mr-3 text-white"></i> Bình luận (<span id="comment-count">0</span>)
-        </h3>
-        
-        <div class="relative bg-[#1a1a1a] rounded-xl p-5 border border-gray-800">
-            <input type="text" id="comment-name" class="w-full bg-transparent text-white text-sm outline-none mb-4 pb-3 border-b border-gray-800 hidden" placeholder="Nhập tên của bạn...">
-            <textarea id="comment-content" rows="3" class="w-full bg-transparent text-white text-sm outline-none resize-none placeholder-gray-500" placeholder="Viết bình luận..."></textarea>
-            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
-                <label class="flex items-center text-gray-500 text-sm cursor-pointer hover:text-white transition-colors">
-                    <input type="checkbox" id="comment-anon" checked class="mr-2 rounded border-gray-700 bg-[#222] text-white focus:ring-0 focus:ring-offset-0"> Ẩn danh
-                </label>
-                <button id="btn-submit-comment" class="bg-white text-black font-medium px-6 py-2.5 rounded-lg text-sm flex items-center hover:bg-gray-200 transition-colors">
-                    Gửi <i data-lucide="send" class="w-4 h-4 ml-2"></i>
-                </button>
             </div>
-        </div>
-        
-        <div id="comments-list" class="mt-8 space-y-6">
-            <div class="text-center text-gray-500 text-sm py-8">Đang tải bình luận...</div>
+
+            <!-- Right Column: Sidebar -->
+            <div class="w-full xl:w-[28%] space-y-6">
+                
+                <?php if (!empty($episodes[0]['server_data'])): ?>
+                <!-- Playlist Sidebar -->
+                <div class="bg-[#181a20] rounded-lg p-4 border border-[#2d2f36]">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-white leading-tight"><?= htmlspecialchars($movie['name']) ?></h3>
+                        <p class="text-sm text-gray-500 mt-1"><?= count($episodes[0]['server_data']) ?> Tập</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 mb-4 border-b border-[#2d2f36] pb-2">
+                        <button class="text-[#ff8f00] font-medium text-sm border-b-2 border-[#ff8f00] pb-1">Danh sách phát</button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-1 max-h-[450px] overflow-y-auto custom-scrollbar pr-1" id="episode-list">
+                        <?php foreach ($episodes[0]['server_data'] as $e): ?>
+                            <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>" 
+                               class="flex items-center justify-between px-3 py-3 rounded hover:bg-[#2d2f36] transition-colors group">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 md:w-16 md:h-10 rounded bg-[#22242d] flex items-center justify-center mr-3 group-hover:text-[#ff8f00] transition-colors text-xs font-medium text-gray-500 overflow-hidden relative">
+                                        <img src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '')) ?>" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-10 transition-opacity">
+                                        <i data-lucide="play" class="w-4 h-4 relative z-10 text-white group-hover:text-[#ff8f00] hidden group-hover:block"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-300 group-hover:text-[#ff8f00] transition-colors font-medium">Tập <?= htmlspecialchars($e['name']) ?></span>
+                                </div>
+                                <span class="bg-[#2d2f36] text-[10px] text-gray-400 px-1.5 py-0.5 rounded group-hover:bg-[#ff8f00] group-hover:text-black transition-colors">VIP</span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Comments Widget -->
+                <div class="bg-[#181a20] rounded-lg p-4 border border-[#2d2f36]">
+                    <h3 class="text-base font-bold text-white mb-3">Bình luận (<span id="comment-count">0</span>)</h3>
+                    <div class="bg-[#22242d] rounded-md p-3 mb-4">
+                        <textarea id="comment-content" rows="2" class="w-full bg-transparent text-white text-sm outline-none resize-none placeholder-gray-500" placeholder="Viết bình luận..."></textarea>
+                        <div class="flex items-center justify-end mt-2">
+                            <button id="btn-submit-comment" class="bg-[#ff8f00] text-black font-bold px-3 py-1.5 rounded text-xs hover:bg-[#e68000] transition-colors">
+                                Gửi
+                            </button>
+                        </div>
+                    </div>
+                    <div id="comments-list" class="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
+                        <div class="text-center text-gray-500 text-xs py-4">Đang tải bình luận...</div>
+                    </div>
+                </div>
+                
+            </div>
+            
         </div>
     </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Comments logic
+    const contentInput = document.getElementById('comment-content');
+    const submitBtn = document.getElementById('btn-submit-comment');
+    const commentsList = document.getElementById('comments-list');
+    const countSpan = document.getElementById('comment-count');
+    const movieSlug = '<?= htmlspecialchars($slug) ?>';
     
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const anonCheckbox = document.getElementById('comment-anon');
-        const nameInput = document.getElementById('comment-name');
-        const contentInput = document.getElementById('comment-content');
-        const submitBtn = document.getElementById('btn-submit-comment');
-        const commentsList = document.getElementById('comments-list');
-        const countSpan = document.getElementById('comment-count');
-        const movieSlug = '<?= htmlspecialchars($slug) ?>';
-        
-        if (anonCheckbox) {
-            anonCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    nameInput.classList.add('hidden');
-                } else {
-                    nameInput.classList.remove('hidden');
-                    nameInput.focus();
-                }
-            });
-        }
-        
-        function fetchComments() {
-            fetch('/api/comments.php?slug=' + movieSlug)
-                .then(res => res.json())
-                .then(res => {
-                    if (res.success) {
-                        countSpan.textContent = res.data.length;
-                        if (res.data.length === 0) {
-                            commentsList.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">Chưa có bình luận nào. Hãy là người đầu tiên!</div>';
-                            return;
-                        }
-                        
-                        let html = '';
-                        res.data.forEach(c => {
-                            html += `
-                                <div class="flex gap-4">
-                                    <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center shrink-0 border border-gray-700">
-                                        <svg class="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                    </div>
-                                    <div class="flex-1 bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
-                                        <div class="flex items-baseline gap-3 mb-2">
-                                            <span class="font-bold text-gray-100">${c.user_name}</span>
-                                            <span class="text-xs text-gray-500">${c.time_ago}</span>
-                                        </div>
-                                        <p class="text-sm text-gray-300 leading-relaxed">${c.content}</p>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        commentsList.innerHTML = html;
-                    }
-                });
-        }
-        
-        if (submitBtn) {
-            submitBtn.addEventListener('click', function() {
-                const content = contentInput.value.trim();
-                const isAnon = anonCheckbox.checked;
-                const name = isAnon ? '' : nameInput.value.trim();
-                
-                if (!content) return alert('Vui lòng nhập nội dung bình luận!');
-                if (!isAnon && !name) return alert('Vui lòng nhập tên của bạn!');
-                
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = 'Đang gửi...';
-                
-                fetch('/api/comments.php', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({slug: movieSlug, name: name, content: content, anonymous: isAnon})
-                })
-                .then(res => res.json())
-                .then(res => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Gửi bình luận <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
-                    if (res.success) {
-                        contentInput.value = '';
-                        fetchComments();
-                    } else {
-                        alert(res.message);
-                    }
-                });
-            });
-        }
-        
-        fetchComments();
-        
-        // Follow logic
-        const btnFollow = document.getElementById('btn-follow-movie');
-        if (btnFollow) {
-            const iconFollow = document.getElementById('icon-follow-movie');
-            const textFollow = document.getElementById('text-follow-movie');
-            
-            // Check follow status
-            fetch('/api/follow.php?action=check&slug=' + movieSlug)
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status === 'success') {
-                        btnFollow.classList.remove('hidden');
-                        btnFollow.classList.add('inline-flex');
-                        if (res.is_following) {
-                            textFollow.textContent = 'Hủy theo dõi';
-                            iconFollow.classList.add('fill-current', 'text-red-500');
-                        }
-                    } else if (res.status === 'error' && res.message === 'Unauthorized') {
-                        // Show button but redirect to login on click
-                        btnFollow.classList.remove('hidden');
-                        btnFollow.classList.add('inline-flex');
-                    }
-                });
-                
-            btnFollow.addEventListener('click', function() {
-                const thumbUrl = '<?= htmlspecialchars(!empty($movie['thumb_url']) ? $movie['thumb_url'] : (!empty($movie['poster_url']) ? $movie['poster_url'] : '')) ?>';
-                const name = '<?= htmlspecialchars($movie['name']) ?>';
-                
-                fetch('/api/follow.php?action=toggle', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        item_slug: movieSlug,
-                        item_type: 'movie',
-                        item_name: name,
-                        thumb_url: thumbUrl
-                    })
-                })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status === 'success') {
-                        if (res.action === 'added') {
-                            textFollow.textContent = 'Hủy theo dõi';
-                            iconFollow.classList.add('fill-current', 'text-red-500');
-                        } else {
-                            textFollow.textContent = 'Theo dõi';
-                            iconFollow.classList.remove('fill-current', 'text-red-500');
-                        }
-                    } else if (res.status === 'error' && res.message === 'Unauthorized') {
-                        window.location.href = '/member.php?mode=login&error=' + encodeURIComponent('Vui lòng đăng nhập để theo dõi.');
-                    }
-                });
-            });
-        }
-        
-        // Playlist logic
-        const btnPlaylist = document.getElementById('btn-playlist-movie');
-        const modalPlaylist = document.getElementById('modal-playlist');
-        const closePlaylist = document.getElementById('close-playlist-modal');
-        const listPlaylist = document.getElementById('list-playlist');
-        const newPlaylistInput = document.getElementById('new-playlist-name');
-        const btnCreatePlaylist = document.getElementById('btn-create-playlist');
-        
-        if (btnPlaylist) {
-            // Show button if logged in (check via follow api check is a trick, but let's just show it if res.message !== Unauthorized)
-            fetch('/api/playlists.php?action=check&slug=' + movieSlug)
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status === 'success' || (res.status === 'error' && res.message === 'Unauthorized')) {
-                        btnPlaylist.classList.remove('hidden');
-                        btnPlaylist.classList.add('inline-flex');
-                    }
-                });
-                
-            function openPlaylistModal() {
-                fetch('/api/playlists.php?action=check&slug=' + movieSlug)
-                .then(res => res.json())
-                .then(checkRes => {
-                    if (checkRes.status === 'error' && checkRes.message === 'Unauthorized') {
-                        window.location.href = '/member.php?mode=login&error=' + encodeURIComponent('Vui lòng đăng nhập để dùng danh sách phát.');
+    function fetchComments() {
+        fetch('/api/comments.php?slug=' + movieSlug)
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    countSpan.textContent = res.data.length;
+                    if (res.data.length === 0) {
+                        commentsList.innerHTML = '<div class="text-center text-gray-500 text-xs py-4">Chưa có bình luận.</div>';
                         return;
                     }
                     
-                    const inPlaylists = checkRes.in_playlists || [];
-                    
-                    fetch('/api/playlists.php?action=list')
-                    .then(res => res.json())
-                    .then(res => {
-                        if (res.status === 'success') {
-                            let html = '';
-                            if (res.data.length === 0) {
-                                html = '<div class="text-center text-gray-500 text-sm py-4">Bạn chưa có danh sách phát nào.</div>';
-                            } else {
-                                res.data.forEach(pl => {
-                                    const inPl = inPlaylists.includes(pl.id);
-                                    html += `
-                                        <div class="flex items-center justify-between bg-gray-700/50 p-3 rounded-lg border border-gray-600">
-                                            <span class="text-white font-medium">${pl.name}</span>
-                                            ${inPl 
-                                                ? `<span class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">Đã thêm</span>`
-                                                : `<button onclick="addToPlaylist(${pl.id})" class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded transition-colors">Thêm</button>`
-                                            }
-                                        </div>
-                                    `;
-                                });
-                            }
-                            listPlaylist.innerHTML = html;
-                            modalPlaylist.classList.remove('hidden');
-                            modalPlaylist.classList.add('flex');
-                        }
+                    let html = '';
+                    res.data.forEach(c => {
+                        html += `
+                            <div class="flex gap-3 bg-[#22242d] p-3 rounded-lg border border-[#2d2f36]">
+                                <div class="w-8 h-8 rounded-full bg-[#181a20] flex items-center justify-center shrink-0 border border-[#2d2f36]">
+                                    <i data-lucide="user" class="w-4 h-4 text-gray-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-baseline gap-2 mb-1">
+                                        <span class="font-bold text-gray-200 text-xs">${c.user_name}</span>
+                                        <span class="text-[10px] text-gray-500">${c.time_ago}</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400 leading-relaxed">${c.content}</p>
+                                </div>
+                            </div>
+                        `;
                     });
-                });
-            }
-            
-            window.addToPlaylist = function(id) {
-                const thumbUrl = '<?= htmlspecialchars(!empty($movie['thumb_url']) ? $movie['thumb_url'] : (!empty($movie['poster_url']) ? $movie['poster_url'] : '')) ?>';
-                const name = '<?= htmlspecialchars($movie['name']) ?>';
-                
-                fetch('/api/playlists.php?action=add_item', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        playlist_id: id,
-                        movie_slug: movieSlug,
-                        movie_name: name,
-                        thumb_url: thumbUrl
-                    })
-                })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status === 'success') {
-                        openPlaylistModal(); // Refresh list
-                    } else {
-                        alert(res.message);
-                    }
-                });
-            };
-            
-            btnPlaylist.addEventListener('click', openPlaylistModal);
-            
-            closePlaylist.addEventListener('click', () => {
-                modalPlaylist.classList.add('hidden');
-                modalPlaylist.classList.remove('flex');
+                    commentsList.innerHTML = html;
+                    lucide.createIcons();
+                }
             });
-            
-            btnCreatePlaylist.addEventListener('click', () => {
-                const name = newPlaylistInput.value.trim();
-                if (!name) return alert('Vui lòng nhập tên danh sách phát');
-                
-                fetch('/api/playlists.php?action=create', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name: name })
-                })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status === 'success') {
-                        newPlaylistInput.value = '';
-                        openPlaylistModal();
-                    } else {
-                        alert(res.message);
-                    }
-                });
-            });
-        }
-    });
-    </script>
+    }
     
-    <!-- Modal Playlist -->
-    <div id="modal-playlist" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-        <div class="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div class="flex justify-between items-center p-4 border-b border-gray-700">
-                <h3 class="text-lg font-bold text-white flex items-center"><i data-lucide="list" class="w-5 h-5 mr-2 text-red-500"></i> Lưu vào danh sách phát</h3>
-                <button id="close-playlist-modal" class="text-gray-400 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar space-y-3" id="list-playlist">
-                <!-- Playlists will be loaded here -->
-            </div>
-            <div class="p-4 border-t border-gray-700 bg-gray-800/80">
-                <div class="flex gap-2">
-                    <input type="text" id="new-playlist-name" placeholder="Tên danh sách mới..." class="flex-1 bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-red-500 transition-colors">
-                    <button id="btn-create-playlist" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-red-600/20 whitespace-nowrap">Tạo mới</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Movie Suggestions -->
-    <?php if (!empty($suggestions)): ?>
-    <div class="mb-12">
-        <h3 class="text-2xl font-bold text-white mb-8 tracking-tight">Có Thể Bạn Sẽ Thích</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-10">
-            <?php foreach ($suggestions as $item): ?>
-                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group flex flex-col">
-                    <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                        <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                        
-                        <div class="absolute top-2 left-2">
-                            <span class="bg-black/70 backdrop-blur-md text-white text-[10px] font-medium px-2 py-0.5 rounded"><?= htmlspecialchars($item['quality'] ?? 'HD') ?></span>
-                        </div>
-                    </div>
-                    <div class="flex flex-col">
-                        <h3 class="text-sm font-medium text-gray-100 line-clamp-1 group-hover:text-white transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
-                    </div>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php endif; ?>
-    </div>
-</div>
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function() {
+            const content = contentInput.value.trim();
+            if (!content) return alert('Vui lòng nhập nội dung bình luận!');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '...';
+            
+            fetch('/api/comments.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({slug: movieSlug, name: '', content: content, anonymous: true})
+            })
+            .then(res => res.json())
+            .then(res => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Gửi';
+                if (res.success) {
+                    contentInput.value = '';
+                    fetchComments();
+                } else {
+                    alert(res.message);
+                }
+            });
+        });
+    }
+    
+    fetchComments();
+});
+</script>
 
 <?php include __DIR__ . '/footer.php'; ?>

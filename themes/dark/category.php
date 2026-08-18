@@ -19,7 +19,7 @@ for ($y = $currentYear; $y >= 2010; $y--) $filterYears[$y] = (string)$y;
 $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)', 'modified.time-asc' => 'Thời gian cập nhật (Cũ nhất)', 'year-desc' => 'Năm phát hành (Mới nhất)', 'year-asc' => 'Năm phát hành (Cũ nhất)'];
 ?>
 <div class="bg-[#000000] min-h-screen text-gray-200 font-sans pb-20">
-    <div class="max-w-[1400px] mx-auto px-6 md:px-12 pt-8 lg:pt-12">
+    <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto pt-8 lg:pt-12">
         <div class="flex items-center justify-between mb-8 border-b border-gray-900 pb-4">
             <h2 class="text-2xl font-bold text-white tracking-tight"><?= htmlspecialchars($title) ?></h2>
         </div>

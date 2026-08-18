@@ -67,7 +67,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
                             <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover opacity-90">
                             
-                            <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 max-w-[1400px] mx-auto w-full">
+                            <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto w-full">
                                 <div class="max-w-2xl">
                                     <div class="flex items-center space-x-3 mb-4">
                                         <span class="text-white text-xs font-medium tracking-widest uppercase opacity-70">Nổi Bật</span>
@@ -120,7 +120,7 @@ if (empty($featuredMovies) && !empty($movies)) {
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
             <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover opacity-90">
             
-            <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 max-w-[1400px] mx-auto w-full">
+            <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto w-full">
                 <div class="max-w-2xl">
                     <div class="flex items-center space-x-3 mb-4">
                         <span class="text-white text-xs font-medium tracking-widest uppercase opacity-70">Nổi Bật</span>
@@ -147,7 +147,7 @@ if (empty($featuredMovies) && !empty($movies)) {
 <?php endif; ?>
 
     <!-- Main Container -->
-    <div class="max-w-[1400px] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-16">
+    <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-16">
         
         <!-- Left Content: Movies Grid -->
         <div class="lg:col-span-3">

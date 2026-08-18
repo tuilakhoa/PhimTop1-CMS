@@ -1,6 +1,6 @@
 <?php include __DIR__ . '/header.php'; ?>
 <div class="bg-[#000000] min-h-screen text-gray-200 font-sans pb-20">
-    <div class="max-w-[1400px] mx-auto px-6 md:px-12 pt-8 lg:pt-12">
+    <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto pt-8 lg:pt-12">
         <div class="mb-8 max-w-xl mx-auto md:hidden">
             <form action="search.php" method="GET" class="relative">
                 <input type="text" name="keyword" value="<?= htmlspecialchars($keyword) ?>" placeholder="Tìm kiếm phim..." 

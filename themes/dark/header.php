@@ -103,7 +103,7 @@ if ($pdo) {
 </head>
 <body class="<?= $bodyClass ?> min-h-screen">
     <nav class="glass-nav fixed w-full top-0 z-50">
-        <div class="container mx-auto px-4">
+        <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto">
             <div class="flex items-center justify-between h-16">
                 <!-- Left Section: Logo & Nav -->
                 <div class="flex items-center space-x-8">

@@ -15,9 +15,8 @@ if ($response) {
 ?>
 
 <?php if (!empty($peoples)): ?>
-<div class="mb-8">
-    <h3 class="text-xl font-bold mb-3 text-white border-l-4 border-red-500 pl-2">Diễn Viên</h3>
-    <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-4 snap-x">
+<div class="w-full">
+    <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-2 snap-x">
         <?php foreach ($peoples as $person): ?>
             <a href="/tim-kiem?keyword=<?= urlencode($person['name'] ?? '') ?>" class="shrink-0 w-24 md:w-28 text-center snap-start group block">
                 <div class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full overflow-hidden border-2 border-gray-700 bg-gray-800 mb-2 group-hover:border-red-500 transition-colors">
