@@ -7,7 +7,7 @@ $settings = getSettings();
 $adminPath = $settings['adminPath'] ?? '/admin';
 
 if (isset($_SESSION['admin'])) {
-    header("Location: " . $adminPath);
+    header("Location: " . $adminPath . "/index.php");
     exit;
 }
 
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($user && password_verify($password, $user['password'])) {
             $_SESSION['admin'] = $username;
-            header("Location: " . $adminPath);
+            header("Location: " . $adminPath . "/index.php");
             exit;
         } else {
             $error = 'Sai tên đăng nhập hoặc mật khẩu';
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $fs->getDocument('users', md5($username));
             if ($user && password_verify($password, $user['password'])) {
                 $_SESSION['admin'] = $username;
-                header("Location: " . $adminPath);
+                header("Location: " . $adminPath . "/index.php");
                 exit;
             } else {
                 $error = 'Sai tên đăng nhập hoặc mật khẩu';

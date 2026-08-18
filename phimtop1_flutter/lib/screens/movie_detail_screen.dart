@@ -1009,51 +1009,11 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ),
                     TextButton.icon(
                       onPressed: () => _showReviewModal(context, provider),
-                      icon: const Icon(Icons.edit_note_rounded, color: Colors.indigoAccent),
-                      label: const Text("Viết đánh giá", style: TextStyle(color: Colors.indigoAccent)),
+                      icon: const Icon(Icons.star_half_rounded, color: Colors.amber),
+                      label: const Text("Đánh giá", style: TextStyle(color: Colors.amber)),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                if (provider.reviews.isEmpty)
-                  const Text("Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic))
-                else
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: provider.reviews.length,
-                    separatorBuilder: (_, __) => const Divider(color: Colors.white10),
-                    itemBuilder: (context, index) {
-                      final review = provider.reviews[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(review.userName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                Row(
-                                  children: List.generate(5, (starIndex) {
-                                    return Icon(
-                                      starIndex < review.ratingScore ? Icons.star_rounded : Icons.star_border_rounded,
-                                      color: Colors.amber,
-                                      size: 16,
-                                    );
-                                  }),
-                                )
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(review.content, style: const TextStyle(color: Colors.white70)),
-                            const SizedBox(height: 4),
-                            Text(review.createdAt, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
                 
                 const SizedBox(height: 40),
                 const Text("Bình luận", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
@@ -1290,7 +1250,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
   void _showReviewModal(BuildContext context, DetailProvider provider) {
     int rating = 5;
-    final contentController = TextEditingController();
 
     showModalBottomSheet(
       context: context,
@@ -1317,7 +1276,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         icon: Icon(
                           index < rating ? Icons.star_rounded : Icons.star_border_rounded,
                           color: Colors.amber,
-                          size: 40,
+                          size: 48,
                         ),
                         onPressed: () {
                           setStateModal(() {
@@ -1327,26 +1286,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       );
                     }),
                   ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: contentController,
-                    style: const TextStyle(color: Colors.white),
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      hintText: "Cảm nhận của bạn về phim (tuỳ chọn)...",
-                      hintStyle: const TextStyle(color: Colors.white38),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.05),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigoAccent,
+                        backgroundColor: Colors.amber,
+                        foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () async {
@@ -1355,15 +1302,16 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập để đánh giá')));
                           return;
                         }
-                        final success = await provider.postReview(token, provider.movie!.slug, rating, contentController.text);
+                        final success = await provider.postReview(token, provider.movie!.slug, rating, "");
                         if (success && mounted) {
+                          provider.fetchReviews(provider.movie!.slug); // Refresh average rating
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cảm ơn bạn đã đánh giá!')));
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lỗi gửi đánh giá.')));
                         }
                       },
-                      child: const Text("GỬI ĐÁNH GIÁ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                      child: const Text("GỬI ĐÁNH GIÁ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 32),

@@ -24,13 +24,17 @@ if ($isPost) {
         if (!$dbHost || !$dbName || !$dbUser || !$username || !$password) {
             $error = "Vui lòng nhập đầy đủ các trường bắt buộc (MySQL).";
         } else {
-            $config = ['type' => 'mysql', 'host' => $dbHost, 'database' => $dbName, 'user' => $dbUser, 'password' => $dbPass];
-            file_put_contents($dbConfigPath, json_encode($config, JSON_PRETTY_PRINT));
-            
-            try {
-                $dsn = "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4";
-                $pdo = new PDO($dsn, $dbUser, $dbPass);
-                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            if (!is_writable(dirname($dbConfigPath))) {
+                $error = "Thư mục gốc không có quyền ghi. Vui lòng CHMOD 777 hoặc cấp quyền chown cho user web server (www/www-data).";
+            } else {
+                $config = ['type' => 'mysql', 'host' => $dbHost, 'database' => $dbName, 'user' => $dbUser, 'password' => $dbPass];
+                if (file_put_contents($dbConfigPath, json_encode($config, JSON_PRETTY_PRINT)) === false) {
+                    $error = "Không thể lưu file config.json. Kiểm tra lại quyền thư mục!";
+                } else {
+                    try {
+                        $dsn = "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4";
+                        $pdo = new PDO($dsn, $dbUser, $dbPass);
+                        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
                 $pdo->exec("DROP TABLE IF EXISTS users");
                 $pdo->exec("DROP TABLE IF EXISTS settings");
@@ -48,7 +52,7 @@ if ($isPost) {
                     siteName VARCHAR(255) DEFAULT 'PhimTop1', comicApiUrl VARCHAR(255) DEFAULT 'https://otruyenapi.com/v1/api',
                     seoTitle TEXT, seoDesc TEXT, seoKeywords TEXT, logoUrl VARCHAR(255),
                     verifyGoogle VARCHAR(255), verifyBing VARCHAR(255), verifyYandex VARCHAR(255),
-                    customHead TEXT, customBody TEXT
+                    customHead TEXT, customBody TEXT, db_version INT DEFAULT 12
                 )");
                 $pdo->exec("CREATE TABLE IF NOT EXISTS movies (
                     id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, origin_name VARCHAR(255),
@@ -100,20 +104,54 @@ if ($isPost) {
                 $adminDir = __DIR__ . '/admin';
                 $newAdminDir = __DIR__ . '/' . $randomPath;
                 $finalAdminPath = 'admin';
-                if (is_dir($adminDir)) {
-                    if (@rename($adminDir, $newAdminDir)) {
-                        $finalAdminPath = $randomPath;
+                // Chỉ insert settings mặc định nếu bảng settings đang rỗng
+                $settingsCount = $pdo->query("SELECT COUNT(*) FROM settings")->fetchColumn();
+                if ($settingsCount == 0) {
+                    // Cài đặt mới: Sinh random admin path và đổi tên thư mục để bảo mật
+                    $finalAdminPath = 'admin_' . substr(md5(uniqid()), 0, 6);
+                    
+                    $sourceAdminDir = __DIR__ . '/admin';
+                    if (!is_dir($sourceAdminDir)) {
+                        $adminDirs = glob(__DIR__ . '/admin_*', GLOB_ONLYDIR);
+                        if (!empty($adminDirs)) $sourceAdminDir = $adminDirs[0];
+                    }
+
+                    if (is_dir($sourceAdminDir) && !is_dir(__DIR__ . '/' . $finalAdminPath)) {
+                        if (!@rename($sourceAdminDir, __DIR__ . '/' . $finalAdminPath)) {
+                            throw new Exception("Không thể đổi tên thư mục admin. Vui lòng cấp quyền ghi cho thư mục gốc!");
+                        }
+                    }
+
+                    $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl, comicApiUrl) VALUES (1, ?, 'api', 'dark', '1.0.2', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS', 'https://otruyenapi.com/v1/api')");
+                    $stmt->execute(['/' . $finalAdminPath]);
+                } else {
+                    // Đã cài đặt: lấy adminPath hiện tại từ database
+                    $finalAdminPath = ltrim($pdo->query("SELECT adminPath FROM settings WHERE id = 1")->fetchColumn(), '/');
+                    if (empty($finalAdminPath)) $finalAdminPath = 'admin';
+                    
+                    // Đảm bảo thư mục vật lý khớp với đường dẫn trong database cũ
+                    $sourceAdminDir = __DIR__ . '/admin';
+                    if (!is_dir($sourceAdminDir)) {
+                        $adminDirs = glob(__DIR__ . '/admin_*', GLOB_ONLYDIR);
+                        if (!empty($adminDirs)) $sourceAdminDir = $adminDirs[0];
+                    }
+                    
+                    if ($finalAdminPath !== 'admin' && is_dir($sourceAdminDir) && basename($sourceAdminDir) !== $finalAdminPath) {
+                        @rename($sourceAdminDir, __DIR__ . '/' . $finalAdminPath);
                     }
                 }
 
-                $pdo->exec("TRUNCATE TABLE settings");
-                $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl, comicApiUrl) VALUES (1, ?, 'api', 'dark', '1.0.2', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS', 'https://otruyenapi.com/v1/api')");
-                $stmt->execute(['/' . $finalAdminPath]);
+                if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+                    session_start();
+                }
+                $_SESSION['admin'] = $username;
 
-                $success = "Cài đặt MySQL thành công! Link quản trị mới là: /$finalAdminPath";
-                echo "<script>setTimeout(() => window.location.href='/$finalAdminPath', 3000);</script>";
+                $success = "Cài đặt MySQL thành công! Link quản trị mới là: /$finalAdminPath/";
+                echo "<script>setTimeout(() => window.location.href='/$finalAdminPath/index.php', 3000);</script>";
             } catch (Exception $e) {
                 $error = "Kết nối hoặc cài đặt DB thất bại: " . $e->getMessage();
+            }
+                }
             }
         }
     } else if ($dbType === 'firestore') {
@@ -130,16 +168,6 @@ if ($isPost) {
                 $config = ['type' => 'firestore', 'projectId' => $projectId, 'serviceAccount' => $saData];
                 file_put_contents($dbConfigPath, json_encode($config, JSON_PRETTY_PRINT));
                 
-                $randomPath = 'admin_' . substr(md5(uniqid(rand(), true)), 0, 6);
-                $adminDir = __DIR__ . '/admin';
-                $newAdminDir = __DIR__ . '/' . $randomPath;
-                $finalAdminPath = 'admin';
-                if (is_dir($adminDir)) {
-                    if (@rename($adminDir, $newAdminDir)) {
-                        $finalAdminPath = $randomPath;
-                    }
-                }
-
                 require_once __DIR__ . '/includes/firestore_helper.php';
                 $fs = new FirestoreClient($projectId, $saData);
                 
@@ -151,23 +179,48 @@ if ($isPost) {
                     'role' => 'admin'
                 ]);
                 
-                // Khởi tạo Settings mặc định
-                $fs->setDocument('settings', '1', [
-                    'adminPath' => '/' . $finalAdminPath,
-                    'displayMode' => 'api',
-                    'theme' => 'dark',
-                    'cmsVersion' => '1.0.0',
-                    'siteName' => 'PhimTop1',
-                    'seoTitle' => 'PhimTop1 - Xem Phim Online Chất Lượng Cao',
-                    'seoDesc' => 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.',
-                    'seoKeywords' => 'xem phim, phim online, phim hay, phim vietsub',
-                    'logoUrl' => '',
-                    'comicApiUrl' => 'https://otruyenapi.com/v1/api',
-                    'updateServerUrl' => 'tuilakhoa/PhimTop1-CMS'
-                ]);
+                $settingsData = $fs->getDocument('settings', '1');
+                if (!$settingsData) {
+                    $finalAdminPath = 'admin_' . substr(md5(uniqid()), 0, 6);
+                    if (is_dir(__DIR__ . '/admin') && !is_dir(__DIR__ . '/' . $finalAdminPath)) {
+                        rename(__DIR__ . '/admin', __DIR__ . '/' . $finalAdminPath);
+                    }
+                    
+                    // Khởi tạo Settings mặc định
+                    $fs->setDocument('settings', '1', [
+                        'adminPath' => '/' . $finalAdminPath,
+                        'displayMode' => 'api',
+                        'theme' => 'dark',
+                        'cmsVersion' => '1.0.0',
+                        'siteName' => 'PhimTop1',
+                        'seoTitle' => 'PhimTop1 - Xem Phim Online Chất Lượng Cao',
+                        'seoDesc' => 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.',
+                        'seoKeywords' => 'xem phim, phim online, phim hay, phim vietsub',
+                        'logoUrl' => '',
+                        'comicApiUrl' => 'https://otruyenapi.com/v1/api',
+                        'updateServerUrl' => 'tuilakhoa/PhimTop1-CMS'
+                    ]);
+                } else {
+                    $finalAdminPath = ltrim($settingsData['adminPath'] ?? 'admin', '/');
+                    
+                    $sourceAdminDir = __DIR__ . '/admin';
+                    if (!is_dir($sourceAdminDir)) {
+                        $adminDirs = glob(__DIR__ . '/admin_*', GLOB_ONLYDIR);
+                        if (!empty($adminDirs)) $sourceAdminDir = $adminDirs[0];
+                    }
+                    
+                    if ($finalAdminPath !== 'admin' && is_dir($sourceAdminDir) && basename($sourceAdminDir) !== $finalAdminPath) {
+                        @rename($sourceAdminDir, __DIR__ . '/' . $finalAdminPath);
+                    }
+                }
 
-                $success = "Cài đặt Firestore thành công! Link quản trị mới là: /$finalAdminPath";
-                echo "<script>setTimeout(() => window.location.href='/$finalAdminPath', 3000);</script>";
+                if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+                    session_start();
+                }
+                $_SESSION['admin'] = $username;
+
+                $success = "Cài đặt Firestore thành công! Link quản trị mới là: /$finalAdminPath/";
+                echo "<script>setTimeout(() => window.location.href='/$finalAdminPath/index.php', 3000);</script>";
             }
         }
     }

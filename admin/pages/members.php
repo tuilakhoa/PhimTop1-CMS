@@ -105,9 +105,8 @@ if ($action === 'history') {
                     $fs->setDocument('members', $memberId, $user);
                 }
             }
-        }
     }
-    header("Location: ?page=members");
+    echo "<script>window.location.href='?page=members';</script>";
     exit;
 } else {
     // List view

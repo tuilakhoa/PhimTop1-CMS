@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $repo->updateStatus($id, $newStatus);
         $_SESSION['success'] = "Đã cập nhật trạng thái bình luận!";
     }
-    header("Location: ?page=comments");
+    echo "<script>window.location.href='?page=comments';</script>";
     exit;
 }
 

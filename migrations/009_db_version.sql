@@ -1,0 +1,1 @@
+ALTER TABLE settings ADD COLUMN db_version INT DEFAULT 12;

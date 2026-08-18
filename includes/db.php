@@ -29,6 +29,7 @@ $jwtSecret = "super-secret-key-for-movie-app";
 
 function getDbConfig() {
     global $dbConfigPath;
+    clearstatcache(true, $dbConfigPath);
     if (file_exists($dbConfigPath)) {
         return json_decode(file_get_contents($dbConfigPath), true);
     }
@@ -252,7 +253,7 @@ function requireAdmin() {
         session_start();
     }
     if (!isset($_SESSION['admin'])) {
-        header("Location: /login");
+        header("Location: /login.php");
         exit;
     }
 }
