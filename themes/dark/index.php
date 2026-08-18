@@ -82,11 +82,11 @@ if (empty($featuredMovies) && !empty($movies)) {
                                     </p>
                                     <?php endif; ?>
                                     <div class="flex flex-wrap items-center gap-4">
-                                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center justify-center bg-white text-black hover:bg-gray-200 px-8 py-3.5 rounded-lg font-medium transition-colors">
+                                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center justify-center bg-primary text-dark-900 hover:bg-primary-dark px-8 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(250,204,21,0.3)] active:scale-95">
                                             <i data-lucide="play" class="w-5 h-5 mr-2 fill-current"></i>
                                             Phát ngay
                                         </a>
-                                        <button class="flex items-center justify-center bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-lg font-medium transition-colors backdrop-blur-md">
+                                        <button class="flex items-center justify-center bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-xl font-medium transition-colors backdrop-blur-md border border-white/10 active:scale-95">
                                             <i data-lucide="info" class="w-5 h-5 mr-2"></i>
                                             Chi tiết
                                         </button>
@@ -135,7 +135,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                     </p>
                     <?php endif; ?>
                     <div class="flex flex-wrap items-center gap-4">
-                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center justify-center bg-white text-black hover:bg-gray-200 px-8 py-3.5 rounded-lg font-medium transition-colors">
+                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center justify-center bg-primary text-dark-900 hover:bg-primary-dark px-8 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(250,204,21,0.3)] active:scale-95">
                             <i data-lucide="play" class="w-5 h-5 mr-2 fill-current"></i>
                             Phát ngay
                         </a>
@@ -167,10 +167,10 @@ if (empty($featuredMovies) && !empty($movies)) {
             <div class="mb-12">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-white tracking-tight flex items-center">
-                        <i data-lucide="clock" class="w-6 h-6 mr-2 text-red-500"></i> Tiếp tục xem
+                        <i data-lucide="clock" class="w-6 h-6 mr-2 text-primary"></i> Tiếp tục xem
                     </h2>
                 </div>
-                <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-4">
+                <div class="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 custom-scrollbar pb-4 snap-x snap-mandatory">
                     <?php foreach ($historyItems as $item): 
                         $progress = $item['duration'] > 0 ? min(1, max(0, $item['current_time'] / $item['duration'])) * 100 : 0;
                         // Build direct watch link using episode_slug if available, fallback to movie page
@@ -178,20 +178,24 @@ if (empty($featuredMovies) && !empty($movies)) {
                             ? '/' . ($settings["slugWatch"] ?? "xem-phim") . '/' . urlencode($item['movie_slug']) . '/' . urlencode($item['episode_slug'])
                             : '/' . ($settings["slugMovie"] ?? "phim") . '/' . urlencode($item['movie_slug']);
                     ?>
-                        <a href="<?= $historyLink ?>" class="group shrink-0 w-64 block">
-                            <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                                <img src="<?= htmlspecialchars(getPhimImgUrl($item['thumb_url'])) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <i data-lucide="play-circle" class="w-12 h-12 text-white"></i>
+                        <a href="<?= $historyLink ?>" class="group shrink-0 w-64 md:w-auto block snap-start">
+                            <div class="relative aspect-video w-full overflow-hidden rounded-xl bg-dark-800 mb-3 border border-white/5 shadow-lg group-hover:border-primary/50 transition-all duration-300">
+                                <img src="<?= htmlspecialchars(getPhimImgUrl($item['thumb_url'])) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                                    <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.5)] transform scale-75 group-hover:scale-100 transition-transform duration-300">
+                                        <i data-lucide="play" class="w-6 h-6 text-black fill-current ml-1"></i>
+                                    </div>
                                 </div>
                                 <?php if ($item['duration'] > 0): ?>
-                                    <div class="absolute bottom-0 left-0 w-full h-1 bg-white/20">
-                                        <div class="h-full bg-red-600" style="width: <?= $progress ?>%"></div>
+                                    <div class="absolute bottom-0 left-0 w-full h-1 bg-white/20 z-20">
+                                        <div class="h-full bg-primary shadow-[0_0_10px_rgba(250,204,21,0.8)]" style="width: <?= $progress ?>%"></div>
                                     </div>
                                 <?php endif; ?>
                             </div>
-                            <h3 class="text-sm font-medium text-gray-100 line-clamp-1 mb-1 group-hover:text-white"><?= htmlspecialchars($item['movie_name']) ?></h3>
-                            <p class="text-xs text-red-500"><?= htmlspecialchars($item['episode_name']) ?></p>
+                            <div class="px-1">
+                                <h3 class="text-sm font-medium text-gray-100 line-clamp-1 mb-1 group-hover:text-primary transition-colors"><?= htmlspecialchars($item['movie_name']) ?></h3>
+                                <p class="text-xs text-primary/80"><?= htmlspecialchars($item['episode_name']) ?></p>
+                            </div>
                         </a>
                     <?php endforeach; ?>
                 </div>
@@ -205,7 +209,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                         <i data-lucide="sparkles" class="w-6 h-6 mr-2 text-cyan-400"></i> Dành Riêng Cho Bạn
                     </h2>
                 </div>
-                <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-4" id="ai-recommend-list">
+                <div class="flex overflow-x-auto md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5 pb-6 custom-scrollbar snap-x snap-mandatory" id="ai-recommend-list">
                     <!-- JS will populate -->
                 </div>
             </div>
@@ -224,15 +228,20 @@ if (empty($featuredMovies) && !empty($movies)) {
                                 thumb = 'https://phimimg.com/' + thumb;
                             }
                             html += `
-                                <a href="/phim/${item.slug}" class="group shrink-0 w-40 sm:w-48 block">
-                                    <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                                        <img src="${thumb}" alt="${item.name}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <i data-lucide="play-circle" class="w-10 h-10 text-white"></i>
+                                <a href="/phim/${item.slug}" class="group flex flex-col shrink-0 w-36 md:w-auto snap-start">
+                                    <div class="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-dark-800 mb-3 border border-white/5 shadow-lg group-hover:border-primary/50 transition-all duration-300">
+                                        <img src="${thumb}" alt="${item.name}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-80"></div>
+                                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 z-20">
+                                            <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.5)] transform scale-75 group-hover:scale-100 transition-transform duration-300">
+                                                <i data-lucide="play" class="w-6 h-6 text-black fill-current ml-1"></i>
+                                            </div>
                                         </div>
                                     </div>
-                                    <h3 class="text-sm font-medium text-gray-100 line-clamp-1 mb-1 group-hover:text-white">${item.name}</h3>
-                                    <p class="text-xs text-gray-500 line-clamp-1">${item.origin_name || ''}</p>
+                                    <div class="flex flex-col px-1">
+                                        <h3 class="text-sm font-medium text-gray-200 line-clamp-1 mb-1 group-hover:text-primary transition-colors">${item.name}</h3>
+                                        <p class="text-[11px] text-gray-500 line-clamp-1">${item.origin_name || ''}</p>
+                                    </div>
                                 </a>
                             `;
                         });
@@ -245,14 +254,14 @@ if (empty($featuredMovies) && !empty($movies)) {
             });
             </script>
 
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-bold text-white tracking-tight">Mới Cập Nhật</h2>
-                <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="text-sm font-medium text-gray-500 hover:text-white transition-colors">
-                    Xem tất cả
+                <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors flex items-center">
+                    Xem tất cả <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
                 </a>
             </div>
             
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-10">
+            <div class="flex overflow-x-auto md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5 pb-6 custom-scrollbar snap-x snap-mandatory">
                 <?php foreach ($movies as $movie): 
                     $thumb = !empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '');
                     if (!preg_match('/^http/', $thumb) && $thumb) {
@@ -264,29 +273,38 @@ if (empty($featuredMovies) && !empty($movies)) {
                         }
                     }
                 ?>
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= htmlspecialchars($movie['slug']) ?>" class="group flex flex-col">
-                        <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                            <img src="<?= htmlspecialchars($thumb) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= htmlspecialchars($movie['slug']) ?>" class="group flex flex-col shrink-0 w-36 md:w-auto snap-start">
+                        <div class="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-dark-800 mb-3 border border-white/5 shadow-lg group-hover:border-primary/50 transition-all duration-300">
+                            <img src="<?= htmlspecialchars($thumb) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-80"></div>
                             
                             <!-- Minimal Overlays -->
-                            <div class="absolute top-2 left-2 flex gap-1.5">
+                            <div class="absolute top-2 left-2 flex gap-1.5 z-10">
                                 <?php if (!empty($movie['quality'])): ?>
-                                    <span class="bg-black/70 backdrop-blur-md text-white text-[10px] font-medium px-2 py-0.5 rounded"><?= htmlspecialchars($movie['quality']) ?></span>
+                                    <span class="bg-black/70 backdrop-blur-md text-primary text-[10px] font-bold px-2 py-0.5 rounded border border-primary/20"><?= htmlspecialchars($movie['quality']) ?></span>
                                 <?php endif; ?>
                             </div>
                             
                             <?php if (!empty($movie['episode_current'])): ?>
-                                <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md text-white text-[10px] font-medium px-2 py-1 rounded">
+                                <div class="absolute bottom-2 right-2 bg-primary text-black text-[10px] font-bold px-2 py-1 rounded shadow-lg z-10">
                                     <?= htmlspecialchars($movie['episode_current']) ?>
                                 </div>
                             <?php endif; ?>
+                            
+                            <!-- Play button overlay on hover -->
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 z-20">
+                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.5)] transform scale-75 group-hover:scale-100 transition-transform duration-300">
+                                    <i data-lucide="play" class="w-6 h-6 text-black fill-current ml-1"></i>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="flex flex-col">
-                            <h3 class="text-sm font-medium text-gray-100 line-clamp-1 mb-1 group-hover:text-white transition-colors" title="<?= htmlspecialchars($movie['name']) ?>">
+                        <div class="flex flex-col px-1">
+                            <h3 class="text-sm font-medium text-gray-200 line-clamp-1 mb-1 group-hover:text-primary transition-colors" title="<?= htmlspecialchars($movie['name']) ?>">
                                 <?= htmlspecialchars($movie['name']) ?>
                             </h3>
-                            <p class="text-xs text-gray-500 line-clamp-1">
+                            <p class="text-[11px] text-gray-500 line-clamp-1">
                                 <?= !empty($movie['year']) ? $movie['year'] . ' • ' : '' ?><?= htmlspecialchars($movie['origin_name'] ?? '') ?>
                             </p>
                         </div>

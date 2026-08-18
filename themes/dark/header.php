@@ -73,6 +73,35 @@ if ($pdo) {
     <?php endif; ?>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                DEFAULT: '#FACC15', // Vibrant yellow matching app logo
+                dark: '#EAB308',
+                glow: 'rgba(250, 204, 21, 0.4)'
+              },
+              dark: {
+                900: '#0a0a0a',
+                800: '#111111',
+                700: '#1a1a1a',
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/themes/dark/assets/css/style.css?v=<?= time() ?>">
@@ -101,9 +130,9 @@ if ($pdo) {
     <?php endif; ?>
     <?php do_action('cms_head'); ?>
 </head>
-<body class="<?= $bodyClass ?> min-h-screen">
-    <nav class="glass-nav fixed w-full top-0 z-50">
-        <div class="container mx-auto px-4">
+<body class="<?= $bodyClass ?> min-h-screen selection:bg-primary selection:text-black">
+    <nav class="glass-nav fixed w-full top-0 z-50 bg-black/60 backdrop-blur-xl border-b border-white/5 transition-all duration-300" id="mainNav">
+        <div class="container mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Left Section: Logo & Nav -->
                 <div class="flex items-center space-x-8">
@@ -158,10 +187,10 @@ if ($pdo) {
                 
                 <!-- Right Section: Search & Admin -->
                 <div class="flex items-center space-x-6">
-                    <form action="/search" method="GET" class="relative hidden md:block">
+                    <form action="/search" method="GET" class="relative hidden md:block group">
                         <input type="text" name="keyword" placeholder="Tìm kiếm phim..." 
-                            class="bg-gray-800/50 text-gray-200 text-sm rounded-full pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 border border-gray-700 w-64 transition-all focus:w-80">
-                        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                            class="bg-dark-800/80 text-gray-200 text-sm rounded-full pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary border border-white/10 w-64 transition-all duration-300 focus:w-80 focus:bg-dark-700">
+                        <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors"></i>
                     </form>
                     
                     <?php if (!empty($settings['appDownloadUrl'])): ?>
@@ -177,61 +206,55 @@ if ($pdo) {
 
                     <?php include __DIR__ . '/../../includes/user_nav.php'; ?>
 
-                    <!-- Mobile Menu Button -->
+                    <!-- Mobile Search Button (replaces hamburger) -->
                     <div class="md:hidden flex items-center">
-                        <button id="mobileMenuBtn" class="text-gray-300 hover:text-white focus:outline-none">
-                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        <button id="mobileSearchBtn" class="text-gray-300 hover:text-white focus:outline-none p-2 rounded-full hover:bg-white/10 transition-colors">
+                            <i data-lucide="search" class="w-6 h-6"></i>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Mobile Menu (Hidden by default) -->
-        <div id="mobileMenu" class="md:hidden hidden bg-gray-900 border-t border-gray-800 absolute w-full left-0 top-16 shadow-2xl">
-            <div class="px-4 py-4 space-y-4">
-                <form action="/search" method="GET" class="relative">
-                    <input type="text" name="keyword" placeholder="Tìm kiếm phim..." 
-                        class="w-full bg-gray-800/50 text-gray-200 text-sm rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 border border-gray-700">
-                    <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-gray-400"></i>
-                </form>
-                <div class="flex flex-col space-y-3 font-medium text-gray-300">
-                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white">Phim Lẻ</a>
-                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white">Phim Bộ</a>
-                    <a href="/bang-xep-hang" class="text-[#00E359] font-bold flex items-center"><i data-lucide="trending-up" class="w-4 h-4 mr-2"></i> Bảng Xếp Hạng</a>
-                    <?php do_action('theme_mobile_menu'); ?>
-                    
-                    <?php if (!empty($settings['appDownloadUrl'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-red-600/30 mt-2">
-                        <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng Mobile
-                    </a>
-                    <?php endif; ?>
-                    <?php if (!empty($settings['appDownloadUrlTv'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-gray-900/30 mt-2">
-                        <i data-lucide="tv" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng TV
-                    </a>
-                    <?php endif; ?>
-                    
-                    <div class="border-t border-gray-800 pt-2 pb-1">
-                        <p class="text-gray-500 text-sm mb-2 font-bold uppercase tracking-wider">Thể Loại</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <?php $limitG = array_slice($genres, 0, 8); foreach ($limitG as $g): ?>
-                                <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white truncate"><?= htmlspecialchars($g['name']) ?></a>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-800 pt-2 pb-1">
-                        <p class="text-gray-500 text-sm mb-2 font-bold uppercase tracking-wider">Quốc Gia</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <?php $limitC = array_slice($countries, 0, 8); foreach ($limitC as $c): ?>
-                                <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white truncate"><?= htmlspecialchars($c['name']) ?></a>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
-                </div>
+        
+        <!-- Mobile Search Bar (Hidden by default) -->
+        <div id="mobileSearch" class="md:hidden hidden bg-dark-900/95 backdrop-blur-xl border-t border-white/5 absolute w-full left-0 top-16 shadow-2xl p-4">
+            <form action="/search" method="GET" class="relative">
+                <input type="text" name="keyword" placeholder="Tìm kiếm phim..." 
+                    class="w-full bg-dark-800 text-white text-sm rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary border border-white/10 shadow-inner">
+                <i data-lucide="search" class="absolute left-3 top-3.5 w-5 h-5 text-gray-400"></i>
+            </form>
+            <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+                <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="bg-dark-800 py-2 px-3 rounded-lg text-center text-gray-300 hover:text-primary border border-white/5">Phim Lẻ</a>
+                <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="bg-dark-800 py-2 px-3 rounded-lg text-center text-gray-300 hover:text-primary border border-white/5">Phim Bộ</a>
+                <a href="/bang-xep-hang" class="bg-dark-800 py-2 px-3 rounded-lg text-center text-gray-300 hover:text-primary border border-white/5 col-span-2 flex justify-center items-center"><i data-lucide="trending-up" class="w-4 h-4 mr-2 text-primary"></i> Bảng Xếp Hạng</a>
             </div>
         </div>
     </nav>
     <script src="/assets/js/main.js?v=<?= time() ?>"></script>
-    <div class="pt-20 pb-12">
+    <script>
+        // Header scroll effect & Mobile Search Toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const nav = document.getElementById('mainNav');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 20) {
+                    nav.classList.add('shadow-lg', 'bg-black/80');
+                    nav.classList.remove('bg-black/60');
+                } else {
+                    nav.classList.remove('shadow-lg', 'bg-black/80');
+                    nav.classList.add('bg-black/60');
+                }
+            });
+
+            const searchBtn = document.getElementById('mobileSearchBtn');
+            const searchPanel = document.getElementById('mobileSearch');
+            if(searchBtn && searchPanel) {
+                searchBtn.addEventListener('click', () => {
+                    searchPanel.classList.toggle('hidden');
+                    if(!searchPanel.classList.contains('hidden')) {
+                        searchPanel.querySelector('input').focus();
+                    }
+                });
+            }
+        });
+    </script>
+    <div class="pt-20 pb-24 md:pb-12">
