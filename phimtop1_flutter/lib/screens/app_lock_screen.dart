@@ -15,7 +15,6 @@ class _AppLockScreenState extends State<AppLockScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
@@ -38,7 +37,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                   counterText: "",
                   errorText: _error,
                   enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-                  focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
                 ),
                 onChanged: (val) async {
                   if (val.length == 4) {

@@ -32,14 +32,32 @@ function runMigrations() {
         foreach ($migrationFiles as $file) {
             $filename = basename($file);
             if (!in_array($filename, $executedMigrations)) {
-                $sql = file_get_contents($file);
+                $sqlContent = file_get_contents($file);
+                // Split by semicolon and execute each statement
+                $statements = array_filter(array_map('trim', explode(';', $sqlContent)));
+                $successCount = 0;
+                
+                foreach ($statements as $statement) {
+                    if (empty($statement)) continue;
+                    try {
+                        $pdo->exec($statement);
+                        $successCount++;
+                    } catch (PDOException $e) {
+                        // Ignore duplicate column/table errors, log others
+                        $msg = $e->getMessage();
+                        if (strpos($msg, 'Duplicate column name') === false && strpos($msg, 'already exists') === false) {
+                            Logger::error("Error in statement from $filename: " . $msg);
+                        }
+                    }
+                }
+                
+                // Always mark as executed to avoid infinite loop of failing migrations
                 try {
-                    $pdo->exec($sql);
                     $stmt = $pdo->prepare("INSERT INTO migrations (migration) VALUES (?)");
                     $stmt->execute([$filename]);
                     Logger::info("Migrated: $filename");
                 } catch (PDOException $e) {
-                    Logger::error("Error executing migration $filename: " . $e->getMessage());
+                    Logger::error("Failed to record migration $filename: " . $e->getMessage());
                 }
             }
         }

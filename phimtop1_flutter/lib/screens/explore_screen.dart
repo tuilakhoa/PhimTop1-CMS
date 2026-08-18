@@ -17,7 +17,7 @@ class ExploreScreen extends StatelessWidget {
       backgroundColor: _isTvMode(context) ? const Color(0xFF0F0F0F) : Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: _isTvMode(context) ? const Color(0xFF0F0F0F) : null,
-        title: const Text("Khám Phá", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text("Khám Phá", style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           const TvCastButton(),
           IconButton(
@@ -44,7 +44,7 @@ class ExploreScreen extends StatelessWidget {
                         : provider.movies.isEmpty && !provider.isTrendingLoading && provider.trendingMovies.isNotEmpty && _isFiltersEmpty(provider)
                             ? _buildTrending(provider, context)
                             : provider.movies.isEmpty
-                                ? const Center(child: Text("Không có dữ liệu", style: TextStyle(color: Colors.white70)))
+                                ? Center(child: Text("Không có dữ liệu", style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54)))
                                 : _buildMovieGrid(provider, context),
               ),
             ],
@@ -82,9 +82,11 @@ class ExploreScreen extends StatelessWidget {
     // Generate years from current year down to 2010
     final currentYear = DateTime.now().year;
     final years = List.generate(currentYear - 2010 + 1, (index) => (currentYear - index).toString());
+    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      color: const Color(0xFF151515),
+      color: isDark ? const Color(0xFF151515) : Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
@@ -130,36 +132,41 @@ class ExploreScreen extends StatelessWidget {
     required String valueKey,
     required String labelKey,
   }) {
-    return SizedBox(
-      height: 40,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          final value = item[valueKey] as String;
-          final label = item[labelKey] as String;
-          final isSelected = selectedValue == value;
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return SizedBox(
+          height: 40,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              final value = item[valueKey] as String;
+              final label = item[labelKey] as String;
+              final isSelected = selectedValue == value;
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ChoiceChip(
-              label: Text(label),
-              selected: isSelected,
-              selectedColor: Theme.of(context).primaryColor,
-              backgroundColor: Colors.grey[900],
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Colors.white70,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-              onSelected: (_) => onSelected(value),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              showCheckmark: false,
-            ),
-          );
-        },
-      ),
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(label),
+                  selected: isSelected,
+                  selectedColor: Theme.of(context).primaryColor,
+                  backgroundColor: isDark ? Colors.grey[900] : Colors.grey[200],
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  onSelected: (_) => onSelected(value),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  showCheckmark: false,
+                ),
+              );
+            },
+          ),
+        );
+      }
     );
   }
 

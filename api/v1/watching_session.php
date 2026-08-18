@@ -85,11 +85,14 @@ if ($action === 'heartbeat') {
         $sql = "INSERT INTO active_sessions (device_id, device_name, platform, movie_slug, movie_name, episode_name, user_name, is_logged_in, progress, last_seen) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW()) 
                 ON DUPLICATE KEY UPDATE 
-                device_name = VALUES(device_name), platform = VALUES(platform), movie_slug = VALUES(movie_slug), movie_name = VALUES(movie_name), 
-                episode_name = VALUES(episode_name), user_name = VALUES(user_name), is_logged_in = VALUES(is_logged_in), progress = VALUES(progress), last_seen = NOW()";
+                device_name = ?, platform = ?, movie_slug = ?, movie_name = ?, 
+                episode_name = ?, user_name = ?, is_logged_in = ?, progress = ?, last_seen = NOW()";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$device_id, $device_name, $platform, $movie_slug, $movie_name, $episode_name, $user_name, $is_logged_in, $progress]);
+        $stmt->execute([
+            $device_id, $device_name, $platform, $movie_slug, $movie_name, $episode_name, $user_name, $is_logged_in, $progress,
+            $device_name, $platform, $movie_slug, $movie_name, $episode_name, $user_name, $is_logged_in, $progress
+        ]);
 
         $stmtCmd = $pdo->prepare("SELECT pending_command FROM active_sessions WHERE device_id = ?");
         $stmtCmd->execute([$device_id]);

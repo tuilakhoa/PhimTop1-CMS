@@ -142,7 +142,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   ),
                   Expanded(
                     child: provider.isLoading && provider.playlists.isEmpty
-                        ? const Center(child: CircularProgressIndicator(color: Colors.red))
+                        ? Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor))
                         : provider.playlists.isEmpty
                             ? const Center(child: Text("Bạn chưa có danh sách phát nào.", style: TextStyle(color: Colors.grey)))
                             : ListView.builder(
@@ -155,7 +155,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                     trailing: hasMovie
                                         ? const Icon(Icons.check_circle, color: Colors.green)
                                         : ElevatedButton(
-                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                                            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
                                             onPressed: () async {
                                               final success = await provider.addToPlaylist(pl.id, movieSlug, movieName, thumbUrl);
                                               if (success) {
@@ -681,7 +681,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         child: _buildActionButton(
                           provider.isFollowing ? Icons.favorite : Icons.favorite_border,
                           provider.isFollowing ? "Đã thích" : "Yêu thích",
-                          color: provider.isFollowing ? Colors.redAccent : Colors.white,
+                          color: provider.isFollowing ? Theme.of(context).primaryColor : Colors.white,
                         ),
                       ),
                       GestureDetector(
@@ -1172,7 +1172,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const Icon(Icons.cast_connected, color: Colors.blueAccent, size: 48),
+              Icon(Icons.cast_connected, color: Theme.of(context).primaryColor, size: 48),
               const SizedBox(height: 16),
               Text(
                 "Đang chiếu trên TV",
@@ -1199,19 +1199,19 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.2),
+                      color: Theme.of(context).primaryColor.withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Row(
                       children: [
                         IconButton(
                           iconSize: 48,
-                          icon: const Icon(Icons.play_arrow, color: Colors.blueAccent),
+                          icon: Icon(Icons.play_arrow, color: Theme.of(context).primaryColor),
                           onPressed: () => TvRemoteService().sendPlayerControl('play'),
                         ),
                         IconButton(
                           iconSize: 48,
-                          icon: const Icon(Icons.pause, color: Colors.blueAccent),
+                          icon: Icon(Icons.pause, color: Theme.of(context).primaryColor),
                           onPressed: () => TvRemoteService().sendPlayerControl('pause'),
                         ),
                       ],
@@ -1229,7 +1229,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               const SizedBox(height: 40),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[700],
+                  backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

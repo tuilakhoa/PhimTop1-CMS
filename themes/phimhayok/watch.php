@@ -227,11 +227,11 @@ if (isset($_SESSION['user'])) {
 <!-- History Logging Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const appApiKey = '<?= addslashes($settings['appApiKey'] ?? '') ?>';
-    const movieSlug = '<?= addslashes($movie['slug']) ?>';
-    const movieName = '<?= addslashes($movie['name']) ?>';
-    const episodeName = '<?= addslashes($currentEp['name']) ?>';
-    const thumbUrl = '<?= addslashes($movie['thumb_url'] ?? '') ?>';
+    const appApiKey = <?= json_encode($settings['appApiKey'] ?? '') ?>;
+    const movieSlug = <?= json_encode($movie['slug']) ?>;
+    const movieName = <?= json_encode($movie['name']) ?>;
+    const episodeName = <?= json_encode($currentEp['name']) ?>;
+    const thumbUrl = <?= json_encode($movie['thumb_url'] ?? '') ?>;
     // Function to log history
     function logHistory() {
         let currentTime = 0;
@@ -313,10 +313,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const isLogged = <?= isset($_SESSION['user']) ? 1 : 0 ?>;
-    const userName = '<?= addslashes($_SESSION['user']['name'] ?? 'Guest') ?>';
-    const movieSlug = '<?= addslashes($movie['slug']) ?>';
-    const movieName = '<?= addslashes($movie['name']) ?>';
-    const episodeName = '<?= addslashes($currentEp['name']) ?>';
+    const userName = <?= json_encode($_SESSION['user']['name'] ?? 'Guest') ?>;
+    const movieSlug = <?= json_encode($movie['slug']) ?>;
+    const movieName = <?= json_encode($movie['name']) ?>;
+    const episodeName = <?= json_encode($currentEp['name']) ?>;
 
     function sendHeartbeat() {
         let progress = 0;

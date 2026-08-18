@@ -56,7 +56,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       body: Stack(
         children: [
           // Background PageView
@@ -241,7 +240,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   spreadRadius: 20,
                 ),
                 BoxShadow(
-                  color: Colors.blueAccent.withOpacity(0.1),
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
                   blurRadius: 80,
                   spreadRadius: 30,
                 ),
@@ -254,7 +253,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Positioned(
                   bottom: 40,
                   left: 40,
-                  child: Icon(Icons.laptop_mac, size: 80, color: Colors.blueAccent.withOpacity(0.9)),
+                  child: Icon(Icons.laptop_mac, size: 80, color: Theme.of(context).primaryColor.withOpacity(0.9)),
                 ),
                 Positioned(
                   bottom: 30,

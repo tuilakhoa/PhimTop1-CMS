@@ -76,7 +76,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Thông báo', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
@@ -87,7 +86,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: Colors.red));
+      return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
     }
     if (_error != null) {
       if (_error == "Bạn cần đăng nhập để xem thông báo") {
@@ -106,7 +105,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return ListTile(
           leading: Icon(
             item.isRead ? Icons.notifications_none : Icons.notifications_active,
-            color: item.isRead ? Colors.grey : Colors.red,
+            color: item.isRead ? Colors.grey : Theme.of(context).primaryColor,
           ),
           title: Text(
             item.title, 

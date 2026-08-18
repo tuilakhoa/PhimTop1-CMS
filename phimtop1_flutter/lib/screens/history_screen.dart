@@ -92,7 +92,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Lịch sử xem', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
@@ -110,7 +109,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: Colors.red));
+      return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
     }
     if (_error != null) {
       if (_error == "Bạn cần đăng nhập để xem lịch sử") {
@@ -169,7 +168,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           child: LinearProgressIndicator(
                             value: progress,
                             backgroundColor: Colors.white24,
-                            color: Colors.red,
+                            color: Theme.of(context).primaryColor,
                             minHeight: 3,
                           ),
                         ),

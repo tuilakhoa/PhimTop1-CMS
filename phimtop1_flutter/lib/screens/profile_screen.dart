@@ -10,10 +10,14 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
+    final hintColor = Theme.of(context).brightness == Brightness.dark ? Colors.grey : Colors.grey[700];
+    final dialogBg = Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.white;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Cá nhân", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text("Cá nhân", style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: Consumer<AuthProvider>(
         builder: (context, auth, child) {
@@ -22,9 +26,9 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.account_circle, size: 100, color: Colors.grey),
+                  Icon(Icons.account_circle, size: 100, color: hintColor),
                   const SizedBox(height: 16),
-                  const Text("Bạn chưa đăng nhập", style: TextStyle(color: Colors.white, fontSize: 18)),
+                  Text("Bạn chưa đăng nhập", style: TextStyle(color: textColor, fontSize: 18)),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () => context.push('/login'),
@@ -36,9 +40,9 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   ListTile(
-                    leading: const Icon(Icons.download_done, color: Colors.white),
-                    title: const Text("Phim đã tải (Ngoại tuyến)", style: TextStyle(color: Colors.white, fontSize: 16)),
-                    trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                    leading: Icon(Icons.download_done, color: textColor),
+                    title: Text("Phim đã tải (Ngoại tuyến)", style: TextStyle(color: textColor, fontSize: 16)),
+                    trailing: Icon(Icons.chevron_right, color: hintColor),
                     onTap: () => context.push('/downloads'),
                   ),
                 ],
@@ -77,14 +81,14 @@ class ProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(auth.currentProfile?.profileName ?? user.name, style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text(auth.currentProfile?.profileName ?? user.name, style: TextStyle(fontSize: 22, color: textColor, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text(user.email, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                        Text(user.email, style: TextStyle(fontSize: 16, color: hintColor)),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.expand_more, color: Colors.white),
+                    icon: Icon(Icons.expand_more, color: textColor),
                     onPressed: () {
                       context.push('/select_profile'); // We can navigate to profiles screen which already has switch and add profile logic.
                     },
@@ -94,22 +98,22 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 40),
               _buildMenuItem(Icons.favorite, "Phim đã thích", () {
                 context.push('/follow');
-              }),
+              }, textColor, hintColor),
               _buildMenuItem(Icons.playlist_play, "Danh sách phát", () {
                 context.push('/playlists');
-              }),
+              }, textColor, hintColor),
               _buildMenuItem(Icons.notifications, "Thông báo", () {
                 context.push('/notifications');
-              }),
+              }, textColor, hintColor),
               _buildMenuItem(Icons.history, "Lịch sử xem", () {
                 context.push('/history');
-              }),
+              }, textColor, hintColor),
               _buildMenuItem(Icons.download_done, "Phim đã tải", () {
                 context.push('/downloads');
-              }),
+              }, textColor, hintColor),
               _buildMenuItem(Icons.settings, "Cài đặt", () {
                 context.push('/settings');
-              }),
+              }, textColor, hintColor),
               const SizedBox(height: 40),
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.red),
@@ -125,37 +129,41 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap, Color textColor, Color? hintColor) {
     return ListTile(
-      leading: Icon(icon, color: Colors.white),
-      title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16)),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+      leading: Icon(icon, color: textColor),
+      title: Text(title, style: TextStyle(color: textColor, fontSize: 16)),
+      trailing: Icon(Icons.chevron_right, color: hintColor),
       onTap: onTap,
     );
   }
 
   void _showUpdateAvatarDialog(BuildContext context, AuthProvider auth) {
     final TextEditingController urlController = TextEditingController(text: auth.currentProfile?.avatarUrl ?? '');
-    
+    final textColor = Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
+    final hintColor = Theme.of(context).brightness == Brightness.dark ? Colors.grey : Colors.grey[700];
+    final dialogBg = Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.white;
+    final borderColor = Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05);
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text('Đổi ảnh đại diện', style: TextStyle(color: Colors.white)),
+        backgroundColor: dialogBg,
+        title: Text('Đổi ảnh đại diện', style: TextStyle(color: textColor)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Nhập URL ảnh mới (có thể dùng link Gravatar):', style: TextStyle(color: Colors.white70, fontSize: 14)),
+            Text('Nhập URL ảnh mới (có thể dùng link Gravatar):', style: TextStyle(color: hintColor, fontSize: 14)),
             const SizedBox(height: 12),
             TextField(
               controller: urlController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
                 hintText: 'https://...',
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintStyle: TextStyle(color: hintColor),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.05),
+                fillColor: borderColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
               ),
             ),
@@ -164,7 +172,7 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            child: Text('Hủy', style: TextStyle(color: hintColor)),
           ),
           TextButton(
             onPressed: () async {
@@ -192,7 +200,7 @@ class ProfileScreen extends StatelessWidget {
                 }
               }
             },
-            child: const Text('Lưu', style: TextStyle(color: Colors.blueAccent)),
+            child: Text('Lưu', style: TextStyle(color: Theme.of(context).primaryColor)),
           ),
         ],
       ),

@@ -43,8 +43,8 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.white10, width: 0.5)),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 0.5)),
         ),
         child: BottomNavigationBar(
           currentIndex: _calculateSelectedIndex(context) > 4 ? 0 : _calculateSelectedIndex(context),

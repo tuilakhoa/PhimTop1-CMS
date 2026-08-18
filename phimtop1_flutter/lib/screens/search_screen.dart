@@ -104,7 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   child: Icon(
                     _isListening ? Icons.mic : Icons.mic_none,
-                    color: _isListening ? Colors.red : Colors.white,
+                    color: _isListening ? Theme.of(context).primaryColor : Colors.white,
                   ),
                 ),
               ),
@@ -126,7 +126,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                   decoration: InputDecoration(
                     hintText: _isListening ? "Đang nghe..." : "Tìm kiếm",
-                    hintStyle: TextStyle(color: _isListening ? Colors.red : Colors.white54),
+                    hintStyle: TextStyle(color: _isListening ? Theme.of(context).primaryColor : Colors.white54),
                     border: InputBorder.none,
                     suffixIcon: _controller.text.isNotEmpty
                         ? IconButton(
@@ -321,7 +321,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: _isListening ? "Đang nghe..." : "Nhập tên phim...",
-                  hintStyle: TextStyle(color: _isListening ? Colors.red : Colors.white54),
+                  hintStyle: TextStyle(color: _isListening ? Theme.of(context).primaryColor : Colors.white54),
                   border: InputBorder.none,
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -329,7 +329,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       IconButton(
                         icon: Icon(
                           _isListening ? Icons.mic : Icons.mic_none,
-                          color: _isListening ? Colors.red : Colors.white,
+                          color: _isListening ? Theme.of(context).primaryColor : Colors.white,
                         ),
                         onPressed: _isListening ? _stopListening : _startListening,
                       ),

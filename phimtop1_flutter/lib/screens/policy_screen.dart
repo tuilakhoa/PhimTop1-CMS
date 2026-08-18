@@ -5,22 +5,25 @@ class PolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final cardColor = isDark ? Colors.grey[900] : Colors.white;
+
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text("Điều khoản & Chính sách", style: TextStyle(color: Colors.white, fontSize: 18)),
-        backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text("Điều khoản & Chính sách", style: TextStyle(color: textColor, fontSize: 18)),
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: textColor),
       ),
       body: SafeArea(
         child: Container(
           margin: const EdgeInsets.all(16.0),
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: Colors.grey[900],
+            color: cardColor,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const SingleChildScrollView(
+          child: SingleChildScrollView(
             child: Text(
               '''Chào mừng bạn đến với PhimTop1!
 
@@ -45,7 +48,7 @@ Cảm ơn bạn đã tin tưởng và sử dụng PhimTop1!
 ''',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white70,
+                color: isDark ? Colors.white70 : Colors.black87,
                 height: 1.5,
               ),
             ),

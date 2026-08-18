@@ -562,7 +562,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
             child: Builder(builder: (context) {
               return ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Focus.of(context).hasFocus ? Colors.redAccent : Colors.red,
+                  backgroundColor: Focus.of(context).hasFocus ? Theme.of(context).primaryColor : Theme.of(context).primaryColor.withOpacity(0.8),
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
                 onPressed: () {
@@ -994,7 +994,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
                           return IconButton(
                             icon: const Icon(Icons.close, color: Colors.white, size: 32),
                             onPressed: () => Navigator.pop(context),
-                            color: Focus.of(context).hasFocus ? Colors.red : Colors.white,
+                            color: Focus.of(context).hasFocus ? Theme.of(context).primaryColor : Colors.white,
                           );
                         }),
                       ),
@@ -1141,7 +1141,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
                     Text("Lỗi tải video. Vui lòng thử lại sau.", style: TextStyle(color: Colors.white)),
                   ],
                 )
-              : const CircularProgressIndicator(color: Colors.red),
+              : CircularProgressIndicator(color: Theme.of(context).primaryColor),
     );
 
     final tvLayout = Focus(
@@ -1194,11 +1194,9 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
     return PipWidget(
       pipChild: Scaffold(
-        backgroundColor: Colors.black,
         body: playerWidget,
       ),
       child: Scaffold(
-        backgroundColor: Colors.black,
         appBar: isTv ? null : AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,

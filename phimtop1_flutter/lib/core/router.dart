@@ -23,6 +23,7 @@ import '../screens/onboarding_screen.dart';
 import '../screens/downloads_screen.dart';
 import '../screens/profiles_screen.dart';
 import '../screens/app_lock_screen.dart';
+import '../screens/appearance_settings_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -142,6 +143,11 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
       path: '/settings',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (BuildContext context, GoRouterState state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/appearance_settings',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (BuildContext context, GoRouterState state) => const AppearanceSettingsScreen(),
     ),
     GoRoute(
       path: '/terms',

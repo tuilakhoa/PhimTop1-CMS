@@ -45,16 +45,16 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("PHIMTOP1", style: TextStyle(color: Colors.red, fontSize: 32, fontWeight: FontWeight.bold)),
+                Text("PHIMTOP1", style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 32, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 40),
                 TextField(
                   controller: _emailCtrl,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Email",
-                    labelStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+                    labelStyle: const TextStyle(color: Colors.grey),
+                    enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -62,11 +62,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _passCtrl,
                   obscureText: true,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Mật khẩu",
-                    labelStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+                    labelStyle: const TextStyle(color: Colors.grey),
+                    enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: _login,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
                       child: const Text("Đăng nhập", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                   ),

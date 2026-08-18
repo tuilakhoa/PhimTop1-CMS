@@ -23,13 +23,10 @@ DirectoryIndex index.php index.html
     RewriteRule ^sitemap-([0-9]+)\.xml$ sitemap.php?page=$1 [L]
 
     # SEO URL Rewrites
-    RewriteRule ^bang-xep-hang/?$ trending.php [QSA,L]
     RewriteRule ^phim/([^/]+)/?$ movie.php?slug=$1 [QSA,L]
-    RewriteRule ^xem-phim/([^/]+)/?$ watch.php?slug=$1 [QSA,L]
     RewriteRule ^xem-phim/([^/]+)/([^/]+)/?$ watch.php?slug=$1&ep=$2 [QSA,L]
     RewriteRule ^danh-sach-truyen/?$ danh-sach-truyen.php [QSA,L]
     RewriteRule ^truyen/([^/]+)/?$ comic.php?slug=$1 [QSA,L]
-    RewriteRule ^doc-truyen/([^/]+)/?$ read.php?slug=$1 [QSA,L]
     RewriteRule ^doc-truyen/([^/]+)/([^/]+)/?$ read.php?slug=$1&chap=$2 [QSA,L]
     RewriteRule ^danh-sach/([^/]+)/?$ category.php?type=$1 [QSA,L]
     RewriteRule ^the-loai/([^/]+)/?$ category.php?slug=$1&type=the-loai [QSA,L]

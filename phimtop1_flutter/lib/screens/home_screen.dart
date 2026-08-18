@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.only(left: 16.0, top: 24.0, bottom: 16.0),
           child: Text(
             title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
           ),
         ),
         SizedBox(
@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.only(left: 16.0, top: 24.0, bottom: 16.0),
           child: Text(
             title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
           ),
         ),
         SizedBox(
@@ -217,15 +217,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 16.0, top: 24.0, bottom: 16.0),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 24.0, bottom: 16.0),
           child: Row(
             children: [
-              Icon(Icons.history, color: Colors.red, size: 24),
-              SizedBox(width: 8),
+              Icon(Icons.history, color: Theme.of(context).primaryColor, size: 24),
+              const SizedBox(width: 8),
               Text(
                 "Tiếp tục xem",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
               ),
             ],
           ),
@@ -272,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: LinearProgressIndicator(
                                     value: progress,
                                     backgroundColor: Colors.black54,
-                                    color: Colors.red,
+                                    color: Theme.of(context).primaryColor,
                                     minHeight: 4,
                                   ),
                                 ),
@@ -283,13 +283,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
                       Text(
                         item.movieName,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 14),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         item.episodeName,
-                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey : Colors.grey[700], fontSize: 12),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -307,9 +307,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTextLogo(BuildContext context) {
     return Row(
       children: [
-        const Text(
+        Text(
           "PHIM",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
         ),
         Text(
           "TOP1",

@@ -123,7 +123,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
             ),
           if (!_isDownloading)
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
               onPressed: () {
                 if (Platform.isIOS) {
                   // For iOS, always open the link

@@ -122,7 +122,7 @@ class _CartoonScreenState extends State<CartoonScreen> {
 
   Widget _buildBody(BuildContext context) {
     if (isLoading && movies.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: Colors.red));
+      return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
     }
 
     if (error != null && movies.isEmpty) {
@@ -163,9 +163,9 @@ class _CartoonScreenState extends State<CartoonScreen> {
             ),
           ),
           if (isLoadingMore)
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(child: CircularProgressIndicator(color: Colors.red)),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
             )
         ],
       ),

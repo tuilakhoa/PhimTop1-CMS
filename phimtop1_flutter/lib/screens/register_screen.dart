@@ -62,27 +62,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("PHIMTOP1", style: TextStyle(color: Colors.red, fontSize: 32, fontWeight: FontWeight.bold)),
+                  Text("PHIMTOP1", style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 32, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 40),
                   TextField(
                     controller: _nameCtrl,
                     style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: "Họ và Tên",
-                      labelStyle: TextStyle(color: Colors.grey),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+                      labelStyle: const TextStyle(color: Colors.grey),
+                      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _emailCtrl,
                     style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: "Email",
-                      labelStyle: TextStyle(color: Colors.grey),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+                      labelStyle: const TextStyle(color: Colors.grey),
+                      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -90,11 +90,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _passCtrl,
                     obscureText: true,
                     style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: "Mật khẩu",
-                      labelStyle: TextStyle(color: Colors.grey),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+                      labelStyle: const TextStyle(color: Colors.grey),
+                      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -102,11 +102,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _confirmPassCtrl,
                     obscureText: true,
                     style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: "Xác nhận mật khẩu",
-                      labelStyle: TextStyle(color: Colors.grey),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+                      labelStyle: const TextStyle(color: Colors.grey),
+                      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -120,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           });
                         },
                         checkColor: Colors.white,
-                        activeColor: Colors.red,
+                        activeColor: Theme.of(context).primaryColor,
                         side: const BorderSide(color: Colors.grey),
                       ),
                       Expanded(
@@ -145,7 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: _register,
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
                         child: const Text("Đăng ký", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ),

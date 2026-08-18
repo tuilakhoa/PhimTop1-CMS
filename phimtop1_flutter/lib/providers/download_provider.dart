@@ -31,7 +31,7 @@ class DownloadProvider extends ChangeNotifier {
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await _flutterLocalNotificationsPlugin.initialize(settings: initializationSettings);
     
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'download_channel', 
@@ -63,7 +63,7 @@ class DownloadProvider extends ChangeNotifier {
       icon: '@mipmap/ic_launcher',
     );
     final NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
-    await _flutterLocalNotificationsPlugin.show(id, title, '$progress% Đã tải', platformChannelSpecifics);
+    await _flutterLocalNotificationsPlugin.show(id: id, title: title, body: '$progress% Đã tải', notificationDetails: platformChannelSpecifics);
   }
   
   Future<void> _showCompletedNotification(int id, String title) async {
@@ -78,7 +78,7 @@ class DownloadProvider extends ChangeNotifier {
       icon: '@mipmap/ic_launcher',
     );
     final NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
-    await _flutterLocalNotificationsPlugin.show(id, title, 'Tải phim hoàn tất!', platformChannelSpecifics);
+    await _flutterLocalNotificationsPlugin.show(id: id, title: title, body: 'Tải phim hoàn tất!', notificationDetails: platformChannelSpecifics);
   }
   
   Future<void> _showFailedNotification(int id, String title) async {
@@ -93,7 +93,7 @@ class DownloadProvider extends ChangeNotifier {
       icon: '@mipmap/ic_launcher',
     );
     final NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
-    await _flutterLocalNotificationsPlugin.show(id, title, 'Tải phim thất bại', platformChannelSpecifics);
+    await _flutterLocalNotificationsPlugin.show(id: id, title: title, body: 'Tải phim thất bại', notificationDetails: platformChannelSpecifics);
   }
 
   Future<void> _loadTasks() async {
@@ -359,7 +359,7 @@ class DownloadProvider extends ChangeNotifier {
     } catch (e) {
       if (e is DioException && CancelToken.isCancel(e)) {
         pendingTask.status = DownloadStatus.canceled;
-        await _flutterLocalNotificationsPlugin.cancel(pendingTask.id.hashCode);
+        await _flutterLocalNotificationsPlugin.cancel(id: pendingTask.id.hashCode);
       } else {
         pendingTask.status = DownloadStatus.failed;
         debugPrint("Download Error: $e");
@@ -378,7 +378,7 @@ class DownloadProvider extends ChangeNotifier {
     } else if (task != null) {
       deleteDownload(id);
     }
-    await _flutterLocalNotificationsPlugin.cancel(id.hashCode);
+    await _flutterLocalNotificationsPlugin.cancel(id: id.hashCode);
   }
 
   Future<void> deleteDownload(String id) async {

@@ -33,11 +33,11 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
           content: TextField(
             controller: controller,
             style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Tên danh sách',
-              hintStyle: TextStyle(color: Colors.grey),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+              hintStyle: const TextStyle(color: Colors.grey),
+              enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
             ),
           ),
           actions: [
@@ -59,7 +59,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                   }
                 }
               },
-              child: const Text('Tạo', style: TextStyle(color: Colors.red)),
+              child: Text('Tạo', style: TextStyle(color: Theme.of(context).primaryColor)),
             ),
           ],
         );
@@ -70,7 +70,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Danh sách phát', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
@@ -84,7 +83,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
       body: Consumer<PlaylistProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.playlists.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: Colors.red));
+            return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
           }
           if (provider.error != null && provider.playlists.isEmpty) {
             return ErrorView(

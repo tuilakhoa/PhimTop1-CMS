@@ -12,6 +12,7 @@ import 'providers/explore_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/playlist_provider.dart';
 import 'providers/download_provider.dart';
+import 'providers/theme_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/tv_remote_service.dart';
 import 'package:go_router/go_router.dart';
@@ -42,6 +43,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TrendingProvider()),
         ChangeNotifierProvider(create: (_) => ExploreProvider()),
         ChangeNotifierProvider(create: (_) => DownloadProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProxyProvider<AuthProvider, PlaylistProvider>(
           create: (context) => PlaylistProvider(authProvider: context.read<AuthProvider>()),
           update: (context, auth, previous) {
@@ -92,13 +94,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'PhimTop1',
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
-      routerConfig: _router,
-      debugShowCheckedModeBanner: false,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp.router(
+          title: 'PhimTop1',
+          theme: AppTheme.getTheme(brightness: Brightness.light, skin: themeProvider.currentSkin),
+          darkTheme: AppTheme.getTheme(brightness: Brightness.dark, skin: themeProvider.currentSkin),
+          themeMode: themeProvider.themeMode,
+          routerConfig: _router,
+          debugShowCheckedModeBanner: false,
+        );
+      }
     );
   }
 }

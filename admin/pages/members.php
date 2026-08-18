@@ -105,6 +105,7 @@ if ($action === 'history') {
                     $fs->setDocument('members', $memberId, $user);
                 }
             }
+        }
     }
     echo "<script>window.location.href='?page=members';</script>";
     exit;

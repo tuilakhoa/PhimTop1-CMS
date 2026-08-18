@@ -142,15 +142,15 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
           autofocus: true,
           style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 16),
           textAlign: TextAlign.center,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             counterText: "",
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
+            enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
+            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
           ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy', style: TextStyle(color: Colors.grey))),
-          TextButton(onPressed: () => Navigator.pop(ctx, controller.text), child: const Text('Xác nhận', style: TextStyle(color: Colors.blueAccent))),
+          TextButton(onPressed: () => Navigator.pop(ctx, controller.text), child: Text('Xác nhận', style: TextStyle(color: Theme.of(context).primaryColor))),
         ],
       ),
     );
@@ -212,7 +212,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
                     title: const Text("Chế độ Trẻ em (Kids Mode)", style: TextStyle(color: Colors.white)),
                     subtitle: const Text("Chỉ hiển thị nội dung phù hợp cho trẻ em", style: TextStyle(color: Colors.white54, fontSize: 12)),
                     value: isKidsMode,
-                    activeColor: Colors.blueAccent,
+                    activeColor: Theme.of(context).primaryColor,
                     onChanged: (val) {
                       setStateModal(() { isKidsMode = val; });
                     },
@@ -258,14 +258,12 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: Colors.redAccent)),
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -273,7 +271,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
         title: Image.network(
           'https://phimimg.com/upload/vod/20230219-1/afdc78a16db8a20d2d317ee0c36df12d.jpg', // Using generic for now
           height: 30,
-          errorBuilder: (_,__,___) => const Text('PhimTop1', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+          errorBuilder: (_,__,___) => Text('PhimTop1', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
         ),
       ),
       body: Center(
@@ -345,7 +343,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
                   top: 4, left: 4,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                    decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(4)),
+                    decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(4)),
                     child: const Text('KIDS', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
                 ),

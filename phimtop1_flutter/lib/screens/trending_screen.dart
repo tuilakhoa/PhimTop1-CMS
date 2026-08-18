@@ -83,7 +83,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
                     : (thumb.startsWith('/') ? '${provider.domain}$thumb' : '${provider.domain}/$thumb');
 
                 Color rankColor = Colors.grey[600]!;
-                if (rank == 1) rankColor = Colors.red[600]!;
+                if (rank == 1) rankColor = Theme.of(context).primaryColor;
                 else if (rank == 2) rankColor = Colors.orange[500]!;
                 else if (rank == 3) rankColor = Colors.yellow[600]!;
 

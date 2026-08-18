@@ -229,7 +229,11 @@ function updateSettings($updates) {
     $values[] = 1;
     $sql = "UPDATE settings SET " . implode(', ', $setClause) . " WHERE id = ?";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($values);
+    try {
+        $stmt->execute($values);
+    } catch (PDOException $e) {
+        Logger::error("Failed to update settings: " . $e->getMessage());
+    }
 }
 
 function checkSetup() {

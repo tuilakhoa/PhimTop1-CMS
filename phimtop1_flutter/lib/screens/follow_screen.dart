@@ -52,7 +52,6 @@ class _FollowScreenState extends State<FollowScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Phim đã thích', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
@@ -63,7 +62,7 @@ class _FollowScreenState extends State<FollowScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: Colors.red));
+      return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
     }
     if (_error != null) {
       if (_error == "Bạn cần đăng nhập để xem danh sách") {
@@ -101,7 +100,7 @@ class _FollowScreenState extends State<FollowScreen> {
           ),
           title: Text(item.itemName, style: const TextStyle(color: Colors.white)),
           subtitle: const Text("Phim", style: TextStyle(color: Colors.grey, fontSize: 12)),
-          trailing: const Icon(Icons.favorite, color: Colors.red, size: 20),
+          trailing: Icon(Icons.favorite, color: Theme.of(context).primaryColor, size: 20),
           onTap: () {
             context.push('/movie/${item.itemSlug}');
           },

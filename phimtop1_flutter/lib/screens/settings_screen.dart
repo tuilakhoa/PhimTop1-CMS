@@ -92,6 +92,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showFeedbackDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final cardColor = isDark ? Colors.grey[900] : Colors.white;
+
     final token = context.read<AuthProvider>().token;
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập để gửi phản hồi')));
@@ -115,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.grey[900]!, Colors.black],
+                    colors: [cardColor!, isDark ? Colors.black : Colors.grey[100]!],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -138,19 +143,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Icon(Icons.feedback_rounded, color: Theme.of(context).primaryColor),
                         ),
                         const SizedBox(width: 16),
-                        const Text('Góp ý / Phản hồi', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text('Góp ý / Phản hồi', style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 24),
                     TextField(
                       controller: controller,
                       maxLines: 5,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(color: textColor, fontSize: 16),
                       decoration: InputDecoration(
                         hintText: 'Nhập nội dung phản hồi (báo lỗi, góp ý, yêu cầu phim...)',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        hintStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600]),
                         filled: true,
-                        fillColor: Colors.black45,
+                        fillColor: isDark ? Colors.black45 : Colors.grey[200],
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
@@ -202,8 +207,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               }
                             },
                             child: isSubmitting 
-                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                : const Text('Gửi', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: textColor, strokeWidth: 2))
+                                : Text('Gửi', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ],
@@ -220,6 +225,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _toggleAppLock() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final cardColor = isDark ? Colors.grey[900] : Colors.white;
+
     if (_hasAppLock) {
       // Bỏ khóa
       final prefs = await SharedPreferences.getInstance();
@@ -232,8 +242,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final pin = await showDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: Colors.grey[900],
-          title: const Text('Cài đặt mã PIN (4 số)', style: TextStyle(color: Colors.white, fontSize: 18)),
+          backgroundColor: cardColor,
+          title: Text('Cài đặt mã PIN (4 số)', style: TextStyle(color: textColor, fontSize: 18)),
           content: TextField(
             controller: controller,
             obscureText: true,
@@ -241,11 +251,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             maxLength: 4,
             autofocus: true,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 16),
-            decoration: const InputDecoration(
+            style: TextStyle(color: textColor, fontSize: 24, letterSpacing: 16),
+            decoration: InputDecoration(
               counterText: "",
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: isDark ? Colors.white54 : Colors.black54)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
             ),
           ),
           actions: [
@@ -254,7 +264,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () {
                 if (controller.text.length == 4) Navigator.pop(ctx, controller.text);
               },
-              child: const Text('Xác nhận', style: TextStyle(color: Colors.blueAccent)),
+              child: Text('Xác nhận', style: TextStyle(color: Theme.of(context).primaryColor)),
             ),
           ],
         ),
@@ -271,10 +281,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final cardColor = isDark ? Colors.grey[900] : Colors.white;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+
       appBar: AppBar(
-        title: const Text('Cài đặt', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Cài đặt', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
       ),
       body: ListView(
@@ -299,7 +314,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             Row(
                               children: [
                                 const Text("MÃ PIN: ", style: TextStyle(color: Colors.grey)),
-                                Text(_tvService.currentPin, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                                Text(_tvService.currentPin, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2)),
                               ],
                             ),
                           ],
@@ -312,7 +327,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     else
                       ListTile(
                         leading: const Icon(Icons.tv, color: Colors.grey),
-                        title: const Text("Bật Chế độ nhận lệnh", style: TextStyle(color: Colors.white)),
+                        title: Text("Bật Chế độ nhận lệnh", style: TextStyle(color: textColor)),
                         subtitle: const Text("Chỉ dành cho ứng dụng cài trên TV", style: TextStyle(color: Colors.grey, fontSize: 12)),
                         onTap: () => _tvService.startServer(),
                       ),
@@ -350,15 +365,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(color: Colors.grey),
           _buildSectionHeader("Ứng dụng"),
           ListTile(
+            leading: const Icon(Icons.palette_outlined, color: Colors.grey),
+            title: Text("Màu nền / Giao diện", style: TextStyle(color: textColor)),
+            onTap: () {
+              context.push('/appearance_settings');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.policy_outlined, color: Colors.grey),
-            title: const Text("Điều khoản & Chính sách", style: TextStyle(color: Colors.white)),
+            title: Text("Điều khoản & Chính sách", style: TextStyle(color: textColor)),
             onTap: () {
               context.push('/policy');
             },
           ),
           ListTile(
             leading: const Icon(Icons.info_outline, color: Colors.grey),
-            title: const Text("Phiên bản", style: TextStyle(color: Colors.white)),
+            title: Text("Phiên bản", style: TextStyle(color: textColor)),
             subtitle: Text("v$_version ($_buildNumber)", style: const TextStyle(color: Colors.grey)),
             trailing: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -372,12 +394,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.feedback_outlined, color: Colors.grey),
-            title: const Text("Góp ý / Phản hồi", style: TextStyle(color: Colors.white)),
+            title: Text("Góp ý / Phản hồi", style: TextStyle(color: textColor)),
             onTap: _showFeedbackDialog,
           ),
           ListTile(
             leading: const Icon(Icons.lock_outline, color: Colors.grey),
-            title: const Text("Khóa ứng dụng", style: TextStyle(color: Colors.white)),
+            title: Text("Khóa ứng dụng", style: TextStyle(color: textColor)),
             trailing: Switch(
               value: _hasAppLock,
               activeColor: Theme.of(context).primaryColor,
@@ -386,7 +408,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.wifi, color: Colors.grey),
-            title: const Text("Chỉ tải qua Wi-Fi", style: TextStyle(color: Colors.white)),
+            title: Text("Chỉ tải qua Wi-Fi", style: TextStyle(color: textColor)),
             subtitle: const Text("Tạm dừng tải nếu dùng mạng di động", style: TextStyle(color: Colors.grey, fontSize: 12)),
             trailing: Switch(
               value: _wifiOnlyDownload,
@@ -403,21 +425,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionHeader("Khác"),
           ListTile(
             leading: const Icon(Icons.cleaning_services_outlined, color: Colors.grey),
-            title: const Text("Xóa bộ nhớ đệm", style: TextStyle(color: Colors.white)),
+            title: Text("Xóa bộ nhớ đệm", style: TextStyle(color: textColor)),
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa bộ nhớ đệm ứng dụng')));
             },
           ),
           ListTile(
             leading: const Icon(Icons.share_outlined, color: Colors.grey),
-            title: const Text("Chia sẻ ứng dụng", style: TextStyle(color: Colors.white)),
+            title: Text("Chia sẻ ứng dụng", style: TextStyle(color: textColor)),
             onTap: () {
               Share.share('Cùng xem phim trên PhimTop1 nhé: ${AppConfig.baseUrl}');
             },
           ),
           ListTile(
             leading: const Icon(Icons.star_outline, color: Colors.grey),
-            title: const Text("Đánh giá ứng dụng", style: TextStyle(color: Colors.white)),
+            title: Text("Đánh giá ứng dụng", style: TextStyle(color: textColor)),
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cảm ơn bạn đã đánh giá!')));
             },
