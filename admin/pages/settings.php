@@ -142,7 +142,7 @@
     
 
     <!-- Tab 4: Database -->
-    <?php $dbConfig = getDbConfig(); $isFs = ($dbConfig['type'] ?? 'mysql') === 'firestore'; ?>
+    <?php $dbConfig = getDbConfig() ?: []; $isFs = ($dbConfig['type'] ?? 'mysql') === 'firestore'; ?>
     <div id="tab-database" class="tab-content hidden animate-fade-in">
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-300 mb-2">Loại Database</label>

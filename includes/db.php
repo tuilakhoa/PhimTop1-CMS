@@ -98,6 +98,9 @@ function getSettings() {
         'canonicalBaseUrl' => '',
         'logoUrl' => '/assets/images/logo.png',
         'useLogoAsFavicon' => 1,
+        'faviconUrl' => '',
+        'appleTouchIconUrl' => '',
+        'ogImageUrl' => '',
         'verifyGoogle' => '',
         'verifyBing' => '',
         'verifyYandex' => '',
@@ -131,9 +134,11 @@ function getSettings() {
         'sitemapIncludeMovies' => 1,
         'sitemapIncludeCategories' => 1,
         'sitemapLinksPerFile' => 1000,
+        'enableGoogleLogin' => 0,
         'googleClientId' => '',
         'googleClientSecret' => '',
         'googleAllowedEmails' => '',
+        'enableMicrosoftLogin' => 0,
         'msClientId' => '',
         'msClientSecret' => '',
         'msTenantId' => 'common',
@@ -165,6 +170,7 @@ function getSettings() {
         'featuredMovieSlug' => '',
         'featuredStyle' => 'slider',
         'featuredCount' => 5,
+        'enableContinueWatching' => 1,
         'enableWatchingSession' => 1,
         'trackAnonymousSession' => 0
     ];
@@ -190,10 +196,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 12) {
+            if (!isset($row['db_version']) || $row['db_version'] < 13) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 12]);
-                $row['db_version'] = 12;
+                updateSettings(['db_version' => 13]);
+                $row['db_version'] = 13;
             }
             
             return array_merge($defaultSettings, $row);

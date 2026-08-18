@@ -94,6 +94,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
 
     // Update Settings
     if (isset($_POST['allowAutoUpdate'])) $updates['allowAutoUpdate'] = (int)$_POST['allowAutoUpdate'];
+    if (isset($_POST['enableContinueWatching'])) $updates['enableContinueWatching'] = (int)$_POST['enableContinueWatching'];
     
     // Featured Banner Settings
     if (isset($_POST['featuredType'])) $updates['featuredType'] = $_POST['featuredType'];
