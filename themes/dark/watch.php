@@ -123,8 +123,8 @@ if (isset($_SESSION['user'])) {
                 <?php foreach ($episodes[0]['server_data'] as $e): 
                     $isActive = $currentEp['slug'] === $e['slug'];
                     $classes = $isActive 
-                        ? "bg-primary text-black font-bold border border-primary shadow-[0_0_15px_rgba(250,204,21,0.3)]" 
-                        : "bg-dark-800 text-gray-400 hover:text-primary border border-gray-800 hover:border-primary/50";
+                        ? "bg-white text-black font-medium border border-white" 
+                        : "bg-[#1a1a1a] text-gray-400 hover:text-white border border-gray-800 hover:border-gray-500";
                 ?>
                     <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>" 
                        class="px-5 py-2.5 rounded-lg transition-colors text-sm <?= $classes ?>">
@@ -157,28 +157,19 @@ if (isset($_SESSION['user'])) {
     <!-- Movie Suggestions -->
     <?php if (!empty($suggestions)): ?>
     <div class="mt-12 mb-12">
-        <h3 class="text-2xl font-bold text-white mb-6 tracking-tight">Có Thể Bạn Sẽ Thích</h3>
-        <div class="flex overflow-x-auto md:grid md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-6 custom-scrollbar snap-x snap-mandatory">
+        <h3 class="text-2xl font-bold text-white mb-8 tracking-tight">Có Thể Bạn Sẽ Thích</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-10">
             <?php foreach ($suggestions as $item): ?>
-                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group flex flex-col shrink-0 w-36 md:w-auto snap-start">
-                    <div class="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-dark-800 mb-3 border border-white/5 shadow-lg group-hover:border-primary/50 transition-all duration-300">
-                        <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group flex flex-col">
+                    <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
+                        <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         
-                        <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-80"></div>
-                        
-                        <div class="absolute top-2 left-2 z-10">
-                            <span class="bg-black/70 backdrop-blur-md text-primary text-[10px] font-bold px-2 py-0.5 rounded border border-primary/20"><?= htmlspecialchars($item['quality'] ?? 'HD') ?></span>
-                        </div>
-                        
-                        <!-- Play button overlay on hover -->
-                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 z-20">
-                            <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.5)] transform scale-75 group-hover:scale-100 transition-transform duration-300">
-                                <i data-lucide="play" class="w-6 h-6 text-black fill-current ml-1"></i>
-                            </div>
+                        <div class="absolute top-2 left-2">
+                            <span class="bg-black/70 backdrop-blur-md text-white text-[10px] font-medium px-2 py-0.5 rounded"><?= htmlspecialchars($item['quality'] ?? 'HD') ?></span>
                         </div>
                     </div>
-                    <div class="flex flex-col px-1">
-                        <h3 class="text-sm font-medium text-gray-200 line-clamp-1 group-hover:text-primary transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-medium text-gray-100 line-clamp-1 group-hover:text-white transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
                     </div>
                 </a>
             <?php endforeach; ?>

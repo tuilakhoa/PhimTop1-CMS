@@ -103,30 +103,17 @@
     <?php endif; ?>
     <?php do_action('cms_footer'); ?>
 
-    <!-- Mobile Bottom Navigation (App-like) -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-dark-900/90 backdrop-blur-xl border-t border-white/5 pb-safe z-50 px-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-        <div class="flex justify-around items-center h-16">
-            <a href="/" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-primary transition-colors active:scale-95">
-                <i data-lucide="home" class="w-5 h-5 mb-1 <?= ($_SERVER['REQUEST_URI'] == '/' || $_SERVER['REQUEST_URI'] == '/index.php') ? 'text-primary fill-primary/20' : '' ?>"></i>
-                <span class="text-[10px] font-medium <?= ($_SERVER['REQUEST_URI'] == '/' || $_SERVER['REQUEST_URI'] == '/index.php') ? 'text-primary' : '' ?>">Trang Chủ</span>
-            </a>
-            <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-primary transition-colors active:scale-95">
-                <i data-lucide="film" class="w-5 h-5 mb-1 <?= strpos($_SERVER['REQUEST_URI'], 'phim-le') !== false ? 'text-primary fill-primary/20' : '' ?>"></i>
-                <span class="text-[10px] font-medium <?= strpos($_SERVER['REQUEST_URI'], 'phim-le') !== false ? 'text-primary' : '' ?>">Phim Lẻ</span>
-            </a>
-            <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-primary transition-colors active:scale-95">
-                <i data-lucide="monitor-play" class="w-5 h-5 mb-1 <?= strpos($_SERVER['REQUEST_URI'], 'phim-bo') !== false ? 'text-primary fill-primary/20' : '' ?>"></i>
-                <span class="text-[10px] font-medium <?= strpos($_SERVER['REQUEST_URI'], 'phim-bo') !== false ? 'text-primary' : '' ?>">Phim Bộ</span>
-            </a>
-            <a href="/bang-xep-hang" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-primary transition-colors active:scale-95">
-                <i data-lucide="trending-up" class="w-5 h-5 mb-1 <?= strpos($_SERVER['REQUEST_URI'], 'bang-xep-hang') !== false ? 'text-primary fill-primary/20' : '' ?>"></i>
-                <span class="text-[10px] font-medium <?= strpos($_SERVER['REQUEST_URI'], 'bang-xep-hang') !== false ? 'text-primary' : '' ?>">Xếp Hạng</span>
-            </a>
-            <a href="/member" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-primary transition-colors active:scale-95">
-                <i data-lucide="user" class="w-5 h-5 mb-1 <?= strpos($_SERVER['REQUEST_URI'], 'member') !== false ? 'text-primary fill-primary/20' : '' ?>"></i>
-                <span class="text-[10px] font-medium <?= strpos($_SERVER['REQUEST_URI'], 'member') !== false ? 'text-primary' : '' ?>">Cá Nhân</span>
-            </a>
-        </div>
+    <!-- Mobile Floating Download Button -->
+    <?php if (!empty($settings['appDownloadUrl'])): ?>
+    <div class="md:hidden fixed bottom-6 right-5 z-[90]">
+        <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center w-12 h-12 bg-blue-600/90 backdrop-blur-md text-white rounded-full shadow-lg shadow-blue-500/30 border border-blue-400/50 hover:bg-blue-500 hover:scale-110 active:scale-95 transition-all duration-300 group" aria-label="Tải Ứng Dụng">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" x2="12" y1="15" y2="3"/>
+            </svg>
+        </a>
     </div>
+    <?php endif; ?>
 </body>
 </html>
