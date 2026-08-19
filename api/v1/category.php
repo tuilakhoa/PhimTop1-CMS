@@ -43,6 +43,8 @@ if ($displayMode === 'crawl') {
         'items' => $result['items'],
         'titlePage' => 'Danh mục: ' . htmlspecialchars($slug),
         'domain' => '',
+        'seoOnPage' => (object)[],
+        'params' => (object)[],
         'pagination' => [
             'totalPages' => $result['totalPages'],
             'currentPage' => $page
@@ -62,6 +64,8 @@ if ($displayMode === 'crawl') {
             'items' => [],
             'titlePage' => 'Danh mục: ' . htmlspecialchars($slug),
             'domain' => '',
+            'seoOnPage' => (object)[],
+            'params' => (object)[],
             'pagination' => [
                 'totalPages' => 1,
                 'currentPage' => $page

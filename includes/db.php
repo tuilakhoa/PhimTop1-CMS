@@ -361,7 +361,8 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
         'items' => [],
         'titlePage' => '',
         'domain' => 'https://phimimg.com/',
-        'seoOnPage' => [],
+        'seoOnPage' => (object)[],
+        'params' => (object)[],
         'pagination' => [
             'totalPages' => 1,
             'currentPage' => $page
@@ -380,7 +381,8 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
         
         $result['titlePage'] = $data['data']['titlePage'] ?? '';
         $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? $data['pathImage'] ?? 'https://phimimg.com/';
-        $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
+        $result['seoOnPage'] = !empty($data['data']['seoOnPage']) ? $data['data']['seoOnPage'] : (object)[];
+        $result['params'] = !empty($data['data']['params']) ? $data['data']['params'] : (object)[];
         
         if (isset($data['data']['params']['pagination'])) {
             $result['pagination'] = $data['data']['params']['pagination'];
@@ -421,7 +423,7 @@ function fetchApiMovieDetail($slug) {
     $result = [
         'movie' => null,
         'episodes' => [],
-        'seoOnPage' => [],
+        'seoOnPage' => (object)[],
         'domain' => 'https://phimimg.com/'
     ];
     
@@ -451,7 +453,7 @@ function fetchApiMovieDetail($slug) {
         if (isset($data['data']['item'])) {
             $result['movie'] = $data['data']['item'];
             $result['episodes'] = $result['movie']['episodes'] ?? [];
-            $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
+            $result['seoOnPage'] = !empty($data['data']['seoOnPage']) ? $data['data']['seoOnPage'] : (object)[];
             $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
         } else if (isset($data['movie'])) {
             $result['movie'] = $data['movie'];
@@ -500,7 +502,8 @@ function fetchApiComics($type, $slug = '', $page = 1, $keyword = '') {
         'items' => [],
         'titlePage' => '',
         'domain' => 'https://otruyencdn.com/',
-        'seoOnPage' => [],
+        'seoOnPage' => (object)[],
+        'params' => (object)[],
         'pagination' => [
             'totalPages' => 1,
             'currentPage' => $page
@@ -512,7 +515,8 @@ function fetchApiComics($type, $slug = '', $page = 1, $keyword = '') {
     $result['titlePage'] = $data['data']['titlePage'] ?? '';
     $domain = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://otruyencdn.com/';
     $result['domain'] = rtrim($domain, '/') . '/uploads/comics/';
-    $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
+    $result['seoOnPage'] = !empty($data['data']['seoOnPage']) ? $data['data']['seoOnPage'] : (object)[];
+    $result['params'] = !empty($data['data']['params']) ? $data['data']['params'] : (object)[];
     
     if (isset($data['data']['params']['pagination'])) {
         $result['pagination'] = $data['data']['params']['pagination'];
@@ -542,7 +546,7 @@ function fetchApiComicDetail($slug) {
     $result = [
         'comic' => null,
         'chapters' => [],
-        'seoOnPage' => [],
+        'seoOnPage' => (object)[],
         'domain' => 'https://otruyencdn.com/'
     ];
     
@@ -560,7 +564,7 @@ function fetchApiComicDetail($slug) {
         }
         
         $result['chapters'] = $result['comic']['chapters'] ?? [];
-        $result['seoOnPage'] = $data['data']['seoOnPage'] ?? [];
+        $result['seoOnPage'] = !empty($data['data']['seoOnPage']) ? $data['data']['seoOnPage'] : (object)[];
         $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://otruyencdn.com/';
     }
     

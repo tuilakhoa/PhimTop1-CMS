@@ -36,7 +36,7 @@ if ($displayMode === 'crawl') {
             'movie' => $movie,
             'episodes' => $episodes ?: [],
             'domain' => '',
-            'seoOnPage' => []
+            'seoOnPage' => (object)[]
         ];
     }
 } else {
@@ -92,7 +92,7 @@ if ($displayMode === 'crawl') {
                     'movie' => $movie,
                     'episodes' => $episodes ?: [],
                     'domain' => '',
-                    'seoOnPage' => [],
+                    'seoOnPage' => (object)[],
                     'images' => ['backdrops' => [], 'posters' => []]
                 ];
             }

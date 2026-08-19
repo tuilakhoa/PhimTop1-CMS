@@ -35,6 +35,8 @@ if ($displayMode === 'crawl') {
         'items' => $result['items'],
         'titlePage' => 'Tìm kiếm: ' . htmlspecialchars($keyword),
         'domain' => '',
+        'seoOnPage' => (object)[],
+        'params' => (object)[],
         'pagination' => [
             'totalPages' => $result['totalPages'],
             'currentPage' => $page
@@ -55,6 +57,8 @@ if ($displayMode === 'crawl') {
             'items' => [],
             'titlePage' => 'Tìm kiếm: ' . htmlspecialchars($keyword),
             'domain' => '',
+            'seoOnPage' => (object)[],
+            'params' => (object)[],
             'pagination' => [
                 'totalPages' => 1,
                 'currentPage' => $page
