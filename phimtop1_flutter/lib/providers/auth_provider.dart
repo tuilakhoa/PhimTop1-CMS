@@ -74,6 +74,38 @@ class AuthProvider with ChangeNotifier {
     return false;
   }
 
+  Future<bool> firebaseLogin(String email, String name, String avatar, String uid) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final response = await cmsApi.firebaseLogin(email, name, avatar, uid);
+      if (response.status == 'success' && response.token != null && response.user != null) {
+        token = response.token;
+        user = response.user;
+        
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token!);
+        await prefs.setString('user_id', user!.id);
+        await prefs.setString('user_name', user!.name);
+        await prefs.setString('user_email', user!.email);
+        
+        isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        error = response.message ?? 'Đăng nhập Google thất bại';
+      }
+    } catch (e) {
+      error = e.toString();
+    }
+    
+    isLoading = false;
+    notifyListeners();
+    return false;
+  }
+
   Future<bool> register(String name, String email, String password) async {
     isLoading = true;
     error = null;

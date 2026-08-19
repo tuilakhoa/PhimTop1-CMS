@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -42,6 +43,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final error = context.read<AuthProvider>().error;
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      }
+    }
+  }
+
+  void _loginWithGoogle() async {
+    final authService = AuthService();
+    final credential = await authService.signInWithGoogle();
+    
+    if (credential != null && credential.user != null) {
+      final user = credential.user!;
+      if (mounted) {
+        final success = await context.read<AuthProvider>().firebaseLogin(
+          user.email ?? '', 
+          user.displayName ?? 'User', 
+          user.photoURL ?? '', 
+          user.uid
+        );
+        if (success && mounted) {
+          context.go('/select_profile');
+        } else if (mounted) {
+          final error = context.read<AuthProvider>().error;
+          if (error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+          }
+        }
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đăng ký bằng Google bị hủy hoặc thất bại")));
       }
     }
   }
@@ -147,6 +177,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: _register,
                         style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
                         child: const Text("Đăng ký", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  if (!auth.isLoading)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        onPressed: _loginWithGoogle,
+                        icon: Image.network('https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg', width: 24, height: 24),
+                        label: const Text("Tiếp tục với Google", style: TextStyle(color: Colors.white, fontSize: 16)),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.grey),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
                       ),
                     ),
                   const SizedBox(height: 16),

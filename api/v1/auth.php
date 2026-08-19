@@ -169,6 +169,78 @@ if ($action === 'register') {
     exit;
 }
 
+if ($action === 'firebase_login') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $email = $input['email'] ?? '';
+    $name = $input['name'] ?? 'User';
+    $avatar = $input['avatar'] ?? '';
+    $uid = $input['uid'] ?? '';
+    
+    if (empty($email) || empty($uid)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Email and Firebase UID are required']);
+        exit;
+    }
+    
+    $fs = getFirestore();
+    $userId = null;
+    $userRole = 'user';
+    
+    if ($fs) {
+        $results = $fs->runQuery('members', 'email', 'EQUAL', $email, 1);
+        if (!empty($results)) {
+            $user = $results[0];
+            $userId = $user['_id'];
+            $userRole = $user['role'] ?? 'user';
+            
+            // Update avatar/name
+            $fs->setDocument('members', $userId, array_merge($user, ['name' => $name, 'avatar' => $avatar]));
+        } else {
+            // Register new user
+            $userId = uniqid();
+            $fs->setDocument('members', $userId, [
+                'email' => $email,
+                'name' => $name,
+                'avatar' => $avatar,
+                'firebase_uid' => $uid,
+                'role' => 'user'
+            ]);
+        }
+    } else if ($pdo) {
+        $stmt = $pdo->prepare("SELECT id, role FROM members WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($user) {
+            $userId = $user['id'];
+            $userRole = $user['role'] ?? 'user';
+            $updateStmt = $pdo->prepare("UPDATE members SET name = ?, avatar = ? WHERE id = ?");
+            $updateStmt->execute([$name, $avatar, $userId]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO members (email, name, avatar, role) VALUES (?, ?, ?, 'user')");
+            $stmt->execute([$email, $name, $avatar]);
+            $userId = $pdo->lastInsertId();
+        }
+    } else {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => 'Database error']);
+        exit;
+    }
+    
+    $token = generateToken($userId, $email, $userRole);
+    echo json_encode([
+        'status' => 'success',
+        'token' => $token,
+        'user' => [
+            'id' => $userId,
+            'name' => $name,
+            'email' => $email,
+            'avatar' => $avatar
+        ]
+    ]);
+    exit;
+}
+
 if ($action === 'profile') {
     $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
     $token = str_replace('Bearer ', '', $authHeader);

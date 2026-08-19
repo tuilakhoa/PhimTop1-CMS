@@ -172,6 +172,23 @@ class CmsApiService {
     }
   }
 
+  Future<AuthResponse> firebaseLogin(String email, String name, String avatar, String uid) async {
+    try {
+      final response = await _dio.post('api/v1/auth.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'firebase_login',
+      }, data: {
+        'email': email,
+        'name': name,
+        'avatar': avatar,
+        'uid': uid,
+      });
+      return AuthResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<AuthResponse> register(String name, String email, String password) async {
     try {
       final response = await _dio.post('api/v1/auth.php', queryParameters: {
