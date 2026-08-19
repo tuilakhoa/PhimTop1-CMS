@@ -258,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Image.network(
                                 thumbUrl,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(color: Colors.grey[900], child: const Icon(Icons.movie)),
+                                errorBuilder: (_, __, ___) => Container(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.grey[200], child: const Icon(Icons.movie, color: Colors.grey)),
                               ),
                               Container(
                                 color: Colors.black38,

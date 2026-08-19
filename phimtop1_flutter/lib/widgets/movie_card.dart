@@ -42,11 +42,11 @@ class YoukuMovieCard extends StatelessWidget {
                 fit: BoxFit.cover,
                 width: double.infinity,
                 placeholder: (context, url) => Container(
-                  color: Colors.grey[900],
+                  color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.grey[200],
                   child: const Center(child: CircularProgressIndicator()),
                 ),
                 errorWidget: (context, url, error) => Container(
-                  color: Colors.grey[900],
+                  color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.grey[200],
                   child: const Icon(Icons.error),
                 ),
               ),
@@ -55,8 +55,8 @@ class YoukuMovieCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             movie.name,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),

@@ -153,13 +153,18 @@ class ExploreScreen extends StatelessWidget {
                   label: Text(label),
                   selected: isSelected,
                   selectedColor: Theme.of(context).primaryColor,
-                  backgroundColor: isDark ? Colors.grey[900] : Colors.grey[200],
+                  backgroundColor: isDark ? Colors.grey[900] : Colors.white,
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                   onSelected: (_) => onSelected(value),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(
+                      color: isSelected ? Colors.transparent : (isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                    ),
+                  ),
                   showCheckmark: false,
                 ),
               );

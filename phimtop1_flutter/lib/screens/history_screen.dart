@@ -91,23 +91,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lịch sử xem', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Lịch sử xem', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         actions: [
           if (_history.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.white),
+              icon: Icon(Icons.delete_outline, color: textColor),
               onPressed: _clearHistory,
             )
         ],
       ),
-      body: _buildBody(),
+      body: _buildBody(isDark, textColor),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(bool isDark, Color textColor) {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
     }
@@ -118,7 +121,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return ErrorView(error: _error!, onRetry: _fetchHistory);
     }
     if (_history.isEmpty) {
-      return const Center(child: Text("Chưa có lịch sử xem phim", style: TextStyle(color: Colors.white)));
+      return Center(child: Text("Chưa có lịch sử xem phim", style: TextStyle(color: textColor)));
     }
 
     return ListView.builder(
@@ -144,12 +147,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           width: 100,
                           height: 60,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(width: 100, height: 60, color: Colors.grey[800], child: const Icon(Icons.movie, color: Colors.grey)),
+                          errorBuilder: (_, __, ___) => Container(width: 100, height: 60, color: isDark ? Colors.grey[800] : Colors.grey[200], child: const Icon(Icons.movie, color: Colors.grey)),
                         )
                       : Container(
                           width: 100,
                           height: 60,
-                          color: Colors.grey[800],
+                          color: isDark ? Colors.grey[800] : Colors.grey[200],
                           child: const Icon(Icons.movie, color: Colors.grey),
                         ),
                 ),
@@ -158,7 +161,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.movieName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(item.movieName, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 4),
                       Text(item.episodeName, style: const TextStyle(color: Colors.grey, fontSize: 12)),
                       if (item.duration > 0) ...[
@@ -179,7 +182,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 const SizedBox(width: 8),
                 Text(
                   item.updatedAt.split(' ').first,
-                  style: const TextStyle(color: Colors.white54, fontSize: 10),
+                  style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 10),
                 ),
               ],
             ),

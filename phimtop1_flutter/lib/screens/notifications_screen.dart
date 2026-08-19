@@ -75,16 +75,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Thông báo', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Thông báo', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
       ),
-      body: _buildBody(),
+      body: _buildBody(isDark, textColor),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(bool isDark, Color textColor) {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
     }
@@ -95,7 +98,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       return ErrorView(error: _error!, onRetry: _fetchNotifications);
     }
     if (_notifications.isEmpty) {
-      return const Center(child: Text("Không có thông báo nào", style: TextStyle(color: Colors.white)));
+      return Center(child: Text("Không có thông báo nào", style: TextStyle(color: textColor)));
     }
 
     return ListView.builder(
@@ -110,7 +113,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           title: Text(
             item.title, 
             style: TextStyle(
-              color: Colors.white, 
+              color: textColor, 
               fontWeight: item.isRead ? FontWeight.normal : FontWeight.bold
             )
           ),

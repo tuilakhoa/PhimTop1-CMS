@@ -73,7 +73,7 @@ try {
         ];
 
         // Kiểm tra các bảng quan trọng
-        $requiredTables = ['settings', 'movies', 'episodes', 'members'];
+        $requiredTables = ['settings', 'movies', 'members'];
         $missingTables = [];
         foreach ($requiredTables as $tbl) {
             try {

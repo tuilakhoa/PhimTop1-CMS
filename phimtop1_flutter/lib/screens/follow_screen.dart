@@ -51,16 +51,19 @@ class _FollowScreenState extends State<FollowScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Phim đã thích', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Phim đã thích', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
       ),
-      body: _buildBody(),
+      body: _buildBody(isDark, textColor),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(bool isDark, Color textColor) {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
     }
@@ -71,7 +74,7 @@ class _FollowScreenState extends State<FollowScreen> {
       return ErrorView(error: _error!, onRetry: _fetchFollows);
     }
     if (_follows.isEmpty) {
-      return const Center(child: Text("Bạn chưa thích bộ phim nào", style: TextStyle(color: Colors.white)));
+      return Center(child: Text("Bạn chưa thích bộ phim nào", style: TextStyle(color: textColor)));
     }
 
     return ListView.builder(
@@ -93,12 +96,12 @@ class _FollowScreenState extends State<FollowScreen> {
               child: CachedNetworkImage(
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(color: Colors.grey[900]),
-                errorWidget: (context, url, error) => Container(color: Colors.grey[900]),
+                placeholder: (context, url) => Container(color: isDark ? Colors.grey[900] : Colors.grey[200]),
+                errorWidget: (context, url, error) => Container(color: isDark ? Colors.grey[900] : Colors.grey[200]),
               ),
             ),
           ),
-          title: Text(item.itemName, style: const TextStyle(color: Colors.white)),
+          title: Text(item.itemName, style: TextStyle(color: textColor)),
           subtitle: const Text("Phim", style: TextStyle(color: Colors.grey, fontSize: 12)),
           trailing: Icon(Icons.favorite, color: Theme.of(context).primaryColor, size: 20),
           onTap: () {

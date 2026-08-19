@@ -31,6 +31,7 @@ class AppTheme {
           backgroundColor: backgroundColor,
           elevation: 0,
           centerTitle: false,
+          surfaceTintColor: Colors.transparent,
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
           backgroundColor: backgroundColor,
@@ -57,6 +58,7 @@ class AppTheme {
           elevation: 0,
           centerTitle: false,
           foregroundColor: Colors.black,
+          surfaceTintColor: Colors.transparent,
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
           backgroundColor: surfaceColor,

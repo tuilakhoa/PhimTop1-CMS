@@ -174,11 +174,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
-                              side: BorderSide(color: Colors.grey[700]!),
+                              side: BorderSide(color: isDark ? Colors.grey[700]! : Colors.grey[400]!),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             onPressed: isSubmitting ? null : () => Navigator.pop(context),
-                            child: const Text('Hủy', style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.bold)),
+                            child: Text('Hủy', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -391,6 +391,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: _checkUpdate,
               child: const Text("Kiểm tra cập nhật"),
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.verified_user_outlined, color: Colors.grey),
+            title: Text("Giấy phép mã nguồn mở", style: TextStyle(color: textColor)),
+            onTap: () {
+              showLicensePage(
+                context: context,
+                applicationName: 'PhimTop1',
+                applicationVersion: 'v$_version',
+                applicationIcon: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Icon(Icons.movie, size: 64, color: Theme.of(context).primaryColor),
+                ),
+                applicationLegalese: '© 2026 PhimTop1. All rights reserved.',
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.feedback_outlined, color: Colors.grey),

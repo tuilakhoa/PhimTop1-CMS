@@ -23,7 +23,11 @@ if (($settings['displayMode'] ?? 'api') === 'crawl') {
     $repo = getMovieRepository();
     $movie = $repo->getMovieBySlug($originalSlug);
     if ($movie) {
-        $episodes = [['server_name' => 'VIP', 'server_data' => []]];
+        if (!empty($movie['episodes_json'])) {
+            $episodes = json_decode($movie['episodes_json'], true) ?: [];
+        } else {
+            $episodes = [['server_name' => 'VIP', 'server_data' => []]];
+        }
         
         global $pageTitle, $pageDesc, $pageKeywords;
         $siteName = $settings['siteName'] ?? 'PhimTop1';

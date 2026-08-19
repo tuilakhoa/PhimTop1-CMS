@@ -106,11 +106,14 @@ class _CartoonScreenState extends State<CartoonScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+
     return Scaffold(
       backgroundColor: _isTvMode(context) ? const Color(0xFF0F0F0F) : Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: _isTvMode(context) ? const Color(0xFF0F0F0F) : null,
-        title: const Text('Phim Hoạt Hình', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Phim Hoạt Hình', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
         centerTitle: true,
         actions: const [
           TvCastButton(),
@@ -130,7 +133,9 @@ class _CartoonScreenState extends State<CartoonScreen> {
     }
 
     if (movies.isEmpty) {
-      return const Center(child: Text("Không có phim nào", style: TextStyle(color: Colors.white)));
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final textColor = isDark ? Colors.white : Colors.black;
+      return Center(child: Text("Không có phim nào", style: TextStyle(color: textColor)));
     }
 
     final isTv = _isTvMode(context);
@@ -157,7 +162,7 @@ class _CartoonScreenState extends State<CartoonScreen> {
                   onTap: () => context.push('/movie/${movie.slug}'),
                   child: isTv 
                       ? YoutubeTvMovieCard(movie: movie, domain: domain)
-                      : _buildMobileCard(movie),
+                      : _buildMobileCard(context, movie),
                 );
               },
             ),
@@ -172,7 +177,7 @@ class _CartoonScreenState extends State<CartoonScreen> {
     );
   }
   
-  Widget _buildMobileCard(MovieItem movie) {
+  Widget _buildMobileCard(BuildContext context, MovieItem movie) {
     String? getValidUrl(String? url) => (url != null && url.isNotEmpty) ? url : null;
     final tUrl = getValidUrl(movie.thumbUrl);
     final pUrl = getValidUrl(movie.posterUrl);
@@ -181,6 +186,9 @@ class _CartoonScreenState extends State<CartoonScreen> {
     final imageUrl = thumb.startsWith('http') 
         ? thumb 
         : (thumb.startsWith('/') ? '$domain$thumb' : '$domain/$thumb');
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,9 +200,9 @@ class _CartoonScreenState extends State<CartoonScreen> {
               imageUrl: imageUrl,
               fit: BoxFit.cover,
               width: double.infinity,
-              placeholder: (context, url) => Container(color: Colors.grey[900]),
+              placeholder: (context, url) => Container(color: isDark ? Colors.grey[900] : Colors.grey[200]),
               errorWidget: (context, url, error) => Container(
-                color: Colors.grey[900],
+                color: isDark ? Colors.grey[900] : Colors.grey[200],
                 child: const Icon(Icons.error, color: Colors.grey),
               ),
             ),
@@ -203,8 +211,8 @@ class _CartoonScreenState extends State<CartoonScreen> {
         const SizedBox(height: 6),
         Text(
           movie.name,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: textColor,
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),

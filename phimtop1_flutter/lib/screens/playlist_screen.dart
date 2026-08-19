@@ -27,12 +27,15 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     showDialog(
       context: context,
       builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final textColor = isDark ? Colors.white : Colors.black;
+
         return AlertDialog(
-          backgroundColor: Colors.grey[900],
-          title: const Text('Tạo danh sách phát mới', style: TextStyle(color: Colors.white)),
+          backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+          title: Text('Tạo danh sách phát mới', style: TextStyle(color: textColor)),
           content: TextField(
             controller: controller,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: textColor),
             decoration: InputDecoration(
               hintText: 'Tên danh sách',
               hintStyle: const TextStyle(color: Colors.grey),
@@ -69,13 +72,16 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Danh sách phát', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Danh sách phát', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
+            icon: Icon(Icons.add, color: textColor),
             onPressed: _showCreateDialog,
           ),
         ],
@@ -92,7 +98,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
             );
           }
           if (provider.playlists.isEmpty) {
-            return const Center(child: Text("Bạn chưa có danh sách phát nào", style: TextStyle(color: Colors.white)));
+            return Center(child: Text("Bạn chưa có danh sách phát nào", style: TextStyle(color: textColor)));
           }
 
           return ListView.builder(
@@ -101,12 +107,12 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
             itemBuilder: (context, index) {
               final playlist = provider.playlists[index];
               return Card(
-                color: Colors.grey[900],
+                color: isDark ? Colors.grey[900] : Colors.white,
                 margin: const EdgeInsets.only(bottom: 16),
                 child: ExpansionTile(
-                  title: Text(playlist.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  title: Text(playlist.name, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                   subtitle: Text("${playlist.items?.length ?? 0} phim", style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                  iconColor: Colors.white,
+                  iconColor: textColor,
                   collapsedIconColor: Colors.grey,
                   children: [
                     if (playlist.items == null || playlist.items!.isEmpty)
@@ -129,26 +135,30 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                               child: CachedNetworkImage(
                                 imageUrl: imageUrl,
                                 fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(color: Colors.grey[800]),
-                                errorWidget: (context, url, error) => Container(color: Colors.grey[800]),
+                                placeholder: (context, url) => Container(color: isDark ? Colors.grey[800] : Colors.grey[200]),
+                                errorWidget: (context, url, error) => Container(color: isDark ? Colors.grey[800] : Colors.grey[200]),
                               ),
                             ),
                           ),
-                          title: Text(item.movieName, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                          title: Text(item.movieName, style: TextStyle(color: textColor, fontSize: 14)),
                           trailing: IconButton(
                             icon: const Icon(Icons.close, color: Colors.grey, size: 20),
                             onPressed: () async {
                               final confirm = await showDialog<bool>(
                                 context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: Colors.grey[900],
-                                  title: const Text("Xóa phim", style: TextStyle(color: Colors.white)),
-                                  content: const Text("Xóa phim này khỏi danh sách phát?", style: TextStyle(color: Colors.grey)),
+                                builder: (context) {
+                                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                                  final textColor = isDark ? Colors.white : Colors.black;
+                                  return AlertDialog(
+                                    backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+                                    title: Text("Xóa phim", style: TextStyle(color: textColor)),
+                                    content: const Text("Xóa phim này khỏi danh sách phát?", style: TextStyle(color: Colors.grey)),
                                   actions: [
                                     TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Hủy", style: TextStyle(color: Colors.grey))),
                                     TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Xóa", style: TextStyle(color: Colors.red))),
                                   ],
-                                ),
+                                  );
+                                },
                               );
                               if (confirm == true) {
                                 provider.removeFromPlaylist(playlist.id, item.movieSlug);
@@ -168,15 +178,19 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                         onPressed: () async {
                           final confirm = await showDialog<bool>(
                             context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: Colors.grey[900],
-                              title: const Text("Xóa danh sách", style: TextStyle(color: Colors.white)),
-                              content: const Text("Bạn có chắc chắn muốn xóa danh sách phát này?", style: TextStyle(color: Colors.grey)),
+                            builder: (context) {
+                              final isDark = Theme.of(context).brightness == Brightness.dark;
+                              final textColor = isDark ? Colors.white : Colors.black;
+                              return AlertDialog(
+                                backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+                                title: Text("Xóa danh sách", style: TextStyle(color: textColor)),
+                                content: const Text("Bạn có chắc chắn muốn xóa danh sách phát này?", style: TextStyle(color: Colors.grey)),
                               actions: [
                                 TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Hủy", style: TextStyle(color: Colors.grey))),
                                 TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Xóa", style: TextStyle(color: Colors.red))),
                               ],
-                            ),
+                              );
+                            },
                           );
                           if (confirm == true) {
                             provider.deletePlaylist(playlist.id);
