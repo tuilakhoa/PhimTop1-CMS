@@ -68,14 +68,7 @@ class _FocusableWrapperState extends State<FocusableWrapper> {
                         offset: const Offset(0, 10),
                       )
                     ]
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 5,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 2),
-                      )
-                    ],
+                  : null,
             ),
             child: widget.child,
           ),

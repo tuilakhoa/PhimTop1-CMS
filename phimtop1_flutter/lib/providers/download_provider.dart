@@ -96,6 +96,16 @@ class DownloadProvider extends ChangeNotifier {
     await _flutterLocalNotificationsPlugin.show(id: id, title: title, body: 'Tải phim thất bại', notificationDetails: platformChannelSpecifics);
   }
 
+  static Future<Directory> getDownloadDirectory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final customPath = prefs.getString('custom_download_path');
+    if (customPath != null && customPath.isNotEmpty) {
+      final dir = Directory(customPath);
+      if (await dir.exists()) return dir;
+    }
+    return await getApplicationDocumentsDirectory();
+  }
+
   Future<void> _loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
     final tasksJson = prefs.getStringList(_prefsKey) ?? [];
@@ -155,7 +165,7 @@ class DownloadProvider extends ChangeNotifier {
       }
     }
 
-    final directory = await getApplicationDocumentsDirectory();
+      final directory = await getDownloadDirectory();
     final savePath = '${directory.path}/$id/index.m3u8';
 
     final task = DownloadTask(
@@ -242,7 +252,7 @@ class DownloadProvider extends ChangeNotifier {
     }
 
     try {
-      final directory = await getApplicationDocumentsDirectory();
+        final directory = await getDownloadDirectory();
       final movieDir = Directory('${directory.path}/${pendingTask.id}');
       if (await movieDir.exists()) {
         await movieDir.delete(recursive: true);
@@ -384,7 +394,7 @@ class DownloadProvider extends ChangeNotifier {
   Future<void> deleteDownload(String id) async {
     final task = getTask(id);
     if (task != null) {
-      final directory = await getApplicationDocumentsDirectory();
+        final directory = await getDownloadDirectory();
       final movieDir = Directory('${directory.path}/$id');
       if (await movieDir.exists()) {
         await movieDir.delete(recursive: true);
@@ -392,5 +402,21 @@ class DownloadProvider extends ChangeNotifier {
       _tasks.remove(task);
       await _saveTasks();
     }
+  }
+
+  Future<void> deleteAllDownloads() async {
+      final directory = await getDownloadDirectory();
+    for (var task in List.from(_tasks)) {
+      if (task.status == DownloadStatus.downloading) {
+        _cancelToken?.cancel();
+      }
+      final movieDir = Directory('${directory.path}/${task.id}');
+      if (await movieDir.exists()) {
+        await movieDir.delete(recursive: true);
+      }
+      await _flutterLocalNotificationsPlugin.cancel(id: task.id.hashCode);
+    }
+    _tasks.clear();
+    await _saveTasks();
   }
 }

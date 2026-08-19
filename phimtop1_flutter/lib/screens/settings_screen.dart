@@ -12,7 +12,10 @@ import '../providers/home_provider.dart';
 import '../widgets/update_dialog.dart';
 import '../api/cms_api.dart';
 
+import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -26,12 +29,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _version = "Đang tải...";
   int _buildNumber = 0;
   bool _hasAppLock = false;
-  bool _wifiOnlyDownload = true;
+  String _cacheSize = "Đang tính...";
+  int _autoClearDays = 0;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _calculateCacheSize();
+  }
+
+  Future<void> _calculateCacheSize() async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      int size = await _getDirSize(tempDir);
+      if (mounted) {
+        setState(() {
+          _cacheSize = _formatBytes(size);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _cacheSize = "Không rõ";
+        });
+      }
+    }
+  }
+
+  Future<int> _getDirSize(Directory dir) async {
+    int size = 0;
+    try {
+      if (await dir.exists()) {
+        await for (var entity in dir.list(recursive: true, followLinks: false)) {
+          if (entity is File) {
+            size += await entity.length();
+          }
+        }
+      }
+    } catch (e) {}
+    return size;
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes <= 0) return "0 B";
+    const suffixes = ["B", "KB", "MB", "GB", "TB"];
+    int i = (log(bytes) / log(1024)).floor();
+    return '${(bytes / pow(1024, i)).toStringAsFixed(1)} ${suffixes[i]}';
   }
 
   Future<void> _loadVersion() async {
@@ -42,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _version = info.version;
         _buildNumber = int.tryParse(info.buildNumber) ?? 0;
         _hasAppLock = prefs.getString('app_lock_pin') != null;
-        _wifiOnlyDownload = prefs.getBool('wifi_only_download') ?? true;
+        _autoClearDays = prefs.getInt('auto_clear_cache_days') ?? 0;
       });
     }
   }
@@ -293,51 +337,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Colors.transparent,
       ),
       body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 12),
         children: [
           if (_isTvMode(context)) ...[
-            const SizedBox(height: 20),
             _buildSectionHeader("Ghép nối thiết bị (Dành cho TV)"),
-            AnimatedBuilder(
-              animation: _tvService,
-              builder: (context, child) {
-                return Column(
-                  children: [
-                    if (_tvService.isServerRunning)
-                      ListTile(
-                        leading: const Icon(Icons.tv, color: Colors.green),
-                        title: const Text("TV Đang chờ kết nối", style: TextStyle(color: Colors.green)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("IP: ${_tvService.serverIp}", style: const TextStyle(color: Colors.grey)),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Text("MÃ PIN: ", style: TextStyle(color: Colors.grey)),
-                                Text(_tvService.currentPin, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2)),
-                              ],
-                            ),
-                          ],
+            _buildMenuGroup(context, [
+              AnimatedBuilder(
+                animation: _tvService,
+                builder: (context, child) {
+                  return Column(
+                    children: [
+                      if (_tvService.isServerRunning)
+                        ListTile(
+                          leading: const Icon(Icons.tv, color: Colors.green),
+                          title: const Text("TV Đang chờ kết nối", style: TextStyle(color: Colors.green)),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("IP: ${_tvService.serverIp}", style: const TextStyle(color: Colors.grey)),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Text("MÃ PIN: ", style: TextStyle(color: Colors.grey)),
+                                  Text(_tvService.currentPin, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                                ],
+                              ),
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.stop, color: Colors.red),
+                            onPressed: () => _tvService.stopServer(),
+                          ),
+                        )
+                      else
+                        ListTile(
+                          leading: const Icon(Icons.tv, color: Colors.grey),
+                          title: Text("Bật Chế độ nhận lệnh", style: TextStyle(color: textColor)),
+                          subtitle: const Text("Chỉ dành cho ứng dụng cài trên TV", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          onTap: () => _tvService.startServer(),
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.stop, color: Colors.red),
-                          onPressed: () => _tvService.stopServer(),
-                        ),
-                      )
-                    else
-                      ListTile(
-                        leading: const Icon(Icons.tv, color: Colors.grey),
-                        title: Text("Bật Chế độ nhận lệnh", style: TextStyle(color: textColor)),
-                        subtitle: const Text("Chỉ dành cho ứng dụng cài trên TV", style: TextStyle(color: Colors.grey, fontSize: 12)),
-                        onTap: () => _tvService.startServer(),
-                      ),
-                  ],
-                );
-              },
-            ),
-            const Divider(color: Colors.grey),
+                    ],
+                  );
+                },
+              ),
+            ]),
+            const SizedBox(height: 12),
           ],
           _buildSectionHeader("Tài khoản"),
+          _buildMenuGroup(context, [
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
@@ -361,9 +408,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 }
               }
             },
-          ),
-          const Divider(color: Colors.grey),
+          )]),
+          const SizedBox(height: 12),
           _buildSectionHeader("Ứng dụng"),
+          _buildMenuGroup(context, [
           ListTile(
             leading: const Icon(Icons.palette_outlined, color: Colors.grey),
             title: Text("Màu nền / Giao diện", style: TextStyle(color: textColor)),
@@ -423,28 +471,92 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.wifi, color: Colors.grey),
-            title: Text("Chỉ tải qua Wi-Fi", style: TextStyle(color: textColor)),
-            subtitle: const Text("Tạm dừng tải nếu dùng mạng di động", style: TextStyle(color: Colors.grey, fontSize: 12)),
-            trailing: Switch(
-              value: _wifiOnlyDownload,
-              activeColor: Theme.of(context).primaryColor,
-              onChanged: (val) async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('wifi_only_download', val);
-                setState(() { _wifiOnlyDownload = val; });
-              },
-            ),
-          ),
-
-          const Divider(color: Colors.grey),
+            leading: const Icon(Icons.download_for_offline_outlined, color: Colors.grey),
+            title: Text("Cài đặt tải xuống", style: TextStyle(color: textColor)),
+            onTap: () {
+              context.push('/download_settings');
+            },
+          )]),
+          const SizedBox(height: 12),
           _buildSectionHeader("Khác"),
+          _buildMenuGroup(context, [
           ListTile(
             leading: const Icon(Icons.cleaning_services_outlined, color: Colors.grey),
             title: Text("Xóa bộ nhớ đệm", style: TextStyle(color: textColor)),
+            trailing: Text(_cacheSize, style: const TextStyle(color: Colors.grey, fontSize: 13)),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa bộ nhớ đệm ứng dụng')));
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  backgroundColor: cardColor,
+                  title: Text('Xóa bộ nhớ đệm', style: TextStyle(color: textColor)),
+                  content: Text('Hành động này sẽ xóa dữ liệu tạm và bộ nhớ đệm hình ảnh/video ($_cacheSize). Bạn có chắc chắn không?', style: TextStyle(color: isDark ? Colors.grey[300] : Colors.grey[800])),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy', style: TextStyle(color: Colors.grey))),
+                    TextButton(
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+                        try {
+                           final tempDir = await getTemporaryDirectory();
+                           if (await tempDir.exists()) {
+                             for (var entity in tempDir.listSync()) {
+                               if (entity is File) await entity.delete();
+                               else if (entity is Directory) await entity.delete(recursive: true);
+                             }
+                           }
+                           await DefaultCacheManager().emptyCache();
+                           
+                           // Update last clear time
+                           final prefs = await SharedPreferences.getInstance();
+                           await prefs.setInt('last_cache_clear_time', DateTime.now().millisecondsSinceEpoch);
+
+                           if (mounted) {
+                             setState(() { _cacheSize = "0 B"; });
+                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa bộ nhớ đệm ứng dụng')));
+                           }
+                        } catch (e) {
+                           if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi khi xóa bộ nhớ đệm: $e')));
+                        }
+                      },
+                      child: const Text('Xóa', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              );
             },
+          ),
+          ListTile(
+            leading: const Icon(Icons.auto_delete_outlined, color: Colors.grey),
+            title: Text("Tự động dọn rác", style: TextStyle(color: textColor)),
+            subtitle: Text("Xóa bộ nhớ đệm định kỳ", style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 12)),
+            trailing: DropdownButton<int>(
+              value: _autoClearDays,
+              dropdownColor: cardColor,
+              underline: const SizedBox(),
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+              style: TextStyle(color: textColor, fontSize: 14),
+              items: const [
+                DropdownMenuItem(value: 0, child: Text("Không")),
+                DropdownMenuItem(value: 3, child: Text("Mỗi 3 ngày")),
+                DropdownMenuItem(value: 7, child: Text("Mỗi 7 ngày")),
+                DropdownMenuItem(value: 30, child: Text("Mỗi 30 ngày")),
+              ],
+              onChanged: (val) async {
+                if (val != null) {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setInt('auto_clear_cache_days', val);
+                  setState(() {
+                    _autoClearDays = val;
+                  });
+                  if (val > 0) {
+                     // Set initial clear time if not set
+                     if (prefs.getInt('last_cache_clear_time') == null) {
+                        await prefs.setInt('last_cache_clear_time', DateTime.now().millisecondsSinceEpoch);
+                     }
+                  }
+                }
+              },
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.share_outlined, color: Colors.grey),
@@ -459,8 +571,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cảm ơn bạn đã đánh giá!')));
             },
-          ),
+          )]),
+          const SizedBox(height: 32),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMenuGroup(BuildContext context, List<Widget> children) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? Colors.grey[900] : Colors.white;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))
+        ]
+      ),
+      child: Column(
+        children: children,
       ),
     );
   }

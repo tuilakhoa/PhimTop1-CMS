@@ -9,6 +9,7 @@ import '../api/cms_api.dart';
 import '../core/config.dart';
 import 'watch_movie_screen.dart';
 import 'watch_embed_screen.dart';
+import '../services/mini_player_service.dart';
 import 'package:share_plus/share_plus.dart';
 import '../services/tv_remote_service.dart';
 import '../providers/download_provider.dart';
@@ -25,6 +26,15 @@ class MovieDetailScreen extends StatefulWidget {
 }
 
 class _MovieDetailScreenState extends State<MovieDetailScreen> {
+  Color get _textColor => Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87;
+  Color get _subtitleColor => Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54;
+  Color get _iconColor => Theme.of(context).brightness == Brightness.dark ? Colors.white54 : Colors.black45;
+  Color get _bgOpacity => Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03);
+  Color get __textColor => Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87;
+  Color get __subtitleColor => Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54;
+  Color get __iconColor => Theme.of(context).brightness == Brightness.dark ? Colors.white54 : Colors.black45;
+  Color get __bgOpacity => Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03);
+
   final TextEditingController _commentController = TextEditingController();
   final TextEditingController _episodeSearchController = TextEditingController();
   String _episodeSearchQuery = "";
@@ -79,6 +89,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
           if (m3u8Link.isNotEmpty) {
             final movie = provider.movie!;
             final thumbUrl = movie.thumbUrl ?? movie.posterUrl ?? '';
+            MiniPlayerService().hideMiniPlayer();
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -130,13 +141,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white12))),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white12))),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("Danh sách phát", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                        IconButton(icon: const Icon(Icons.close, color: Colors.grey), onPressed: () => Navigator.pop(context)),
+                        Text("Danh sách phát", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        IconButton(icon: Icon(Icons.close, color: Colors.grey), onPressed: () => Navigator.pop(context)),
                       ],
                     ),
                   ),
@@ -151,9 +162,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                   final pl = provider.playlists[index];
                                   final hasMovie = (pl.items ?? []).any((item) => item.movieSlug == movieSlug);
                                   return ListTile(
-                                    title: Text(pl.name, style: const TextStyle(color: Colors.white)),
+                                    title: Text(pl.name, style: TextStyle(color: Colors.white)),
                                     trailing: hasMovie
-                                        ? const Icon(Icons.check_circle, color: Colors.green)
+                                        ? Icon(Icons.check_circle, color: Colors.green)
                                         : ElevatedButton(
                                             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
                                             onPressed: () async {
@@ -163,21 +174,21 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                                 Navigator.pop(context);
                                               }
                                             },
-                                            child: const Text("Thêm"),
+                                            child: Text("Thêm"),
                                           ),
                                   );
                                 },
                               ),
                   ),
                   Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.white12))),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.white12))),
                     child: Row(
                       children: [
                         Expanded(
                           child: TextField(
                             controller: TextEditingController(),
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: Colors.white),
                             decoration: const InputDecoration(hintText: 'Tên danh sách mới', hintStyle: TextStyle(color: Colors.grey)),
                             onSubmitted: (val) async {
                               if (val.trim().isNotEmpty) {
@@ -219,13 +230,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white12))),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white12))),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("Tải xuống ngoại tuyến", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                        IconButton(icon: const Icon(Icons.close, color: Colors.grey), onPressed: () => Navigator.pop(context)),
+                        Text("Tải xuống ngoại tuyến", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        IconButton(icon: Icon(Icons.close, color: Colors.grey), onPressed: () => Navigator.pop(context)),
                       ],
                     ),
                   ),
@@ -240,7 +251,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                               final task = downloadProvider.getTask(taskId);
                               
                               Widget trailing = IconButton(
-                                icon: const Icon(Icons.download, color: Colors.white),
+                                icon: Icon(Icons.download, color: Colors.white),
                                 onPressed: () async {
                                   if (ep.linkM3u8.isNotEmpty) {
                                     final thumbUrl = movie.thumbUrl ?? movie.posterUrl ?? '';
@@ -267,24 +278,24 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
                               if (task != null) {
                                 if (task.status == DownloadStatus.completed) {
-                                  trailing = const Icon(Icons.check_circle, color: Colors.green);
+                                  trailing = Icon(Icons.check_circle, color: Colors.green);
                                 } else if (task.status == DownloadStatus.downloading) {
                                   trailing = Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text('${(task.progress * 100).toStringAsFixed(0)}%', style: const TextStyle(color: Colors.amber)),
+                                      Text('${(task.progress * 100).toStringAsFixed(0)}%', style: TextStyle(color: Colors.amber)),
                                       const SizedBox(width: 8),
                                       IconButton(
-                                        icon: const Icon(Icons.stop_circle, color: Colors.red),
+                                        icon: Icon(Icons.stop_circle, color: Colors.red),
                                         onPressed: () => downloadProvider.cancelDownload(taskId),
                                       ),
                                     ],
                                   );
                                 } else if (task.status == DownloadStatus.pending) {
-                                  trailing = const Text('Chờ tải...', style: TextStyle(color: Colors.grey));
+                                  trailing = Text('Chờ tải...', style: TextStyle(color: Colors.grey));
                                 } else if (task.status == DownloadStatus.failed) {
                                   trailing = IconButton(
-                                    icon: const Icon(Icons.refresh, color: Colors.red),
+                                    icon: Icon(Icons.refresh, color: Colors.red),
                                     onPressed: () async {
                                       final message = await downloadProvider.startDownload(
                                         movieSlug: task.movieSlug,
@@ -307,7 +318,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                               }
 
                               return ListTile(
-                                title: Text(ep.name, style: const TextStyle(color: Colors.white)),
+                                title: Text(ep.name, style: TextStyle(color: Colors.white)),
                                 trailing: trailing,
                               );
                             },
@@ -360,6 +371,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   }
 
   Widget _buildTvLayout(BuildContext context, DetailProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final movie = provider.movie!;
     final imageUrl = (movie.posterUrl ?? movie.thumbUrl!).startsWith('http') 
         ? (movie.posterUrl ?? movie.thumbUrl!) 
@@ -380,7 +393,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
           children: [
             Container(
               width: 320,
-              padding: const EdgeInsets.all(32),
+              padding: EdgeInsets.all(32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -404,17 +417,17 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           borderRadius: BorderRadius.circular(12),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                             decoration: BoxDecoration(
-                              color: hasFocus ? Colors.white : Theme.of(context).primaryColor,
+                              color: hasFocus ? _textColor : Theme.of(context).primaryColor,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.play_arrow, color: hasFocus ? Colors.black : Colors.white),
+                                Icon(Icons.play_arrow, color: hasFocus ? Colors.black : _textColor),
                                 const SizedBox(width: 8),
-                                Text("Xem Phim", style: TextStyle(color: hasFocus ? Colors.black : Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                Text("Xem Phim", style: TextStyle(color: hasFocus ? Colors.black : _textColor, fontSize: 18, fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -427,25 +440,25 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(top: 32, right: 32, bottom: 32),
+                padding: EdgeInsets.only(top: 32, right: 32, bottom: 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       movie.name,
-                      style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: _textColor),
                     ),
                     if (movie.originName != null) ...[
                       const SizedBox(height: 8),
                       Text(
                         movie.originName!,
-                        style: const TextStyle(fontSize: 24, color: Colors.grey),
+                        style: TextStyle(fontSize: 24, color: Colors.grey),
                       ),
                     ],
                     const SizedBox(height: 24),
                     Text(
                       movie.content?.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '') ?? "Đang cập nhật...",
-                      style: const TextStyle(color: Colors.white70, height: 1.5, fontSize: 18),
+                      style: TextStyle(color: _subtitleColor, height: 1.5, fontSize: 18),
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -454,13 +467,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Chọn tập:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                          Text("Chọn tập:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _textColor)),
                           SizedBox(
                             width: 280,
                             height: 48,
                             child: TextField(
                               controller: _episodeSearchController,
-                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                              style: TextStyle(color: _textColor, fontSize: 16, fontWeight: FontWeight.w500),
                               textAlignVertical: TextAlignVertical.center,
                               decoration: InputDecoration(
                                 hintText: "Tìm kiếm tập phim...",
@@ -468,7 +481,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                 prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor, size: 22),
                                 suffixIcon: _episodeSearchQuery.isNotEmpty 
                                     ? IconButton(
-                                        icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 20),
+                                        icon: Icon(Icons.close_rounded, color: _iconColor, size: 20),
                                         onPressed: () {
                                           _episodeSearchController.clear();
                                           setState(() {
@@ -479,7 +492,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                     : null,
                                 filled: true,
                                 fillColor: Colors.white.withOpacity(0.1),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 20),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(24),
                                   borderSide: BorderSide(color: Colors.white.withOpacity(0.15), width: 1),
@@ -535,17 +548,17 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                         duration: const Duration(milliseconds: 200),
                                         alignment: Alignment.center,
                                         decoration: BoxDecoration(
-                                          color: hasFocus ? Colors.white : Colors.white.withOpacity(0.1),
+                                          color: hasFocus ? _textColor : Colors.white.withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(8),
                                           border: Border.all(
-                                            color: hasFocus ? Colors.white : Colors.transparent,
+                                            color: hasFocus ? _textColor : Colors.transparent,
                                             width: 2,
                                           ),
                                         ),
                                         child: Text(
                                           ep.name,
                                           style: TextStyle(
-                                            color: hasFocus ? Colors.black : Colors.white,
+                                            color: hasFocus ? Colors.black : _textColor,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
                                           ),
@@ -573,6 +586,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   }
 
   Widget _buildMobileLayout(BuildContext context, DetailProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final movie = provider.movie!;
     final imageUrl = (movie.posterUrl ?? movie.thumbUrl ?? '').startsWith('http') 
         ? (movie.posterUrl ?? movie.thumbUrl!) 
@@ -616,7 +631,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     child: GestureDetector(
                       onTap: () => _watchMovie(provider),
                       child: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Theme.of(context).primaryColor.withOpacity(0.8),
@@ -628,7 +643,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                             )
                           ]
                         ),
-                        child: const Icon(Icons.play_arrow_rounded, size: 56, color: Colors.white),
+                        child: Icon(Icons.play_arrow_rounded, size: 56, color: _textColor),
                       ),
                     ),
                   ),
@@ -639,30 +654,30 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   movie.name,
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, height: 1.2),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: _textColor, height: 1.2),
                 ),
                 if (movie.originName != null) ...[
                   const SizedBox(height: 6),
                   Text(
                     movie.originName!,
-                    style: const TextStyle(fontSize: 16, color: Colors.grey, fontStyle: FontStyle.italic),
+                    style: TextStyle(fontSize: 16, color: Colors.grey, fontStyle: FontStyle.italic),
                   ),
                 ],
                 const SizedBox(height: 24),
                 
                 // Action Row
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: _bgOpacity,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+                    border: Border.all(color: _bgOpacity),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -681,7 +696,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         child: _buildActionButton(
                           provider.isFollowing ? Icons.favorite : Icons.favorite_border,
                           provider.isFollowing ? "Đã thích" : "Yêu thích",
-                          color: provider.isFollowing ? Theme.of(context).primaryColor : Colors.white,
+                          color: provider.isFollowing ? Theme.of(context).primaryColor : _textColor,
                         ),
                       ),
                       GestureDetector(
@@ -733,7 +748,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                             child: _buildActionButton(
                               isConnected ? Icons.cast_connected_rounded : Icons.cast_rounded,
                               "Chiếu TV",
-                              color: isConnected ? Colors.greenAccent : Colors.white,
+                              color: isConnected ? Colors.greenAccent : _textColor,
                             ),
                           );
                         }
@@ -744,18 +759,18 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 const SizedBox(height: 32),
                 
                 // Content
-                const Text("Nội dung phim", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                Text("Nội dung phim", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _textColor)),
                 const SizedBox(height: 12),
                 Text(
                   movie.content?.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '') ?? "Đang cập nhật...",
-                  style: const TextStyle(color: Colors.white70, height: 1.6, fontSize: 15),
+                  style: TextStyle(color: _subtitleColor, height: 1.6, fontSize: 15),
                 ),
                 
                 const SizedBox(height: 32),
 
                 // Actors
                 if (provider.peoples != null && provider.peoples!.isNotEmpty) ...[
-                  const Text("Diễn viên", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text("Diễn viên", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _textColor)),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 140,
@@ -766,7 +781,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         final person = provider.peoples![index];
                         return Container(
                           width: 80,
-                          margin: const EdgeInsets.only(right: 16),
+                          margin: EdgeInsets.only(right: 16),
                           child: Column(
                             children: [
                               Container(
@@ -783,12 +798,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                         ) 
                                       : null,
                                 ),
-                                child: person.profilePath.isEmpty ? const Icon(Icons.person, color: Colors.white54, size: 32) : null,
+                                child: person.profilePath.isEmpty ? Icon(Icons.person, color: _iconColor, size: 32) : null,
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 person.name,
-                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                                style: TextStyle(color: _textColor, fontSize: 12, fontWeight: FontWeight.w600),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -801,7 +816,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   ),
                   const SizedBox(height: 12),
                 ] else if (movie.actor != null && movie.actor!.isNotEmpty) ...[
-                  const Text("Diễn viên", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text("Diễn viên", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _textColor)),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 120,
@@ -811,7 +826,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       itemBuilder: (context, index) {
                         return Container(
                           width: 80,
-                          margin: const EdgeInsets.only(right: 16),
+                          margin: EdgeInsets.only(right: 16),
                           child: Column(
                             children: [
                               Container(
@@ -822,12 +837,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                   color: Colors.grey[900],
                                   boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8)],
                                 ),
-                                child: const Icon(Icons.person, color: Colors.white54, size: 32),
+                                child: Icon(Icons.person, color: _iconColor, size: 32),
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 movie.actor![index],
-                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                                style: TextStyle(color: _textColor, fontSize: 12, fontWeight: FontWeight.w600),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -843,7 +858,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
                 // Backdrops
                 if (provider.images != null && provider.images!.backdrops.isNotEmpty) ...[
-                  const Text("Hình ảnh", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text("Hình ảnh", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _textColor)),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 160,
@@ -854,7 +869,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         final imgPath = provider.images!.backdrops[index].filePath;
                         return Container(
                           width: 280,
-                          margin: const EdgeInsets.only(right: 16),
+                          margin: EdgeInsets.only(right: 16),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10)],
@@ -875,13 +890,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Chọn tập", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text("Chọn tập", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _textColor)),
                       SizedBox(
                         width: 180,
                         height: 40,
                         child: TextField(
                           controller: _episodeSearchController,
-                          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                          style: TextStyle(color: _textColor, fontSize: 14, fontWeight: FontWeight.w500),
                           textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
                             hintText: "Tìm kiếm tập...",
@@ -889,7 +904,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                             prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor, size: 20),
                             suffixIcon: _episodeSearchQuery.isNotEmpty 
                                 ? IconButton(
-                                    icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 16),
+                                    icon: Icon(Icons.close_rounded, color: _iconColor, size: 16),
                                     onPressed: () {
                                       _episodeSearchController.clear();
                                       setState(() {
@@ -900,7 +915,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                 : null,
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.08),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
@@ -957,7 +972,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                               decoration: BoxDecoration(
                                 gradient: isSelected 
                                   ? LinearGradient(colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withOpacity(0.8)]) 
-                                  : LinearGradient(colors: [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.05)]),
+                                  : LinearGradient(colors: [Colors.white.withOpacity(0.1), _bgOpacity]),
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: isSelected 
                                   ? [BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.4), blurRadius: 8, spreadRadius: 1)]
@@ -966,7 +981,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                               child: Text(
                                 ep.name,
                                 style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.white70,
+                                  color: isSelected ? _textColor : _subtitleColor,
                                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                                 ),
                                 maxLines: 1,
@@ -987,11 +1002,11 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   children: [
                     Row(
                       children: [
-                        const Text("Đánh giá phim", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text("Đánh giá phim", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _textColor)),
                         const SizedBox(width: 8),
                         if (provider.averageRating > 0)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.amber.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(12),
@@ -999,9 +1014,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                                Icon(Icons.star_rounded, color: Colors.amber, size: 16),
                                 const SizedBox(width: 4),
-                                Text(provider.averageRating.toString(), style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
+                                Text(provider.averageRating.toString(), style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -1009,14 +1024,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ),
                     TextButton.icon(
                       onPressed: () => _showReviewModal(context, provider),
-                      icon: const Icon(Icons.star_half_rounded, color: Colors.amber),
-                      label: const Text("Đánh giá", style: TextStyle(color: Colors.amber)),
+                      icon: Icon(Icons.star_half_rounded, color: Colors.amber),
+                      label: Text("Đánh giá", style: TextStyle(color: Colors.amber)),
                     ),
                   ],
                 ),
                 
                 const SizedBox(height: 40),
-                const Text("Bình luận", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                Text("Bình luận", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _textColor)),
                 const SizedBox(height: 20),
                 
                 // Comment Input Form
@@ -1026,19 +1041,19 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     Expanded(
                       child: TextField(
                         controller: _commentController,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: _textColor),
                         maxLines: 3,
                         minLines: 1,
                         decoration: InputDecoration(
                           hintText: "Nhập bình luận...",
-                          hintStyle: const TextStyle(color: Colors.white54),
+                          hintStyle: TextStyle(color: _iconColor),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.05),
+                          fillColor: _bgOpacity,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
                       ),
                     ),
@@ -1076,7 +1091,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           }
                         },
                         icon: Icon(Icons.send_rounded, color: Theme.of(context).primaryColor),
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(12),
                       ),
                     )
                   ],
@@ -1098,7 +1113,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     itemBuilder: (context, index) {
                       final c = provider.comments[index];
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 24.0),
+                        padding: EdgeInsets.only(bottom: 24.0),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1107,7 +1122,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                               backgroundColor: Colors.white.withOpacity(0.1),
                               child: Text(
                                 c.userName.isNotEmpty ? c.userName[0].toUpperCase() : "?", 
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                                style: TextStyle(color: _textColor, fontWeight: FontWeight.bold)
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -1117,13 +1132,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      Text(c.userName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                                      Text(c.userName, style: TextStyle(color: _textColor, fontWeight: FontWeight.bold, fontSize: 15)),
                                       const SizedBox(width: 12),
                                       Text(c.timeAgo, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
                                     ],
                                   ),
                                   const SizedBox(height: 6),
-                                  Text(c.content, style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.4)),
+                                  Text(c.content, style: TextStyle(color: _subtitleColor, fontSize: 14, height: 1.4)),
                                 ],
                               ),
                             )
@@ -1141,12 +1156,16 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label, {Color color = Colors.white}) {
+  Widget _buildActionButton(IconData icon, String label, {Color? color}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fallbackColor = isDark ? Colors.white : Colors.black87;
+    final _subtitleColor = isDark ? Colors.white70 : Colors.black54;
+
     return Column(
       children: [
-        Icon(icon, color: color, size: 24),
+        Icon(icon, color: color ?? fallbackColor, size: 24),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+        Text(label, style: TextStyle(color: _subtitleColor, fontSize: 12)),
       ],
     );
   }
@@ -1159,14 +1178,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 40,
                 height: 4,
-                margin: const EdgeInsets.only(bottom: 24),
+                margin: EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
                   color: Colors.grey[700],
                   borderRadius: BorderRadius.circular(2),
@@ -1176,12 +1195,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               const SizedBox(height: 16),
               Text(
                 "Đang chiếu trên TV",
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: _subtitleColor, fontSize: 14),
               ),
               const SizedBox(height: 8),
               Text(
                 title,
-                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(color: _textColor, fontSize: 20, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -1192,7 +1211,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 children: [
                   IconButton(
                     iconSize: 48,
-                    icon: const Icon(Icons.replay_10, color: Colors.white),
+                    icon: Icon(Icons.replay_10, color: _textColor),
                     onPressed: () {
                       TvRemoteService().sendPlayerControl('rewind');
                     },
@@ -1219,7 +1238,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   ),
                   IconButton(
                     iconSize: 48,
-                    icon: const Icon(Icons.forward_10, color: Colors.white),
+                    icon: Icon(Icons.forward_10, color: _textColor),
                     onPressed: () {
                       TvRemoteService().sendPlayerControl('forward');
                     },
@@ -1230,12 +1249,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: _textColor,
                   minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                icon: const Icon(Icons.stop_circle_outlined, size: 28),
-                label: const Text("Dừng Phát", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                icon: Icon(Icons.stop_circle_outlined, size: 28),
+                label: Text("Dừng Phát", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 onPressed: () {
                   TvRemoteService().sendPlayerControl('stop');
                   Navigator.pop(context);
@@ -1267,7 +1286,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Đánh giá phim", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text("Đánh giá phim", style: TextStyle(color: _textColor, fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1311,7 +1330,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lỗi gửi đánh giá.')));
                         }
                       },
-                      child: const Text("GỬI ĐÁNH GIÁ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      child: Text("GỬI ĐÁNH GIÁ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 32),

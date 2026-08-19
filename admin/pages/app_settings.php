@@ -42,26 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     
     $success = "Cập nhật cấu hình App thành công!";
     
-    // Xử lý upload google-services.json
-    if (isset($_FILES['googleServicesFile']) && $_FILES['googleServicesFile']['error'] === UPLOAD_ERR_OK) {
-        $fileTmpPath = $_FILES['googleServicesFile']['tmp_name'];
-        $fileName = $_FILES['googleServicesFile']['name'];
-        
-        if ($fileName === 'google-services.json') {
-            $uploadDir = __DIR__ . '/../../phimtop1_flutter/android/app/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $dest_path = $uploadDir . 'google-services.json';
-            if (move_uploaded_file($fileTmpPath, $dest_path)) {
-                $success .= " Đã lưu google-services.json!";
-            } else {
-                $success .= " Nhưng lỗi lưu google-services.json.";
-            }
-        } else {
-            $success .= " File tải lên không phải google-services.json.";
-        }
-    }
+    // Lưu ý: Tính năng upload google-services.json đã bị loại bỏ 
+    // vì hệ thống chuyển sang mô hình Private (Closed CMS), 
+    // Firebase được quản lý trực tiếp qua codebase bằng CLI.
     
     $settings = getSettings(); // Refresh
 }
@@ -80,9 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <div class="flex border-b border-gray-800 mb-6 overflow-x-auto">
         <button type="button" onclick="switchTab('general')" class="tab-btn whitespace-nowrap px-5 py-3 text-sm font-medium text-white border-b-2 border-red-500 transition-colors" data-target="general">
             <i data-lucide="settings" class="w-4 h-4 inline-block mr-1.5 -mt-0.5"></i> Cài Đặt Chung
-        </button>
-        <button type="button" onclick="switchTab('firebase')" class="tab-btn whitespace-nowrap px-5 py-3 text-sm font-medium text-gray-400 hover:text-gray-200 border-b-2 border-transparent hover:border-gray-700 transition-colors" data-target="firebase">
-            <i data-lucide="pie-chart" class="w-4 h-4 inline-block mr-1.5 -mt-0.5"></i> Firebase Analytics
         </button>
         <button type="button" onclick="switchTab('schema')" class="tab-btn whitespace-nowrap px-5 py-3 text-sm font-medium text-gray-400 hover:text-gray-200 border-b-2 border-transparent hover:border-gray-700 transition-colors" data-target="schema">
             <i data-lucide="code" class="w-4 h-4 inline-block mr-1.5 -mt-0.5"></i> App Schema
@@ -199,55 +179,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             </div>
                             <div class="ml-2 text-xs font-medium text-gray-300">Bắt buộc cập nhật iOS</div>
                         </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab Content: Firebase -->
-        <div id="tab-firebase" class="tab-pane hidden">
-            <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-800 pb-2 flex items-center">
-                <i data-lucide="pie-chart" class="w-5 h-5 mr-2 text-green-500"></i> Cấu Hình Firebase Analytics
-            </h3>
-            <p class="text-xs text-gray-500 mb-4">Để theo dõi lượng cài đặt và người dùng online trên App, hệ thống yêu cầu file cấu hình từ Firebase.</p>
-            
-            <div class="mb-6 bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
-                <label class="block text-sm font-medium text-gray-300 mb-2">Tải lên file google-services.json mới</label>
-                <?php if (file_exists(__DIR__ . '/../../phimtop1_flutter/android/app/google-services.json')): ?>
-                    <div class="mb-4 bg-green-900/20 border border-green-500/30 p-3 rounded-lg flex items-center">
-                        <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mr-2"></i>
-                        <div>
-                            <p class="text-sm text-green-400 font-medium">Hệ thống đã có file google-services.json hợp lệ.</p>
-                            <p class="text-xs text-green-500/70 mt-0.5">App của bạn đã có thể kết nối với Firebase. Tải lên file mới nếu bạn muốn thay đổi.</p>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <div class="mb-4 bg-red-900/20 border border-red-500/30 p-3 rounded-lg flex items-center">
-                        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500 mr-2"></i>
-                        <div>
-                            <p class="text-sm text-red-400 font-medium">Chưa có file google-services.json!</p>
-                            <p class="text-xs text-red-500/70 mt-0.5">Vui lòng tải lên file để cấu hình Firebase Analytics cho App.</p>
-                        </div>
-                    </div>
-                <?php endif; ?>
-                <input type="file" name="googleServicesFile" accept=".json" class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-colors">
-                
-                <div class="mt-6 p-5 bg-blue-900/20 border border-blue-500/30 rounded-lg text-sm text-blue-200/90 leading-relaxed shadow-sm">
-                    <h4 class="font-semibold text-blue-400 text-base mb-3 flex items-center">
-                        <i data-lucide="info" class="w-4 h-4 mr-1.5"></i> Hướng dẫn lấy file google-services.json:
-                    </h4>
-                    <ol class="list-decimal list-inside space-y-3 ml-1 text-[13px]">
-                        <li>Truy cập vào <a href="https://console.firebase.google.com/" target="_blank" class="text-blue-400 hover:underline font-semibold bg-blue-500/10 px-1 rounded">Firebase Console</a> và tạo một dự án (Project) mới hoặc chọn dự án có sẵn.</li>
-                        <li>Tại trang chủ dự án, bấm vào biểu tượng <b>Android</b> để thêm ứng dụng vào dự án.</li>
-                        <li>Trang đăng ký ứng dụng sẽ hiện ra. Tại mục <b>Android package name</b>, hãy nhập chính xác: <br>
-                            <code class="bg-blue-950 px-2 py-1 rounded text-blue-300 font-mono text-sm mt-1 inline-block shadow-sm border border-blue-500/30 font-bold">com.phimtop1.app</code>
-                        </li>
-                        <li>Các mục <i>App nickname</i> và <i>SHA-1</i> có thể bỏ trống. Bấm <b>Register app (Đăng ký ứng dụng)</b>.</li>
-                        <li>Hệ thống sẽ tạo file cấu hình. Bấm vào nút <b>Download google-services.json</b> để tải file về máy.</li>
-                        <li>Sau khi tải về, hãy bấm <b>Choose File</b> phía trên để upload file đó lên đây. Cuối cùng bấm <strong class="text-white">Lưu Cấu Hình</strong> (nút màu đỏ bên dưới) để hệ thống tự động copy file vào đúng thư mục code của App.</li>
-                    </ol>
-                    <div class="mt-4 p-3 bg-blue-950/50 rounded border border-blue-500/20 text-xs">
-                        <i data-lucide="lightbulb" class="w-3.5 h-3.5 inline mr-1 text-yellow-500"></i> <b>Lưu ý:</b> Sau khi upload file json lên đây, bạn cần build lại App (file APK hoặc AAB) thì tính năng Analytics mới có tác dụng.
                     </div>
                 </div>
             </div>

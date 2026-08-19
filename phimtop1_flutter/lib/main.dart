@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/theme.dart';
@@ -14,21 +15,61 @@ import 'providers/playlist_provider.dart';
 import 'providers/download_provider.dart';
 import 'providers/theme_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'dart:io';
 import 'services/tv_remote_service.dart';
 import 'package:go_router/go_router.dart';
+
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
     print("Firebase init error (ignored on Linux): $e");
   }
+
+  LicenseRegistry.addLicense(() async* {
+    try {
+      final license = await rootBundle.loadString('assets/LICENSE');
+      yield LicenseEntryWithLineBreaks(['PhimTop1 (Mã nguồn mở)'], license);
+    } catch (e) {
+      print("Could not load license: $e");
+    }
+  });
   
   final prefs = await SharedPreferences.getInstance();
   final hasAgreed = prefs.getBool('has_agreed_terms') ?? false;
   final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
   final hasAppLock = prefs.getString('app_lock_pin') != null;
+
+  // Auto clear cache
+  final autoClearDays = prefs.getInt('auto_clear_cache_days') ?? 0;
+  if (autoClearDays > 0) {
+    final lastClear = prefs.getInt('last_cache_clear_time') ?? 0;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final msInDay = 86400000; // 24 * 60 * 60 * 1000
+    if (now - lastClear >= autoClearDays * msInDay) {
+      try {
+        final tempDir = await getTemporaryDirectory();
+        if (await tempDir.exists()) {
+          for (var entity in tempDir.listSync()) {
+            if (entity is File) await entity.delete();
+            else if (entity is Directory) await entity.delete(recursive: true);
+          }
+        }
+        await DefaultCacheManager().emptyCache();
+        await prefs.setInt('last_cache_clear_time', now);
+        print("Auto cleared cache after $autoClearDays days.");
+      } catch (e) {
+        print("Auto clear cache error: $e");
+      }
+    }
+  }
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

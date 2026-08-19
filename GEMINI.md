@@ -4,3 +4,4 @@
 - When rebuilding the application, ensure that you DO NOT overwrite, change, or remove this specific `app-mobile-release.apk.sha1` file.
 - **KEYSTORE INTEGRITY**: Do NOT delete, overwrite, or modify any keystore files (e.g., `.jks` or `.keystore` files) associated with this project under any circumstances.
 - **APK NAMING CONVENTION**: When building the app, name the APK as `<app_name>-<platform>.apk`. For example: `phimtop1-mobile.apk`.
+- **APK BUILD LOCATION**: The built APK files are always generated and located in `/home/khoa/Bản tải về/phimtop1cms/phimtop1_flutter/build/app/outputs/flutter-apk`.

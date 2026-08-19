@@ -442,7 +442,7 @@ class _VoiceSearchBottomSheetState extends State<VoiceSearchBottomSheet> with Si
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.google, size: 24, color: isDark ? Colors.white70 : Colors.black54),
+              Icon(Icons.g_translate, size: 24, color: isDark ? Colors.white70 : Colors.black54),
               const SizedBox(width: 8),
               Text("Google Speech Services", style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 16)),
             ],

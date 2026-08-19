@@ -14,6 +14,7 @@ import '../services/tv_remote_service.dart';
 import '../widgets/tv_virtual_keyboard.dart';
 import '../services/watching_session_service.dart';
 import '../services/watch_party_service.dart';
+import '../services/mini_player_service.dart';
 import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
 import '../services/widget_service.dart';
@@ -44,6 +45,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
   bool _showSuggestions = false;
+  bool _isMinimizing = false;
   final FocusNode _suggestionsFocusNode = FocusNode();
 
   StreamSubscription? _remoteSubscription;
@@ -246,8 +248,11 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
-    _videoController?.dispose();
-    _chewieController?.dispose();
+    _wpSyncTimer?.cancel();
+    if (!_isMinimizing && _videoController != null) {
+      _videoController?.dispose();
+      _chewieController?.dispose();
+    }
     _suggestionsFocusNode.dispose();
     super.dispose();
   }
@@ -1126,6 +1131,77 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     }
   }
 
+  void _showOptionsMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[900],
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.grey[600], borderRadius: BorderRadius.circular(2)),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Text('Tùy chọn phim', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              const Divider(color: Colors.white24),
+              ListTile(
+                leading: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
+                title: const Text('Hình trong hình (OS PiP)', style: TextStyle(color: Colors.white)),
+                subtitle: const Text('Phát ngoài màn hình nền thiết bị', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                onTap: () {
+                  Navigator.pop(context);
+                  SimplePip().enterPipMode();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.fit_screen_rounded, color: Colors.white),
+                title: const Text('Trình phát Mini', style: TextStyle(color: Colors.white)),
+                subtitle: const Text('Thu nhỏ và tiếp tục lướt ứng dụng', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (_videoController != null) {
+                    setState(() {
+                      _isMinimizing = true;
+                    });
+                    MiniPlayerService().showMiniPlayer(
+                      context: context,
+                      controller: _videoController!,
+                      movieSlug: widget.movieSlug,
+                      episodeSlug: widget.episodeSlug,
+                      onExpand: () {},
+                      onClose: () {
+                        _videoController?.dispose();
+                      },
+                    );
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.group, color: _wpRoomCode != null ? Colors.indigoAccent : Colors.white),
+                title: Text(_wpRoomCode != null ? 'Quản lý Xem Chung' : 'Mở Phòng Xem Chung', style: const TextStyle(color: Colors.white)),
+                subtitle: Text(_wpRoomCode != null ? 'Đang trong phòng: $_wpRoomCode' : 'Xem cùng bạn bè từ xa', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showWatchPartyDialog();
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isTv = _isTvMode(context);
@@ -1221,14 +1297,8 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
                 ),
               ),
             IconButton(
-              icon: Icon(Icons.group, color: _wpRoomCode != null ? Colors.indigoAccent : Colors.white),
-              onPressed: _showWatchPartyDialog,
-            ),
-            IconButton(
-              icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-              onPressed: () {
-                SimplePip().enterPipMode();
-              },
+              icon: const Icon(Icons.more_vert, color: Colors.white),
+              onPressed: _showOptionsMenu,
             ),
           ],
         ),
