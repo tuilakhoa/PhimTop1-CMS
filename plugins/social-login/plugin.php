@@ -159,8 +159,8 @@ add_action('api_auth', function($action) {
     $enableGoogleLogin = isset($settings['enableGoogleLogin']) && $settings['enableGoogleLogin'] == 1;
     $enableMicrosoftLogin = isset($settings['enableMicrosoftLogin']) && $settings['enableMicrosoftLogin'] == 1;
 
-    $googleRedirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=google_callback';
-    $msRedirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=microsoft_callback';
+    $googleRedirectUri = ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=google_callback';
+    $msRedirectUri = ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=microsoft_callback';
 
     // Google Start
     if ($action === 'google_login') {
@@ -324,8 +324,8 @@ add_action('admin_login_auth', function($action) {
     $enableGoogleLogin = isset($settings['enableGoogleLogin']) && $settings['enableGoogleLogin'] == 1;
     $enableMicrosoftLogin = isset($settings['enableMicrosoftLogin']) && $settings['enableMicrosoftLogin'] == 1;
 
-    $googleRedirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=google_callback';
-    $msRedirectUri = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=microsoft_callback';
+    $googleRedirectUri = ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=google_callback';
+    $msRedirectUri = ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=microsoft_callback';
     $adminPath = $settings['adminPath'] ?? '/admin';
 
     // Google Start

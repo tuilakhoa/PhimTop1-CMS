@@ -40,10 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <i data-lucide="info" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
         <div>
             <p class="text-sm text-blue-300 font-medium mb-1">Authorized redirect URI (Frontend):</p>
-            <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block mb-2"><?= 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=google_callback' ?></code>
+            <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block mb-2"><?= ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=google_callback' ?></code>
             
             <p class="text-sm text-blue-300 font-medium mb-1 mt-2">Authorized redirect URI (Admin Login):</p>
-            <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block"><?= 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=google_callback' ?></code>
+            <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block"><?= ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=google_callback' ?></code>
             
             <p class="text-xs text-blue-400/80 mt-2">Copy các đường dẫn này dán vào cấu hình OAuth 2.0 Client ID trên Google Cloud Console.</p>
         </div>
@@ -74,10 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <i data-lucide="info" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
         <div>
             <p class="text-sm text-blue-300 font-medium mb-1">Web Redirect URI (Frontend):</p>
-            <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block mb-2"><?= 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=microsoft_callback' ?></code>
+            <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block mb-2"><?= ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=microsoft_callback' ?></code>
             
             <p class="text-sm text-blue-300 font-medium mb-1 mt-2">Web Redirect URI (Admin Login):</p>
-            <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block"><?= 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=microsoft_callback' ?></code>
+            <code class="bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg select-all text-xs font-mono text-gray-300 inline-block"><?= ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/login.php?action=microsoft_callback' ?></code>
             
             <p class="text-xs text-blue-400/80 mt-2">Copy các đường dẫn này dán vào Web Redirect URI trên Azure Portal.</p>
         </div>
