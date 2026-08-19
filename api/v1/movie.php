@@ -31,12 +31,11 @@ if ($displayMode === 'crawl') {
     $movie = $repo->getMovieBySlug($slug);
     $data = null;
     if ($movie) {
-        $episodes = !empty($movie['episodes_json']) ? json_decode($movie['episodes_json'], true) : [];
         $data = [
             'movie' => $movie,
-            'episodes' => $episodes ?: [],
+            'episodes' => [], // In DB only crawl mode, episodes are often not fully synced unless custom scraped
             'domain' => '',
-            'seoOnPage' => (object)[]
+            'seoOnPage' => []
         ];
     }
 } else {
@@ -87,12 +86,11 @@ if ($displayMode === 'crawl') {
             $repo = getMovieRepository();
             $movie = $repo->getMovieBySlug($slug);
             if ($movie) {
-                $episodes = !empty($movie['episodes_json']) ? json_decode($movie['episodes_json'], true) : [];
                 $data = [
                     'movie' => $movie,
-                    'episodes' => $episodes ?: [],
+                    'episodes' => [], // Local cache might not have full episodes
                     'domain' => '',
-                    'seoOnPage' => (object)[],
+                    'seoOnPage' => [],
                     'images' => ['backdrops' => [], 'posters' => []]
                 ];
             }

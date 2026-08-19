@@ -216,15 +216,6 @@ if (!empty($items)) {
             if (strpos($m['poster_url'], 'http') !== 0 && !empty($m['poster_url'])) $m['poster_url'] = 'https://phimimg.com/' . $m['poster_url'];
         }
         
-        // Lấy chi tiết phim để lấy episodes nếu chế độ là crawl
-        // Gọi thẳng hàm fetchApiMovieDetail đã có sẵn trong db.php
-        $detailRes = fetchApiMovieDetail($m['slug']);
-        if ($detailRes && !empty($detailRes['episodes'])) {
-            $m['episodes_json'] = json_encode($detailRes['episodes'], JSON_UNESCAPED_UNICODE);
-        } else {
-            $m['episodes_json'] = null;
-        }
-        
         // Save via repository
         $existing = clone (object) $m; // just a dummy object
         if ($repo->saveMovie($m)) {

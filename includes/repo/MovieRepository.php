@@ -99,12 +99,12 @@ class MovieRepository {
         } else {
             if (!$this->pdo) return false;
             
-            $sql = "INSERT INTO movies (id, name, origin_name, slug, thumb_url, poster_url, year, type, status, episode_current, quality, lang, chieu_rap, content, view, updated_at, episodes_json)
-                VALUES (:id, :name, :origin_name, :slug, :thumb_url, :poster_url, :year, :type, :status, :episode_current, :quality, :lang, :chieu_rap, :content, :view, :updated_at, :episodes_json)
+            $sql = "INSERT INTO movies (id, name, origin_name, slug, thumb_url, poster_url, year, type, status, episode_current, quality, lang, chieu_rap, content, view, updated_at)
+                VALUES (:id, :name, :origin_name, :slug, :thumb_url, :poster_url, :year, :type, :status, :episode_current, :quality, :lang, :chieu_rap, :content, :view, :updated_at)
                 ON DUPLICATE KEY UPDATE 
                 name=VALUES(name), origin_name=VALUES(origin_name), thumb_url=VALUES(thumb_url), poster_url=VALUES(poster_url), 
                 year=VALUES(year), type=VALUES(type), status=VALUES(status), episode_current=VALUES(episode_current), 
-                quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap), content=VALUES(content), view=VALUES(view), updated_at=VALUES(updated_at), episodes_json=VALUES(episodes_json)";
+                quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap), content=VALUES(content), view=VALUES(view), updated_at=VALUES(updated_at)";
             $stmt = $this->pdo->prepare($sql);
             
             // Lọc các trường có trong SQL
@@ -124,8 +124,7 @@ class MovieRepository {
                 ':chieu_rap' => $data['chieu_rap'] ?? 0,
                 ':content' => $data['content'] ?? '',
                 ':view' => $data['view'] ?? 0,
-                ':updated_at' => $data['updated_at'],
-                ':episodes_json' => isset($data['episodes_json']) ? $data['episodes_json'] : null
+                ':updated_at' => $data['updated_at']
             ];
             $stmt->execute($params);
             return $stmt->rowCount() > 0;

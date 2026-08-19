@@ -1,1 +1,0 @@
-ALTER TABLE movies ADD COLUMN episodes_json LONGTEXT NULL;
