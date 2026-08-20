@@ -54,7 +54,13 @@ if ($method === 'GET') {
 
         // Format date
         foreach ($comments as &$c) {
-            $date = new DateTime($c['created_at']);
+            $createdAt = $c['created_at'] ?? 'now';
+            if (empty($createdAt)) $createdAt = 'now';
+            try {
+                $date = new DateTime($createdAt);
+            } catch (Exception $e) {
+                $date = new DateTime();
+            }
             $now = new DateTime();
             $diff = $now->diff($date);
             

@@ -269,7 +269,7 @@ class CommentResponse {
   CommentResponse.fromJson(Map<String, dynamic> json)
       : success = json['success'] ?? false,
         message = json['message'],
-        data = (json['data'] as List?)?.map((e) => CommentItem.fromJson(e)).toList();
+        data = (json['data'] as List?)?.map((e) => CommentItem.fromJson(e as Map<String, dynamic>)).toList();
 }
 
 class CheckFollowResponse {

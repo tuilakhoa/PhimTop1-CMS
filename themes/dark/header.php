@@ -76,6 +76,13 @@ if ($pdo) {
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/themes/dark/assets/css/style.css?v=<?= time() ?>">
+    <style>
+        /* CSS Optimizations for Mobile */
+        img { content-visibility: auto; }
+        .custom-scrollbar { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+        * { -webkit-tap-highlight-color: transparent; }
+        .group-hover\:scale-105 { will-change: transform; transform-style: preserve-3d; }
+    </style>
     
     <!-- Cấu hình Đo lường & Bảo mật (Cloudflare/GA4) -->
     <?php if (!empty($settings['cfAnalyticsToken'])): ?>
@@ -110,7 +117,7 @@ if ($pdo) {
                     <!-- Logo -->
                     <a href="/" class="flex items-center space-x-2">
                         <?php if (!empty($settings['logoUrl'])): ?>
-                            <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" class="w-8 h-8 object-contain">
+                            <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" decoding="async" class="w-8 h-8 object-contain">
                         <?php else: ?>
                             <div class="w-10 h-10 bg-gray-800/50 rounded-xl flex items-center justify-center">
                                 <i data-lucide="monitor-play" class="w-6 h-6 text-white"></i>
@@ -131,7 +138,7 @@ if ($pdo) {
                             <button class="text-gray-300 hover:text-white transition-colors flex items-center">
                                 Thể Loại <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                             </button>
-                            <div class="absolute left-0 mt-2 w-96 bg-gray-900 border border-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                            <div class="absolute left-0 mt-2 w-96 bg-gray-900 border border-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-50">
                                 <div class="p-4 grid grid-cols-3 gap-2">
                                     <?php foreach ($genres as $g): ?>
                                         <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded transition-colors truncate"><?= htmlspecialchars($g['name']) ?></a>
@@ -145,7 +152,7 @@ if ($pdo) {
                             <button class="text-gray-300 hover:text-white transition-colors flex items-center">
                                 Quốc Gia <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                             </button>
-                            <div class="absolute left-0 mt-2 w-96 bg-gray-900 border border-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                            <div class="absolute left-0 mt-2 w-96 bg-gray-900 border border-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-50">
                                 <div class="p-4 grid grid-cols-3 gap-2">
                                     <?php foreach ($countries as $c): ?>
                                         <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded transition-colors truncate"><?= htmlspecialchars($c['name']) ?></a>

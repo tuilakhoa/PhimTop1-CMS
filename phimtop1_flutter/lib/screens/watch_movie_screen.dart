@@ -1176,7 +1176,10 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
                       controller: _videoController!,
                       movieSlug: widget.movieSlug,
                       episodeSlug: widget.episodeSlug,
-                      onExpand: () {},
+                      onExpand: () {
+                        _videoController?.dispose();
+                        Navigator.pushNamed(context, '/detail', arguments: widget.movieSlug);
+                      },
                       onClose: () {
                         _videoController?.dispose();
                       },

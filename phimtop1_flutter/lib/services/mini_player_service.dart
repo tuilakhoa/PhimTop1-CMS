@@ -96,7 +96,16 @@ class _MiniPlayerWidgetState extends State<_MiniPlayerWidget> {
             _y += details.delta.dy;
           });
         },
-        onTap: widget.onExpand,
+        onDoubleTap: widget.onExpand,
+        onTap: () {
+          setState(() {
+            if (widget.controller.value.isPlaying) {
+              widget.controller.pause();
+            } else {
+              widget.controller.play();
+            }
+          });
+        },
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -125,6 +134,14 @@ class _MiniPlayerWidgetState extends State<_MiniPlayerWidget> {
                   child: IconButton(
                     icon: const Icon(Icons.close, color: Colors.white, size: 20),
                     onPressed: widget.onClose,
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  child: IconButton(
+                    icon: const Icon(Icons.fullscreen, color: Colors.white, size: 20),
+                    onPressed: widget.onExpand,
                   ),
                 ),
                 Positioned(

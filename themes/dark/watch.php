@@ -119,9 +119,14 @@ if (isset($_SESSION['user'])) {
                 <div class="mb-8">
                     <div class="flex items-center justify-between mb-2">
                         <h1 class="text-2xl md:text-3xl font-bold text-white"><a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($slug) ?>" class="hover:text-[#ff8f00] transition-colors"><?= htmlspecialchars($movie['name']) ?></a></h1>
-                        <button class="flex items-center text-gray-400 hover:text-white transition-colors p-2 rounded-md hover:bg-[#22242d]">
-                            <i data-lucide="share-2" class="w-4 h-4 mr-1.5"></i> <span class="text-sm">Chia sẻ</span>
-                        </button>
+                        <div class="flex items-center gap-1 sm:gap-2">
+                            <button onclick="document.getElementById('download-app-modal').classList.remove('hidden'); document.getElementById('download-app-modal').classList.add('flex');" class="flex items-center text-gray-400 hover:text-white transition-colors p-2 rounded-md hover:bg-[#22242d]">
+                                <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> <span class="text-sm hidden sm:inline">Tải phim</span>
+                            </button>
+                            <button class="flex items-center text-gray-400 hover:text-white transition-colors p-2 rounded-md hover:bg-[#22242d]">
+                                <i data-lucide="share-2" class="w-4 h-4 mr-1.5"></i> <span class="text-sm hidden sm:inline">Chia sẻ</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="text-lg text-[#ff8f00] font-medium mb-3">Tập <?= htmlspecialchars($currentEp['name']) ?></div>
                     
@@ -173,7 +178,7 @@ if (isset($_SESSION['user'])) {
                         <?php foreach ($suggestions as $item): ?>
                             <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group flex flex-col">
                                 <div class="relative w-full aspect-[16/9] overflow-hidden rounded-md bg-[#22242d] mb-2 border border-[#2d2f36]">
-                                    <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                     <div class="absolute top-1 right-1">
                                         <span class="bg-[#ff4d4f] text-white text-[10px] font-bold px-1.5 py-0.5 rounded"><?= htmlspecialchars($item['quality'] ?? 'HD') ?></span>
                                     </div>
@@ -217,9 +222,9 @@ if (isset($_SESSION['user'])) {
                                class="flex items-center justify-between px-3 py-3 rounded transition-colors group <?= $containerClass ?>">
                                 <div class="flex items-center">
                                     <div class="w-8 h-8 md:w-16 md:h-10 rounded bg-[#22242d] flex items-center justify-center mr-3 transition-colors text-xs font-medium text-gray-500 overflow-hidden relative border border-[#2d2f36]">
-                                        <img src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '')) ?>" alt="" class="absolute inset-0 w-full h-full object-cover transition-opacity <?= $imgClass ?>">
+                                        <img src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '')) ?>" alt="" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover transition-opacity <?= $imgClass ?>">
                                         <?php if ($isActive): ?>
-                                            <div class="absolute inset-0 bg-[#ff8f00]/20 mix-blend-overlay"></div>
+                                            <div class="absolute inset-0 bg-[#ff8f00]/30"></div>
                                         <?php endif; ?>
                                         <i data-lucide="play" class="w-4 h-4 relative z-10 <?= $iconClass ?>"></i>
                                     </div>
@@ -255,33 +260,44 @@ if (isset($_SESSION['user'])) {
 </div>
 
 <script>
-// Smart App Banner Logic
+// Smart App Prompt Logic
 document.addEventListener('DOMContentLoaded', function() {
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    if (isAndroid) {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const hasDismissed = sessionStorage.getItem('phimtop1_app_prompt_dismissed');
+    
+    if (isMobile && !hasDismissed) {
         const intentUrl = "intent://movie/<?= urlencode($slug) ?>#Intent;scheme=phimtop1;package=com.phimtop1.app;S.browser_fallback_url=<?= urlencode($settings['appDownloadUrl'] ?? '') ?>;end;";
-        const banner = document.createElement('div');
-        banner.id = 'smart-app-banner';
-        banner.className = 'fixed bottom-0 left-0 w-full bg-[#181a20]/95 backdrop-blur-md border-t border-[#2d2f36] z-[60] flex items-center justify-between p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)] transition-transform duration-300';
-        banner.innerHTML = `
-            <div class="flex items-center space-x-3 w-[70%]">
-                <button onclick="document.getElementById('smart-app-banner').style.transform='translateY(100%)'" class="text-gray-400 hover:text-white p-1 shrink-0">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-                <div class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center border border-[#2d2f36] shrink-0 overflow-hidden">
-                    <img src="/phimtop1_logo_512.png" onerror="this.src='/favicon.ico'" alt="App" class="w-full h-full object-cover">
+        
+        const modal = document.createElement('div');
+        modal.id = 'app-prompt-modal';
+        modal.className = 'fixed inset-0 bg-black/95 z-[200] flex flex-col items-center justify-center p-4 transition-opacity duration-300';
+        modal.innerHTML = `
+            <div class="bg-[#181a20] border border-[#2d2f36] rounded-2xl w-full max-w-sm p-6 shadow-2xl text-center relative transform transition-transform scale-100 mx-4">
+                <div class="w-20 h-20 bg-[#22242d] rounded-3xl flex items-center justify-center mx-auto mb-5 border border-[#2d2f36] shadow-lg overflow-hidden relative">
+                    <img src="/phimtop1_logo_512.png" onerror="this.src='/favicon.ico'" alt="App" decoding="async" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/10"></div>
                 </div>
-                <div class="flex flex-col overflow-hidden">
-                    <span class="text-white text-sm font-bold leading-tight truncate">Mở trên Ứng dụng</span>
-                    <span class="text-gray-400 text-[11px] truncate">Trải nghiệm mượt mà hơn</span>
+                <h3 class="text-xl font-bold text-white mb-2">Đã có Ứng dụng PhimTop1?</h3>
+                <p class="text-sm text-gray-400 mb-6">Mở ngay phim <strong class="text-white"><?= htmlspecialchars($movie['name']) ?></strong> trên ứng dụng để xem mượt mà và không quảng cáo!</p>
+                
+                <div class="flex flex-col gap-3">
+                    <a href="${intentUrl}" onclick="sessionStorage.setItem('phimtop1_app_prompt_dismissed', 'true');" class="w-full bg-[#ff8f00] hover:bg-[#e68000] text-black py-3.5 rounded-xl font-bold transition-all shadow-[0_4px_15px_rgba(255,143,0,0.3)] flex items-center justify-center text-[15px]">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Mở trong Ứng dụng
+                    </a>
+                    <button id="btn-continue-web" class="w-full bg-transparent hover:bg-[#2d2f36] text-gray-400 py-3 rounded-xl font-medium transition-colors text-[15px]">
+                        Tiếp tục dùng Web
+                    </button>
                 </div>
             </div>
-            <a href="${intentUrl}" class="bg-[#ff8f00] text-black text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-md hover:bg-[#e68000] ml-2">Mở App</a>
         `;
-        document.body.appendChild(banner);
-        if (window.lucide) {
-            lucide.createIcons();
-        }
+        document.body.appendChild(modal);
+        
+        document.getElementById('btn-continue-web').addEventListener('click', function() {
+            sessionStorage.setItem('phimtop1_app_prompt_dismissed', 'true');
+            modal.style.opacity = '0';
+            setTimeout(() => modal.remove(), 300);
+        });
     }
 });
 </script>
@@ -397,10 +413,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     logHistory();
     setInterval(() => {
+        if (document.hidden) return;
         const video = document.getElementById('video-player');
         if (video && !video.paused) logHistory();
     }, 15000);
     window.addEventListener('beforeunload', logHistory);
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) logHistory();
+    });
 });
 </script>
 <?php endif; ?>
@@ -457,12 +477,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     sendHeartbeat();
-    setInterval(sendHeartbeat, 10000);
+    setInterval(() => {
+        if (document.hidden) return;
+        sendHeartbeat();
+    }, 10000);
 });
 </script>
 
 <!-- Watch Party Dialog -->
-<div id="watch-party-dialog" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
+<div id="watch-party-dialog" class="fixed inset-0 bg-black/95 z-[100] hidden flex items-center justify-center">
     <div class="bg-[#181a20] border border-[#2d2f36] rounded-xl w-full max-w-md p-6 shadow-2xl relative">
         <button onclick="toggleWatchPartyDialog()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
             <i data-lucide="x" class="w-5 h-5"></i>
@@ -606,7 +629,7 @@ function showWpActiveView(code, isHost) {
     if (!badge) {
         badge = document.createElement('div');
         badge.id = 'wp-player-badge';
-        badge.className = 'absolute top-4 left-4 z-20 bg-black/60 backdrop-blur border border-[#ff8f00]/50 text-[#ff8f00] px-3 py-1.5 rounded text-xs font-medium flex items-center cursor-pointer hover:bg-black/80 transition-colors';
+        badge.className = 'absolute top-4 left-4 z-20 bg-black/80 border border-[#ff8f00]/50 text-[#ff8f00] px-3 py-1.5 rounded text-xs font-medium flex items-center cursor-pointer hover:bg-black transition-colors';
         badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span> Watch Party: ' + code;
         badge.onclick = toggleWatchPartyDialog;
         document.getElementById('player-container').appendChild(badge);
@@ -717,5 +740,29 @@ function startWpSync() {
     }, 2000);
 }
 </script>
+
+<!-- Download App Modal -->
+<div id="download-app-modal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col items-center justify-center">
+    <div class="bg-[#181a20] border border-[#2d2f36] rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center mx-4">
+        <button onclick="document.getElementById('download-app-modal').classList.add('hidden'); document.getElementById('download-app-modal').classList.remove('flex');" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <div class="w-16 h-16 bg-[#22242d] rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#2d2f36]">
+            <i data-lucide="download-cloud" class="w-8 h-8 text-[#ff8f00]"></i>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Tải phim ngoại tuyến</h3>
+        <p class="text-sm text-gray-400 mb-6">Tính năng tải phim siêu tốc độ cao và xem offline không quảng cáo chỉ có trên ứng dụng PhimTop1. Trải nghiệm ngay!</p>
+        
+        <?php
+        $intentUrlModal = "intent://movie/" . urlencode($slug) . "#Intent;scheme=phimtop1;package=com.phimtop1.app;S.browser_fallback_url=" . urlencode($settings['appDownloadUrl'] ?? '') . ";end;";
+        ?>
+        <a href="<?= $intentUrlModal ?>" class="w-full bg-[#ff8f00] hover:bg-[#e68000] text-black py-3 rounded-lg font-bold transition-colors flex items-center justify-center mb-3">
+            <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Mở trong Ứng dụng
+        </a>
+        <a href="<?= htmlspecialchars($settings['appDownloadUrl'] ?? '#') ?>" target="_blank" class="w-full bg-[#2d2f36] hover:bg-[#3d3f46] text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
+            Tải bản APK
+        </a>
+    </div>
+</div>
 
 <?php include __DIR__ . '/footer.php'; ?>

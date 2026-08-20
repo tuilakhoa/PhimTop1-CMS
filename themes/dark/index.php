@@ -65,7 +65,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                         <div class="swiper-slide relative w-full h-full">
                             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10"></div>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-                            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover opacity-90">
+                            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-90">
                             
                             <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto w-full">
                                 <div class="max-w-2xl">
@@ -86,7 +86,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                                             <i data-lucide="play" class="w-5 h-5 mr-2 fill-current"></i>
                                             Phát ngay
                                         </a>
-                                        <button class="flex items-center justify-center bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-lg font-medium transition-colors backdrop-blur-md">
+                                        <button class="flex items-center justify-center bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-lg font-medium transition-colors">
                                             <i data-lucide="info" class="w-5 h-5 mr-2"></i>
                                             Chi tiết
                                         </button>
@@ -108,8 +108,6 @@ if (empty($featuredMovies) && !empty($movies)) {
                             slidesPerView: 1,
                             loop: true,
                             autoplay: { delay: 6000, disableOnInteraction: false },
-                            effect: 'fade',
-                            fadeEffect: { crossFade: true },
                             pagination: { el: '.swiper-hero .swiper-pagination', clickable: true }
                         });
                     }
@@ -118,7 +116,7 @@ if (empty($featuredMovies) && !empty($movies)) {
         <?php else: $featured = $featuredMovies[0]; ?>
             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" class="absolute inset-0 w-full h-full object-cover opacity-90">
+            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-90">
             
             <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto w-full">
                 <div class="max-w-2xl">
@@ -180,7 +178,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                     ?>
                         <a href="<?= $historyLink ?>" class="group shrink-0 w-64 block">
                             <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                                <img src="<?= htmlspecialchars(getPhimImgUrl($item['thumb_url'])) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                <img src="<?= htmlspecialchars(getPhimImgUrl($item['thumb_url'])) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <i data-lucide="play-circle" class="w-12 h-12 text-white"></i>
                                 </div>
@@ -226,7 +224,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                             html += `
                                 <a href="/phim/${item.slug}" class="group shrink-0 w-40 sm:w-48 block">
                                     <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                                        <img src="${thumb}" alt="${item.name}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                        <img src="${thumb}" alt="${item.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <i data-lucide="play-circle" class="w-10 h-10 text-white"></i>
                                         </div>
@@ -266,17 +264,17 @@ if (empty($featuredMovies) && !empty($movies)) {
                 ?>
                     <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= htmlspecialchars($movie['slug']) ?>" class="group flex flex-col">
                         <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                            <img src="<?= htmlspecialchars($thumb) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <img src="<?= htmlspecialchars($thumb) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                             
                             <!-- Minimal Overlays -->
                             <div class="absolute top-2 left-2 flex gap-1.5">
                                 <?php if (!empty($movie['quality'])): ?>
-                                    <span class="bg-black/70 backdrop-blur-md text-white text-[10px] font-medium px-2 py-0.5 rounded"><?= htmlspecialchars($movie['quality']) ?></span>
+                                    <span class="bg-black/80 text-white text-[10px] font-medium px-2 py-0.5 rounded"><?= htmlspecialchars($movie['quality']) ?></span>
                                 <?php endif; ?>
                             </div>
                             
                             <?php if (!empty($movie['episode_current'])): ?>
-                                <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md text-white text-[10px] font-medium px-2 py-1 rounded">
+                                <div class="absolute bottom-2 right-2 bg-black/90 text-white text-[10px] font-medium px-2 py-1 rounded">
                                     <?= htmlspecialchars($movie['episode_current']) ?>
                                 </div>
                             <?php endif; ?>
@@ -334,7 +332,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                             <span class="text-lg font-bold <?= $rankColor ?>"><?= $rank ?></span>
                         </div>
                         <div class="w-12 h-16 shrink-0 mx-3 rounded bg-[#111] overflow-hidden">
-                            <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
+                            <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
                         </div>
                         <div class="flex-1 min-w-0">
                             <h3 class="text-sm font-medium text-gray-200 truncate group-hover:text-white transition-colors mb-0.5"><?= htmlspecialchars($item['name']) ?></h3>
