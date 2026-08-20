@@ -166,6 +166,9 @@ class CmsApiService {
         'email': email,
         'password': password,
       });
+      if (response.data == null || response.data is! Map<String, dynamic>) {
+        throw Exception('Dữ liệu từ máy chủ không hợp lệ');
+      }
       return AuthResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
@@ -183,6 +186,9 @@ class CmsApiService {
         'avatar': avatar,
         'uid': uid,
       });
+      if (response.data == null || response.data is! Map<String, dynamic>) {
+        throw Exception('Dữ liệu từ máy chủ không hợp lệ');
+      }
       return AuthResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
@@ -199,6 +205,9 @@ class CmsApiService {
         'email': email,
         'password': password,
       });
+      if (response.data == null || response.data is! Map<String, dynamic>) {
+        throw Exception('Dữ liệu từ máy chủ không hợp lệ');
+      }
       return AuthResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
