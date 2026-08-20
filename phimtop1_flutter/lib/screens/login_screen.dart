@@ -119,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 50,
                     child: OutlinedButton.icon(
                       onPressed: _loginWithGoogle,
-                      icon: Image.network('https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg', width: 24, height: 24),
+                      icon: Image.network('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png', width: 24, height: 24),
                       label: const Text("Đăng nhập bằng Google", style: TextStyle(color: Colors.white, fontSize: 16)),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.grey),
