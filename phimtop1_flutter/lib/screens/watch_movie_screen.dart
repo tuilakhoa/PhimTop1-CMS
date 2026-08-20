@@ -192,6 +192,52 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
               backgroundColor: Colors.white24,
               bufferedColor: Colors.white60,
             ),
+            additionalOptions: (optionContext) {
+              return [
+                OptionItem(
+                  onTap: (menuContext) {
+                    Navigator.pop(optionContext);
+                    SimplePip().enterPipMode();
+                  },
+                  iconData: Icons.picture_in_picture_alt,
+                  title: 'Hình trong hình (PiP)',
+                ),
+                OptionItem(
+                  onTap: (menuContext) {
+                    Navigator.pop(optionContext);
+                    if (_videoController != null) {
+                      setState(() {
+                        _isMinimizing = true;
+                      });
+                      MiniPlayerService().showMiniPlayer(
+                        context: context,
+                        controller: _videoController!,
+                        movieSlug: widget.movieSlug,
+                        episodeSlug: widget.episodeSlug,
+                        onExpand: () {
+                          _videoController?.dispose();
+                          Navigator.pushNamed(context, '/detail', arguments: widget.movieSlug);
+                        },
+                        onClose: () {
+                          _videoController?.dispose();
+                        },
+                      );
+                      Navigator.pop(context);
+                    }
+                  },
+                  iconData: Icons.fit_screen_rounded,
+                  title: 'Trình phát Mini',
+                ),
+                OptionItem(
+                  onTap: (menuContext) {
+                    Navigator.pop(optionContext);
+                    _showWatchPartyDialog();
+                  },
+                  iconData: _wpRoomCode != null ? Icons.group : Icons.group_add,
+                  title: _wpRoomCode != null ? 'Quản lý Xem Chung' : 'Phòng Xem Chung',
+                ),
+              ];
+            },
             errorBuilder: (context, errorMessage) {
               return Center(
                 child: Column(
@@ -1131,79 +1177,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     }
   }
 
-  void _showOptionsMenu() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.grey[900],
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(color: Colors.grey[600], borderRadius: BorderRadius.circular(2)),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                child: Text('Tùy chọn phim', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-              const Divider(color: Colors.white24),
-              ListTile(
-                leading: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-                title: const Text('Hình trong hình (OS PiP)', style: TextStyle(color: Colors.white)),
-                subtitle: const Text('Phát ngoài màn hình nền thiết bị', style: TextStyle(color: Colors.white54, fontSize: 12)),
-                onTap: () {
-                  Navigator.pop(context);
-                  SimplePip().enterPipMode();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.fit_screen_rounded, color: Colors.white),
-                title: const Text('Trình phát Mini', style: TextStyle(color: Colors.white)),
-                subtitle: const Text('Thu nhỏ và tiếp tục lướt ứng dụng', style: TextStyle(color: Colors.white54, fontSize: 12)),
-                onTap: () {
-                  Navigator.pop(context);
-                  if (_videoController != null) {
-                    setState(() {
-                      _isMinimizing = true;
-                    });
-                    MiniPlayerService().showMiniPlayer(
-                      context: context,
-                      controller: _videoController!,
-                      movieSlug: widget.movieSlug,
-                      episodeSlug: widget.episodeSlug,
-                      onExpand: () {
-                        _videoController?.dispose();
-                        Navigator.pushNamed(context, '/detail', arguments: widget.movieSlug);
-                      },
-                      onClose: () {
-                        _videoController?.dispose();
-                      },
-                    );
-                    Navigator.pop(context);
-                  }
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.group, color: _wpRoomCode != null ? Colors.indigoAccent : Colors.white),
-                title: Text(_wpRoomCode != null ? 'Quản lý Xem Chung' : 'Mở Phòng Xem Chung', style: const TextStyle(color: Colors.white)),
-                subtitle: Text(_wpRoomCode != null ? 'Đang trong phòng: $_wpRoomCode' : 'Xem cùng bạn bè từ xa', style: const TextStyle(color: Colors.white54, fontSize: 12)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showWatchPartyDialog();
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // Menu items moved to AppBar actions directly to avoid duplicate 3-dot menus
 
   @override
   Widget build(BuildContext context) {
@@ -1273,9 +1247,11 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
     return PipWidget(
       pipChild: Scaffold(
+        backgroundColor: Colors.black,
         body: playerWidget,
       ),
       child: Scaffold(
+        backgroundColor: Colors.black,
         appBar: isTv ? null : AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -1287,22 +1263,18 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
           actions: [
             if (_wpRoomCode != null)
               Container(
-                margin: const EdgeInsets.only(right: 8),
+                margin: const EdgeInsets.only(right: 16),
                 alignment: Alignment.center,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.green.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.green),
                   ),
-                  child: Text(_wpRoomCode!, style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)),
+                  child: Text(_wpRoomCode!, style: const TextStyle(color: Colors.green, fontSize: 13, fontWeight: FontWeight.bold)),
                 ),
               ),
-            IconButton(
-              icon: const Icon(Icons.more_vert, color: Colors.white),
-              onPressed: _showOptionsMenu,
-            ),
           ],
         ),
         body: isTv ? tvLayout : playerWidget,

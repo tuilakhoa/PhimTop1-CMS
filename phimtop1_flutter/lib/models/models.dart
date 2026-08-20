@@ -231,6 +231,24 @@ class User {
         avatar = json['avatar'],
         activeFrame = json['active_frame'],
         coins = int.tryParse(json['coins']?.toString() ?? '0') ?? 0;
+
+  User copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? avatar,
+    String? activeFrame,
+    int? coins,
+  }) {
+    return User.fromJson({
+      'id': id ?? this.id,
+      'name': name ?? this.name,
+      'email': email ?? this.email,
+      'avatar': avatar ?? this.avatar,
+      'active_frame': activeFrame ?? this.activeFrame,
+      'coins': coins ?? this.coins,
+    });
+  }
 }
 
 class AuthResponse {

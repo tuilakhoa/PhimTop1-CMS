@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:math';
 import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
 import '../models/models.dart';
@@ -175,11 +176,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showUpdateAvatarDialog(BuildContext context, AuthProvider auth) {
-    final TextEditingController urlController = TextEditingController(text: auth.currentProfile?.avatarUrl ?? '');
+    String initialUrl = '';
+    if (auth.currentProfile != null) {
+      initialUrl = auth.currentProfile!.avatarUrl;
+    } else if (auth.user != null) {
+      initialUrl = auth.user!.avatar ?? '';
+    }
+    
+    final TextEditingController urlController = TextEditingController(text: initialUrl);
     final textColor = Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
     final hintColor = Theme.of(context).brightness == Brightness.dark ? Colors.grey : Colors.grey[700];
     final dialogBg = Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.white;
     final borderColor = Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05);
+
+    void rollAvatar() {
+      final styles = ['identicon', 'monsterid', 'wavatar', 'retro', 'robohash'];
+      final randomStyle = styles[Random().nextInt(styles.length)];
+      final randomHash = List.generate(32, (index) => Random().nextInt(16).toRadixString(16)).join('');
+      urlController.text = 'https://www.gravatar.com/avatar/$randomHash?d=$randomStyle&s=200';
+    }
 
     showDialog(
       context: context,
@@ -190,7 +205,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Nhập URL ảnh mới (có thể dùng link Gravatar):', style: TextStyle(color: hintColor, fontSize: 14)),
+            Text('Nhập URL ảnh mới hoặc tạo tự động (Gravatar):', style: TextStyle(color: hintColor, fontSize: 14)),
             const SizedBox(height: 12),
             TextField(
               controller: urlController,
@@ -201,6 +216,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 filled: true,
                 fillColor: borderColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.casino, color: Colors.amber),
+                  tooltip: 'Tạo ngẫu nhiên',
+                  onPressed: rollAvatar,
+                ),
               ),
             ),
           ],
@@ -212,27 +232,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           TextButton(
             onPressed: () async {
-              if (auth.currentProfile == null || auth.token == null) return;
+              if (auth.token == null) return;
               final newUrl = urlController.text.trim();
               if (newUrl.isEmpty) return;
               
-              final profile = auth.currentProfile!;
-              // Call API
-              final success = await cmsApi.updateProfile(auth.token!, profile.id, profile.profileName, newUrl);
-              if (success) {
-                final updatedProfile = UserProfile.fromJson({
-                  'id': profile.id,
-                  'user_email': profile.userEmail,
-                  'profile_name': profile.profileName,
-                  'avatar_url': newUrl,
-                  'is_kids_mode': profile.isKidsMode ? 1 : 0,
-                  'has_pin': profile.hasPin ? 1 : 0,
-                });
-                await auth.setProfile(updatedProfile);
-                if (ctx.mounted) Navigator.pop(ctx);
-              } else {
-                if (ctx.mounted) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Lỗi khi cập nhật ảnh đại diện')));
+              if (auth.currentProfile != null) {
+                final profile = auth.currentProfile!;
+                final success = await cmsApi.updateProfile(auth.token!, profile.id, profile.profileName, newUrl);
+                if (success) {
+                  final updatedProfile = UserProfile.fromJson({
+                    'id': profile.id,
+                    'user_email': profile.userEmail,
+                    'profile_name': profile.profileName,
+                    'avatar_url': newUrl,
+                    'is_kids_mode': profile.isKidsMode ? 1 : 0,
+                    'has_pin': profile.hasPin ? 1 : 0,
+                  });
+                  await auth.setProfile(updatedProfile);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                } else {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Lỗi khi cập nhật ảnh đại diện')));
+                  }
+                }
+              } else if (auth.user != null) {
+                final success = await cmsApi.updateUserAvatar(auth.token!, newUrl);
+                if (success) {
+                  final updatedUser = auth.user!.copyWith(avatar: newUrl);
+                  await auth.updateUser(updatedUser);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                } else {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Lỗi khi cập nhật ảnh đại diện')));
+                  }
                 }
               }
             },

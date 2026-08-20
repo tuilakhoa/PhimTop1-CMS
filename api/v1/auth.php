@@ -296,5 +296,37 @@ if ($action === 'profile') {
     exit;
 }
 
+if ($action === 'update_avatar') {
+    $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    $token = str_replace('Bearer ', '', $authHeader);
+    
+    $payload = verifyToken($token);
+    if (!$payload) {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+        exit;
+    }
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    $newAvatarUrl = $input['avatar_url'] ?? '';
+    
+    if (empty($newAvatarUrl)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Missing avatar_url']);
+        exit;
+    }
+    
+    if ($pdo) {
+        $stmt = $pdo->prepare("UPDATE members SET avatar = ? WHERE id = ?");
+        if ($stmt->execute([$newAvatarUrl, $payload['user_id']])) {
+            echo json_encode(['status' => 'success']);
+            exit;
+        }
+    }
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Database error']);
+    exit;
+}
+
 http_response_code(400);
 echo json_encode(['status' => 'error', 'message' => 'Invalid action']);

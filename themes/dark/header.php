@@ -127,36 +127,39 @@ if ($pdo) {
                     </a>
                     
                     <!-- Desktop Nav Links -->
-                    <div class="hidden md:flex items-center space-x-6">
+                    <div class="hidden lg:flex items-center space-x-6">
                         <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="text-gray-300 hover:text-white transition-colors">Phim Lẻ</a>
                         <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="text-gray-300 hover:text-white transition-colors">Phim Bộ</a>
                         <a href="/bang-xep-hang" class="text-[#00E359] font-semibold hover:text-white transition-colors flex items-center" title="Bảng Xếp Hạng"><i data-lucide="trending-up" class="w-4 h-4 mr-1"></i> BXH</a>
                         <?php do_action('theme_header_menu'); ?>
                         
-                        <!-- Dropdown Thể Loại -->
+                        <!-- Dropdown Khám Phá -->
                         <div class="relative group">
-                            <button class="text-gray-300 hover:text-white transition-colors flex items-center">
-                                Thể Loại <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+                            <button class="text-gray-300 hover:text-white transition-colors flex items-center font-medium">
+                                Khám Phá <i data-lucide="grid" class="w-4 h-4 ml-1"></i>
                             </button>
-                            <div class="absolute left-0 mt-2 w-96 bg-gray-900 border border-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-50">
-                                <div class="p-4 grid grid-cols-3 gap-2">
-                                    <?php foreach ($genres as $g): ?>
-                                        <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded transition-colors truncate"><?= htmlspecialchars($g['name']) ?></a>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Dropdown Quốc Gia -->
-                        <div class="relative group">
-                            <button class="text-gray-300 hover:text-white transition-colors flex items-center">
-                                Quốc Gia <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
-                            </button>
-                            <div class="absolute left-0 mt-2 w-96 bg-gray-900 border border-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-50">
-                                <div class="p-4 grid grid-cols-3 gap-2">
-                                    <?php foreach ($countries as $c): ?>
-                                        <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded transition-colors truncate"><?= htmlspecialchars($c['name']) ?></a>
-                                    <?php endforeach; ?>
+                            <div class="absolute left-1/2 -translate-x-1/2 mt-2 w-[600px] bg-gray-900 border border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div class="p-6 flex gap-6">
+                                    <div class="flex-1">
+                                        <h3 class="text-white font-bold mb-3 flex items-center border-b border-gray-800 pb-2">
+                                            <i data-lucide="film" class="w-4 h-4 mr-2 text-red-500"></i> Thể Loại
+                                        </h3>
+                                        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                                            <?php foreach (array_slice($genres, 0, 14) as $g): ?>
+                                                <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1.5 rounded transition-colors truncate"><?= htmlspecialchars($g['name']) ?></a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 border-l border-gray-800 pl-6">
+                                        <h3 class="text-white font-bold mb-3 flex items-center border-b border-gray-800 pb-2">
+                                            <i data-lucide="globe" class="w-4 h-4 mr-2 text-blue-500"></i> Quốc Gia
+                                        </h3>
+                                        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                                            <?php foreach (array_slice($countries, 0, 14) as $c): ?>
+                                                <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1.5 rounded transition-colors truncate"><?= htmlspecialchars($c['name']) ?></a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -165,19 +168,19 @@ if ($pdo) {
                 
                 <!-- Right Section: Search & Admin -->
                 <div class="flex items-center space-x-6">
-                    <form action="/search" method="GET" class="relative hidden md:block">
+                    <form action="/search" method="GET" class="relative hidden lg:block">
                         <input type="text" name="keyword" placeholder="Tìm kiếm phim..." 
                             class="bg-gray-800/50 text-gray-200 text-sm rounded-full pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 border border-gray-700 w-64 transition-all focus:w-80">
                         <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
                     </form>
                     
                     <?php if (!empty($settings['appDownloadUrl'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="hidden md:flex items-center justify-center w-9 h-9 rounded-full bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors border border-gray-700/50 mr-2" title="Tải Ứng Dụng">
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="hidden lg:flex items-center justify-center w-9 h-9 rounded-full bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors border border-gray-700/50 mr-2" title="Tải Ứng Dụng">
                         <i data-lucide="smartphone" class="w-4 h-4"></i>
                     </a>
                     <?php endif; ?>
                     <?php if (!empty($settings['appDownloadUrlTv'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="hidden md:flex items-center justify-center w-9 h-9 rounded-full bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors border border-gray-700/50 mr-2" title="Tải App TV">
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="hidden lg:flex items-center justify-center w-9 h-9 rounded-full bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors border border-gray-700/50 mr-2" title="Tải App TV">
                         <i data-lucide="tv" class="w-4 h-4"></i>
                     </a>
                     <?php endif; ?>
@@ -185,7 +188,7 @@ if ($pdo) {
                     <?php include __DIR__ . '/../../includes/user_nav.php'; ?>
 
                     <!-- Mobile Menu Button -->
-                    <div class="md:hidden flex items-center">
+                    <div class="lg:hidden flex items-center">
                         <button id="mobileMenuBtn" class="text-gray-300 hover:text-white focus:outline-none">
                             <i data-lucide="menu" class="w-6 h-6"></i>
                         </button>
@@ -195,7 +198,7 @@ if ($pdo) {
         </div>
 
         <!-- Mobile Menu (Hidden by default) -->
-        <div id="mobileMenu" class="md:hidden hidden bg-gray-900 border-t border-gray-800 absolute w-full left-0 top-16 shadow-2xl">
+        <div id="mobileMenu" class="lg:hidden hidden bg-gray-900 border-t border-gray-800 absolute w-full left-0 top-16 shadow-2xl">
             <div class="px-4 py-4 space-y-4">
                 <form action="/search" method="GET" class="relative">
                     <input type="text" name="keyword" placeholder="Tìm kiếm phim..." 

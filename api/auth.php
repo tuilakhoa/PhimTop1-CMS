@@ -36,7 +36,8 @@ if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         $hashed = password_hash($password, PASSWORD_BCRYPT);
-        $avatar = 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=random';
+        $emailHash = md5(strtolower(trim($email)));
+        $avatar = 'https://www.gravatar.com/avatar/' . $emailHash . '?d=robohash&s=200';
         $insertStmt = $pdo->prepare("INSERT INTO members (email, name, password, avatar) VALUES (?, ?, ?, ?)");
         if ($insertStmt->execute([$email, $name, $hashed, $avatar])) {
             $_SESSION['user'] = [
@@ -61,7 +62,8 @@ if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
             $hashed = password_hash($password, PASSWORD_BCRYPT);
-            $avatar = 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=random';
+            $emailHash = md5(strtolower(trim($email)));
+            $avatar = 'https://www.gravatar.com/avatar/' . $emailHash . '?d=robohash&s=200';
             $fs->setDocument('members', $memberId, ['email' => $email, 'name' => $name, 'password' => $hashed, 'avatar' => $avatar, 'role' => 'user']);
             $_SESSION['user'] = ['email' => $email, 'name' => $name, 'avatar' => $avatar];
             header("Location: /");
@@ -127,6 +129,24 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // --- Plugin Hooks for OAuth ---
 do_action('api_auth', $action);
+
+if ($action === 'generate_avatar' && isset($_SESSION['user'])) {
+    $styles = ['identicon', 'monsterid', 'wavatar', 'retro', 'robohash'];
+    $randomStyle = $styles[array_rand($styles)];
+    $randomHash = md5(uniqid(rand(), true));
+    $newAvatarUrl = "https://www.gravatar.com/avatar/{$randomHash}?d={$randomStyle}&s=200";
+    
+    if ($pdo) {
+        $stmt = $pdo->prepare("UPDATE members SET avatar = ? WHERE email = ?");
+        if ($stmt->execute([$newAvatarUrl, $_SESSION['user']['email']])) {
+            $_SESSION['user']['avatar'] = $newAvatarUrl;
+            echo json_encode(['status' => 'success', 'avatar_url' => $newAvatarUrl]);
+            exit;
+        }
+    }
+    echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống']);
+    exit;
+}
 
 if ($action === 'logout') {
     unset($_SESSION['user']);

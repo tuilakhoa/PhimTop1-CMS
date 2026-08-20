@@ -73,7 +73,12 @@ $themePath = __DIR__ . '/themes/' . $themeName;
             <h2 class="text-4xl mb-6 font-medium">Thêm Hồ Sơ</h2>
             <p class="text-gray-400 mb-6 text-lg">Thêm một hồ sơ cho người xem khác trên tài khoản của bạn.</p>
             <div class="flex items-center gap-6 mb-8 border-t border-b border-gray-700 py-6">
-                <img src="https://ui-avatars.com/api/?name=New&background=random" class="w-24 h-24 md:w-28 md:h-28 rounded-md" alt="">
+                <div class="relative group cursor-pointer" onclick="rollAvatar()" title="Tạo avatar ngẫu nhiên">
+                    <img id="new-avatar-img" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=200" class="w-24 h-24 md:w-28 md:h-28 rounded-md bg-[#141414]" alt="">
+                    <div class="absolute inset-0 bg-black/60 text-white rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </div>
+                </div>
                 <div class="flex-1">
                     <input type="text" id="new-name" placeholder="Tên" class="w-full bg-[#333] text-white px-4 py-2 text-lg focus:outline-none">
                 </div>
@@ -162,6 +167,15 @@ $themePath = __DIR__ . '/themes/' . $themeName;
             document.getElementById('create-modal').classList.replace('hidden', 'flex');
         }
 
+        let currentTempAvatar = '';
+        function rollAvatar() {
+            const styles = ['identicon', 'monsterid', 'wavatar', 'retro', 'robohash'];
+            const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+            const hash = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
+            currentTempAvatar = `https://www.gravatar.com/avatar/${hash}?d=${randomStyle}&s=200`;
+            document.getElementById('new-avatar-img').src = currentTempAvatar;
+        }
+
         async function createProfile() {
             const name = document.getElementById('new-name').value;
             const kids = document.getElementById('kids-mode').checked ? 1 : 0;
@@ -169,7 +183,7 @@ $themePath = __DIR__ . '/themes/' . $themeName;
             
             const res = await fetch('/api/v1/profiles.php?action=create', {
                 method: 'POST',
-                body: JSON.stringify({profile_name: name, is_kids_mode: kids}),
+                body: JSON.stringify({profile_name: name, is_kids_mode: kids, avatar_url: currentTempAvatar}),
                 headers: {'Content-Type': 'application/json'}
             });
             const data = await res.json();
@@ -177,6 +191,8 @@ $themePath = __DIR__ . '/themes/' . $themeName;
                 document.getElementById('create-modal').classList.replace('flex', 'hidden');
                 document.getElementById('new-name').value = '';
                 document.getElementById('kids-mode').checked = false;
+                currentTempAvatar = '';
+                document.getElementById('new-avatar-img').src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=200';
                 fetchProfiles();
             } else {
                 alert(data.message);

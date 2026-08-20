@@ -38,6 +38,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   final TextEditingController _commentController = TextEditingController();
   final TextEditingController _episodeSearchController = TextEditingController();
   String _episodeSearchQuery = "";
+  bool _isContentExpanded = false;
 
   @override
   void initState() {
@@ -456,11 +457,32 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       ),
                     ],
                     const SizedBox(height: 24),
-                    Text(
-                      movie.content?.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '') ?? "Đang cập nhật...",
-                      style: TextStyle(color: _subtitleColor, height: 1.5, fontSize: 18),
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isContentExpanded = !_isContentExpanded;
+                        });
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            child: Text(
+                              movie.content?.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '') ?? "Đang cập nhật...",
+                              style: TextStyle(color: _subtitleColor, height: 1.5, fontSize: 18),
+                              maxLines: _isContentExpanded ? null : 4,
+                              overflow: _isContentExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _isContentExpanded ? "Thu gọn" : "Xem thêm",
+                            style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 32),
                     if (provider.episodes.isNotEmpty) ...[
@@ -477,7 +499,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                               textAlignVertical: TextAlignVertical.center,
                               decoration: InputDecoration(
                                 hintText: "Tìm kiếm tập phim...",
-                                hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 15),
+                                hintStyle: TextStyle(color: _textColor.withOpacity(0.4), fontSize: 15),
                                 prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor, size: 22),
                                 suffixIcon: _episodeSearchQuery.isNotEmpty 
                                     ? IconButton(
@@ -491,15 +513,15 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                       ) 
                                     : null,
                                 filled: true,
-                                fillColor: Colors.white.withOpacity(0.1),
+                                fillColor: _bgOpacity,
                                 contentPadding: EdgeInsets.symmetric(horizontal: 20),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(24),
-                                  borderSide: BorderSide(color: Colors.white.withOpacity(0.15), width: 1),
+                                  borderSide: BorderSide(color: _textColor.withOpacity(0.15), width: 1),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(24),
-                                  borderSide: BorderSide(color: Colors.white.withOpacity(0.15), width: 1),
+                                  borderSide: BorderSide(color: _textColor.withOpacity(0.15), width: 1),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(24),
@@ -548,7 +570,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                         duration: const Duration(milliseconds: 200),
                                         alignment: Alignment.center,
                                         decoration: BoxDecoration(
-                                          color: hasFocus ? _textColor : Colors.white.withOpacity(0.1),
+                                          color: hasFocus ? _textColor : _bgOpacity,
                                           borderRadius: BorderRadius.circular(8),
                                           border: Border.all(
                                             color: hasFocus ? _textColor : Colors.transparent,
@@ -761,9 +783,32 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 // Content
                 Text("Nội dung phim", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _textColor)),
                 const SizedBox(height: 12),
-                Text(
-                  movie.content?.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '') ?? "Đang cập nhật...",
-                  style: TextStyle(color: _subtitleColor, height: 1.6, fontSize: 15),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isContentExpanded = !_isContentExpanded;
+                    });
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: Text(
+                          movie.content?.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '') ?? "Đang cập nhật...",
+                          style: TextStyle(color: _subtitleColor, height: 1.6, fontSize: 15),
+                          maxLines: _isContentExpanded ? null : 4,
+                          overflow: _isContentExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _isContentExpanded ? "Thu gọn" : "Xem thêm",
+                        style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                    ],
+                  ),
                 ),
                 
                 const SizedBox(height: 32),
@@ -900,7 +945,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
                             hintText: "Tìm kiếm tập...",
-                            hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13),
+                            hintStyle: TextStyle(color: _textColor.withOpacity(0.4), fontSize: 13),
                             prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor, size: 20),
                             suffixIcon: _episodeSearchQuery.isNotEmpty 
                                 ? IconButton(
@@ -914,15 +959,15 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                   ) 
                                 : null,
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.08),
+                            fillColor: _bgOpacity,
                             contentPadding: EdgeInsets.symmetric(horizontal: 16),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
+                              borderSide: BorderSide(color: _textColor.withOpacity(0.1), width: 1),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
+                              borderSide: BorderSide(color: _textColor.withOpacity(0.1), width: 1),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -970,9 +1015,10 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                               duration: const Duration(milliseconds: 300),
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
+                                color: isSelected ? null : _bgOpacity,
                                 gradient: isSelected 
                                   ? LinearGradient(colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withOpacity(0.8)]) 
-                                  : LinearGradient(colors: [Colors.white.withOpacity(0.1), _bgOpacity]),
+                                  : null,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: isSelected 
                                   ? [BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.4), blurRadius: 8, spreadRadius: 1)]
@@ -1106,58 +1152,67 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ),
                   )
                 else
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: provider.comments.length,
-                    itemBuilder: (context, index) {
-                      final c = provider.comments[index];
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 24.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: Colors.white.withOpacity(0.1),
-                                  child: Text(
-                                    c.userName.isNotEmpty ? c.userName[0].toUpperCase() : "?", 
-                                    style: TextStyle(color: _textColor, fontWeight: FontWeight.bold)
-                                  ),
-                                ),
-                                if (c.activeFrameUrl != null && c.activeFrameUrl!.isNotEmpty)
-                                  Positioned.fill(
-                                    child: Image.network(
-                                      c.activeFrameUrl!,
-                                      fit: BoxFit.cover,
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 400),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.02),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white.withOpacity(0.05)),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: provider.comments.length,
+                      itemBuilder: (context, index) {
+                        final c = provider.comments[index];
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: index == provider.comments.length - 1 ? 0 : 24.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: Colors.white.withOpacity(0.1),
+                                    child: Text(
+                                      c.userName.isNotEmpty ? c.userName[0].toUpperCase() : "?", 
+                                      style: TextStyle(color: _textColor, fontWeight: FontWeight.bold)
                                     ),
                                   ),
-                              ],
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(c.userName, style: TextStyle(color: _textColor, fontWeight: FontWeight.bold, fontSize: 15)),
-                                      const SizedBox(width: 12),
-                                      Text(c.timeAgo, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(c.content, style: TextStyle(color: _subtitleColor, fontSize: 14, height: 1.4)),
+                                  if (c.activeFrameUrl != null && c.activeFrameUrl!.isNotEmpty)
+                                    Positioned.fill(
+                                      child: CachedNetworkImage(
+                                        imageUrl: c.activeFrameUrl!,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                 ],
                               ),
-                            )
-                          ],
-                        ),
-                      );
-                    },
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(c.userName, style: TextStyle(color: _textColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                                        const SizedBox(width: 12),
+                                        Text(c.timeAgo, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(c.content, style: TextStyle(color: _subtitleColor, fontSize: 14, height: 1.4)),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 const SizedBox(height: 40),
               ],

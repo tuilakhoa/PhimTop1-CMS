@@ -68,7 +68,8 @@ $pdo = getPDO();
 
 if ($action === 'list') {
     if (!$pdo) {
-        $defaultAvatar = 'https://ui-avatars.com/api/?name=' . urlencode($user['name'] ?? 'User') . '&background=random';
+        $emailHash = md5(strtolower(trim($user['email'] ?? '')));
+        $defaultAvatar = 'https://www.gravatar.com/avatar/' . $emailHash . '?d=robohash&s=200';
         echo json_encode(['status' => 'success', 'data' => [
             ['id' => 1, 'profile_name' => 'Default', 'avatar_url' => $defaultAvatar, 'is_kids_mode' => 0]
         ]]);
@@ -103,7 +104,8 @@ if ($action === 'list') {
     // Auto-create a default profile if none exists
     if (empty($profiles)) {
         $stmt = $pdo->prepare("INSERT INTO user_profiles (user_email, profile_name, is_kids_mode, avatar_url) VALUES (?, ?, 0, ?)");
-        $defaultAvatar = 'https://ui-avatars.com/api/?name=' . urlencode($user['name'] ?? 'User') . '&background=random';
+        $emailHash = md5(strtolower(trim($user['email'] ?? '')));
+        $defaultAvatar = 'https://www.gravatar.com/avatar/' . $emailHash . '?d=robohash&s=200';
         $stmt->execute([$user['email'], 'Default', $defaultAvatar]);
         
         $stmt = $pdo->prepare("SELECT * FROM user_profiles WHERE user_email = ?");
@@ -145,7 +147,8 @@ if ($action === 'create') {
         exit;
     }
 
-    $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($profileName) . '&background=random';
+    $randomHash = md5(uniqid(rand(), true));
+    $avatarUrl = !empty($input['avatar_url']) ? $input['avatar_url'] : 'https://www.gravatar.com/avatar/' . $randomHash . '?d=robohash&s=200';
     $stmt = $pdo->prepare("INSERT INTO user_profiles (user_email, profile_name, is_kids_mode, avatar_url) VALUES (?, ?, ?, ?)");
     $stmt->execute([$user['email'], $profileName, $isKidsMode, $avatarUrl]);
     
@@ -224,7 +227,8 @@ if ($action === 'select') {
         if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
             session_start();
         }
-        $defaultAvatar = 'https://ui-avatars.com/api/?name=' . urlencode($user['name'] ?? 'User') . '&background=random';
+        $emailHash = md5(strtolower(trim($user['email'] ?? '')));
+        $defaultAvatar = 'https://www.gravatar.com/avatar/' . $emailHash . '?d=robohash&s=200';
         $_SESSION['current_profile'] = ['id' => 1, 'profile_name' => 'Default', 'avatar_url' => $defaultAvatar, 'is_kids_mode' => 0];
         echo json_encode(['status' => 'success', 'profile' => $_SESSION['current_profile']]);
         exit;

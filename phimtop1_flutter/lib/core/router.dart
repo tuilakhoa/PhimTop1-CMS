@@ -48,6 +48,29 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
     navigatorKey: _rootNavigatorKey,
     initialLocation: hasAppLock ? '/app_lock' : (hasAgreed ? (hasSeenOnboarding ? '/' : '/onboarding') : '/terms'),
     observers: currentAnalytics != null ? [FirebaseAnalyticsObserver(analytics: currentAnalytics)] : [],
+    redirect: (context, state) {
+      if (state.uri.scheme == 'phimtop1' && state.uri.host == 'movie' && state.uri.pathSegments.isNotEmpty) {
+        final slug = state.uri.pathSegments.first;
+        return '/movie/$slug';
+      }
+      return null;
+    },
+    errorBuilder: (context, state) => Scaffold(
+      appBar: AppBar(title: const Text('Page Not Found')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('The page you are looking for does not exist.'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.go('/'),
+              child: const Text('Go Home'),
+            ),
+          ],
+        ),
+      ),
+    ),
   routes: <RouteBase>[
     GoRoute(
       path: '/app_lock',

@@ -165,6 +165,13 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateUser(User updatedUser) async {
+    user = updatedUser;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_avatar', updatedUser.avatar ?? '');
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();

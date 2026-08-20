@@ -137,6 +137,15 @@ class DetailProvider with ChangeNotifier {
     try {
       final response = await cmsApi.postComment(slug, content, token: token, name: name);
       if (response.success) {
+        // Optimistic update
+        comments.insert(0, CommentItem.fromJson({
+          'id': 0,
+          'user_name': name != null && name.isNotEmpty ? name : 'Ẩn danh',
+          'content': content,
+          'time_ago': 'Vừa xong',
+        }));
+        notifyListeners();
+        
         await fetchComments(slug);
         return true;
       }

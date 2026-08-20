@@ -23,7 +23,12 @@
             <?php if ($isLoggedIn): ?>
                 <div class="p-8">
                     <div class="flex items-center space-x-4 mb-8 border-b border-zinc-800/50 pb-6">
-                        <img src="<?= htmlspecialchars($user['avatar'] ?? 'https://ui-avatars.com/api/?name='.urlencode($user['name'])) ?>" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-red-500">
+                        <div class="relative group">
+                            <img id="main-user-avatar" src="<?= htmlspecialchars($user['avatar'] ?? 'https://ui-avatars.com/api/?name='.urlencode($user['name'])) ?>" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-red-500 bg-zinc-800">
+                            <button onclick="generateRandomAvatar()" class="absolute inset-0 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" title="Tạo ngẫu nhiên">
+                                <i data-lucide="dices" class="w-6 h-6"></i>
+                            </button>
+                        </div>
                         <div>
                             <h2 class="text-2xl font-bold text-white"><?= htmlspecialchars($user['name']) ?></h2>
                             <p class="text-zinc-400"><?= htmlspecialchars($user['email']) ?></p>
@@ -230,6 +235,24 @@
                 if (res.status === 'success') location.reload();
                 else alert(res.message);
             });
+        }
+        
+        function generateRandomAvatar() {
+            const btnIcon = document.querySelector('button[title="Tạo ngẫu nhiên"] i');
+            if(btnIcon) btnIcon.classList.add('animate-spin');
+            
+            fetch('/api/auth.php?action=generate_avatar')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('main-user-avatar').src = data.avatar_url;
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .finally(() => {
+                    if(btnIcon) btnIcon.classList.remove('animate-spin');
+                });
         }
         
         let currentMode = '<?= $mode ?>';
