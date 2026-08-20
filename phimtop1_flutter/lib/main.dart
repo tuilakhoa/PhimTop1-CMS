@@ -20,6 +20,8 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'dart:io';
 import 'services/tv_remote_service.dart';
 import 'package:go_router/go_router.dart';
+import 'package:app_links/app_links.dart';
+import 'dart:async';
 
 import 'firebase_options.dart';
 
@@ -113,11 +115,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final GoRouter _router;
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
     super.initState();
     _router = createRouter(widget.hasAgreed, widget.hasSeenOnboarding, widget.hasAppLock);
+    
+    _initDeepLinks();
     
     // Listen for cast commands
     TvRemoteService().onPlayCommand.listen((slug) {
@@ -131,6 +137,24 @@ class _MyAppState extends State<MyApp> {
         _router.push('/watch_direct', extra: data);
       }
     });
+  }
+
+  void _initDeepLinks() {
+    _appLinks = AppLinks();
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      if (mounted) {
+        if (uri.scheme == 'phimtop1' && uri.host == 'movie' && uri.pathSegments.isNotEmpty) {
+          final slug = uri.pathSegments.first;
+          _router.push('/movie/$slug');
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
   }
 
   @override

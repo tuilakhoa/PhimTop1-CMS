@@ -112,7 +112,7 @@ if ($pdo) {
                         <?php if (!empty($settings['logoUrl'])): ?>
                             <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" class="w-8 h-8 object-contain">
                         <?php else: ?>
-                            <div class="w-10 h-10 bg-gray-800/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                            <div class="w-10 h-10 bg-gray-800/50 rounded-xl flex items-center justify-center">
                                 <i data-lucide="monitor-play" class="w-6 h-6 text-white"></i>
                             </div>
                         <?php endif; ?>
@@ -165,13 +165,13 @@ if ($pdo) {
                     </form>
                     
                     <?php if (!empty($settings['appDownloadUrl'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="hidden md:flex items-center bg-red-600 hover:bg-red-500 text-white text-sm font-bold py-2 px-4 rounded-full transition-colors shadow-[0_0_15px_rgba(220,38,38,0.3)] border border-red-500/50 mr-2">
-                        <i data-lucide="smartphone" class="w-4 h-4 mr-1.5"></i> Tải App Mobile
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="hidden md:flex items-center justify-center w-9 h-9 rounded-full bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors border border-gray-700/50 mr-2" title="Tải Ứng Dụng">
+                        <i data-lucide="smartphone" class="w-4 h-4"></i>
                     </a>
                     <?php endif; ?>
                     <?php if (!empty($settings['appDownloadUrlTv'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="hidden md:flex items-center bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold py-2 px-4 rounded-full transition-colors border border-gray-700 mr-2">
-                        <i data-lucide="tv" class="w-4 h-4 mr-1.5"></i> Tải App TV
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="hidden md:flex items-center justify-center w-9 h-9 rounded-full bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors border border-gray-700/50 mr-2" title="Tải App TV">
+                        <i data-lucide="tv" class="w-4 h-4"></i>
                     </a>
                     <?php endif; ?>
 
@@ -202,13 +202,13 @@ if ($pdo) {
                     <?php do_action('theme_mobile_menu'); ?>
                     
                     <?php if (!empty($settings['appDownloadUrl'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-red-600/30 mt-2">
-                        <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng Mobile
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center hover:text-white mt-1">
+                        <i data-lucide="smartphone" class="w-4 h-4 mr-2 text-gray-400"></i> Tải Ứng Dụng Mobile
                     </a>
                     <?php endif; ?>
                     <?php if (!empty($settings['appDownloadUrlTv'])): ?>
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-gray-900/30 mt-2">
-                        <i data-lucide="tv" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng TV
+                    <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center hover:text-white mt-1">
+                        <i data-lucide="tv" class="w-4 h-4 mr-2 text-gray-400"></i> Tải Ứng Dụng TV
                     </a>
                     <?php endif; ?>
                     

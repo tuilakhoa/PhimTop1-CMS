@@ -255,6 +255,38 @@ if (isset($_SESSION['user'])) {
 </div>
 
 <script>
+// Smart App Banner Logic
+document.addEventListener('DOMContentLoaded', function() {
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    if (isAndroid) {
+        const intentUrl = "intent://movie/<?= urlencode($slug) ?>#Intent;scheme=phimtop1;package=com.phimtop1.app;S.browser_fallback_url=<?= urlencode($settings['appDownloadUrl'] ?? '') ?>;end;";
+        const banner = document.createElement('div');
+        banner.id = 'smart-app-banner';
+        banner.className = 'fixed bottom-0 left-0 w-full bg-[#181a20]/95 backdrop-blur-md border-t border-[#2d2f36] z-[60] flex items-center justify-between p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)] transition-transform duration-300';
+        banner.innerHTML = `
+            <div class="flex items-center space-x-3 w-[70%]">
+                <button onclick="document.getElementById('smart-app-banner').style.transform='translateY(100%)'" class="text-gray-400 hover:text-white p-1 shrink-0">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center border border-[#2d2f36] shrink-0 overflow-hidden">
+                    <img src="/phimtop1_logo_512.png" onerror="this.src='/favicon.ico'" alt="App" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col overflow-hidden">
+                    <span class="text-white text-sm font-bold leading-tight truncate">Mở trên Ứng dụng</span>
+                    <span class="text-gray-400 text-[11px] truncate">Trải nghiệm mượt mà hơn</span>
+                </div>
+            </div>
+            <a href="${intentUrl}" class="bg-[#ff8f00] text-black text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-md hover:bg-[#e68000] ml-2">Mở App</a>
+        `;
+        document.body.appendChild(banner);
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+});
+</script>
+
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     // Comments logic
     const contentInput = document.getElementById('comment-content');
