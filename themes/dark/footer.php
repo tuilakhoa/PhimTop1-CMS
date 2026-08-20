@@ -75,68 +75,7 @@
     <?php endif; ?>
     <?php do_action('cms_footer'); ?>
 
-    <!-- App Promo Popup -->
-    <?php if (!empty($settings['appDownloadUrl'])): ?>
-    <div id="appPromoPopup" class="fixed inset-0 z-[100] hidden items-center justify-center">
-        <div class="absolute inset-0 bg-black/80" onclick="closeAppPromo()"></div>
-        <div class="relative bg-gray-900 border border-gray-700 w-[90%] max-w-sm rounded-2xl shadow-xl overflow-hidden" id="appPromoModal">
-            <button onclick="closeAppPromo()" class="absolute top-3 right-3 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700 p-1.5 rounded-full z-10">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            <div class="p-6 text-center">
-                <?php if (!empty($settings['logoUrl'])): ?>
-                    <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" class="w-16 h-16 mx-auto mb-4 object-contain">
-                <?php else: ?>
-                    <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                        <i data-lucide="monitor-play" class="w-8 h-8 text-white"></i>
-                    </div>
-                <?php endif; ?>
-                <h3 class="text-xl font-bold text-white mb-2">Trải Nghiệm Tốt Hơn</h3>
-                <p class="text-sm text-gray-400 mb-6">Tải ngay ứng dụng <strong><?= htmlspecialchars($settings['siteName'] ?? 'PhimTop1') ?></strong> để xem phim mượt mà hơn và không quảng cáo!</p>
-                <div class="space-y-3">
-                    <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" onclick="closeAppPromo()" class="flex items-center justify-center w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl">
-                        <i data-lucide="download" class="w-5 h-5 mr-2"></i> Tải App Ngay
-                    </a>
-                    <button onclick="closeAppPromo()" class="w-full text-gray-400 hover:text-white text-sm font-medium py-2">
-                        Để sau
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        function closeAppPromo() {
-            const popup = document.getElementById('appPromoPopup');
-            if(popup) {
-                popup.classList.add('hidden');
-                popup.classList.remove('flex');
-            }
-            // Lưu trạng thái ẩn popup trong 24 giờ (86400000 milliseconds)
-            const expiry = new Date().getTime() + 86400000;
-            localStorage.setItem('appPromoExpiry', expiry);
-        }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const isAndroid = /Android/i.test(navigator.userAgent);
-            if (!isAndroid) return;
-
-            const expiry = localStorage.getItem('appPromoExpiry');
-            const now = new Date().getTime();
-            
-            // Nếu chưa có lịch sử đóng hoặc đã quá 24h kể từ lần đóng trước
-            if (!expiry || now > parseInt(expiry)) {
-                const popup = document.getElementById('appPromoPopup');
-                if (popup) {
-                    setTimeout(() => {
-                        popup.classList.remove('hidden');
-                        popup.classList.add('flex');
-                    }, 500); // Rút ngắn thời gian hiện xuống 0.5s, bỏ hiệu ứng mờ dần
-                }
-            }
-        });
-    </script>
-    <?php endif; ?>
 
 </body>
 </html>

@@ -29,11 +29,15 @@ class CommentRepository {
             });
             return $filtered;
         } else {
-            $sql = "SELECT * FROM comments WHERE movie_slug = ?";
+            $sql = "SELECT c.*, f.image_url as active_frame_url 
+                    FROM comments c 
+                    LEFT JOIN members m ON m.name = c.user_name 
+                    LEFT JOIN avatar_frames f ON f.id = m.active_frame_id
+                    WHERE c.movie_slug = ?";
             if ($onlyApproved) {
                 $sql .= " AND status = 'approved'";
             }
-            $sql .= " ORDER BY created_at DESC";
+            $sql .= " ORDER BY c.created_at DESC";
             
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$movieSlug]);

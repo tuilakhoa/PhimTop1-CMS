@@ -79,7 +79,7 @@ if ($action === 'login') {
             $user['id'] = $user['_id'];
         }
     } else if ($pdo) {
-        $stmt = $pdo->prepare("SELECT * FROM members WHERE email = ? LIMIT 1");
+        $stmt = $pdo->prepare("SELECT m.*, f.image_url as active_frame_url FROM members m LEFT JOIN avatar_frames f ON m.active_frame_id = f.id WHERE m.email = ? LIMIT 1");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
     } else {
@@ -98,7 +98,8 @@ if ($action === 'login') {
                 'id' => $user['id'],
                 'name' => $user['name'],
                 'email' => $user['email'],
-                'avatar' => $user['avatar']
+                'avatar' => $user['avatar'],
+                'active_frame' => $user['active_frame_url'] ?? null
             ]
         ]);
     } else {
@@ -163,7 +164,8 @@ if ($action === 'register') {
             'id' => $userId,
             'name' => $name,
             'email' => $email,
-            'avatar' => null
+            'avatar' => null,
+            'active_frame' => null
         ]
     ]);
     exit;
@@ -207,7 +209,7 @@ if ($action === 'firebase_login') {
             ]);
         }
     } else if ($pdo) {
-        $stmt = $pdo->prepare("SELECT id, role FROM members WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT m.id, m.role, f.image_url as active_frame_url FROM members m LEFT JOIN avatar_frames f ON m.active_frame_id = f.id WHERE m.email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -235,7 +237,8 @@ if ($action === 'firebase_login') {
             'id' => $userId,
             'name' => $name,
             'email' => $email,
-            'avatar' => $avatar
+            'avatar' => $avatar,
+            'active_frame' => $user['active_frame_url'] ?? null
         ]
     ]);
     exit;
@@ -258,7 +261,7 @@ if ($action === 'profile') {
         $user = $fs->getDocument('members', $payload['user_id']);
         if ($user) $user['id'] = $payload['user_id'];
     } else if ($pdo) {
-        $stmt = $pdo->prepare("SELECT id, name, email, avatar, role FROM members WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT m.id, m.name, m.email, m.avatar, m.role, f.image_url as active_frame_url FROM members m LEFT JOIN avatar_frames f ON m.active_frame_id = f.id WHERE m.id = ?");
         $stmt->execute([$payload['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
     }

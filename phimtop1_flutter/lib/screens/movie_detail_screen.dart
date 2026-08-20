@@ -1117,13 +1117,25 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.white.withOpacity(0.1),
-                              child: Text(
-                                c.userName.isNotEmpty ? c.userName[0].toUpperCase() : "?", 
-                                style: TextStyle(color: _textColor, fontWeight: FontWeight.bold)
-                              ),
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: Colors.white.withOpacity(0.1),
+                                  child: Text(
+                                    c.userName.isNotEmpty ? c.userName[0].toUpperCase() : "?", 
+                                    style: TextStyle(color: _textColor, fontWeight: FontWeight.bold)
+                                  ),
+                                ),
+                                if (c.activeFrameUrl != null && c.activeFrameUrl!.isNotEmpty)
+                                  Positioned.fill(
+                                    child: Image.network(
+                                      c.activeFrameUrl!,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                              ],
                             ),
                             const SizedBox(width: 16),
                             Expanded(

@@ -39,7 +39,19 @@ class AuthProvider with ChangeNotifier {
         cmsApi.setProfileId(currentProfile!.id.toString());
       }
       notifyListeners();
+      fetchCoins();
     }
+  }
+
+  Future<void> fetchCoins() async {
+    if (user == null || token == null) return;
+    try {
+      final coins = await cmsApi.getCoins(token!);
+      if (coins != null) {
+        user!.coins = coins;
+        notifyListeners();
+      }
+    } catch (e) {}
   }
 
   Future<bool> login(String email, String password) async {
@@ -59,8 +71,10 @@ class AuthProvider with ChangeNotifier {
         await prefs.setString('user_name', user!.name);
         await prefs.setString('user_email', user!.email);
         
+        
         isLoading = false;
         notifyListeners();
+        fetchCoins();
         return true;
       } else {
         error = response.message ?? 'Đăng nhập thất bại';
@@ -91,8 +105,10 @@ class AuthProvider with ChangeNotifier {
         await prefs.setString('user_name', user!.name);
         await prefs.setString('user_email', user!.email);
         
+        
         isLoading = false;
         notifyListeners();
+        fetchCoins();
         return true;
       } else {
         error = response.message ?? 'Đăng nhập Google thất bại';

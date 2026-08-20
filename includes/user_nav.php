@@ -3,6 +3,18 @@ if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
 $settings = getSettings();
+$coins = 0;
+if (isset($_SESSION['user'])) {
+    $pdo = getPDO();
+    if ($pdo) {
+        try {
+            $stmt = $pdo->prepare("SELECT coins FROM members WHERE email = ?");
+            $stmt->execute([$_SESSION['user']['email']]);
+            $u = $stmt->fetch();
+            if ($u) $coins = (int)$u['coins'];
+        } catch (PDOException $e) {}
+    }
+}
 ?>
 <div class="flex items-center space-x-4">
     <?php if (isset($_SESSION['user'])): ?>
@@ -32,9 +44,14 @@ $settings = getSettings();
             </button>
             <div class="absolute right-0 mt-2 w-56 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all origin-top-right transform scale-95 group-hover:scale-100 z-50">
                 <div class="p-2">
-                    <div class="px-4 py-3 border-b border-gray-800 mb-2">
-                        <p class="text-sm font-bold text-white truncate"><?= htmlspecialchars($_SESSION['user']['name']) ?></p>
-                        <p class="text-xs text-gray-400 truncate mt-0.5"><?= htmlspecialchars($_SESSION['user']['email']) ?></p>
+                    <div class="px-4 py-3 border-b border-gray-800 mb-2 flex justify-between items-center">
+                        <div class="overflow-hidden flex-1 pr-2">
+                            <p class="text-sm font-bold text-white truncate"><?= htmlspecialchars($_SESSION['user']['name']) ?></p>
+                            <p class="text-xs text-gray-400 truncate mt-0.5"><?= htmlspecialchars($_SESSION['user']['email']) ?></p>
+                        </div>
+                        <div class="text-yellow-400 text-xs font-bold bg-yellow-400/10 px-2 py-1 rounded-lg border border-yellow-400/20 whitespace-nowrap" title="Điểm thưởng khi xem phim">
+                            <span id="nav-coins"><?= $coins ?></span> <i data-lucide="coins" class="w-3 h-3 inline-block -mt-0.5"></i>
+                        </div>
                     </div>
                     <a href="/profiles.php" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors mb-1">
                         <i data-lucide="users" class="w-4 h-4 mr-2"></i> Hồ sơ người xem

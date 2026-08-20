@@ -530,6 +530,64 @@ class CmsApiService {
       return false;
     }
   }
+
+  Future<int?> getCoins(String token) async {
+    try {
+      final response = await _dio.get('api/v1/rewards.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'balance',
+      }, options: Options(headers: {'Authorization': token}));
+      if (response.data['status'] == 'success') {
+        return int.tryParse(response.data['coins']?.toString() ?? '0');
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<List<AvatarFrame>> getFrames(String token) async {
+    try {
+      final response = await _dio.get('api/v1/shop.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'list',
+      }, options: Options(headers: {'Authorization': token}));
+      if (response.data['status'] == 'success') {
+        return (response.data['data'] as List).map((e) => AvatarFrame.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<bool> buyFrame(String token, int frameId) async {
+    try {
+      final response = await _dio.post('api/v1/shop.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'buy',
+      }, data: {
+        'frame_id': frameId,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> equipFrame(String token, int frameId) async {
+    try {
+      final response = await _dio.post('api/v1/shop.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'equip',
+      }, data: {
+        'frame_id': frameId,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 // Global instance

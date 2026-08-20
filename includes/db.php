@@ -315,6 +315,30 @@ function fetchApiWithCache($url, $ttl = 900) {
     return null;
 }
 
+function isKidsModeActive() {
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        session_start();
+    }
+    if (isset($_SESSION['current_profile']['is_kids_mode']) && $_SESSION['current_profile']['is_kids_mode'] == 1) {
+        return true;
+    }
+    
+    $headers = getallheaders();
+    $profileId = $headers['X-Profile-Id'] ?? $headers['x-profile-id'] ?? '';
+    if ($profileId) {
+        $pdo = getPDO();
+        if ($pdo) {
+            $stmt = $pdo->prepare("SELECT is_kids_mode FROM user_profiles WHERE id = ?");
+            $stmt->execute([$profileId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row && $row['is_kids_mode'] == 1) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = '', $country = '', $year = '') {
     $settings = getSettings();
     $apiSource = $settings['apiSource'] ?? 'kkphim';
@@ -331,6 +355,12 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
     if (!empty($year)) $queryParams[] = "year=" . urlencode($year);
     
     $queryString = !empty($queryParams) ? '&' . implode('&', $queryParams) : '';
+    
+    $isKids = isKidsModeActive();
+    if ($isKids && $type === 'home') {
+        $type = 'the-loai';
+        $slug = 'hoat-hinh';
+    }
     
     if ($apiSource === 'nguonc') {
         if ($type === 'home') $url = "https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=$page$queryString";
@@ -397,6 +427,31 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
                 $item['thumb_url'] = $item['poster_url'] ?? '';
                 $item['poster_url'] = $temp;
             }
+        }
+    }
+    
+    if ($isKids && !empty($result['items'])) {
+        $safeSlugs = ['hoat-hinh', 'gia-dinh', 'anime', 'hoc-duong', 'thieu-nhi'];
+        if ($type !== 'the-loai' || !in_array($slug, $safeSlugs)) {
+            $safeItems = [];
+            foreach ($result['items'] as $item) {
+                $isSafe = false;
+                $cats = $item['category'] ?? (isset($item['categories']) ? $item['categories'] : []);
+                if (is_array($cats)) {
+                    foreach ($cats as $cat) {
+                        $catSlug = is_array($cat) ? ($cat['slug'] ?? '') : (is_string($cat) ? $cat : '');
+                        $catName = is_array($cat) ? ($cat['name'] ?? '') : (is_string($cat) ? $cat : '');
+                        if (in_array($catSlug, $safeSlugs) || stripos($catName, 'hoạt hình') !== false || stripos($catName, 'gia đình') !== false || stripos($catName, 'anime') !== false || stripos($catName, 'thiếu nhi') !== false) {
+                            $isSafe = true;
+                            break;
+                        }
+                    }
+                }
+                if ($isSafe) {
+                    $safeItems[] = $item;
+                }
+            }
+            $result['items'] = $safeItems;
         }
     }
     
@@ -477,6 +532,25 @@ function fetchApiMovieDetail($slug) {
             $temp = $result['movie']['thumb_url'] ?? '';
             $result['movie']['thumb_url'] = $result['movie']['poster_url'] ?? '';
             $result['movie']['poster_url'] = $temp;
+        }
+    }
+    
+    if (isKidsModeActive() && !empty($result['movie'])) {
+        $safeSlugs = ['hoat-hinh', 'gia-dinh', 'anime', 'hoc-duong', 'thieu-nhi'];
+        $isSafe = false;
+        $cats = $result['movie']['category'] ?? [];
+        if (is_array($cats)) {
+            foreach ($cats as $cat) {
+                $catSlug = is_array($cat) ? ($cat['slug'] ?? '') : (is_string($cat) ? $cat : '');
+                $catName = is_array($cat) ? ($cat['name'] ?? '') : (is_string($cat) ? $cat : '');
+                if (in_array($catSlug, $safeSlugs) || stripos($catName, 'hoạt hình') !== false || stripos($catName, 'gia đình') !== false || stripos($catName, 'anime') !== false || stripos($catName, 'thiếu nhi') !== false) {
+                    $isSafe = true;
+                    break;
+                }
+            }
+        }
+        if (!$isSafe) {
+            return null; // Restricted in Kids Mode
         }
     }
     

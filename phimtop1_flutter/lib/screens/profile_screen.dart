@@ -5,8 +5,21 @@ import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
 import '../models/models.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().fetchCoins();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,20 +73,32 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () {
                       _showUpdateAvatarDialog(context, auth);
                     },
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.grey[800],
-                      backgroundImage: auth.currentProfile != null && auth.currentProfile!.avatarUrl.isNotEmpty
-                          ? NetworkImage(auth.currentProfile!.avatarUrl)
-                          : null,
-                      child: (auth.currentProfile == null || auth.currentProfile!.avatarUrl.isEmpty)
-                          ? Text(
-                              auth.currentProfile?.profileName.isNotEmpty == true 
-                                  ? auth.currentProfile!.profileName[0].toUpperCase() 
-                                  : (user.name.isNotEmpty ? user.name[0].toUpperCase() : "?"),
-                              style: const TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
-                            )
-                          : null,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundColor: Colors.grey[800],
+                          backgroundImage: auth.currentProfile != null && auth.currentProfile!.avatarUrl.isNotEmpty
+                              ? NetworkImage(auth.currentProfile!.avatarUrl)
+                              : (user.avatar != null && user.avatar!.isNotEmpty ? NetworkImage(user.avatar!) : null),
+                          child: (auth.currentProfile == null || auth.currentProfile!.avatarUrl.isEmpty) && (user.avatar == null || user.avatar!.isEmpty)
+                              ? Text(
+                                  auth.currentProfile?.profileName.isNotEmpty == true 
+                                      ? auth.currentProfile!.profileName[0].toUpperCase() 
+                                      : (user.name.isNotEmpty ? user.name[0].toUpperCase() : "?"),
+                                  style: const TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
+                                )
+                              : null,
+                        ),
+                        if (user.activeFrame != null && user.activeFrame!.isNotEmpty)
+                          Positioned.fill(
+                            child: Image.network(
+                              user.activeFrame!,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -84,6 +109,14 @@ class ProfileScreen extends StatelessWidget {
                         Text(auth.currentProfile?.profileName ?? user.name, style: TextStyle(fontSize: 22, color: textColor, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         Text(user.email, style: TextStyle(fontSize: 16, color: hintColor)),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.stars, color: Colors.amber, size: 16),
+                            const SizedBox(width: 4),
+                            Text("Số dư: ${user.coins} Xu", style: const TextStyle(fontSize: 14, color: Colors.amber, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -96,6 +129,9 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 40),
+              _buildMenuItem(Icons.storefront, "Cửa hàng vật phẩm", () {
+                context.push('/shop');
+              }, Colors.amber, hintColor),
               _buildMenuItem(Icons.favorite, "Phim đã thích", () {
                 context.push('/follow');
               }, textColor, hintColor),

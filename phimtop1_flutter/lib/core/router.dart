@@ -25,6 +25,7 @@ import '../screens/profiles_screen.dart';
 import '../screens/app_lock_screen.dart';
 import '../screens/appearance_settings_screen.dart';
 import '../screens/download_settings_screen.dart';
+import '../screens/shop_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -174,6 +175,11 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
       path: '/select_profile',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (BuildContext context, GoRouterState state) => const ProfilesScreen(),
+    ),
+    GoRoute(
+      path: '/shop',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (BuildContext context, GoRouterState state) => const ShopScreen(),
     ),
   ],
 );

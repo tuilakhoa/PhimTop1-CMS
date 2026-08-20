@@ -221,12 +221,16 @@ class User {
   final String name;
   final String email;
   final String? avatar;
+  final String? activeFrame;
+  int coins;
 
   User.fromJson(Map<String, dynamic> json)
       : id = json['id']?.toString() ?? '',
         name = json['name'] ?? '',
         email = json['email'] ?? '',
-        avatar = json['avatar'];
+        avatar = json['avatar'],
+        activeFrame = json['active_frame'],
+        coins = int.tryParse(json['coins']?.toString() ?? '0') ?? 0;
 }
 
 class AuthResponse {
@@ -247,12 +251,14 @@ class CommentItem {
   final String userName;
   final String content;
   final String timeAgo;
+  final String? activeFrameUrl;
 
   CommentItem.fromJson(Map<String, dynamic> json)
       : id = int.tryParse(json['id']?.toString() ?? '') ?? 0,
         userName = json['user_name'] ?? '',
         content = json['content'] ?? '',
-        timeAgo = json['time_ago'] ?? '';
+        timeAgo = json['time_ago'] ?? '',
+        activeFrameUrl = json['active_frame_url'];
 }
 
 class CommentResponse {
@@ -458,4 +464,21 @@ class UserProfile {
         avatarUrl = json['avatar_url'] ?? '',
         isKidsMode = (json['is_kids_mode']?.toString() == '1'),
         hasPin = (json['has_pin']?.toString() == '1');
+}
+
+class AvatarFrame {
+  final int id;
+  final String name;
+  final String imageUrl;
+  final int price;
+  final bool isOwned;
+  final bool isActive;
+
+  AvatarFrame.fromJson(Map<String, dynamic> json)
+      : id = int.tryParse(json['id']?.toString() ?? '') ?? 0,
+        name = json['name'] ?? '',
+        imageUrl = json['image_url'] ?? '',
+        price = int.tryParse(json['price']?.toString() ?? '0') ?? 0,
+        isOwned = json['is_owned'] == true || json['is_owned'] == 1,
+        isActive = json['is_active'] == true || json['is_active'] == 1;
 }
