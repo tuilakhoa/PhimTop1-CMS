@@ -610,6 +610,20 @@ class CmsApiService {
       return false;
     }
   }
+
+  Future<bool> linkGoogle(String token, String uid) async {
+    try {
+      final response = await _dio.post('api/v1/auth.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'link_google',
+      }, data: {
+        'uid': uid,
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data['status'] == 'success';
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 // Global instance

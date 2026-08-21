@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:math';
 import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
+import '../services/auth_service.dart';
 import '../models/models.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -148,6 +149,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildMenuItem(Icons.download_done, "Phim đã tải", () {
                 context.push('/downloads');
               }, textColor, hintColor),
+              _buildMenuItem(Icons.link, "Liên kết Google", () async {
+                final authService = AuthService();
+                final credential = await authService.signInWithGoogle();
+                if (credential != null && credential.user != null) {
+                  final uid = credential.user!.uid;
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đang liên kết...")));
+                    final success = await context.read<AuthProvider>().linkGoogle(uid);
+                    if (context.mounted) {
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Liên kết tài khoản Google thành công!")));
+                      } else {
+                        final error = context.read<AuthProvider>().error ?? "Lỗi không xác định";
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+                      }
+                    }
+                  }
+                }
+              }, Colors.blueAccent, hintColor),
               _buildMenuItem(Icons.settings, "Cài đặt", () {
                 context.push('/settings');
               }, textColor, hintColor),

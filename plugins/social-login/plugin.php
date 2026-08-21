@@ -110,18 +110,43 @@ add_action('admin_social_login_buttons', function() {
 });
 
 // Helper function for user upsert
-function plugin_social_login_upsert_user($email, $name, $avatar) {
+function plugin_social_login_upsert_user($email, $name, $avatar, $providerId = null) {
     $pdo = getPDO();
     if ($pdo) {
-        $stmt = $pdo->prepare("SELECT id, role, name, avatar FROM members WHERE email = ?");
-        $stmt->execute([$email]);
+        // Ensure google_id column exists
+        try {
+            $pdo->query("SELECT google_id FROM members LIMIT 1");
+        } catch (PDOException $e) {
+            try { $pdo->exec("ALTER TABLE members ADD COLUMN google_id VARCHAR(255) DEFAULT NULL"); } catch (PDOException $ex) {}
+            try { $pdo->exec("ALTER TABLE members ADD UNIQUE KEY unique_google_id (google_id)"); } catch (PDOException $ex) {}
+        }
+        
+        $stmt = null;
+        if ($providerId) {
+            $stmt = $pdo->prepare("SELECT id, role, name, avatar FROM members WHERE google_id = ? OR (email = ? AND email != '') LIMIT 1");
+            $stmt->execute([$providerId, $email]);
+        } else {
+            $stmt = $pdo->prepare("SELECT id, role, name, avatar FROM members WHERE email = ? LIMIT 1");
+            $stmt->execute([$email]);
+        }
+        
         $user = $stmt->fetch();
         if ($user) {
-            $updateStmt = $pdo->prepare("UPDATE members SET name = ?, avatar = ? WHERE email = ?");
-            $updateStmt->execute([$name, $avatar, $email]);
+            if ($providerId) {
+                $updateStmt = $pdo->prepare("UPDATE members SET name = ?, avatar = ?, google_id = ? WHERE id = ?");
+                $updateStmt->execute([$name, $avatar, $providerId, $user['id']]);
+            } else {
+                $updateStmt = $pdo->prepare("UPDATE members SET name = ?, avatar = ? WHERE id = ?");
+                $updateStmt->execute([$name, $avatar, $user['id']]);
+            }
         } else {
-            $insertStmt = $pdo->prepare("INSERT INTO members (email, name, avatar) VALUES (?, ?, ?)");
-            $insertStmt->execute([$email, $name, $avatar]);
+            if ($providerId) {
+                $insertStmt = $pdo->prepare("INSERT INTO members (email, name, avatar, google_id) VALUES (?, ?, ?, ?)");
+                $insertStmt->execute([$email, $name, $avatar, $providerId]);
+            } else {
+                $insertStmt = $pdo->prepare("INSERT INTO members (email, name, avatar) VALUES (?, ?, ?)");
+                $insertStmt->execute([$email, $name, $avatar]);
+            }
             $user = ['role' => 'user'];
         }
         return $user;
@@ -130,14 +155,33 @@ function plugin_social_login_upsert_user($email, $name, $avatar) {
         if ($config && isset($config['type']) && $config['type'] === 'firestore') {
             require_once __DIR__ . '/../../includes/firestore_helper.php';
             $fs = new FirestoreClient($config['projectId'], $config['serviceAccount']);
-            $memberId = md5($email);
-            $user = $fs->getDocument('members', $memberId);
+            $user = null;
+            $memberId = null;
+            
+            if ($providerId) {
+                $results = $fs->runQuery('members', 'google_id', 'EQUAL', $providerId, 1);
+                if (empty($results) && !empty($email)) {
+                    $results = $fs->runQuery('members', 'email', 'EQUAL', $email, 1);
+                }
+                if (!empty($results)) {
+                    $user = $results[0];
+                    $memberId = $user['_id'];
+                }
+            } else {
+                $memberId = md5($email);
+                $user = $fs->getDocument('members', $memberId);
+            }
+            
             if ($user) {
                 $user['name'] = $name; 
                 $user['avatar'] = $avatar;
+                if ($providerId) $user['google_id'] = $providerId;
+                if (!$memberId) $memberId = $user['_id'];
                 $fs->setDocument('members', $memberId, $user);
             } else {
+                $memberId = $providerId ? md5($providerId) : md5($email);
                 $user = ['email' => $email, 'name' => $name, 'avatar' => $avatar, 'role' => 'user'];
+                if ($providerId) $user['google_id'] = $providerId;
                 $fs->setDocument('members', $memberId, $user);
             }
             return $user;
@@ -148,7 +192,7 @@ function plugin_social_login_upsert_user($email, $name, $avatar) {
 
 // Handle API Auth (Frontend)
 add_action('api_auth', function($action) {
-    if (!in_array($action, ['google_login', 'google_callback', 'microsoft_login', 'microsoft_callback'])) return;
+    if (!in_array($action, ['google_login', 'google_link', 'google_callback', 'microsoft_login', 'microsoft_callback'])) return;
     
     $settings = getSettings();
     $googleClientId = $settings['googleClientId'] ?? '';
@@ -162,8 +206,8 @@ add_action('api_auth', function($action) {
     $googleRedirectUri = ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=google_callback';
     $msRedirectUri = ($_SERVER['HTTP_HOST'] === 'localhost' ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . '/api/auth.php?action=microsoft_callback';
 
-    // Google Start
-    if ($action === 'google_login') {
+    // Google Start & Link
+    if ($action === 'google_login' || $action === 'google_link') {
         if (!$enableGoogleLogin) die('Tính năng đăng nhập Google đã bị tắt.');
         if (!$googleClientId || !$googleClientSecret) die('Google OAuth chưa được cấu hình. Vui lòng liên hệ quản trị viên.');
         
@@ -173,7 +217,8 @@ add_action('api_auth', function($action) {
             'client_id' => $googleClientId,
             'redirect_uri' => $googleRedirectUri,
             'scope' => 'email profile',
-            'prompt' => 'select_account'
+            'prompt' => 'select_account',
+            'state' => ($action === 'google_link') ? 'link' : ''
         ]);
         header("Location: " . $authUrl);
         exit;
@@ -209,22 +254,37 @@ add_action('api_auth', function($action) {
                 $email = $userInfo['email'];
                 $name = $userInfo['name'] ?? 'User';
                 $avatar = $userInfo['picture'] ?? '';
+                $googleId = $userInfo['id'] ?? null;
                 
-                $user = plugin_social_login_upsert_user($email, $name, $avatar);
-                
-                $_SESSION['user'] = [
-                    'email' => $email,
-                    'name' => $name,
-                    'avatar' => $avatar
-                ];
-                if (!empty($user) && ($user['role'] ?? 'user') === 'admin') {
-                    $_SESSION['admin'] = $email;
+                if (isset($_GET['state']) && $_GET['state'] === 'link') {
+                    // Linking to existing account
+                    if (!isset($_SESSION['user'])) {
+                        die('Bạn cần đăng nhập để liên kết tài khoản.');
+                    }
+                    $currentUserEmail = $_SESSION['user']['email'];
+                    $user = plugin_social_login_upsert_user($currentUserEmail, $name, $avatar, $googleId);
+                    
+                    $referer = $_SESSION['auth_referer'] ?? '/profile.php';
+                    unset($_SESSION['auth_referer']);
+                    header("Location: " . $referer);
+                    exit;
+                } else {
+                    $user = plugin_social_login_upsert_user($email, $name, $avatar, $googleId);
+                    
+                    $_SESSION['user'] = [
+                        'email' => $email,
+                        'name' => $name,
+                        'avatar' => $avatar
+                    ];
+                    if (!empty($user) && ($user['role'] ?? 'user') === 'admin') {
+                        $_SESSION['admin'] = $email;
+                    }
+                    
+                    $referer = $_SESSION['auth_referer'] ?? '/';
+                    unset($_SESSION['auth_referer']);
+                    header("Location: " . $referer);
+                    exit;
                 }
-                
-                $referer = $_SESSION['auth_referer'] ?? '/';
-                unset($_SESSION['auth_referer']);
-                header("Location: " . $referer);
-                exit;
             } else {
                 die('Không thể lấy thông tin email từ Google.');
             }
@@ -359,7 +419,8 @@ add_action('admin_login_auth', function($action) {
             $userInfo = json_decode($userResponse, true);
             if (isset($userInfo['email'])) {
                 $email = $userInfo['email'];
-                $user = plugin_social_login_upsert_user($email, $userInfo['name'] ?? 'Admin', $userInfo['picture'] ?? '');
+                $googleId = $userInfo['id'] ?? null;
+                $user = plugin_social_login_upsert_user($email, $userInfo['name'] ?? 'Admin', $userInfo['picture'] ?? '', $googleId);
 
                 if ($user && ($user['role'] ?? 'user') === 'admin') {
                     $_SESSION['admin'] = $email;

@@ -122,6 +122,30 @@ class AuthProvider with ChangeNotifier {
     return false;
   }
 
+  Future<bool> linkGoogle(String uid) async {
+    if (token == null) return false;
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final success = await cmsApi.linkGoogle(token!, uid);
+      if (success) {
+        isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        error = 'Liên kết Google thất bại hoặc tài khoản này đã được liên kết';
+      }
+    } catch (e) {
+      error = e.toString();
+    }
+    
+    isLoading = false;
+    notifyListeners();
+    return false;
+  }
+
   Future<bool> register(String name, String email, String password) async {
     isLoading = true;
     error = null;
