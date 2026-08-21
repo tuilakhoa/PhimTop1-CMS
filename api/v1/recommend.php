@@ -10,8 +10,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../../includes/db.php';
-require_once __DIR__ . '/history.php'; // To reuse verifyToken and get user
 
+// Authenticate user without forcing exit
+$headers = getallheaders();
+$authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+$token = str_replace('Bearer ', '', $authHeader);
+
+if (!function_exists('verifyToken')) {
+    function verifyToken($token) {
+        global $jwtSecret;
+        $parts = explode('.', $token);
+        if (count($parts) !== 3) return null;
+        
+        $signature = hash_hmac('sha256', $parts[0] . "." . $parts[1], $jwtSecret, true);
+        $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+        
+        if (hash_equals($base64UrlSignature, $parts[2])) {
+            $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $parts[1])), true);
+            if (isset($payload['exp']) && $payload['exp'] >= time()) {
+                return $payload;
+            }
+        }
+        return null;
+    }
+}
+
+$user = verifyToken($token);
+
+if (!$user) {
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        session_start();
+    }
+    if (isset($_SESSION['user'])) {
+        $user = $_SESSION['user'];
+    }
+}
 $pdo = getPDO();
 $action = $_GET['action'] ?? 'personal';
 $limit = (int)($_GET['limit'] ?? 12);
