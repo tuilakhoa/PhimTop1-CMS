@@ -265,7 +265,11 @@ if (isset($_SESSION['user'])) {
                                         <?php endif; ?>
                                         <i data-lucide="play" class="w-4 h-4 relative z-10 <?= $iconClass ?>"></i>
                                     </div>
-                                    <span class="text-sm transition-colors font-medium <?= $textClass ?>">Tập <?= htmlspecialchars($e['name']) ?></span>
+                                    <?php 
+                                        $epName = trim($e['name']);
+                                        $displayEpName = (stripos($epName, 'tập') === 0 || stripos($epName, 'tap') === 0 || stripos($epName, 'ep') === 0) ? $epName : 'Tập ' . $epName;
+                                    ?>
+                                    <span class="text-sm transition-colors font-medium <?= $textClass ?>"><?= htmlspecialchars($displayEpName) ?></span>
                                 </div>
                                 <span class="bg-black/50 text-[10px] text-gray-400 px-1.5 py-0.5 rounded group-hover:bg-[#ff8f00] group-hover:text-black transition-colors">VIP</span>
                             </a>

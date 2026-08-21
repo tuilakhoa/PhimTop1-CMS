@@ -221,7 +221,11 @@ if (!empty($episodes[0]['server_data'])) {
                                         <img src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '')) ?>" alt="" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-10 transition-opacity">
                                         <i data-lucide="play" class="w-4 h-4 relative z-10 text-white group-hover:text-[#ff8f00] hidden group-hover:block"></i>
                                     </div>
-                                    <span class="text-sm text-gray-300 group-hover:text-[#ff8f00] transition-colors font-medium">Tập <?= htmlspecialchars($e['name']) ?></span>
+                                    <?php 
+                                        $epName = trim($e['name']);
+                                        $displayEpName = (stripos($epName, 'tập') === 0 || stripos($epName, 'tap') === 0 || stripos($epName, 'ep') === 0) ? $epName : 'Tập ' . $epName;
+                                    ?>
+                                    <span class="text-sm text-gray-300 group-hover:text-[#ff8f00] transition-colors font-medium"><?= htmlspecialchars($displayEpName) ?></span>
                                 </div>
                                 <span class="bg-[#2d2f36] text-[10px] text-gray-400 px-1.5 py-0.5 rounded group-hover:bg-[#ff8f00] group-hover:text-black transition-colors">VIP</span>
                             </a>

@@ -96,10 +96,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                         </div>
                     <?php endforeach; ?>
                 </div>
-                <!-- Minimalist Pagination -->
-                <div class="absolute bottom-0 left-0 w-full h-1 bg-white/10 z-50">
-                    <div class="hero-progress-line h-full bg-white w-0 transition-all duration-75 ease-linear"></div>
-                </div>
+
                 <div class="swiper-pagination !bottom-8 opacity-70"></div>
             </div>
             
@@ -117,14 +114,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                                 next: { translate: ['100%', 0, 0] }
                             },
                             pagination: { el: '.swiper-hero .swiper-pagination', clickable: true },
-                            on: {
-                                autoplayTimeLeft(s, time, progress) {
-                                    const progressLine = document.querySelector('.hero-progress-line');
-                                    if(progressLine) {
-                                        progressLine.style.width = ((1 - progress) * 100) + '%';
-                                    }
-                                }
-                            }
+
                         });
                     }
                 });
