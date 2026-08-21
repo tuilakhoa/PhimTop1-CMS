@@ -54,30 +54,67 @@ if (isset($_SESSION['user'])) {
         <div class="w-full bg-black rounded-xl overflow-hidden shadow-2xl border border-[#2d2f36]">
                     <div class="aspect-video w-full relative flex items-center justify-center group" id="player-container">
                         <?php if ($isM3U8): ?>
-                            <video id="video-player" class="w-full h-full outline-none bg-black" controls playsinline>
-                                <source src="<?= htmlspecialchars($videoUrl) ?>" type="application/x-mpegURL">
-                            </video>
+                            <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+                            <style>
+                                :root { --plyr-color-main: #ff8f00; } /* Dark theme yellow */
+                                .plyr { border-radius: 0.75rem; overflow: hidden; height: 100%; width: 100%; }
+                            </style>
+                            <video id="video-player" class="w-full h-full outline-none bg-black" playsinline></video>
+                            <!-- Thư viện Hls.js và Plyr -->
                             <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+                            <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
                             <script>
-                                var video = document.getElementById('video-player');
-                                var videoSrc = "<?= addslashes($videoUrl) ?>";
-                                var startTime = <?= $startTime ?>;
-                                
-                                if (Hls.isSupported()) {
-                                    var hls = new Hls();
-                                    hls.loadSource(videoSrc);
-                                    hls.attachMedia(video);
-                                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                                        if (startTime > 0) video.currentTime = startTime;
-                                        video.play().catch(e => console.log("Auto-play blocked"));
-                                    });
-                                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                                    video.src = videoSrc;
-                                    video.addEventListener('loadedmetadata', function() {
-                                        if (startTime > 0) video.currentTime = startTime;
-                                        video.play().catch(e => console.log("Auto-play blocked"));
-                                    });
-                                }
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const video = document.getElementById('video-player');
+                                    const source = "<?= addslashes($videoUrl) ?>";
+                                    let startTime = <?= $startTime ?>;
+                                    
+                                    if (Hls.isSupported()) {
+                                        const hls = new Hls();
+                                        hls.loadSource(source);
+                                        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                                            const availableQualities = hls.levels.map((l) => l.height);
+                                            let plyrOptions = {
+                                                i18n: { quality: 'Chất lượng', speed: 'Tốc độ', normal: 'Bình thường' }
+                                            };
+                                            
+                                            if (availableQualities.length > 1) {
+                                                availableQualities.unshift(0); // 0 = Auto
+                                                plyrOptions.quality = {
+                                                    default: 0,
+                                                    options: availableQualities,
+                                                    forced: true,
+                                                    onChange: (newQuality) => {
+                                                        if (newQuality === 0) {
+                                                            window.hls.currentLevel = -1; // Auto
+                                                        } else {
+                                                            window.hls.levels.forEach((level, levelIndex) => {
+                                                                if (level.height === newQuality) {
+                                                                    window.hls.currentLevel = levelIndex;
+                                                                }
+                                                            });
+                                                        }
+                                                    }
+                                                };
+                                                plyrOptions.i18n.qualityLabel = { 0: 'Tự động' };
+                                            }
+                                            
+                                            const player = new Plyr(video, plyrOptions);
+                                            window.hls = hls;
+                                            
+                                            if (startTime > 0) {
+                                                player.once('canplay', () => { player.currentTime = startTime; });
+                                            }
+                                        });
+                                        hls.attachMedia(video);
+                                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                                        video.src = source;
+                                        const player = new Plyr(video);
+                                        if (startTime > 0) {
+                                            player.once('canplay', () => { player.currentTime = startTime; });
+                                        }
+                                    }
+                                });
                             </script>
                         <?php elseif (!empty($currentEp['link_embed'])): ?>
                             <iframe src="<?= htmlspecialchars($currentEp['link_embed']) ?>" 
@@ -742,26 +779,33 @@ function startWpSync() {
 </script>
 
 <!-- Download App Modal -->
-<div id="download-app-modal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col items-center justify-center">
-    <div class="bg-[#181a20] border border-[#2d2f36] rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center mx-4">
-        <button onclick="document.getElementById('download-app-modal').classList.add('hidden'); document.getElementById('download-app-modal').classList.remove('flex');" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-            <i data-lucide="x" class="w-5 h-5"></i>
+<div id="download-app-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center p-4 transition-opacity">
+    <div class="bg-[#181a20]/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative text-center mx-4">
+        <button onclick="document.getElementById('download-app-modal').classList.add('hidden'); document.getElementById('download-app-modal').classList.remove('flex');" class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-full p-1.5 z-10">
+            <i data-lucide="x" class="w-4 h-4"></i>
         </button>
-        <div class="w-16 h-16 bg-[#22242d] rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#2d2f36]">
-            <i data-lucide="download-cloud" class="w-8 h-8 text-[#ff8f00]"></i>
+        <div class="w-12 h-12 bg-[#ff8f00]/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#ff8f00]/20">
+            <i data-lucide="download-cloud" class="w-6 h-6 text-[#ff8f00]"></i>
         </div>
-        <h3 class="text-xl font-bold text-white mb-2">Tải phim ngoại tuyến</h3>
-        <p class="text-sm text-gray-400 mb-6">Tính năng tải phim siêu tốc độ cao và xem offline không quảng cáo chỉ có trên ứng dụng PhimTop1. Trải nghiệm ngay!</p>
+        <h3 class="text-lg font-bold text-white mb-1.5 tracking-tight">Tải phim ngoại tuyến</h3>
+        <p class="text-xs text-gray-400 mb-5 px-2">Tính năng tải phim siêu tốc độ cao và xem offline không quảng cáo chỉ có trên ứng dụng PhimTop1. Trải nghiệm ngay!</p>
         
         <?php
         $intentUrlModal = "intent://movie/" . urlencode($slug) . "#Intent;scheme=phimtop1;package=com.phimtop1.app;S.browser_fallback_url=" . urlencode($settings['appDownloadUrl'] ?? '') . ";end;";
         ?>
-        <a href="<?= $intentUrlModal ?>" class="w-full bg-[#ff8f00] hover:bg-[#e68000] text-black py-3 rounded-lg font-bold transition-colors flex items-center justify-center mb-3">
-            <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Mở trong Ứng dụng
-        </a>
-        <a href="<?= htmlspecialchars($settings['appDownloadUrl'] ?? '#') ?>" target="_blank" class="w-full bg-[#2d2f36] hover:bg-[#3d3f46] text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
-            Tải bản APK
-        </a>
+        <div class="flex flex-col gap-2.5">
+            <a href="<?= $intentUrlModal ?>" class="flex items-center justify-between w-full bg-[#ff8f00] hover:bg-[#ffaa33] text-black py-2.5 px-4 rounded-xl font-semibold transition-all">
+                <div class="flex items-center text-sm">
+                    <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> Mở trong Ứng dụng
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </a>
+            <a href="<?= htmlspecialchars($settings['appDownloadUrl'] ?? '#') ?>" target="_blank" class="flex items-center justify-between w-full bg-white/5 hover:bg-white/10 text-gray-200 py-2.5 px-4 rounded-xl font-medium transition-all border border-white/10">
+                <div class="flex items-center text-sm">
+                    <i data-lucide="download" class="w-4 h-4 mr-2"></i> Tải bản APK
+                </div>
+            </a>
+        </div>
     </div>
 </div>
 

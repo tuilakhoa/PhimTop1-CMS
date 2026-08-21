@@ -97,6 +97,9 @@ if (empty($featuredMovies) && !empty($movies)) {
                     <?php endforeach; ?>
                 </div>
                 <!-- Minimalist Pagination -->
+                <div class="absolute bottom-0 left-0 w-full h-1 bg-white/10 z-50">
+                    <div class="hero-progress-line h-full bg-white w-0 transition-all duration-75 ease-linear"></div>
+                </div>
                 <div class="swiper-pagination !bottom-8 opacity-70"></div>
             </div>
             
@@ -108,7 +111,20 @@ if (empty($featuredMovies) && !empty($movies)) {
                             slidesPerView: 1,
                             loop: true,
                             autoplay: { delay: 6000, disableOnInteraction: false },
-                            pagination: { el: '.swiper-hero .swiper-pagination', clickable: true }
+                            effect: 'creative',
+                            creativeEffect: {
+                                prev: { shadow: true, translate: ['-20%', 0, -1] },
+                                next: { translate: ['100%', 0, 0] }
+                            },
+                            pagination: { el: '.swiper-hero .swiper-pagination', clickable: true },
+                            on: {
+                                autoplayTimeLeft(s, time, progress) {
+                                    const progressLine = document.querySelector('.hero-progress-line');
+                                    if(progressLine) {
+                                        progressLine.style.width = ((1 - progress) * 100) + '%';
+                                    }
+                                }
+                            }
                         });
                     }
                 });
@@ -197,14 +213,21 @@ if (empty($featuredMovies) && !empty($movies)) {
             <?php endif; ?>
 
             <!-- AI Recommend Section -->
-            <div id="ai-recommend-container" class="mb-12 hidden">
+            <div id="ai-recommend-container" class="mb-12">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-white tracking-tight flex items-center">
                         <i data-lucide="sparkles" class="w-6 h-6 mr-2 text-cyan-400"></i> Dành Riêng Cho Bạn
                     </h2>
                 </div>
                 <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-4" id="ai-recommend-list">
-                    <!-- JS will populate -->
+                    <!-- Skeleton Loader to prevent layout shift -->
+                    <?php for($i=0; $i<6; $i++): ?>
+                        <div class="group shrink-0 w-40 sm:w-48 block">
+                            <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] animate-pulse mb-3 border border-gray-800"></div>
+                            <div class="h-4 bg-[#111] animate-pulse rounded w-3/4 mb-1"></div>
+                            <div class="h-3 bg-[#111] animate-pulse rounded w-1/2"></div>
+                        </div>
+                    <?php endfor; ?>
                 </div>
             </div>
             <script>
