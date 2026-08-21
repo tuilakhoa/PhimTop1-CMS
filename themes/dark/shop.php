@@ -3,10 +3,16 @@ require_once __DIR__ . '/header.php';
 
 $pdo = getPDO();
 $userEmail = $_SESSION['user']['email'];
-$stmt = $pdo->prepare("SELECT coins FROM members WHERE email = ?");
-$stmt->execute([$userEmail]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
-$coins = $user ? (int)$user['coins'] : 0;
+try {
+    $stmt = $pdo->prepare("SELECT coins FROM members WHERE email = ?");
+    $stmt->execute([$userEmail]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $coins = $user ? (int)$user['coins'] : 0;
+} catch (PDOException $e) {
+    try { $pdo->exec("ALTER TABLE members ADD COLUMN coins INT DEFAULT 0"); } catch (PDOException $ex) {}
+    try { $pdo->exec("ALTER TABLE members ADD COLUMN active_frame_id INT DEFAULT NULL"); } catch (PDOException $ex) {}
+    $coins = 0;
+}
 ?>
 
 <!-- Load SweetAlert2 -->
@@ -47,7 +53,7 @@ function loadShop() {
     document.getElementById('loading').style.display = 'flex';
     document.getElementById('shopContainer').innerHTML = '';
     
-    fetch('/api/v1/shop.php?action=list')
+    fetch('/api/v1/shop.php?action=list', { credentials: 'same-origin' })
         .then(res => res.json())
         .then(data => {
             document.getElementById('loading').style.display = 'none';
@@ -126,6 +132,7 @@ function buyItem(id, price, name) {
             
             fetch('/api/v1/shop.php?action=buy', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({frame_id: id})
             })
@@ -155,6 +162,7 @@ function equipItem(id, equip) {
             
     fetch('/api/v1/shop.php?action=equip', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({frame_id: equip ? id : 0})
     })

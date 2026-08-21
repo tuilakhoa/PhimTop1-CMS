@@ -62,6 +62,15 @@ if (!$pdo) {
 
 // Check and run migrations if table doesn't exist
 try {
+    $pdo->query("SELECT active_frame_id, coins FROM members LIMIT 1");
+} catch (PDOException $e) {
+    // Ensure columns exist (fallback for MySQL versions that don't support IF NOT EXISTS for ADD COLUMN)
+    try { $pdo->exec("ALTER TABLE members ADD COLUMN coins INT DEFAULT 0"); } catch (PDOException $ex) {}
+    try { $pdo->exec("ALTER TABLE members ADD COLUMN last_reward_time TIMESTAMP NULL DEFAULT NULL"); } catch (PDOException $ex) {}
+    try { $pdo->exec("ALTER TABLE members ADD COLUMN active_frame_id INT DEFAULT NULL"); } catch (PDOException $ex) {}
+}
+
+try {
     $pdo->query("SELECT 1 FROM avatar_frames LIMIT 1");
 } catch (PDOException $e) {
     require_once __DIR__ . '/../../includes/migrate.php';

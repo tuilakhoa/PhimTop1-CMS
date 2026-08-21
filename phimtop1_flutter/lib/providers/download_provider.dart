@@ -280,12 +280,8 @@ class DownloadProvider extends ChangeNotifier {
       }
 
       final prefs = await SharedPreferences.getInstance();
-      int threadLevel = prefs.getInt('download_thread_level') ?? 0;
-      if (threadLevel == 0) {
-        bool multiThread = prefs.getBool('multi_thread_download') ?? false;
-        threadLevel = multiThread ? 5 : 1;
-      }
-      int maxConcurrent = threadLevel;
+      
+      final lines = m3u8Content.split('\n');
 
       List<String> newM3u8Lines = [];
       List<Map<String, dynamic>> segmentsToDownload = [];
@@ -361,10 +357,20 @@ class DownloadProvider extends ChangeNotifier {
         notifyListeners();
       }
 
-      for (int i = 0; i < segmentsToDownload.length; i += maxConcurrent) {
+      int i = 0;
+      while (i < segmentsToDownload.length) {
+        await prefs.reload();
+        int threadLevel = prefs.getInt('download_thread_level') ?? 0;
+        if (threadLevel == 0) {
+          bool multiThread = prefs.getBool('multi_thread_download') ?? false;
+          threadLevel = multiThread ? 5 : 1;
+        }
+        int maxConcurrent = threadLevel;
+
         int end = (i + maxConcurrent < segmentsToDownload.length) ? i + maxConcurrent : segmentsToDownload.length;
         var batch = segmentsToDownload.sublist(i, end);
         await Future.wait(batch.map((seg) => downloadSegment(seg)));
+        i = end;
       }
 
       final localM3u8File = File('${movieDir.path}/index.m3u8');
