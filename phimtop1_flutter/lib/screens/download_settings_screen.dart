@@ -143,21 +143,49 @@ class _DownloadSettingsScreenState extends State<DownloadSettingsScreen> {
                   ),
                 ),
                 Divider(color: isDark ? Colors.grey[800] : Colors.grey[300], height: 1),
-                FutureBuilder<bool>(
-                  future: SharedPreferences.getInstance().then((prefs) => prefs.getBool('multi_thread_download') ?? false),
+                FutureBuilder<int>(
+                  future: SharedPreferences.getInstance().then((prefs) {
+                     int level = prefs.getInt('download_thread_level') ?? 0;
+                     if (level == 0) {
+                        bool oldBool = prefs.getBool('multi_thread_download') ?? false;
+                        level = oldBool ? 5 : 1;
+                     }
+                     return level;
+                  }),
                   builder: (context, snapshot) {
-                    bool multiThread = snapshot.data ?? false;
+                    int threadLevel = snapshot.data ?? 1;
                     return ListTile(
-                      leading: Icon(Icons.speed, color: Theme.of(context).primaryColor),
-                      title: Text('Tăng tốc tải phim (Đa luồng)', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                      subtitle: Text('Tải nhiều phần cùng lúc, giúp tăng tốc độ đáng kể nhưng tốn CPU hơn', style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 12)),
-                      trailing: Switch(
-                        value: multiThread,
-                        activeColor: Theme.of(context).primaryColor,
+                      leading: Icon(
+                        threadLevel == 15 ? Icons.rocket_launch : Icons.speed, 
+                        color: threadLevel == 15 ? Colors.redAccent : Theme.of(context).primaryColor
+                      ),
+                      title: Text('Chế độ tải phim', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                      subtitle: Text(
+                        threadLevel == 15 ? 'DỒN TOÀN LỰC: Max băng thông, có thể nóng máy' : 
+                        threadLevel == 5 ? 'TỐC ĐỘ CAO: Nhanh nhưng vẫn ổn định' : 
+                        'BÌNH THƯỜNG: Tiết kiệm pin và RAM', 
+                        style: TextStyle(
+                          color: threadLevel == 15 ? Colors.redAccent : (isDark ? Colors.grey[400] : Colors.grey[600]), 
+                          fontSize: 12,
+                          fontWeight: threadLevel == 15 ? FontWeight.bold : FontWeight.normal
+                        )
+                      ),
+                      trailing: DropdownButton<int>(
+                        value: threadLevel,
+                        dropdownColor: cardColor,
+                        underline: const SizedBox(),
+                        icon: Icon(Icons.arrow_drop_down, color: textColor),
+                        items: [
+                          DropdownMenuItem(value: 1, child: Text('Bình thường', style: TextStyle(color: textColor, fontSize: 13))),
+                          DropdownMenuItem(value: 5, child: Text('Tốc độ cao', style: TextStyle(color: textColor, fontSize: 13))),
+                          DropdownMenuItem(value: 15, child: Text('Max băng thông', style: TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.bold))),
+                        ],
                         onChanged: (val) async {
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.setBool('multi_thread_download', val);
-                          setState(() {}); // trigger rebuild
+                          if (val != null) {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setInt('download_thread_level', val);
+                            setState(() {}); // trigger rebuild
+                          }
                         },
                       ),
                     );

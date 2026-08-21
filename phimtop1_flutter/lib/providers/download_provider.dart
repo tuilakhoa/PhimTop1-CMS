@@ -280,8 +280,12 @@ class DownloadProvider extends ChangeNotifier {
       }
 
       final prefs = await SharedPreferences.getInstance();
-      final bool multiThread = prefs.getBool('multi_thread_download') ?? false;
-      int maxConcurrent = multiThread ? 5 : 1;
+      int threadLevel = prefs.getInt('download_thread_level') ?? 0;
+      if (threadLevel == 0) {
+        bool multiThread = prefs.getBool('multi_thread_download') ?? false;
+        threadLevel = multiThread ? 5 : 1;
+      }
+      int maxConcurrent = threadLevel;
 
       List<String> newM3u8Lines = [];
       List<Map<String, dynamic>> segmentsToDownload = [];
