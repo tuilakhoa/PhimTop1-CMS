@@ -120,7 +120,10 @@
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Mật khẩu</label>
+                            <label class="block text-sm font-medium text-gray-300 mb-2 flex justify-between">
+                                <span>Mật khẩu</span>
+                                <a href="/forgot_password.php" id="forgot-link" class="text-xs text-phim-yellow hover:text-white transition-colors <?= $mode === 'register' ? 'hidden' : 'block' ?>">Quên mật khẩu?</a>
+                            </label>
                             <div class="relative">
                                 <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
                                 <input type="password" name="password" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow transition-all placeholder-gray-600" placeholder="••••••••">
@@ -174,6 +177,8 @@
                 document.getElementById('name-field').classList.remove('hidden');
                 document.getElementById('name-field').classList.add('block');
                 document.getElementById('name-field').querySelector('input').setAttribute('required', 'required');
+                const forgotLink = document.getElementById('forgot-link');
+                if(forgotLink) forgotLink.style.display = 'none';
                 
                 document.getElementById('submit-text').innerText = 'Đăng Ký Tài Khoản';
                 document.getElementById('submit-icon').setAttribute('data-lucide', 'user-plus');
@@ -187,6 +192,8 @@
                 document.getElementById('name-field').classList.add('hidden');
                 document.getElementById('name-field').classList.remove('block');
                 document.getElementById('name-field').querySelector('input').removeAttribute('required');
+                const forgotLink = document.getElementById('forgot-link');
+                if(forgotLink) forgotLink.style.display = 'block';
                 
                 document.getElementById('submit-text').innerText = 'Đăng Nhập';
                 document.getElementById('submit-icon').setAttribute('data-lucide', 'log-in');

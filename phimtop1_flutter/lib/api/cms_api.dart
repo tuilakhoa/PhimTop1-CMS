@@ -214,6 +214,23 @@ class CmsApiService {
     }
   }
 
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await _dio.post('api/v1/auth.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'forgot_password',
+      }, data: {
+        'email': email,
+      });
+      if (response.data == null || response.data is! Map<String, dynamic>) {
+        throw Exception('Dữ liệu từ máy chủ không hợp lệ');
+      }
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<FollowListResponse> getFollows(String token, {String type = 'movie'}) async {
     try {
       final response = await _dio.get('api/v1/follow.php', queryParameters: {

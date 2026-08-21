@@ -16,6 +16,7 @@ import '../screens/notifications_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/terms_screen.dart';
 import '../screens/register_screen.dart';
+import '../screens/forgot_password_screen.dart';
 import '../screens/policy_screen.dart';
 import '../screens/watch_movie_screen.dart';
 import '../screens/playlist_screen.dart';
@@ -138,6 +139,11 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
       path: '/register',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (BuildContext context, GoRouterState state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (BuildContext context, GoRouterState state) => const ForgotPasswordScreen(),
     ),
     GoRoute(
       path: '/policy',

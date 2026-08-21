@@ -135,9 +135,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // App Logo or Name
-                        Icon(Icons.movie_creation_rounded, size: 72, color: Theme.of(context).primaryColor),
-                        const SizedBox(height: 16),
-                        Text(
+                              Image.asset('assets/logo.png', height: 72),
+                              const SizedBox(height: 16),
+                              const Text(
                           "PHIMTOP1", 
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -210,12 +210,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 12),
                         
-                        // Forgot password (Placeholder text for UX)
+                        // Forgot password
                         Align(
                           alignment: Alignment.centerRight,
-                          child: Text(
-                            "Quên mật khẩu?",
-                            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 13, fontWeight: FontWeight.w600),
+                          child: GestureDetector(
+                            onTap: () {
+                              context.push('/forgot-password');
+                            },
+                            child: Text(
+                              "Quên mật khẩu?",
+                              style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 32),

@@ -14,6 +14,9 @@
         <button type="button" onclick="switchTab('theme')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="theme">
             <i data-lucide="monitor" class="w-4 h-4 inline-block mr-2"></i>Giao Diện Trang Chủ
         </button>
+        <button type="button" onclick="switchTab('smtp')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="smtp">
+            <i data-lucide="mail" class="w-4 h-4 inline-block mr-2"></i>SMTP (Gửi Email)
+        </button>
     </nav>
 </div>
 
@@ -136,6 +139,36 @@
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-1"><i data-lucide="send" class="w-4 h-4 inline mr-1 text-blue-400"></i>Telegram URL</label>
                 <input type="text" name="socialTelegram" value="<?= htmlspecialchars($settings['socialTelegram'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab: SMTP (Email) -->
+    <div id="tab-smtp" class="tab-content hidden animate-fade-in">
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-6">
+            <h4 class="text-white font-semibold mb-2"><i data-lucide="info" class="w-4 h-4 inline mr-2 text-blue-400"></i>Lưu ý về SMTP</h4>
+            <p class="text-sm text-gray-300">Cấu hình này được sử dụng để gửi email lấy lại mật khẩu cho người dùng. Đề xuất sử dụng Gmail SMTP hoặc các dịch vụ như SendGrid, Mailgun.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">SMTP Host (Máy chủ)</label>
+                <input type="text" name="smtpHost" value="<?= htmlspecialchars($settings['smtpHost'] ?? '') ?>" placeholder="vd: smtp.gmail.com" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">SMTP Port (Cổng)</label>
+                <input type="text" name="smtpPort" value="<?= htmlspecialchars($settings['smtpPort'] ?? '587') ?>" placeholder="vd: 587 hoặc 465" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">SMTP Username (Tài khoản Email)</label>
+                <input type="text" name="smtpUser" value="<?= htmlspecialchars($settings['smtpUser'] ?? '') ?>" placeholder="Email của bạn" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">SMTP Password (Mật khẩu ứng dụng)</label>
+                <input type="password" name="smtpPass" value="<?= htmlspecialchars($settings['smtpPass'] ?? '') ?>" placeholder="Mật khẩu hoặc App Password" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
             </div>
         </div>
     </div>

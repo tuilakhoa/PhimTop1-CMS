@@ -130,55 +130,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
-              _buildMenuItem(Icons.storefront, "Cửa hàng vật phẩm", () {
-                context.push('/shop');
-              }, Colors.amber, hintColor),
-              _buildMenuItem(Icons.favorite, "Phim đã thích", () {
-                context.push('/follow');
-              }, textColor, hintColor),
-              _buildMenuItem(Icons.playlist_play, "Danh sách phát", () {
-                context.push('/playlists');
-              }, textColor, hintColor),
-              _buildMenuItem(Icons.notifications, "Thông báo", () {
-                context.push('/notifications');
-              }, textColor, hintColor),
-              _buildMenuItem(Icons.history, "Lịch sử xem", () {
-                context.push('/history');
-              }, textColor, hintColor),
-              _buildMenuItem(Icons.download_done, "Phim đã tải", () {
-                context.push('/downloads');
-              }, textColor, hintColor),
-              _buildMenuItem(Icons.link, "Liên kết Google", () async {
-                final authService = AuthService();
-                final credential = await authService.signInWithGoogle();
-                if (credential != null && credential.user != null) {
-                  final uid = credential.user!.uid;
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đang liên kết...")));
-                    final success = await context.read<AuthProvider>().linkGoogle(uid);
+              const SizedBox(height: 32),
+              _buildMenuGroup([
+                _buildMenuRow(Icons.storefront, "Cửa hàng vật phẩm", () => context.push('/shop'), Colors.amber, textColor, hintColor),
+                _buildMenuRow(Icons.link, "Liên kết Google", () async {
+                  final authService = AuthService();
+                  final credential = await authService.signInWithGoogle();
+                  if (credential != null && credential.user != null) {
+                    final uid = credential.user!.uid;
                     if (context.mounted) {
-                      if (success) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Liên kết tài khoản Google thành công!")));
-                      } else {
-                        final error = context.read<AuthProvider>().error ?? "Lỗi không xác định";
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đang liên kết...")));
+                      final success = await context.read<AuthProvider>().linkGoogle(uid);
+                      if (context.mounted) {
+                        if (success) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Liên kết tài khoản Google thành công!")));
+                        } else {
+                          final error = context.read<AuthProvider>().error ?? "Lỗi không xác định";
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+                        }
                       }
                     }
                   }
-                }
-              }, Colors.blueAccent, hintColor),
-              _buildMenuItem(Icons.settings, "Cài đặt", () {
-                context.push('/settings');
-              }, textColor, hintColor),
-              const SizedBox(height: 40),
-              ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
-                title: const Text("Đăng xuất", style: TextStyle(color: Colors.red, fontSize: 18)),
-                onTap: () {
-                  auth.logout();
-                },
-              ),
+                }, Colors.blueAccent, textColor, hintColor),
+              ], dialogBg),
+              
+              const SizedBox(height: 16),
+              _buildMenuGroup([
+                _buildMenuRow(Icons.favorite, "Phim đã thích", () => context.push('/follow'), Colors.pinkAccent, textColor, hintColor),
+                _buildMenuRow(Icons.playlist_play, "Danh sách phát", () => context.push('/playlists'), Colors.purpleAccent, textColor, hintColor),
+                _buildMenuRow(Icons.history, "Lịch sử xem", () => context.push('/history'), Colors.green, textColor, hintColor),
+                _buildMenuRow(Icons.download_done, "Phim đã tải", () => context.push('/downloads'), Colors.teal, textColor, hintColor),
+              ], dialogBg),
+              
+              const SizedBox(height: 16),
+              _buildMenuGroup([
+                _buildMenuRow(Icons.notifications, "Thông báo", () => context.push('/notifications'), Colors.orange, textColor, hintColor),
+                _buildMenuRow(Icons.settings, "Cài đặt", () => context.push('/settings'), Colors.grey, textColor, hintColor),
+              ], dialogBg),
+
+              const SizedBox(height: 24),
+              _buildMenuGroup([
+                _buildMenuRow(Icons.logout, "Đăng xuất", () => auth.logout(), Colors.red, Colors.red, hintColor, showTrailing: false),
+              ], dialogBg),
             ],
           );
         },
@@ -186,12 +179,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap, Color textColor, Color? hintColor) {
+  Widget _buildMenuGroup(List<Widget> children, Color? bgColor) {
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildMenuRow(IconData icon, String title, VoidCallback onTap, Color iconColor, Color textColor, Color? hintColor, {bool showTrailing = true}) {
     return ListTile(
-      leading: Icon(icon, color: textColor),
-      title: Text(title, style: TextStyle(color: textColor, fontSize: 16)),
-      trailing: Icon(Icons.chevron_right, color: hintColor),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: iconColor.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: iconColor, size: 22),
+      ),
+      title: Text(title, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w500)),
+      trailing: showTrailing ? Icon(Icons.chevron_right, color: hintColor, size: 20) : null,
       onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
 
