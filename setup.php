@@ -52,7 +52,7 @@ if ($isPost) {
                     siteName VARCHAR(255) DEFAULT 'PhimTop1',
                     seoTitle TEXT, seoDesc TEXT, seoKeywords TEXT, logoUrl VARCHAR(255),
                     verifyGoogle VARCHAR(255), verifyBing VARCHAR(255), verifyYandex VARCHAR(255),
-                    customHead TEXT, customBody TEXT, db_version INT DEFAULT 12
+                    customHead TEXT, customBody TEXT, db_version INT DEFAULT 14
                 )");
                 $pdo->exec("CREATE TABLE IF NOT EXISTS movies (
                     id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, origin_name VARCHAR(255),
