@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (section && list) {
                         let html = '';
                         res.data.forEach(item => {
-                            let thumbUrl = item.thumb_url || item.poster_url;
+                            let thumbUrl = item.poster_url || item.thumb_url;
                             if (thumbUrl && !thumbUrl.startsWith('http')) {
                                 // Assume phimimg if missing
                                 thumbUrl = 'https://phimimg.com/' + thumbUrl;

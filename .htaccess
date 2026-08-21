@@ -32,6 +32,7 @@ DirectoryIndex index.php index.html
     RewriteRule ^the-loai/([^/]+)/?$ category.php?slug=$1&type=the-loai [QSA,L]
     RewriteRule ^quoc-gia/([^/]+)/?$ category.php?slug=$1&type=quoc-gia [QSA,L]
     RewriteRule ^tim-kiem/?$ search.php [QSA,L]
+    RewriteRule ^bang-xep-hang/?$ trending.php [QSA,L]
 </IfModule>
 
 <IfModule mod_headers.c>

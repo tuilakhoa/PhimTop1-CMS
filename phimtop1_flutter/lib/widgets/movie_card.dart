@@ -21,8 +21,8 @@ class YoukuMovieCard extends StatelessWidget {
     final tUrl = getValidUrl(movie.thumbUrl);
 
     final thumb = isFeatured 
-        ? (pUrl ?? tUrl ?? "") 
-        : (tUrl ?? pUrl ?? "");
+        ? (tUrl ?? pUrl ?? "") 
+        : (pUrl ?? tUrl ?? "");
         
     final imageUrl = thumb.startsWith('http') 
         ? thumb 

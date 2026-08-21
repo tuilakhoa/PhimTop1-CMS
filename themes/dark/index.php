@@ -230,7 +230,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                         const container = document.getElementById('ai-recommend-container');
                         let html = '';
                         res.data.forEach(item => {
-                            let thumb = item.thumb_url || item.poster_url;
+                            let thumb = item.poster_url || item.thumb_url;
                             if (thumb && !thumb.startsWith('http')) {
                                 thumb = 'https://phimimg.com/' + thumb;
                             }
