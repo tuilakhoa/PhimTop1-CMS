@@ -279,77 +279,88 @@ class DownloadProvider extends ChangeNotifier {
         }
       }
 
-      final lines = m3u8Content.split('\n');
-      List<String> tsFiles = [];
-      for (var line in lines) {
-        if (!line.startsWith('#') && line.trim().isNotEmpty) {
-          tsFiles.add(line.trim());
-        }
-      }
-
-      if (tsFiles.isEmpty) {
-        throw Exception("No TS files found in playlist");
-      }
+      final prefs = await SharedPreferences.getInstance();
+      final bool multiThread = prefs.getBool('multi_thread_download') ?? false;
+      int maxConcurrent = multiThread ? 5 : 1;
 
       List<String> newM3u8Lines = [];
-      int downloaded = 0;
-      int totalSegments = tsFiles.length;
-      int totalBytesDownloaded = 0;
-      DateTime downloadStartTime = DateTime.now();
+      List<Map<String, dynamic>> segmentsToDownload = [];
+      int segmentIndex = 0;
 
       for (var line in lines) {
         if (!line.startsWith('#') && line.trim().isNotEmpty) {
           String tsUrl = line.trim();
           Uri tsUri = baseUri.resolve(tsUrl);
-          
-          String tsName = 'segment_$downloaded.ts';
+          String tsName = 'segment_$segmentIndex.ts';
           String tsPath = '${movieDir.path}/$tsName';
-
-          int fileBytes = 0;
-          DateTime lastUpdateTime = DateTime.now();
-
-          await _dio.download(
-            tsUri.toString(), 
-            tsPath, 
-            cancelToken: _cancelToken,
-            onReceiveProgress: (received, total) {
-              int delta = received - fileBytes;
-              fileBytes = received;
-              totalBytesDownloaded += delta;
-
-              DateTime now = DateTime.now();
-              if (now.difference(lastUpdateTime).inMilliseconds > 1000) {
-                 lastUpdateTime = now;
-                 double elapsedSeconds = now.difference(downloadStartTime).inMilliseconds / 1000.0;
-                 if (elapsedSeconds > 0) {
-                    double speedBps = totalBytesDownloaded / elapsedSeconds;
-                    
-                    double progress = (downloaded + (total > 0 ? (received / total) : 0)) / totalSegments;
-                    
-                    if (progress > 0) {
-                      double estimatedTotalBytes = totalBytesDownloaded / progress;
-                      double remainingBytes = estimatedTotalBytes - totalBytesDownloaded;
-                      double remainingSeconds = remainingBytes / speedBps;
-                      
-                      pendingTask.speed = _formatBytes(speedBps.round()) + "/s";
-                      pendingTask.timeRemaining = _formatTime(remainingSeconds.round());
-                      pendingTask.progress = progress;
-                      notifyListeners();
-                      
-                      _showProgressNotification(pendingTask.id.hashCode, pendingTask.movieName, (progress * 100).toInt());
-                    }
-                 }
-              }
-            }
-          );
           
+          segmentsToDownload.add({
+            'uri': tsUri.toString(),
+            'path': tsPath,
+            'name': tsName,
+          });
           newM3u8Lines.add(tsName);
-          downloaded++;
-          pendingTask.progress = downloaded / totalSegments;
-          notifyListeners();
+          segmentIndex++;
         } else {
           newM3u8Lines.add(line);
         }
+      }
+
+      if (segmentsToDownload.isEmpty) {
+        throw Exception("No TS files found in playlist");
+      }
+
+      int downloaded = 0;
+      int totalSegments = segmentsToDownload.length;
+      int totalBytesDownloaded = 0;
+      DateTime downloadStartTime = DateTime.now();
+      DateTime lastUpdateTime = DateTime.now();
+
+      Future<void> downloadSegment(Map<String, dynamic> segment) async {
+        int fileBytes = 0;
+        await _dio.download(
+          segment['uri'],
+          segment['path'],
+          cancelToken: _cancelToken,
+          onReceiveProgress: (received, total) {
+            int delta = received - fileBytes;
+            fileBytes = received;
+            totalBytesDownloaded += delta;
+
+            DateTime now = DateTime.now();
+            if (now.difference(lastUpdateTime).inMilliseconds > 500) {
+               lastUpdateTime = now;
+               double elapsedSeconds = now.difference(downloadStartTime).inMilliseconds / 1000.0;
+               if (elapsedSeconds > 0) {
+                  double speedBps = totalBytesDownloaded / elapsedSeconds;
+                  
+                  double currentProgress = (downloaded + (total > 0 ? (received / total) : 0)) / totalSegments;
+                  
+                  if (currentProgress > 0 && currentProgress <= 1.0) {
+                    double estimatedTotalBytes = totalBytesDownloaded / currentProgress;
+                    double remainingBytes = estimatedTotalBytes - totalBytesDownloaded;
+                    double remainingSeconds = remainingBytes / speedBps;
+                    
+                    pendingTask.speed = _formatBytes(speedBps.round()) + "/s";
+                    pendingTask.timeRemaining = _formatTime(remainingSeconds.round());
+                    pendingTask.progress = currentProgress;
+                    notifyListeners();
+                    
+                    _showProgressNotification(pendingTask.id.hashCode, pendingTask.movieName, (currentProgress * 100).toInt());
+                  }
+               }
+            }
+          }
+        );
+        downloaded++;
+        pendingTask.progress = downloaded / totalSegments;
+        notifyListeners();
+      }
+
+      for (int i = 0; i < segmentsToDownload.length; i += maxConcurrent) {
+        int end = (i + maxConcurrent < segmentsToDownload.length) ? i + maxConcurrent : segmentsToDownload.length;
+        var batch = segmentsToDownload.sublist(i, end);
+        await Future.wait(batch.map((seg) => downloadSegment(seg)));
       }
 
       final localM3u8File = File('${movieDir.path}/index.m3u8');

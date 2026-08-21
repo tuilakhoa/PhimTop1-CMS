@@ -143,6 +143,27 @@ class _DownloadSettingsScreenState extends State<DownloadSettingsScreen> {
                   ),
                 ),
                 Divider(color: isDark ? Colors.grey[800] : Colors.grey[300], height: 1),
+                FutureBuilder<bool>(
+                  future: SharedPreferences.getInstance().then((prefs) => prefs.getBool('multi_thread_download') ?? false),
+                  builder: (context, snapshot) {
+                    bool multiThread = snapshot.data ?? false;
+                    return ListTile(
+                      leading: Icon(Icons.speed, color: Theme.of(context).primaryColor),
+                      title: Text('Tăng tốc tải phim (Đa luồng)', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                      subtitle: Text('Tải nhiều phần cùng lúc, giúp tăng tốc độ đáng kể nhưng tốn CPU hơn', style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 12)),
+                      trailing: Switch(
+                        value: multiThread,
+                        activeColor: Theme.of(context).primaryColor,
+                        onChanged: (val) async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('multi_thread_download', val);
+                          setState(() {}); // trigger rebuild
+                        },
+                      ),
+                    );
+                  },
+                ),
+                Divider(color: isDark ? Colors.grey[800] : Colors.grey[300], height: 1),
                 ListTile(
                   leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
                   title: const Text('Xóa tất cả phim đã tải', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
