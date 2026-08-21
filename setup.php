@@ -57,8 +57,10 @@ if ($isPost) {
                 $pdo->exec("CREATE TABLE IF NOT EXISTS movies (
                     id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, origin_name VARCHAR(255),
                     slug VARCHAR(255) UNIQUE NOT NULL, thumb_url TEXT, poster_url TEXT, year INT, type VARCHAR(100),
-                    status VARCHAR(100), episode_current VARCHAR(100), quality VARCHAR(100), lang VARCHAR(100),
-                    chieu_rap TINYINT(1) DEFAULT 0, view INT DEFAULT 0, content TEXT,
+                    status VARCHAR(100), episode_current VARCHAR(100), episode_total INT DEFAULT 0,
+                    quality VARCHAR(100), lang VARCHAR(100), time VARCHAR(100),
+                    chieu_rap TINYINT(1) DEFAULT 0, is_copyright TINYINT(1) DEFAULT 0, sub_docquyen TINYINT(1) DEFAULT 0,
+                    view INT DEFAULT 0, content TEXT, trailer_url TEXT, actor TEXT, director TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 )");
                 $pdo->exec("CREATE TABLE IF NOT EXISTS categories (
@@ -72,10 +74,11 @@ if ($isPost) {
                     category_slug VARCHAR(255),
                     PRIMARY KEY (movie_slug, category_slug)
                 )");
-                $pdo->exec("CREATE TABLE IF NOT EXISTS movie_episodes (
+                $pdo->exec("CREATE TABLE IF NOT EXISTS episodes (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    movie_slug VARCHAR(255), server_name VARCHAR(100), name VARCHAR(100), slug VARCHAR(255),
-                    embed_url TEXT, m3u8_url TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    movie_slug VARCHAR(255), server_name VARCHAR(100), name VARCHAR(100), slug VARCHAR(255), filename VARCHAR(255),
+                    embed_url TEXT, m3u8_url TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_movie_slug (movie_slug)
                 )");
                 $pdo->exec("CREATE TABLE IF NOT EXISTS playlists (
                     id INT AUTO_INCREMENT PRIMARY KEY,

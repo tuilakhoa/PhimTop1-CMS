@@ -50,12 +50,36 @@ $action = $_GET['action'] ?? 'personal';
 $limit = (int)($_GET['limit'] ?? 12);
 
 if ($action === 'personal') {
+    $settings = getSettings();
+    $displayMode = $settings['displayMode'] ?? 'api';
+    
     if (!$user) {
-        // Fallback: Just return trending/latest movies if not logged in
-        $stmt = $pdo->prepare("SELECT * FROM movies ORDER BY view DESC, updated_at DESC LIMIT ?");
-        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $items = [];
+        if ($displayMode === 'api') {
+            // Fetch random page from external API to increase index chances
+            $randomPage = mt_rand(1, 20); // API typically has many pages, 1-20 is a safe range
+            $res = fetchApiFilms('home', '', $randomPage);
+            if ($res && !empty($res['items'])) {
+                $items = $res['items'];
+                shuffle($items);
+                $items = array_slice($items, 0, $limit);
+            }
+        } else {
+            // Local DB: Optimized random approach
+            $countStmt = $pdo->query("SELECT COUNT(*) FROM movies");
+            $totalMovies = (int)$countStmt->fetchColumn();
+            
+            if ($totalMovies > 0) {
+                $offset = mt_rand(0, max(0, $totalMovies - $limit));
+                $stmt = $pdo->prepare("SELECT * FROM movies LIMIT ? OFFSET ?");
+                $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+                $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+                $stmt->execute();
+                $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                shuffle($items); // Add visual randomness to the fetched slice
+            }
+        }
+        
         echo json_encode(['status' => 'success', 'data' => $items, 'is_personalized' => false]);
         exit;
     }
@@ -66,11 +90,20 @@ if ($action === 'personal') {
     $historySlugs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     if (empty($historySlugs)) {
-        // No history, return trending
-        $stmt = $pdo->prepare("SELECT * FROM movies ORDER BY view DESC, updated_at DESC LIMIT ?");
-        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // No history, return trending/latest
+        $items = [];
+        if ($displayMode === 'api') {
+            $res = fetchApiFilms('home', '', 1);
+            if ($res && !empty($res['items'])) {
+                $items = array_slice($res['items'], 0, $limit);
+            }
+        } else {
+            $stmt = $pdo->prepare("SELECT * FROM movies ORDER BY view DESC, updated_at DESC LIMIT ?");
+            $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+        
         echo json_encode(['status' => 'success', 'data' => $items, 'is_personalized' => false]);
         exit;
     }
@@ -94,43 +127,75 @@ if ($action === 'personal') {
     $topType = !empty($types) ? array_key_first($types) : null;
     $topLang = !empty($langs) ? array_key_first($langs) : null;
 
-    $where = "slug NOT IN ($placeholders)";
-    $params = $historySlugs;
+    $recommended = [];
 
-    if ($topType) {
-        $where .= " AND type = ?";
-        $params[] = $topType;
-    }
-    if ($topLang) {
-        $where .= " AND lang = ?";
-        $params[] = $topLang;
-    }
+    if ($displayMode === 'api') {
+        // In API mode, we try to fetch from the top type or just fallback to latest
+        $apiType = 'home';
+        $apiSlug = '';
+        if ($topType === 'series' || $topType === 'hoathinh') {
+            $apiType = 'danh-sach';
+            $apiSlug = ($topType === 'hoathinh') ? 'hoat-hinh' : 'phim-bo';
+        } elseif ($topType === 'single' || $topType === 'phimle') {
+            $apiType = 'danh-sach';
+            $apiSlug = 'phim-le';
+        }
+        $res = fetchApiFilms($apiType, $apiSlug, 1);
+        if ($res && !empty($res['items'])) {
+            $recommended = $res['items'];
+            // Filter out already watched
+            $recommended = array_filter($recommended, function($item) use ($historySlugs) {
+                return !in_array($item['slug'] ?? '', $historySlugs);
+            });
+            $recommended = array_values($recommended);
+        }
+    } else {
+        $where = "slug NOT IN ($placeholders)";
+        $params = $historySlugs;
 
-    // Query recommended movies
-    $stmt = $pdo->prepare("SELECT * FROM movies WHERE $where ORDER BY view DESC, updated_at DESC LIMIT ?");
-    foreach ($params as $k => $v) {
-        $stmt->bindValue($k + 1, $v);
+        if ($topType) {
+            $where .= " AND type = ?";
+            $params[] = $topType;
+        }
+        if ($topLang) {
+            $where .= " AND lang = ?";
+            $params[] = $topLang;
+        }
+
+        // Query recommended movies
+        $stmt = $pdo->prepare("SELECT * FROM movies WHERE $where ORDER BY view DESC, updated_at DESC LIMIT ?");
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k + 1, $v);
+        }
+        $stmt->bindValue(count($params) + 1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $recommended = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    $stmt->bindValue(count($params) + 1, $limit, PDO::PARAM_INT);
-    $stmt->execute();
-    $recommended = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // If we didn't find enough, backfill
     if (count($recommended) < $limit) {
         $needed = $limit - count($recommended);
-        $excludeSlugs = array_merge($historySlugs, array_column($recommended, 'slug'));
-        $placeholders2 = str_repeat('?,', count($excludeSlugs) - 1) . '?';
-        
-        $stmt = $pdo->prepare("SELECT * FROM movies WHERE slug NOT IN ($placeholders2) ORDER BY view DESC LIMIT ?");
-        foreach ($excludeSlugs as $k => $v) {
-            $stmt->bindValue($k + 1, $v);
+        if ($displayMode === 'api') {
+            $res = fetchApiFilms('home', '', 2); // get page 2 for backfill
+            $backfill = $res['items'] ?? [];
+        } else {
+            $excludeSlugs = array_merge($historySlugs, array_column($recommended, 'slug'));
+            $placeholders2 = str_repeat('?,', count($excludeSlugs) - 1) . '?';
+            
+            $stmt = $pdo->prepare("SELECT * FROM movies WHERE slug NOT IN ($placeholders2) ORDER BY view DESC LIMIT ?");
+            foreach ($excludeSlugs as $k => $v) {
+                $stmt->bindValue($k + 1, $v);
+            }
+            $stmt->bindValue(count($excludeSlugs) + 1, $needed, PDO::PARAM_INT);
+            $stmt->execute();
+            $backfill = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
-        $stmt->bindValue(count($excludeSlugs) + 1, $needed, PDO::PARAM_INT);
-        $stmt->execute();
-        $backfill = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         $recommended = array_merge($recommended, $backfill);
     }
+
+    // Ensure we only return $limit items
+    $recommended = array_slice($recommended, 0, $limit);
 
     echo json_encode(['status' => 'success', 'data' => $recommended, 'is_personalized' => true]);
     exit;
