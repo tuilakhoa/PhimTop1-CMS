@@ -165,20 +165,27 @@ if ($action === 'add') {
             }
         }
         
-        // Reward Logic: 1 coin per minute of watch time ping
-        try {
-            $stmt = $pdo->prepare("SELECT coins, last_reward_time FROM members WHERE email = ?");
-            $stmt->execute([$user['email']]);
-            $u = $stmt->fetch();
-            if ($u !== false) {
-                $lastReward = $u['last_reward_time'] ? strtotime($u['last_reward_time']) : 0;
-                if (time() - $lastReward >= 60) {
-                    $stmt = $pdo->prepare("UPDATE members SET coins = COALESCE(coins, 0) + 1, last_reward_time = CURRENT_TIMESTAMP WHERE email = ?");
-                    $stmt->execute([$user['email']]);
+        // Reward Logic: Watch to Earn
+        $enableWatchReward = isset($settings['enable_watch_reward']) ? (int)$settings['enable_watch_reward'] : 1;
+        if ($enableWatchReward) {
+            $watchIntervalMins = isset($settings['watch_reward_interval']) ? (int)$settings['watch_reward_interval'] : 1;
+            $watchRewardCoins = isset($settings['watch_reward_coins']) ? (int)$settings['watch_reward_coins'] : 1;
+            $intervalSeconds = $watchIntervalMins * 60;
+            
+            try {
+                $stmt = $pdo->prepare("SELECT coins, last_reward_time FROM members WHERE email = ?");
+                $stmt->execute([$user['email']]);
+                $u = $stmt->fetch();
+                if ($u !== false) {
+                    $lastReward = $u['last_reward_time'] ? strtotime($u['last_reward_time']) : 0;
+                    if (time() - $lastReward >= $intervalSeconds) {
+                        $stmt = $pdo->prepare("UPDATE members SET coins = COALESCE(coins, 0) + ?, last_reward_time = CURRENT_TIMESTAMP WHERE email = ?");
+                        $stmt->execute([$watchRewardCoins, $user['email']]);
+                    }
                 }
+            } catch (PDOException $e) {
+                // Ignore if columns don't exist yet
             }
-        } catch (PDOException $e) {
-            // Ignore if columns don't exist yet
         }
     } catch (PDOException $e) {
         // Ignore errors if table doesn't exist etc.

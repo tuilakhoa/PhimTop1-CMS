@@ -15,6 +15,9 @@ class ShopScreen extends StatefulWidget {
 class _ShopScreenState extends State<ShopScreen> {
   List<AvatarFrame> frames = [];
   bool isLoading = true;
+  bool canCheckIn = false;
+  int checkinStreak = 0;
+  bool isCheckingIn = false;
 
   @override
   void initState() {
@@ -30,12 +33,50 @@ class _ShopScreenState extends State<ShopScreen> {
     }
     setState(() => isLoading = true);
     final list = await cmsApi.getFrames(auth.token!);
+    
+    // Check check-in status
+    final status = await cmsApi.checkCheckinStatus(auth.token!);
+    bool canCheckinToday = false;
+    int currentStreak = 0;
+    if (status != null) {
+      canCheckinToday = !(status['is_checked_in_today'] as bool? ?? true);
+      currentStreak = (status['checkin_streak'] as int?) ?? 0;
+    }
+    
     // Refresh user info as well to update coins/active frame
     await auth.fetchCoins();
     setState(() {
       frames = list;
+      canCheckIn = canCheckinToday;
+      checkinStreak = currentStreak;
       isLoading = false;
     });
+  }
+
+  Future<void> _doCheckIn() async {
+    final auth = context.read<AuthProvider>();
+    if (auth.token == null) return;
+    
+    setState(() => isCheckingIn = true);
+    final response = await cmsApi.doCheckin(auth.token!);
+    setState(() => isCheckingIn = false);
+    
+    if (response != null && response['status'] == 'success') {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response['message'] ?? 'Điểm danh thành công!'),
+          backgroundColor: Colors.green,
+        ));
+      }
+      _loadFrames(); // Reload frames and coins
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(response?['message'] ?? 'Điểm danh thất bại, vui lòng thử lại.'),
+          backgroundColor: Colors.red,
+        ));
+      }
+    }
   }
 
   Future<void> _buyFrame(AvatarFrame frame) async {
@@ -164,20 +205,47 @@ class _ShopScreenState extends State<ShopScreen> {
                           ),
                         ),
                         if (user != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: Colors.amber.withOpacity(0.5), width: 1.5),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.stars, color: Colors.amber, size: 22),
-                                const SizedBox(width: 8),
-                                Text('${user.coins} Xu', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 16)),
-                              ],
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (canCheckIn)
+                                GestureDetector(
+                                  onTap: isCheckingIn ? null : _doCheckIn,
+                                  child: Container(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(colors: [Colors.red, Colors.orange]),
+                                      borderRadius: BorderRadius.circular(24),
+                                      boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.3), blurRadius: 8)],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        isCheckingIn
+                                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                          : const Icon(Icons.calendar_month, color: Colors.white, size: 18),
+                                        const SizedBox(width: 6),
+                                        const Text('Điểm danh', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: Colors.amber.withOpacity(0.5), width: 1.5),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.stars, color: Colors.amber, size: 22),
+                                    const SizedBox(width: 8),
+                                    Text('${user.coins} Xu', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 16)),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                       ],
                     ),

@@ -7,7 +7,9 @@ class AuthService {
 
   AuthService() {
     if (!kIsWeb) {
-      GoogleSignIn.instance.initialize();
+      GoogleSignIn.instance.initialize(
+        serverClientId: '606978027987-auh7o8h0pned4aislf154tn7eejocebg.apps.googleusercontent.com',
+      );
     }
   }
 
@@ -25,11 +27,13 @@ class AuthService {
         GoogleAuthProvider authProvider = GoogleAuthProvider();
         return await _auth.signInWithPopup(authProvider);
       } else {
-        // Mobile uses standard flow
+        // Clear any stuck state
+        await GoogleSignIn.instance.signOut();
+
         final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
         if (googleUser == null) return null; // Cancelled
 
-        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
         
         final AuthCredential credential = GoogleAuthProvider.credential(
           idToken: googleAuth.idToken,

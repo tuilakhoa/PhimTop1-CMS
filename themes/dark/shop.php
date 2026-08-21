@@ -26,11 +26,17 @@ try {
             </h1>
             <p class="text-gray-400 mt-2">Mua sắm khung ảnh đại diện và vật phẩm trang trí</p>
         </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl px-6 py-3 flex items-center shadow-lg">
-            <span class="text-gray-400 mr-3">Số dư của bạn:</span>
-            <div class="flex items-center text-yellow-400 font-bold text-xl">
-                <i data-lucide="coins" class="w-5 h-5 mr-1.5"></i>
-                <span id="userCoins"><?= number_format($coins) ?></span>
+        <div class="flex items-center space-x-4">
+            <button id="checkinBtn" onclick="doCheckin()" class="hidden bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white border-none rounded-xl px-4 py-3 flex items-center shadow-lg shadow-red-500/20 transition-all hover:scale-105 font-medium">
+                <i data-lucide="calendar-check" class="w-5 h-5 mr-2"></i>
+                <span>Điểm Danh Nhận Xu</span>
+            </button>
+            <div class="bg-gray-900 border border-gray-800 rounded-xl px-6 py-3 flex items-center shadow-lg">
+                <span class="text-gray-400 mr-3">Số dư:</span>
+                <div class="flex items-center text-yellow-400 font-bold text-xl">
+                    <i data-lucide="coins" class="w-5 h-5 mr-1.5"></i>
+                    <span id="userCoins"><?= number_format($coins) ?></span>
+                </div>
             </div>
         </div>
     </div>
@@ -47,7 +53,44 @@ try {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     loadShop();
+    checkCheckinStatus();
 });
+
+function checkCheckinStatus() {
+    fetch('/api/v1/rewards.php?action=balance', { credentials: 'same-origin' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('userCoins').innerText = data.coins.toLocaleString();
+                if (data.is_checked_in_today === false) {
+                    document.getElementById('checkinBtn').classList.remove('hidden');
+                } else {
+                    document.getElementById('checkinBtn').classList.add('hidden');
+                }
+            }
+        });
+}
+
+function doCheckin() {
+    Swal.fire({title: 'Đang điểm danh...', didOpen: () => {Swal.showLoading()}});
+    
+    fetch('/api/v1/rewards.php?action=checkin', {
+        method: 'POST',
+        credentials: 'same-origin'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire('Thành công', data.message, 'success');
+            checkCheckinStatus();
+        } else {
+            Swal.fire('Thất bại', data.message || 'Không thể điểm danh', 'error');
+        }
+    })
+    .catch(err => {
+        Swal.fire('Lỗi', 'Lỗi kết nối', 'error');
+    });
+}
 
 function loadShop() {
     document.getElementById('loading').style.display = 'flex';

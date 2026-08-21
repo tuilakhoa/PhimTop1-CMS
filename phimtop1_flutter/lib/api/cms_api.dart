@@ -555,6 +555,38 @@ class CmsApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> checkCheckinStatus(String token) async {
+    try {
+      final response = await _dio.get('api/v1/rewards.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'balance',
+      }, options: Options(headers: {'Authorization': token}));
+      if (response.data['status'] == 'success') {
+        return response.data as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> doCheckin(String token) async {
+    try {
+      final response = await _dio.post('api/v1/rewards.php', queryParameters: {
+        'key': AppConfig.apiKey,
+        'action': 'checkin',
+      }, options: Options(headers: {'Authorization': token}));
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null && e.response?.data is Map) {
+        return e.response?.data as Map<String, dynamic>;
+      }
+      return {'status': 'error', 'message': 'Lỗi kết nối'};
+    } catch (e) {
+      return {'status': 'error', 'message': 'Lỗi không xác định'};
+    }
+  }
+
   Future<List<AvatarFrame>> getFrames(String token) async {
     try {
       final response = await _dio.get('api/v1/shop.php', queryParameters: {

@@ -21,6 +21,7 @@
                         'database' => ['icon' => 'database', 'title' => 'Quản Lý Database'],
                         'theme_editor' => ['icon' => 'file-code', 'title' => 'Sửa Giao Diện'],
                         'system_status' => ['icon' => 'activity', 'title' => 'Kiểm Tra Hệ Thống'],
+                        'events' => ['icon' => 'gift', 'title' => 'Sự Kiện & Thưởng Xu'],
                     ],
                     'Hệ Thống' => [
                         'members' => ['icon' => 'users', 'title' => 'Thành Viên'],
