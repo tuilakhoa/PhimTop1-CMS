@@ -223,20 +223,43 @@ if ($pdo) {
                     <?php endif; ?>
                     
                     <div class="border-t border-gray-800 pt-2 pb-1">
-                        <p class="text-gray-500 text-sm mb-2 font-bold uppercase tracking-wider">Thể Loại</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <?php $limitG = array_slice($genres, 0, 8); foreach ($limitG as $g): ?>
-                                <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white truncate"><?= htmlspecialchars($g['name']) ?></a>
-                            <?php endforeach; ?>
-                        </div>
+                        <details class="group">
+                            <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
+                                <span class="text-gray-300 font-bold uppercase tracking-wider text-sm">Thể Loại</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="grid grid-cols-2 gap-2 mt-2 mb-2 pl-4 border-l border-gray-800">
+                                <?php foreach ($genres as $g): ?>
+                                    <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white truncate"><?= htmlspecialchars($g['name']) ?></a>
+                                <?php endforeach; ?>
+                            </div>
+                        </details>
                     </div>
                     <div class="border-t border-gray-800 pt-2 pb-1">
-                        <p class="text-gray-500 text-sm mb-2 font-bold uppercase tracking-wider">Quốc Gia</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <?php $limitC = array_slice($countries, 0, 8); foreach ($limitC as $c): ?>
-                                <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white truncate"><?= htmlspecialchars($c['name']) ?></a>
-                            <?php endforeach; ?>
-                        </div>
+                        <details class="group">
+                            <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
+                                <span class="text-gray-300 font-bold uppercase tracking-wider text-sm">Quốc Gia</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="grid grid-cols-2 gap-2 mt-2 mb-2 pl-4 border-l border-gray-800">
+                                <?php foreach ($countries as $c): ?>
+                                    <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white truncate"><?= htmlspecialchars($c['name']) ?></a>
+                                <?php endforeach; ?>
+                            </div>
+                        </details>
+                    </div>
+                    <div class="border-t border-gray-800 pt-2 pb-1">
+                        <details class="group">
+                            <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
+                                <span class="text-gray-300 font-bold uppercase tracking-wider text-sm">Năm Phát Hành</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="grid grid-cols-3 gap-2 mt-2 mb-2 pl-4 border-l border-gray-800">
+                                <?php for($y = date('Y'); $y >= 2010; $y--): ?>
+                                    <a href="/nam/<?= $y ?>" class="text-sm text-gray-400 hover:text-white"><?= $y ?></a>
+                                <?php endfor; ?>
+                            </div>
+                        </details>
                     </div>
 
                 </div>

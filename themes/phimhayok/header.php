@@ -261,8 +261,45 @@ if ($pdo) {
             <!-- (Mobile menu implementation kept simple) -->
             <div class="px-4 py-4 space-y-4">
                 <div class="flex flex-col space-y-3 font-medium text-gray-300">
-                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white">Phim Lẻ</a>
-                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white">Phim Bộ</a>
+                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white block py-1">Phim Lẻ</a>
+                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white block py-1">Phim Bộ</a>
+                    
+                    <details class="group">
+                        <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
+                            <span>Thể loại</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="grid grid-cols-2 gap-2 mt-2 mb-2 pl-4 border-l border-gray-800">
+                            <?php foreach ($genres as $g): ?>
+                                <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white truncate"><?= htmlspecialchars($g['name']) ?></a>
+                            <?php endforeach; ?>
+                        </div>
+                    </details>
+                    
+                    <details class="group">
+                        <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
+                            <span>Quốc gia</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="grid grid-cols-2 gap-2 mt-2 mb-2 pl-4 border-l border-gray-800">
+                            <?php foreach ($countries as $c): ?>
+                                <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white truncate"><?= htmlspecialchars($c['name']) ?></a>
+                            <?php endforeach; ?>
+                        </div>
+                    </details>
+                    
+                    <details class="group">
+                        <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
+                            <span>Năm</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="grid grid-cols-3 gap-2 mt-2 mb-2 pl-4 border-l border-gray-800">
+                            <?php for($y = date('Y'); $y >= 2010; $y--): ?>
+                                <a href="/nam/<?= $y ?>" class="text-sm text-gray-400 hover:text-white"><?= $y ?></a>
+                            <?php endfor; ?>
+                        </div>
+                    </details>
+
                     <?php do_action('theme_mobile_menu'); ?>
                     
                     <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv'])): ?>
