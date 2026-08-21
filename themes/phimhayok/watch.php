@@ -38,36 +38,70 @@ if (isset($_SESSION['user'])) {
 }
 ?>
             <?php if ($isM3U8): ?>
-                <video id="video-player" class="w-full h-full outline-none" controls playsinline>
-                    <source src="<?= htmlspecialchars($videoUrl) ?>" type="application/x-mpegURL">
-                </video>
-                <!-- Thư viện Hls.js để phát m3u8 -->
+                <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+                <style>
+                    :root { --plyr-color-main: #eab308; } /* Phim-yellow */
+                    .plyr { border-radius: 0.5rem; overflow: hidden; height: 100%; width: 100%; }
+                </style>
+                <video id="video-player" class="w-full h-full outline-none" playsinline></video>
+                <!-- Thư viện Hls.js và Plyr -->
                 <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+                <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
                 <script>
-                    var video = document.getElementById('video-player');
-                    var videoSrc = "<?= addslashes($videoUrl) ?>";
-                    var startTime = <?= $startTime ?>;
-                    
-                    if (Hls.isSupported()) {
-                        var hls = new Hls();
-                        hls.loadSource(videoSrc);
-                        hls.attachMedia(video);
-                        hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                            if (startTime > 0) video.currentTime = startTime;
-                            video.play().catch(function(e) {
-                                console.log("Auto-play blocked by browser.");
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const video = document.getElementById('video-player');
+                        const source = "<?= addslashes($videoUrl) ?>";
+                        let startTime = <?= $startTime ?>;
+                        
+                        if (Hls.isSupported()) {
+                            const hls = new Hls();
+                            hls.loadSource(source);
+                            hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                                // Lấy các mức chất lượng
+                                const availableQualities = hls.levels.map((l) => l.height);
+                                // Chỉ thêm tính năng chọn độ phân giải nếu có nhiều hơn 1 luồng
+                                let plyrOptions = {
+                                    i18n: { quality: 'Chất lượng', speed: 'Tốc độ', normal: 'Bình thường' }
+                                };
+                                
+                                if (availableQualities.length > 1) {
+                                    availableQualities.unshift(0); // 0 = Auto
+                                    plyrOptions.quality = {
+                                        default: 0,
+                                        options: availableQualities,
+                                        forced: true,
+                                        onChange: (newQuality) => {
+                                            if (newQuality === 0) {
+                                                window.hls.currentLevel = -1; // Auto
+                                            } else {
+                                                window.hls.levels.forEach((level, levelIndex) => {
+                                                    if (level.height === newQuality) {
+                                                        window.hls.currentLevel = levelIndex;
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    };
+                                    plyrOptions.i18n.qualityLabel = { 0: 'Tự động' };
+                                }
+                                
+                                const player = new Plyr(video, plyrOptions);
+                                window.hls = hls;
+                                
+                                if (startTime > 0) {
+                                    player.once('canplay', () => { player.currentTime = startTime; });
+                                }
                             });
-                        });
-                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                        // For Safari
-                        video.src = videoSrc;
-                        video.addEventListener('loadedmetadata', function() {
-                            if (startTime > 0) video.currentTime = startTime;
-                            video.play().catch(function(e) {
-                                console.log("Auto-play blocked by browser.");
-                            });
-                        });
-                    }
+                            hls.attachMedia(video);
+                        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                            // Safari
+                            video.src = source;
+                            const player = new Plyr(video);
+                            if (startTime > 0) {
+                                player.once('canplay', () => { player.currentTime = startTime; });
+                            }
+                        }
+                    });
                 </script>
             <?php elseif (!empty($currentEp['link_embed'])): ?>
                 <!-- Phát qua Iframe (Embed) -->

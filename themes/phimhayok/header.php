@@ -116,7 +116,7 @@ if ($pdo) {
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="/assets/js/main.js?v=<?= time() ?>"></script>
     
     <link rel="stylesheet" href="/themes/phimhayok/assets/css/style.css?v=<?= time() ?>">
@@ -277,28 +277,36 @@ if ($pdo) {
     </nav>
 
         <!-- Download App Modal -->
-        <div id="downloadAppModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div class="bg-[#141414] border border-gray-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
-                <button onclick="document.getElementById('downloadAppModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-black/50 rounded-full p-1 transition-colors z-10">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+        <div id="downloadAppModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity">
+            <div class="bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+                <button onclick="document.getElementById('downloadAppModal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full p-1.5 transition-colors z-10">
+                    <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
                 <div class="p-6 text-center">
-                    <div class="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
-                        <i data-lucide="download-cloud" class="w-8 h-8 text-yellow-500"></i>
+                    <div class="w-12 h-12 bg-phim-yellow/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-phim-yellow/20">
+                        <i data-lucide="smartphone" class="w-6 h-6 text-phim-yellow"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-2">Tải Ứng Dụng <?= htmlspecialchars($siteName) ?></h3>
-                    <p class="text-gray-400 text-sm mb-6">Trải nghiệm xem phim mượt mà và chất lượng cao hơn trên thiết bị của bạn.</p>
+                    <h3 class="text-lg font-bold text-white mb-1.5 tracking-tight">Tải Ứng Dụng <?= htmlspecialchars($siteName) ?></h3>
+                    <p class="text-gray-400 text-xs mb-5 px-2">Trải nghiệm xem phim 4K mượt mà, không quảng cáo trên mọi thiết bị.</p>
                     
-                    <div class="grid grid-cols-1 gap-3">
+                    <div class="flex flex-col gap-2.5">
                         <?php if (!empty($settings['appDownloadUrl'])): ?>
-                        <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-4 rounded-xl transition-transform hover:scale-[1.02] shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-                            <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Phiên bản cho Điện Thoại
+                        <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-between bg-phim-yellow hover:bg-yellow-400 text-black font-semibold py-2.5 px-4 rounded-xl transition-all">
+                            <div class="flex items-center text-sm">
+                                <i data-lucide="apple" class="w-4 h-4 mr-1.5"></i>
+                                <i data-lucide="android" class="w-4 h-4 mr-2"></i>
+                                Điện Thoại
+                            </div>
+                            <i data-lucide="download" class="w-4 h-4"></i>
                         </a>
                         <?php endif; ?>
                         
                         <?php if (!empty($settings['appDownloadUrlTv'])): ?>
-                        <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-center bg-[#1f1f1f] hover:bg-[#2f2f2f] text-gray-200 font-bold py-3 px-4 rounded-xl transition-transform hover:scale-[1.02] border border-gray-700">
-                            <i data-lucide="tv" class="w-5 h-5 mr-2"></i> Phiên bản cho TV (Android Box)
+                        <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-between bg-white/5 hover:bg-white/10 text-gray-200 font-medium py-2.5 px-4 rounded-xl transition-all border border-white/10">
+                            <div class="flex items-center text-sm">
+                                <i data-lucide="tv" class="w-4 h-4 mr-2"></i> TV / Android Box
+                            </div>
+                            <i data-lucide="download" class="w-4 h-4 text-gray-400"></i>
                         </a>
                         <?php endif; ?>
                     </div>

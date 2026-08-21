@@ -58,7 +58,7 @@ if (empty($featuredMovies) && !empty($movies)) {
 <?php if (!empty($featuredMovies)): ?>
     <div class="relative w-full h-[60vh] md:h-[75vh] mb-12 lg:mb-20">
         <?php if ($featuredStyle === 'slider' && count($featuredMovies) > 1): ?>
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
             <div class="swiper swiper-hero w-full h-full">
                 <div class="swiper-wrapper">
                     <?php foreach($featuredMovies as $featured): ?>
@@ -100,7 +100,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                 <div class="swiper-pagination !bottom-8 opacity-70"></div>
             </div>
             
-            <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     if (typeof Swiper !== 'undefined') {

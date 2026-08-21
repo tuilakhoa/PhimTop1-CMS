@@ -98,6 +98,9 @@ $homeSliders = [
                 <?php endforeach; ?>
             </div>
             <!-- Navigation & Pagination -->
+            <div class="absolute bottom-0 left-0 w-full h-1 bg-white/20 z-50">
+                <div class="hero-progress-line h-full bg-phim-yellow w-0 transition-all duration-75 ease-linear"></div>
+            </div>
             <div class="swiper-pagination !bottom-8"></div>
             <div class="swiper-button-prev hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors"></div>
             <div class="swiper-button-next hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors"></div>
@@ -483,7 +486,7 @@ $homeSliders = [
 </div>
 
 <!-- Swiper JS -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="/themes/phimhayok/assets/js/home.js?v=<?= time() ?>"></script>
 
 <?php include __DIR__ . '/footer.php'; ?>

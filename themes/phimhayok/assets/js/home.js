@@ -24,9 +24,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 delay: 5000,
                 disableOnInteraction: false,
             },
-            effect: 'fade',
-            fadeEffect: {
-                crossFade: true
+            effect: 'creative',
+            creativeEffect: {
+                prev: {
+                    shadow: true,
+                    translate: ['-20%', 0, -1],
+                },
+                next: {
+                    translate: ['100%', 0, 0],
+                },
             },
             pagination: {
                 el: '.swiper-hero .swiper-pagination',
@@ -35,6 +41,14 @@ document.addEventListener('DOMContentLoaded', function() {
             navigation: {
                 nextEl: '.swiper-hero .swiper-button-next',
                 prevEl: '.swiper-hero .swiper-button-prev',
+            },
+            on: {
+                autoplayTimeLeft(s, time, progress) {
+                    const progressLine = document.querySelector('.hero-progress-line');
+                    if(progressLine) {
+                        progressLine.style.width = ((1 - progress) * 100) + '%';
+                    }
+                }
             }
         });
 
