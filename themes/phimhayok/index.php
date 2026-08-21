@@ -185,7 +185,7 @@ $homeSliders = [
     <?php endif; ?>
 
     <!-- Section: Phim Dành Riêng Cho Bạn (AI Gợi Ý) -->
-    <section id="ai-recommend-section" class="hidden">
+    <section id="ai-recommend-section">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-white flex items-center">
                 <i data-lucide="sparkles" class="w-6 h-6 mr-2 text-cyan-400"></i> Dành Riêng Cho Bạn
@@ -194,7 +194,14 @@ $homeSliders = [
         
         <div class="swiper swiper-recommend">
             <div class="swiper-wrapper pb-4" id="ai-recommend-list">
-                <!-- JS will populate this -->
+                <!-- Skeleton Loader to prevent layout shift -->
+                <?php for($i=0; $i<8; $i++): ?>
+                <div class="swiper-slide w-[180px] md:w-[200px]">
+                    <div class="aspect-[2/3] bg-[#1a1a1a] rounded-lg animate-pulse mb-3 border border-gray-800"></div>
+                    <div class="h-4 bg-[#1a1a1a] rounded animate-pulse w-3/4 mb-2"></div>
+                    <div class="h-3 bg-[#1a1a1a] rounded animate-pulse w-1/2"></div>
+                </div>
+                <?php endfor; ?>
             </div>
             <div class="swiper-button-prev hidden md:flex"></div>
             <div class="swiper-button-next hidden md:flex"></div>
@@ -304,9 +311,9 @@ $homeSliders = [
 
     <!-- 5. Bảng Xếp Hạng (Leaderboard) -->
     <section class="bg-gradient-to-b from-[#0a0a0a] to-[#000000] rounded-3xl p-6 md:p-10 lg:p-12 border border-gray-900 shadow-2xl relative overflow-hidden">
-        <!-- Background decorative blur -->
-        <div class="absolute top-0 right-0 w-96 h-96 bg-phim-yellow/5 rounded-full blur-[100px] pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-red-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+        <!-- Background decorative (Optimized for performance: SVG/Gradients instead of CSS Blur) -->
+        <div class="absolute -top-20 -right-20 w-96 h-96 pointer-events-none" style="background: radial-gradient(circle, rgba(234,179,8,0.12) 0%, rgba(0,0,0,0) 70%);"></div>
+        <div class="absolute -bottom-20 -left-20 w-96 h-96 pointer-events-none" style="background: radial-gradient(circle, rgba(220,38,38,0.12) 0%, rgba(0,0,0,0) 70%);"></div>
         
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 relative z-10 gap-6">
             <h2 class="text-3xl md:text-4xl font-black text-white flex items-center tracking-tight">
@@ -340,9 +347,9 @@ $homeSliders = [
                     $rank = 1;
                     foreach ($category['data'] as $item): 
                         $thumb = !empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? '');
-                        $rankColor = $rank === 1 ? 'text-yellow-400 drop-shadow-[0_0_12px_rgba(250,204,21,0.6)]' : 
-                                    ($rank === 2 ? 'text-gray-300 drop-shadow-[0_0_12px_rgba(209,213,219,0.5)]' : 
-                                    ($rank === 3 ? 'text-amber-600 drop-shadow-[0_0_12px_rgba(217,119,6,0.6)]' : 'text-gray-700'));
+                        $rankColor = $rank === 1 ? 'text-yellow-400 [text-shadow:0_0_12px_rgba(250,204,21,0.8)]' : 
+                                    ($rank === 2 ? 'text-gray-300 [text-shadow:0_0_12px_rgba(209,213,219,0.7)]' : 
+                                    ($rank === 3 ? 'text-amber-600 [text-shadow:0_0_12px_rgba(217,119,6,0.8)]' : 'text-gray-700'));
                     ?>
                     <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex items-center group p-3 -mx-3 rounded-2xl hover:bg-[#1a1a1a] transition-colors duration-300">
                         <div class="w-12 text-center shrink-0">
