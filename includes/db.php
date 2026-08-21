@@ -369,12 +369,6 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
         else if ($type === 'the-loai') $url = "https://phim.nguonc.com/api/films/the-loai/$slug?page=$page$queryString";
         else if ($type === 'quoc-gia') $url = "https://phim.nguonc.com/api/films/quoc-gia/$slug?page=$page$queryString";
         else if ($type === 'nam-phat-hanh') $url = "https://phim.nguonc.com/api/films/nam-phat-hanh/$slug?page=$page$queryString";
-    } else if ($apiSource === 'ophim') {
-        if ($type === 'home') $url = "https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=$page$queryString";
-        else if ($type === 'search') $url = "https://ophim1.com/v1/api/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page$queryString";
-        else if (in_array($type, ['the-loai', 'quoc-gia'])) $url = "https://ophim1.com/v1/api/$type/$slug?page=$page$queryString";
-        else if ($type === 'nam-phat-hanh') $url = "https://ophim1.com/v1/api/nam/$slug?page=$page$queryString";
-        else $url = "https://ophim1.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page$queryString";
     } else { // kkphim
         if ($type === 'home') $url = "https://phimapi.com/v1/api/home?page=$page$queryString";
         else if ($type === 'search') $url = "https://phimapi.com/v1/api/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page$queryString";
@@ -405,7 +399,7 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
         $result['pagination']['currentPage'] = $data['paginate']['current_page'] ?? $page;
         $result['domain'] = ''; // NguonC returns absolute URLs
     } else {
-        // KKPhim / Ophim
+        // KKPhim
         if (isset($data['data']['items'])) $result['items'] = $data['data']['items'];
         else if (isset($data['items'])) $result['items'] = $data['items'];
         
@@ -420,7 +414,7 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
             $result['pagination'] = $data['pagination'];
         }
         
-        // Swap thumb_url and poster_url for KKPhim/Ophim
+        // Swap thumb_url and poster_url for KKPhim
         if (!empty($result['items'])) {
             foreach ($result['items'] as &$item) {
                 $temp = $item['thumb_url'] ?? '';
@@ -465,8 +459,6 @@ function fetchApiMovieDetail($slug) {
     $url = '';
     if ($apiSource === 'nguonc') {
         $url = "https://phim.nguonc.com/api/film/" . rawurlencode($slug);
-    } else if ($apiSource === 'ophim') {
-        $url = "https://ophim1.com/phim/" . rawurlencode($slug);
     } else { // kkphim
         $url = "https://phimapi.com/phim/" . rawurlencode($slug);
     }
@@ -504,7 +496,7 @@ function fetchApiMovieDetail($slug) {
             $result['movie']['content'] = $result['movie']['description'];
         }
     } else {
-        // KKPhim / Ophim
+        // KKPhim
         if (isset($data['data']['item'])) {
             $result['movie'] = $data['data']['item'];
             $result['episodes'] = $result['movie']['episodes'] ?? [];
@@ -527,7 +519,7 @@ function fetchApiMovieDetail($slug) {
         $result['movie']['poster_url'] = rtrim($result['domain'], '/') . '/' . ltrim($result['movie']['poster_url'], '/');
     }
     
-    if ($apiSource === 'kkphim' || $apiSource === 'ophim') {
+    if ($apiSource === 'kkphim') {
         if (!empty($result['movie'])) {
             $temp = $result['movie']['thumb_url'] ?? '';
             $result['movie']['thumb_url'] = $result['movie']['poster_url'] ?? '';
@@ -552,107 +544,6 @@ function fetchApiMovieDetail($slug) {
         if (!$isSafe) {
             return null; // Restricted in Kids Mode
         }
-    }
-    
-    return $result;
-}
-
-// Comic API Fetch Helper (OTruyen)
-function fetchApiComics($type, $slug = '', $page = 1, $keyword = '') {
-    global $settings;
-    $baseUrl = rtrim($settings['comicApiUrl'] ?? 'https://otruyenapi.com/v1/api', '/');
-    $url = '';
-    
-    if ($type === 'home') $url = "$baseUrl/home";
-    else if ($type === 'search') $url = "$baseUrl/tim-kiem?keyword=" . rawurlencode($keyword) . "&page=$page";
-    else if (in_array($type, ['the-loai'])) $url = "$baseUrl/the-loai/$slug?page=$page";
-    else $url = "$baseUrl/danh-sach/" . ($slug ?: 'truyen-moi') . "?page=$page";
-    
-    $res = fetchApiWithCache($url, 900);
-    if (!$res) return null;
-    $data = json_decode($res, true);
-    
-    $result = [
-        'items' => [],
-        'titlePage' => '',
-        'domain' => 'https://otruyencdn.com/',
-        'seoOnPage' => (object)[],
-        'params' => (object)[],
-        'pagination' => [
-            'totalPages' => 1,
-            'currentPage' => $page
-        ]
-    ];
-    
-    if (isset($data['data']['items'])) $result['items'] = $data['data']['items'];
-    
-    $result['titlePage'] = $data['data']['titlePage'] ?? '';
-    $domain = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://otruyencdn.com/';
-    $result['domain'] = rtrim($domain, '/') . '/uploads/comics/';
-    $result['seoOnPage'] = !empty($data['data']['seoOnPage']) ? $data['data']['seoOnPage'] : (object)[];
-    $result['params'] = !empty($data['data']['params']) ? $data['data']['params'] : (object)[];
-    
-    if (isset($data['data']['params']['pagination'])) {
-        $result['pagination'] = $data['data']['params']['pagination'];
-    }
-    
-    // Ensure origin_name is a string to prevent Android app from crashing
-    if (!empty($result['items'])) {
-        foreach ($result['items'] as &$item) {
-            if (isset($item['origin_name']) && is_array($item['origin_name'])) {
-                $item['origin_name'] = implode(', ', $item['origin_name']);
-            }
-        }
-    }
-    
-    return $result;
-}
-
-function fetchApiComicDetail($slug) {
-    global $settings;
-    $baseUrl = rtrim($settings['comicApiUrl'] ?? 'https://otruyenapi.com/v1/api', '/');
-    $url = "$baseUrl/truyen-tranh/" . rawurlencode($slug);
-    
-    $res = fetchApiWithCache($url, 3600);
-    if (!$res) return null;
-    $data = json_decode($res, true);
-    
-    $result = [
-        'comic' => null,
-        'chapters' => [],
-        'seoOnPage' => (object)[],
-        'domain' => 'https://otruyencdn.com/'
-    ];
-    
-    if (isset($data['data']['item'])) {
-        $result['comic'] = $data['data']['item'];
-        // Fix missing properties to match Movie structure if needed by theme
-        if (!isset($result['comic']['year'])) $result['comic']['year'] = '';
-        if (!isset($result['comic']['quality'])) $result['comic']['quality'] = '';
-        if (!isset($result['comic']['lang'])) $result['comic']['lang'] = '';
-        if (!isset($result['comic']['time'])) $result['comic']['time'] = '';
-        
-        // Ensure origin_name is a string to prevent Android app from crashing
-        if (isset($result['comic']['origin_name']) && is_array($result['comic']['origin_name'])) {
-            $result['comic']['origin_name'] = implode(', ', $result['comic']['origin_name']);
-        }
-        
-        $result['chapters'] = $result['comic']['chapters'] ?? [];
-        $result['seoOnPage'] = !empty($data['data']['seoOnPage']) ? $data['data']['seoOnPage'] : (object)[];
-        $result['domain'] = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://otruyencdn.com/';
-    }
-    
-    $baseImgUrl = rtrim($result['domain'], '/') . '/uploads/comics/';
-    if (!empty($result['comic']['thumb_url']) && !preg_match('/^http/', $result['comic']['thumb_url'])) {
-        $result['comic']['thumb_url'] = $baseImgUrl . ltrim($result['comic']['thumb_url'], '/');
-    }
-    if (!empty($result['comic']['poster_url']) && !preg_match('/^http/', $result['comic']['poster_url'])) {
-        $result['comic']['poster_url'] = $baseImgUrl . ltrim($result['comic']['poster_url'], '/');
-    }
-    
-    // Lấy ảnh poster từ seoSchema nếu poster_url không có sẵn trong item
-    if (empty($result['comic']['poster_url']) && !empty($result['seoOnPage']['seoSchema']['image'])) {
-        $result['comic']['poster_url'] = $result['seoOnPage']['seoSchema']['image'];
     }
     
     return $result;

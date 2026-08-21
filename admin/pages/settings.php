@@ -35,7 +35,7 @@
             <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn API (Áp dụng khi dùng "Gọi API Trực Tiếp")</label>
             <select name="apiSource" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
                 <option value="kkphim" <?= (!isset($settings['apiSource']) || $settings['apiSource'] === 'kkphim') ? 'selected' : '' ?>>KKPhim (phimapi.com)</option>
-                <option value="ophim" <?= (isset($settings['apiSource']) && $settings['apiSource'] === 'ophim') ? 'selected' : '' ?>>Ophim (ophim1.com)</option>
+
                 <option value="nguonc" <?= (isset($settings['apiSource']) && $settings['apiSource'] === 'nguonc') ? 'selected' : '' ?>>NguonC (phim.nguonc.com)</option>
             </select>
             <p class="text-xs text-gray-500 mt-2">Hệ thống sẽ tự động điều chỉnh cấu trúc dữ liệu để giao diện hoạt động bình thường trên mọi nguồn.</p>

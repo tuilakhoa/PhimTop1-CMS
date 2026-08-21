@@ -49,7 +49,7 @@ if ($isPost) {
                     githubToken VARCHAR(255), autoCheckUpdates TINYINT(1) DEFAULT 1,
                     updateServerUrl VARCHAR(255) DEFAULT 'tuilakhoa/PhimTop1-CMS',
                     lastUpdateCheck VARCHAR(255), latestRelease TEXT,
-                    siteName VARCHAR(255) DEFAULT 'PhimTop1', comicApiUrl VARCHAR(255) DEFAULT 'https://otruyenapi.com/v1/api',
+                    siteName VARCHAR(255) DEFAULT 'PhimTop1',
                     seoTitle TEXT, seoDesc TEXT, seoKeywords TEXT, logoUrl VARCHAR(255),
                     verifyGoogle VARCHAR(255), verifyBing VARCHAR(255), verifyYandex VARCHAR(255),
                     customHead TEXT, customBody TEXT, db_version INT DEFAULT 12
@@ -122,7 +122,7 @@ if ($isPost) {
                         }
                     }
 
-                    $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl, comicApiUrl) VALUES (1, ?, 'api', 'dark', '1.0.2', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS', 'https://otruyenapi.com/v1/api')");
+                    $stmt = $pdo->prepare("INSERT INTO settings (id, adminPath, displayMode, theme, cmsVersion, siteName, seoTitle, seoDesc, seoKeywords, logoUrl, updateServerUrl) VALUES (1, ?, 'api', 'dark', '1.0.2', 'PhimTop1', 'PhimTop1 - Xem Phim Online Chất Lượng Cao', 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.', 'xem phim, phim online, phim hay, phim vietsub', '', 'tuilakhoa/PhimTop1-CMS')");
                     $stmt->execute(['/' . $finalAdminPath]);
                 } else {
                     // Đã cài đặt: lấy adminPath hiện tại từ database
@@ -197,7 +197,7 @@ if ($isPost) {
                         'seoDesc' => 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.',
                         'seoKeywords' => 'xem phim, phim online, phim hay, phim vietsub',
                         'logoUrl' => '',
-                        'comicApiUrl' => 'https://otruyenapi.com/v1/api',
+
                         'updateServerUrl' => 'tuilakhoa/PhimTop1-CMS'
                     ]);
                 } else {
