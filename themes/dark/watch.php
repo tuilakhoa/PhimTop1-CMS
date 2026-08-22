@@ -136,9 +136,14 @@ if (isset($_SESSION['user'])) {
                             <i data-lucide="server" class="w-4 h-4 mr-1.5 text-[#ff8f00]"></i> 
                             Server: <?= htmlspecialchars($episodes[0]['server_name'] ?? 'HLS/Embed') ?>
                         </div>
-                        <button onclick="toggleWatchPartyDialog()" class="px-4 py-2 bg-[#22242d] hover:bg-[#ff8f00] text-gray-300 hover:text-black rounded-md text-sm font-medium transition-colors flex items-center">
-                            <i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Xem Chung
-                        </button>
+                        <div class="flex space-x-2">
+                            <button onclick="toggleTheatreMode()" class="px-4 py-2 bg-[#22242d] hover:bg-[#ff8f00] text-gray-300 hover:text-black rounded-md text-sm font-medium transition-colors flex items-center">
+                                <i data-lucide="monitor" class="w-4 h-4 mr-1.5"></i> Rạp Hát
+                            </button>
+                            <button onclick="toggleWatchPartyDialog()" class="px-4 py-2 bg-[#22242d] hover:bg-[#ff8f00] text-gray-300 hover:text-black rounded-md text-sm font-medium transition-colors flex items-center">
+                                <i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Xem Chung
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -301,7 +306,71 @@ if (isset($_SESSION['user'])) {
 </div>
 
 <script>
+// Theatre Mode
+let theatreOverlay = document.createElement('div');
+theatreOverlay.id = 'theatre-overlay';
+theatreOverlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:40; display:none; pointer-events:none;';
+document.body.appendChild(theatreOverlay);
 
+function toggleTheatreMode() {
+    const overlay = document.getElementById('theatre-overlay');
+    const playerContainer = document.getElementById('player-container').parentElement;
+    if (overlay.style.display === 'none') {
+        overlay.style.display = 'block';
+        playerContainer.style.position = 'relative';
+        playerContainer.style.zIndex = '50';
+    } else {
+        overlay.style.display = 'none';
+        playerContainer.style.position = '';
+        playerContainer.style.zIndex = '';
+    }
+}
+
+// Auto-Play Next
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('video-player');
+    if (!video) return;
+
+    let nextEpisodeUrl = null;
+    const episodeLinks = document.querySelectorAll('#episode-list a');
+    for(let i=0; i<episodeLinks.length - 1; i++) {
+        if(episodeLinks[i].classList.contains('bg-[#2d2f36]')) { // current active
+            nextEpisodeUrl = episodeLinks[i+1].href;
+            break;
+        }
+    }
+
+    let autoPlayFired = false;
+    video.addEventListener('timeupdate', function() {
+        if (!autoPlayFired && video.duration > 0 && nextEpisodeUrl) {
+            if (video.currentTime / video.duration >= 0.95) {
+                autoPlayFired = true;
+                let countdownDiv = document.createElement('div');
+                countdownDiv.className = 'absolute top-4 right-4 bg-black/80 text-white p-4 rounded-lg z-50 border border-[#ff8f00] shadow-xl';
+                countdownDiv.innerHTML = 'Chuyển tập tiếp theo trong <span id="auto-play-counter" class="text-[#ff8f00] font-bold text-xl">5</span>s... <button onclick="cancelAutoPlay()" class="ml-3 text-sm text-gray-400 hover:text-white underline">Hủy</button>';
+                document.getElementById('player-container').appendChild(countdownDiv);
+                
+                let count = 5;
+                window.autoPlayTimer = setInterval(function() {
+                    count--;
+                    const counterEl = document.getElementById('auto-play-counter');
+                    if(counterEl) counterEl.innerText = count;
+                    if (count <= 0) {
+                        clearInterval(window.autoPlayTimer);
+                        window.location.href = nextEpisodeUrl;
+                    }
+                }, 1000);
+            }
+        }
+    });
+
+    window.cancelAutoPlay = function() {
+        clearInterval(window.autoPlayTimer);
+        autoPlayFired = true; // prevent re-triggering
+        const counterEl = document.getElementById('auto-play-counter');
+        if(counterEl && counterEl.parentNode) counterEl.parentNode.remove();
+    }
+});
 </script>
 
 <script>
@@ -761,7 +830,7 @@ function startWpSync() {
         $intentUrlModal = "intent://movie/" . urlencode($slug) . "#Intent;scheme=phimtop1;package=com.phimtop1.app;S.browser_fallback_url=" . urlencode($settings['appDownloadUrl'] ?? '') . ";end;";
         ?>
         <div class="flex flex-col gap-3">
-            <a href="<?= $intentUrlModal ?>" class="w-full bg-gradient-to-r from-[#ff8f00] to-[#ffaa33] hover:from-[#e68000] hover:to-[#ff9900] text-black py-3.5 rounded-xl font-bold transition-all flex items-center justify-center shadow-[0_4px_20px_rgba(255,143,0,0.3)] hover:shadow-[0_4px_25px_rgba(255,143,0,0.4)] hover:-translate-y-0.5">
+            <a href="<?= $intentUrlModal ?>" class="w-full bg-[#ff8f00] hover:bg-[#e68000] text-black py-3.5 rounded-xl font-bold transition-all flex items-center justify-center shadow-[0_4px_20px_rgba(255,143,0,0.3)] hover:shadow-[0_4px_25px_rgba(255,143,0,0.4)] hover:-translate-y-0.5">
                 <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Mở trong Ứng dụng
             </a>
             <a href="<?= htmlspecialchars($settings['appDownloadUrl'] ?? '#') ?>" target="_blank" class="w-full bg-white/5 hover:bg-white/10 text-white py-3.5 rounded-xl font-medium transition-all flex items-center justify-center border border-white/10 hover:border-white/20">

@@ -215,9 +215,9 @@ class _ShopScreenState extends State<ShopScreen> {
                                     margin: const EdgeInsets.only(bottom: 8),
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                     decoration: BoxDecoration(
-                                      gradient: const LinearGradient(colors: [Colors.red, Colors.orange]),
+                                      color: Colors.redAccent,
                                       borderRadius: BorderRadius.circular(24),
-                                      boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.3), blurRadius: 8)],
+                                      boxShadow: [BoxShadow(color: Colors.redAccent.withOpacity(0.3), blurRadius: 8)],
                                     ),
                                     child: Row(
                                       children: [

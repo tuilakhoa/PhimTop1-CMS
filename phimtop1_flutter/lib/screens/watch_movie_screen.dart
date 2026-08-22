@@ -163,6 +163,24 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     try {
       await _videoController!.initialize();
       
+      bool autoPlayFired = false;
+      _videoController!.addListener(() {
+        if (!mounted) return;
+        if (_videoController!.value.isInitialized) {
+          final pos = _videoController!.value.position.inSeconds;
+          final dur = _videoController!.value.duration.inSeconds;
+          if (dur > 0 && pos > 0 && (pos / dur >= 0.95)) {
+            if (!autoPlayFired) {
+               autoPlayFired = true;
+               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tự động chuyển tập...')));
+               Future.delayed(const Duration(seconds: 3), () {
+                 if (mounted) Navigator.pop(context, 'next_episode');
+               });
+            }
+          }
+        }
+      });
+      
       // Check history and seek if needed
       Duration? startAt;
       if (_token != null && widget.movieSlug.isNotEmpty) {

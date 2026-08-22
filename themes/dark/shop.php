@@ -27,7 +27,7 @@ try {
             <p class="text-gray-400 mt-2">Mua sắm khung ảnh đại diện và vật phẩm trang trí</p>
         </div>
         <div class="flex items-center space-x-4">
-            <button id="checkinBtn" onclick="doCheckin()" class="hidden bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white border-none rounded-xl px-4 py-3 flex items-center shadow-lg shadow-red-500/20 transition-all hover:scale-105 font-medium">
+            <button id="checkinBtn" onclick="doCheckin()" class="hidden bg-red-600 hover:bg-red-500 text-white border-none rounded-xl px-4 py-3 flex items-center shadow-lg shadow-red-500/20 transition-all hover:scale-105 font-medium">
                 <i data-lucide="calendar-check" class="w-5 h-5 mr-2"></i>
                 <span>Điểm Danh Nhận Xu</span>
             </button>

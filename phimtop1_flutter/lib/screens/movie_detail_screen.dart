@@ -104,7 +104,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   thumbUrl: thumbUrl,
                 ),
               ),
-            );
+            ).then((result) {
+              if (result == 'next_episode') {
+                if (provider.currentEpisodeIndex < provider.episodes[provider.currentServerIndex].serverData.length - 1) {
+                  provider.changeEpisode(provider.currentEpisodeIndex + 1, provider.currentServerIndex);
+                  _watchMovie(provider);
+                }
+              }
+            });
           } else if (embedLink.isNotEmpty) {
             Navigator.push(
               context,

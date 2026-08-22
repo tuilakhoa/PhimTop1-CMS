@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $intentUrlModal = "intent://movie/" . urlencode($slug) . "#Intent;scheme=phimtop1;package=com.phimtop1.app;S.browser_fallback_url=" . urlencode($settings['appDownloadUrl'] ?? '') . ";end;";
         ?>
         <div class="flex flex-col gap-3">
-            <a href="<?= $intentUrlModal ?>" class="w-full bg-gradient-to-r from-[#ff8f00] to-[#ffaa33] hover:from-[#e68000] hover:to-[#ff9900] text-black py-3.5 rounded-xl font-bold transition-all flex items-center justify-center shadow-[0_4px_20px_rgba(255,143,0,0.3)] hover:shadow-[0_4px_25px_rgba(255,143,0,0.4)] hover:-translate-y-0.5">
+            <a href="<?= $intentUrlModal ?>" class="w-full bg-[#ff8f00] hover:bg-[#e68000] text-black py-3.5 rounded-xl font-bold transition-all flex items-center justify-center shadow-[0_4px_20px_rgba(255,143,0,0.3)] hover:shadow-[0_4px_25px_rgba(255,143,0,0.4)] hover:-translate-y-0.5">
                 <i data-lucide="smartphone" class="w-5 h-5 mr-2"></i> Mở trong Ứng dụng
             </a>
             <a href="<?= htmlspecialchars($settings['appDownloadUrl'] ?? '#') ?>" target="_blank" class="w-full bg-white/5 hover:bg-white/10 text-white py-3.5 rounded-xl font-medium transition-all flex items-center justify-center border border-white/10 hover:border-white/20">

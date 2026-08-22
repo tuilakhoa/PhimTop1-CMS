@@ -13,7 +13,7 @@
                             <i data-lucide="monitor-play" class="w-5 h-5 text-white fill-current"></i>
                         </div>
                     <?php endif; ?>
-                    <span class="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent"><?= htmlspecialchars($settings['siteName'] ?? 'PhimTop1') ?></span>
+                    <span class="text-xl font-bold text-[#ff8f00]"><?= htmlspecialchars($settings['siteName'] ?? 'PhimTop1') ?></span>
                 </a>
                 <p class="text-sm mb-4"><?= nl2br(htmlspecialchars($settings['footerText'] ?: ($settings['seoDesc'] ?? 'Hệ thống xem phim trực tuyến chất lượng cao, cập nhật liên tục mỗi ngày.'))) ?></p>
                 <div class="flex items-center space-x-4">

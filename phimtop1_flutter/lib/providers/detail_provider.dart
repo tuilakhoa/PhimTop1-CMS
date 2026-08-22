@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../api/cms_api.dart';
 import '../models/models.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class DetailProvider with ChangeNotifier {
   bool isLoading = true;
@@ -126,6 +127,13 @@ class DetailProvider with ChangeNotifier {
       });
       if (response.status == 'success') {
         isFollowing = response.action == 'added';
+        try {
+          if (isFollowing) {
+            FirebaseMessaging.instance.subscribeToTopic('movie_${movie!.slug}');
+          } else {
+            FirebaseMessaging.instance.unsubscribeFromTopic('movie_${movie!.slug}');
+          }
+        } catch (_) {}
         notifyListeners();
       }
     } catch (e) {
