@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/db.php';
 $settings = getSettings();
+set_time_limit(0); // Prevent timeout when fetching many API pages
 
 $baseUrl = "https://$_SERVER[HTTP_HOST]";
 
@@ -30,15 +31,28 @@ function outUrl($loc, $lastmod, $changefreq, $priority) {
 }
 
 require_once __DIR__ . '/includes/repositories.php';
+require_once __DIR__ . '/includes/api_client.php';
 $catRepo = getCategoryRepository();
-$movieRepo = getMovieRepository();
 
 $allCats = $includeCategories ? $catRepo->getCategories() : [];
 $catCount = count($allCats);
 
-$allMoviesResult = $includeMovies ? $movieRepo->getMovies(1, 999999, '') : ['total' => 0, 'items' => []]; // get all for now to count, we can limit later
-$allMovies = $allMoviesResult['items'];
-$movieCount = count($allMovies);
+$movieCount = 0;
+$itemsPerPage = 24;
+
+if ($includeMovies) {
+    $firstPageRes = fetchApiFilms('danh-sach', 'phim-moi-cap-nhat', 1);
+    if ($firstPageRes && isset($firstPageRes['pagination'])) {
+        $movieCount = $firstPageRes['pagination']['totalItems'] ?? 0;
+        if ($movieCount == 0 && isset($firstPageRes['pagination']['totalPages'])) {
+            $itemsPerPage = $firstPageRes['pagination']['totalItemsPerPage'] ?? 24;
+            $movieCount = $firstPageRes['pagination']['totalPages'] * $itemsPerPage;
+        } else {
+            $itemsPerPage = $firstPageRes['pagination']['totalItemsPerPage'] ?? 24;
+        }
+    }
+}
+
 if ($movieCount > $sitemapLimit) {
     $movieCount = $sitemapLimit;
 }
@@ -110,9 +124,22 @@ if ($includeMovies && $itemsToFetch > 0) {
         $movieLimit = min($itemsToFetch, $movieCount - $movieOffset);
         
         if ($movieLimit > 0) {
-            $moviesToProcess = array_slice($allMovies, $movieOffset, $movieLimit);
+            $startApiPage = floor($movieOffset / $itemsPerPage) + 1;
+            $endApiPage = ceil(($movieOffset + $movieLimit) / $itemsPerPage);
+            
+            $collectedMovies = [];
+            for ($p = $startApiPage; $p <= $endApiPage; $p++) {
+                $apiData = fetchApiFilms('danh-sach', 'phim-moi-cap-nhat', $p);
+                if ($apiData && !empty($apiData['items'])) {
+                    $collectedMovies = array_merge($collectedMovies, $apiData['items']);
+                }
+            }
+            
+            $sliceStart = $movieOffset % $itemsPerPage;
+            $moviesToProcess = array_slice($collectedMovies, $sliceStart, $movieLimit);
+            
             foreach ($moviesToProcess as $row) {
-                $date = isset($row['updated_at']) ? date('c', strtotime($row['updated_at'])) : date('c');
+                $date = isset($row['modified']['time']) ? date('c', strtotime($row['modified']['time'])) : (isset($row['updated_at']) ? date('c', strtotime($row['updated_at'])) : date('c'));
                 outUrl("{$baseUrl}/{$slugMovie}/" . ($row['slug'] ?? ''), $date, "weekly", "0.8");
                 $currentCount++;
                 $itemsToFetch--;
