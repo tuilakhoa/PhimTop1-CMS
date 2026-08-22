@@ -65,8 +65,32 @@
         </div>
     </footer>
     
-    <!-- Initialize Lucide Icons -->
+    <!-- Initialize Lucide Icons & Global Scripts -->
     <script>
+      function shareMovie(movieName) {
+          const movieUrl = window.location.href;
+          const appUrl = '<?= !empty($settings['appDownloadUrl']) ? addslashes($settings['appDownloadUrl']) : 'https://phimtop1.com' ?>';
+          const shareText = `Đang xem phim: ${movieName}\nTải app Android để xem phim mượt mà, không quảng cáo: ${appUrl}`;
+          const fallbackText = `Đang xem phim: ${movieName}\nXem ngay tại: ${movieUrl}\n\nTải app Android để xem phim mượt mà, không quảng cáo: ${appUrl}`;
+          
+          if (navigator.share) {
+              navigator.share({
+                  title: movieName,
+                  text: shareText,
+                  url: movieUrl
+              }).catch((error) => console.log('Error sharing', error));
+          } else {
+              if (navigator.clipboard && window.isSecureContext) {
+                  navigator.clipboard.writeText(fallbackText).then(() => {
+                      alert('Đã copy nội dung chia sẻ vào khay nhớ tạm!');
+                  }).catch(() => {
+                      prompt('Copy nội dung này để chia sẻ:', fallbackText);
+                  });
+              } else {
+                  prompt('Copy nội dung này để chia sẻ:', fallbackText);
+              }
+          }
+      }
       lucide.createIcons();
     </script>
 

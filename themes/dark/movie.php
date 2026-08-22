@@ -132,7 +132,7 @@ if (!empty($_GET['party'])) {
                             <button onclick="document.getElementById('download-app-modal').classList.remove('hidden'); document.getElementById('download-app-modal').classList.add('flex');" class="flex items-center text-gray-400 hover:text-white transition-colors p-2 rounded-md hover:bg-[#22242d]">
                                 <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> <span class="text-sm hidden sm:inline">Tải phim</span>
                             </button>
-                            <button class="flex items-center text-gray-400 hover:text-white transition-colors p-2 rounded-md hover:bg-[#22242d]">
+                            <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="flex items-center text-gray-400 hover:text-white transition-colors p-2 rounded-md hover:bg-[#22242d]">
                                 <i data-lucide="share-2" class="w-4 h-4 mr-1.5"></i> <span class="text-sm hidden sm:inline">Chia sẻ</span>
                             </button>
                         </div>

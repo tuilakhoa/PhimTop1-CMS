@@ -168,7 +168,7 @@ if (!empty($_GET['party'])) {
                     </button>
                 <?php endif; ?>
                 
-                <button class="px-6 py-2.5 bg-[#303030] hover:bg-[#404040] text-white text-sm font-medium rounded-full transition-colors flex items-center border border-gray-700">
+                <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-6 py-2.5 bg-[#303030] hover:bg-[#404040] text-white text-sm font-medium rounded-full transition-colors flex items-center border border-gray-700">
                     <i data-lucide="send" class="w-4 h-4 mr-2"></i> Chia sẻ
                 </button>
                 
