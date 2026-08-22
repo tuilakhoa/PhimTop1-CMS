@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // Read current content
-$currentContent = "User-agent: *\nAllow: /\nSitemap: " . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]/sitemap.xml";
+$currentContent = "User-agent: *\nAllow: /\nSitemap: https://$_SERVER[HTTP_HOST]/sitemap.xml";
 if (file_exists($robotsFile)) {
     $currentContent = file_get_contents($robotsFile);
 }

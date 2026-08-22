@@ -140,13 +140,13 @@ if ($pdo) {
                                 Khám Phá <i data-lucide="grid" class="w-4 h-4 ml-1"></i>
                             </button>
                             <div class="absolute left-1/2 -translate-x-1/2 mt-2 w-[600px] bg-gray-900 border border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                <div class="p-6 flex gap-6">
+                                <div class="p-6 flex gap-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                                     <div class="flex-1">
                                         <h3 class="text-white font-bold mb-3 flex items-center border-b border-gray-800 pb-2">
                                             <i data-lucide="film" class="w-4 h-4 mr-2 text-red-500"></i> Thể Loại
                                         </h3>
                                         <div class="grid grid-cols-2 gap-x-4 gap-y-2">
-                                            <?php foreach (array_slice($genres, 0, 14) as $g): ?>
+                                            <?php foreach ($genres as $g): ?>
                                                 <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1.5 rounded transition-colors truncate"><?= htmlspecialchars($g['name']) ?></a>
                                             <?php endforeach; ?>
                                         </div>
@@ -156,7 +156,7 @@ if ($pdo) {
                                             <i data-lucide="globe" class="w-4 h-4 mr-2 text-blue-500"></i> Quốc Gia
                                         </h3>
                                         <div class="grid grid-cols-2 gap-x-4 gap-y-2">
-                                            <?php foreach (array_slice($countries, 0, 14) as $c): ?>
+                                            <?php foreach ($countries as $c): ?>
                                                 <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1.5 rounded transition-colors truncate"><?= htmlspecialchars($c['name']) ?></a>
                                             <?php endforeach; ?>
                                         </div>

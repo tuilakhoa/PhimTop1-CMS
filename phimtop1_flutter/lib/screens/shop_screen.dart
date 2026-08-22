@@ -138,13 +138,13 @@ class _ShopScreenState extends State<ShopScreen> {
     final primaryColor = Theme.of(context).primaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Modern dark blue/black background
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Modern dark blue/black background
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 220.0,
             pinned: true,
-            backgroundColor: const Color(0xFF0F172A),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
               title: const Text('Cửa hàng Vật phẩm', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, textBaseline: TextBaseline.alphabetic, fontSize: 18)),

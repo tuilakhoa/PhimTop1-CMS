@@ -1,7 +1,7 @@
 <h2 class="text-2xl font-bold text-white mb-6">Quản Lý Sitemap</h2>
 
 <?php
-$baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+$baseUrl = "https://$_SERVER[HTTP_HOST]";
 $sitemapUrl = $baseUrl . '/sitemap.xml';
 ?>
 

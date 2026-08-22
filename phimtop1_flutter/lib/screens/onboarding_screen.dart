@@ -215,7 +215,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildPage2() {
     return Container(
-      color: const Color(0xFF0F1218),
+      color: Theme.of(context).scaffoldBackgroundColor,
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
