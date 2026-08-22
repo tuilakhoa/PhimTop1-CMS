@@ -20,9 +20,10 @@ class YoukuMovieCard extends StatelessWidget {
     final pUrl = getValidUrl(movie.posterUrl);
     final tUrl = getValidUrl(movie.thumbUrl);
 
+    // In Ophim API: thumb_url is usually vertical (poster) and poster_url is horizontal (backdrop)
     final thumb = isFeatured 
-        ? (tUrl ?? pUrl ?? "") 
-        : (pUrl ?? tUrl ?? "");
+        ? (pUrl ?? tUrl ?? "") 
+        : (tUrl ?? pUrl ?? "");
         
     final imageUrl = thumb.startsWith('http') 
         ? thumb 

@@ -111,10 +111,10 @@ class _FeaturedSliderState extends State<FeaturedSlider> {
   Widget _buildSlide(BuildContext context, MovieItem movie, double sliderHeight) {
     String? getValidUrl(String? url) => (url != null && url.isNotEmpty) ? url : null;
     
-    // Prefer posterUrl for featured slider
+    // Prefer thumbUrl (vertical) for featured slider on mobile
     final pUrl = getValidUrl(movie.posterUrl);
     final tUrl = getValidUrl(movie.thumbUrl);
-    final thumb = pUrl ?? tUrl ?? "";
+    final thumb = tUrl ?? pUrl ?? "";
         
     final imageUrl = thumb.startsWith('http') 
         ? thumb 

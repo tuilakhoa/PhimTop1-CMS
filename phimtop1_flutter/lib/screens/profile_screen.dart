@@ -5,7 +5,10 @@ import 'dart:math';
 import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
 import '../services/auth_service.dart';
+import '../services/watch_party_service.dart';
 import '../models/models.dart';
+import '../widgets/menu_row_tile.dart';
+import 'watch_movie_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -53,12 +56,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: const Text("Đăng nhập", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
-                  const SizedBox(height: 32),
-                  ListTile(
-                    leading: Icon(Icons.download_done, color: textColor),
-                    title: Text("Phim đã tải (Ngoại tuyến)", style: TextStyle(color: textColor, fontSize: 16)),
-                    trailing: Icon(Icons.chevron_right, color: hintColor),
-                    onTap: () => context.push('/downloads'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _buildMenuGroup([
+                      MenuRowTile(icon: Icons.download_done, title: "Phim đã tải (Ngoại tuyến)", onTap: () => context.push('/downloads'), iconColor: Colors.teal, textColor: textColor, hintColor: hintColor),
+                      MenuRowTile(icon: Icons.people_alt, title: "Vào Phòng Xem Chung", onTap: () => _showGlobalJoinWatchPartyDialog(context), iconColor: Colors.indigoAccent, textColor: textColor, hintColor: hintColor),
+                    ], dialogBg),
                   ),
                 ],
               ),
@@ -132,8 +135,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 32),
               _buildMenuGroup([
-                _buildMenuRow(Icons.storefront, "Cửa hàng vật phẩm", () => context.push('/shop'), Colors.amber, textColor, hintColor),
-                _buildMenuRow(Icons.link, "Liên kết Google", () async {
+                MenuRowTile(icon: Icons.storefront, title: "Cửa hàng vật phẩm", onTap: () => context.push('/shop'), iconColor: Colors.amber, textColor: textColor, hintColor: hintColor),
+                MenuRowTile(icon: Icons.link, title: "Liên kết Google", onTap: () async {
                   final authService = AuthService();
                   final credential = await authService.signInWithGoogle();
                   if (credential != null && credential.user != null) {
@@ -151,28 +154,176 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                     }
                   }
-                }, Colors.blueAccent, textColor, hintColor),
+                }, iconColor: Colors.blueAccent, textColor: textColor, hintColor: hintColor),
               ], dialogBg),
               
               const SizedBox(height: 16),
               _buildMenuGroup([
-                _buildMenuRow(Icons.favorite, "Phim đã thích", () => context.push('/follow'), Colors.pinkAccent, textColor, hintColor),
-                _buildMenuRow(Icons.playlist_play, "Danh sách phát", () => context.push('/playlists'), Colors.purpleAccent, textColor, hintColor),
-                _buildMenuRow(Icons.history, "Lịch sử xem", () => context.push('/history'), Colors.green, textColor, hintColor),
-                _buildMenuRow(Icons.download_done, "Phim đã tải", () => context.push('/downloads'), Colors.teal, textColor, hintColor),
+                MenuRowTile(icon: Icons.favorite, title: "Phim đã thích", onTap: () => context.push('/follow'), iconColor: Colors.pinkAccent, textColor: textColor, hintColor: hintColor),
+                MenuRowTile(icon: Icons.playlist_play, title: "Danh sách phát", onTap: () => context.push('/playlists'), iconColor: Colors.purpleAccent, textColor: textColor, hintColor: hintColor),
+                MenuRowTile(icon: Icons.history, title: "Lịch sử xem", onTap: () => context.push('/history'), iconColor: Colors.green, textColor: textColor, hintColor: hintColor),
+                MenuRowTile(icon: Icons.download_done, title: "Phim đã tải", onTap: () => context.push('/downloads'), iconColor: Colors.teal, textColor: textColor, hintColor: hintColor),
               ], dialogBg),
               
               const SizedBox(height: 16),
               _buildMenuGroup([
-                _buildMenuRow(Icons.notifications, "Thông báo", () => context.push('/notifications'), Colors.orange, textColor, hintColor),
-                _buildMenuRow(Icons.settings, "Cài đặt", () => context.push('/settings'), Colors.grey, textColor, hintColor),
+                MenuRowTile(icon: Icons.people_alt, title: "Vào Phòng Xem Chung", onTap: () => _showGlobalJoinWatchPartyDialog(context), iconColor: Colors.indigoAccent, textColor: textColor, hintColor: hintColor),
+                MenuRowTile(icon: Icons.notifications, title: "Thông báo", onTap: () => context.push('/notifications'), iconColor: Colors.orange, textColor: textColor, hintColor: hintColor),
+                MenuRowTile(icon: Icons.settings, title: "Cài đặt", onTap: () => context.push('/settings'), iconColor: Colors.grey, textColor: textColor, hintColor: hintColor),
               ], dialogBg),
 
               const SizedBox(height: 24),
               _buildMenuGroup([
-                _buildMenuRow(Icons.logout, "Đăng xuất", () => auth.logout(), Colors.red, Colors.red, hintColor, showTrailing: false),
+                MenuRowTile(icon: Icons.logout, title: "Đăng xuất", onTap: () => auth.logout(), iconColor: Colors.red, textColor: Colors.red, hintColor: hintColor, showTrailing: false),
               ], dialogBg),
             ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showGlobalJoinWatchPartyDialog(BuildContext context) {
+    final TextEditingController codeCtrl = TextEditingController();
+    bool isJoining = false;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[900],
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white12))),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Vào Phòng Xem Chung", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      IconButton(icon: const Icon(Icons.close, color: Colors.grey), onPressed: () => Navigator.pop(ctx)),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white.withOpacity(0.08)),
+                        ),
+                        child: TextField(
+                          controller: codeCtrl,
+                          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 4),
+                          textAlign: TextAlign.center,
+                          textCapitalization: TextCapitalization.characters,
+                          decoration: InputDecoration(
+                            hintText: 'NHẬP MÃ',
+                            hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), letterSpacing: 4, fontWeight: FontWeight.bold, fontSize: 18),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 24),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          onPressed: isJoining ? null : () async {
+                            final code = codeCtrl.text.trim().toUpperCase();
+                            if (code.isEmpty) return;
+                            
+                            setModalState(() => isJoining = true);
+                            
+                            try {
+                              final res = await WatchPartyService.joinParty(code);
+                              if (!mounted) return;
+                              
+                              if (res['status'] != 'success') {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: ${res['message']}')));
+                                setModalState(() => isJoining = false);
+                                return;
+                              }
+                              
+                              final movieSlug = res['data']['movie_slug'];
+                              final episodeName = res['data']['episode_name'];
+                              
+                              final detailRes = await cmsApi.getMovieDetail(movieSlug);
+                              if (!mounted) return;
+                              
+                              if (detailRes.status != 'success' || detailRes.data == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Không tìm thấy phim của phòng này')));
+                                setModalState(() => isJoining = false);
+                                return;
+                              }
+                              
+                              final movieData = detailRes.data!.movie;
+                              final episodesData = detailRes.data!.episodes ?? [];
+                              
+                              String? m3u8;
+                              String? epSlug;
+                              for (var epGroup in episodesData) {
+                                for (var ep in epGroup.serverData) {
+                                  if (ep.name == episodeName) {
+                                    m3u8 = ep.linkM3u8;
+                                    epSlug = ep.slug;
+                                    break;
+                                  }
+                                }
+                                if (m3u8 != null) break;
+                              }
+                              
+                              if (m3u8 == null || m3u8.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Không tìm thấy dữ liệu phát của tập này.')));
+                                setModalState(() => isJoining = false);
+                                return;
+                              }
+                              
+                              Navigator.pop(ctx);
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) => WatchMovieScreen(
+                                  m3u8Link: m3u8!,
+                                  title: movieData?.name ?? '',
+                                  movieSlug: movieSlug,
+                                  episodeName: episodeName,
+                                  episodeSlug: epSlug ?? '',
+                                  thumbUrl: movieData?.thumbUrl ?? movieData?.posterUrl ?? '',
+                                  autoJoinRoomCode: code,
+                                ),
+                              ));
+                              
+                            } catch (e) {
+                              setModalState(() => isJoining = false);
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+                              }
+                            }
+                          },
+                          child: isJoining
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text('VÀO PHÒNG', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -188,24 +339,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: children,
       ),
-    );
-  }
-
-  Widget _buildMenuRow(IconData icon, String title, VoidCallback onTap, Color iconColor, Color textColor, Color? hintColor, {bool showTrailing = true}) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: iconColor.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: iconColor, size: 22),
-      ),
-      title: Text(title, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w500)),
-      trailing: showTrailing ? Icon(Icons.chevron_right, color: hintColor, size: 20) : null,
-      onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
 

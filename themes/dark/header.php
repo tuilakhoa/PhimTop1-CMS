@@ -131,6 +131,7 @@ if ($pdo) {
                         <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="text-gray-300 hover:text-white transition-colors">Phim Lẻ</a>
                         <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="text-gray-300 hover:text-white transition-colors">Phim Bộ</a>
                         <a href="/bang-xep-hang" class="text-[#00E359] font-semibold hover:text-white transition-colors flex items-center" title="Bảng Xếp Hạng"><i data-lucide="trending-up" class="w-4 h-4 mr-1"></i> BXH</a>
+                        <button onclick="openGlobalWatchParty()" class="text-[#8B5CF6] font-semibold hover:text-white transition-colors flex items-center" title="Phòng Xem Chung"><i data-lucide="users" class="w-4 h-4 mr-1"></i> Xem Chung</button>
                         <?php do_action('theme_header_menu'); ?>
                         
                         <!-- Dropdown Khám Phá -->
@@ -209,6 +210,7 @@ if ($pdo) {
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white">Phim Lẻ</a>
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white">Phim Bộ</a>
                     <a href="/bang-xep-hang" class="text-[#00E359] font-bold flex items-center"><i data-lucide="trending-up" class="w-4 h-4 mr-2"></i> Bảng Xếp Hạng</a>
+                    <button onclick="openGlobalWatchParty()" class="text-[#8B5CF6] font-bold flex items-center text-left"><i data-lucide="users" class="w-4 h-4 mr-2"></i> Phòng Xem Chung</button>
                     <?php do_action('theme_mobile_menu'); ?>
                     
                     <?php if (!empty($settings['appDownloadUrl'])): ?>
@@ -267,4 +269,20 @@ if ($pdo) {
         </div>
     </nav>
     <script src="/assets/js/main.js?v=<?= time() ?>"></script>
+    <script>
+    function openGlobalWatchParty() {
+        const code = prompt("Nhập MÃ PHÒNG xem chung:");
+        if (code && code.trim() !== "") {
+            fetch('/api/v1/watch_party.php?action=join&room_code=' + code.trim().toUpperCase())
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = '/phim/' + data.data.movie_slug + '?party=' + data.data.room_code;
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            }).catch(e => alert('Có lỗi xảy ra, vui lòng thử lại!'));
+        }
+    }
+    </script>
     <div class="pt-20 pb-12">

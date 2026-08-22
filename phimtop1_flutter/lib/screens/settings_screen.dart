@@ -16,6 +16,7 @@ import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import '../widgets/menu_row_tile.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -348,32 +349,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   return Column(
                     children: [
                       if (_tvService.isServerRunning)
-                        ListTile(
-                          leading: const Icon(Icons.tv, color: Colors.green),
-                          title: const Text("TV Đang chờ kết nối", style: TextStyle(color: Colors.green)),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("IP: ${_tvService.serverIp}", style: const TextStyle(color: Colors.grey)),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Text("MÃ PIN: ", style: TextStyle(color: Colors.grey)),
-                                  Text(_tvService.currentPin, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2)),
-                                ],
-                              ),
-                            ],
-                          ),
+                        MenuRowTile(
+                          icon: Icons.tv,
+                          iconColor: Colors.green,
+                          textColor: textColor,
+                          title: "TV Đang chờ kết nối",
+                          subtitle: "IP: ${_tvService.serverIp}\nMÃ PIN: ${_tvService.currentPin}",
                           trailing: IconButton(
                             icon: const Icon(Icons.stop, color: Colors.red),
                             onPressed: () => _tvService.stopServer(),
                           ),
                         )
                       else
-                        ListTile(
-                          leading: const Icon(Icons.tv, color: Colors.grey),
-                          title: Text("Bật Chế độ nhận lệnh", style: TextStyle(color: textColor)),
-                          subtitle: const Text("Chỉ dành cho ứng dụng cài trên TV", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                        MenuRowTile(
+                          icon: Icons.tv,
+                          iconColor: Colors.grey,
+                          textColor: textColor,
+                          title: "Bật Chế độ nhận lệnh",
+                          subtitle: "Chỉ dành cho ứng dụng cài trên TV",
                           onTap: () => _tvService.startServer(),
                         ),
                     ],
@@ -385,193 +378,221 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
           _buildSectionHeader("Tài khoản"),
           _buildMenuGroup(context, [
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
-            onTap: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text("Đăng xuất"),
-                  content: const Text("Bạn có chắc muốn đăng xuất khỏi ứng dụng?"),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Hủy")),
-                    TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Đăng xuất", style: TextStyle(color: Colors.red))),
-                  ],
-                ),
-              );
-              
-              if (confirm == true && context.mounted) {
-                await context.read<AuthProvider>().logout();
-                if (context.mounted) {
-                  context.go('/profile');
-                }
-              }
-            },
-          )]),
-          const SizedBox(height: 12),
-          _buildSectionHeader("Ứng dụng"),
-          _buildMenuGroup(context, [
-          ListTile(
-            leading: const Icon(Icons.palette_outlined, color: Colors.grey),
-            title: Text("Màu nền / Giao diện", style: TextStyle(color: textColor)),
-            onTap: () {
-              context.push('/appearance_settings');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.policy_outlined, color: Colors.grey),
-            title: Text("Điều khoản & Chính sách", style: TextStyle(color: textColor)),
-            onTap: () {
-              context.push('/policy');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.info_outline, color: Colors.grey),
-            title: Text("Phiên bản", style: TextStyle(color: textColor)),
-            subtitle: Text("v$_version ($_buildNumber)", style: const TextStyle(color: Colors.grey)),
-            trailing: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              ),
-              onPressed: _checkUpdate,
-              child: const Text("Kiểm tra cập nhật"),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.verified_user_outlined, color: Colors.grey),
-            title: Text("Giấy phép mã nguồn mở", style: TextStyle(color: textColor)),
-            onTap: () {
-              showLicensePage(
-                context: context,
-                applicationName: 'PhimTop1',
-                applicationVersion: 'v$_version',
-                applicationIcon: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Icon(Icons.movie, size: 64, color: Theme.of(context).primaryColor),
-                ),
-                applicationLegalese: '© 2026 PhimTop1. All rights reserved.',
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.feedback_outlined, color: Colors.grey),
-            title: Text("Góp ý / Phản hồi", style: TextStyle(color: textColor)),
-            onTap: _showFeedbackDialog,
-          ),
-          ListTile(
-            leading: const Icon(Icons.lock_outline, color: Colors.grey),
-            title: Text("Khóa ứng dụng", style: TextStyle(color: textColor)),
-            trailing: Switch(
-              value: _hasAppLock,
-              activeColor: Theme.of(context).primaryColor,
-              onChanged: (val) => _toggleAppLock(),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.download_for_offline_outlined, color: Colors.grey),
-            title: Text("Cài đặt tải xuống", style: TextStyle(color: textColor)),
-            onTap: () {
-              context.push('/download_settings');
-            },
-          )]),
-          const SizedBox(height: 12),
-          _buildSectionHeader("Khác"),
-          _buildMenuGroup(context, [
-          ListTile(
-            leading: const Icon(Icons.cleaning_services_outlined, color: Colors.grey),
-            title: Text("Xóa bộ nhớ đệm", style: TextStyle(color: textColor)),
-            trailing: Text(_cacheSize, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  backgroundColor: cardColor,
-                  title: Text('Xóa bộ nhớ đệm', style: TextStyle(color: textColor)),
-                  content: Text('Hành động này sẽ xóa dữ liệu tạm và bộ nhớ đệm hình ảnh/video ($_cacheSize). Bạn có chắc chắn không?', style: TextStyle(color: isDark ? Colors.grey[300] : Colors.grey[800])),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy', style: TextStyle(color: Colors.grey))),
-                    TextButton(
-                      onPressed: () async {
-                        Navigator.pop(ctx);
-                        try {
-                           final tempDir = await getTemporaryDirectory();
-                           if (await tempDir.exists()) {
-                             for (var entity in tempDir.listSync()) {
-                               if (entity is File) await entity.delete();
-                               else if (entity is Directory) await entity.delete(recursive: true);
-                             }
-                           }
-                           await DefaultCacheManager().emptyCache();
-                           
-                           // Update last clear time
-                           final prefs = await SharedPreferences.getInstance();
-                           await prefs.setInt('last_cache_clear_time', DateTime.now().millisecondsSinceEpoch);
-
-                           if (mounted) {
-                             setState(() { _cacheSize = "0 B"; });
-                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa bộ nhớ đệm ứng dụng')));
-                           }
-                        } catch (e) {
-                           if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi khi xóa bộ nhớ đệm: $e')));
-                        }
-                      },
-                      child: const Text('Xóa', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.auto_delete_outlined, color: Colors.grey),
-            title: Text("Tự động dọn rác", style: TextStyle(color: textColor)),
-            subtitle: Text("Xóa bộ nhớ đệm định kỳ", style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 12)),
-            trailing: DropdownButton<int>(
-              value: _autoClearDays,
-              dropdownColor: cardColor,
-              underline: const SizedBox(),
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-              style: TextStyle(color: textColor, fontSize: 14),
-              items: const [
-                DropdownMenuItem(value: 0, child: Text("Không")),
-                DropdownMenuItem(value: 3, child: Text("Mỗi 3 ngày")),
-                DropdownMenuItem(value: 7, child: Text("Mỗi 7 ngày")),
-                DropdownMenuItem(value: 30, child: Text("Mỗi 30 ngày")),
-              ],
-              onChanged: (val) async {
-                if (val != null) {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setInt('auto_clear_cache_days', val);
-                  setState(() {
-                    _autoClearDays = val;
-                  });
-                  if (val > 0) {
-                     // Set initial clear time if not set
-                     if (prefs.getInt('last_cache_clear_time') == null) {
-                        await prefs.setInt('last_cache_clear_time', DateTime.now().millisecondsSinceEpoch);
-                     }
+            MenuRowTile(
+              icon: Icons.logout,
+              iconColor: Colors.red,
+              textColor: Colors.red,
+              title: "Đăng xuất",
+              showTrailing: false,
+              onTap: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Đăng xuất"),
+                    content: const Text("Bạn có chắc muốn đăng xuất khỏi ứng dụng?"),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Hủy")),
+                      TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Đăng xuất", style: TextStyle(color: Colors.red))),
+                    ],
+                  ),
+                );
+                
+                if (confirm == true && context.mounted) {
+                  await context.read<AuthProvider>().logout();
+                  if (context.mounted) {
+                    context.go('/profile');
                   }
                 }
               },
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.share_outlined, color: Colors.grey),
-            title: Text("Chia sẻ ứng dụng", style: TextStyle(color: textColor)),
-            onTap: () {
-              Share.share('Cùng xem phim trên PhimTop1 nhé: ${AppConfig.baseUrl}');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.star_outline, color: Colors.grey),
-            title: Text("Đánh giá ứng dụng", style: TextStyle(color: textColor)),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cảm ơn bạn đã đánh giá!')));
-            },
-          )]),
+          ]),
+          const SizedBox(height: 12),
+          _buildSectionHeader("Ứng dụng"),
+          _buildMenuGroup(context, [
+            MenuRowTile(
+              icon: Icons.palette_outlined,
+              iconColor: Colors.purple,
+              textColor: textColor,
+              title: "Màu nền / Giao diện",
+              onTap: () {
+                context.push('/appearance_settings');
+              },
+            ),
+            MenuRowTile(
+              icon: Icons.policy_outlined,
+              iconColor: Colors.teal,
+              textColor: textColor,
+              title: "Điều khoản & Chính sách",
+              onTap: () {
+                context.push('/policy');
+              },
+            ),
+            MenuRowTile(
+              icon: Icons.info_outline,
+              iconColor: Colors.blue,
+              textColor: textColor,
+              title: "Phiên bản",
+              subtitle: "v$_version ($_buildNumber)",
+              trailing: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                ),
+                onPressed: _checkUpdate,
+                child: const Text("Kiểm tra cập nhật"),
+              ),
+            ),
+            MenuRowTile(
+              icon: Icons.verified_user_outlined,
+              iconColor: Colors.green,
+              textColor: textColor,
+              title: "Giấy phép mã nguồn mở",
+              onTap: () {
+                showLicensePage(
+                  context: context,
+                  applicationName: 'PhimTop1',
+                  applicationVersion: 'v$_version',
+                  applicationIcon: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Icon(Icons.movie, size: 64, color: Theme.of(context).primaryColor),
+                  ),
+                  applicationLegalese: '© 2026 PhimTop1. All rights reserved.',
+                );
+              },
+            ),
+            MenuRowTile(
+              icon: Icons.feedback_outlined,
+              iconColor: Colors.orange,
+              textColor: textColor,
+              title: "Góp ý / Phản hồi",
+              onTap: _showFeedbackDialog,
+            ),
+            MenuRowTile(
+              icon: Icons.lock_outline,
+              iconColor: Colors.brown,
+              textColor: textColor,
+              title: "Khóa ứng dụng",
+              trailing: Switch(
+                value: _hasAppLock,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (val) => _toggleAppLock(),
+              ),
+            ),
+            MenuRowTile(
+              icon: Icons.download_for_offline_outlined,
+              iconColor: Colors.indigo,
+              textColor: textColor,
+              title: "Cài đặt tải xuống",
+              onTap: () {
+                context.push('/download_settings');
+              },
+            ),
+          ]),
+          const SizedBox(height: 12),
+          _buildSectionHeader("Khác"),
+          _buildMenuGroup(context, [
+            MenuRowTile(
+              icon: Icons.cleaning_services_outlined,
+              iconColor: Colors.deepOrange,
+              textColor: textColor,
+              title: "Xóa bộ nhớ đệm",
+              trailing: Text(_cacheSize, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    backgroundColor: cardColor,
+                    title: Text('Xóa bộ nhớ đệm', style: TextStyle(color: textColor)),
+                    content: Text('Hành động này sẽ xóa dữ liệu tạm và bộ nhớ đệm hình ảnh/video ($_cacheSize). Bạn có chắc chắn không?', style: TextStyle(color: isDark ? Colors.grey[300] : Colors.grey[800])),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy', style: TextStyle(color: Colors.grey))),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          try {
+                             final tempDir = await getTemporaryDirectory();
+                             if (await tempDir.exists()) {
+                               for (var entity in tempDir.listSync()) {
+                                 if (entity is File) await entity.delete();
+                                 else if (entity is Directory) await entity.delete(recursive: true);
+                               }
+                             }
+                             await DefaultCacheManager().emptyCache();
+                             
+                             // Update last clear time
+                             final prefs = await SharedPreferences.getInstance();
+                             await prefs.setInt('last_cache_clear_time', DateTime.now().millisecondsSinceEpoch);
+
+                             if (mounted) {
+                               setState(() { _cacheSize = "0 B"; });
+                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa bộ nhớ đệm ứng dụng')));
+                             }
+                          } catch (e) {
+                             if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi khi xóa bộ nhớ đệm: $e')));
+                          }
+                        },
+                        child: const Text('Xóa', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            MenuRowTile(
+              icon: Icons.auto_delete_outlined,
+              iconColor: Colors.deepPurple,
+              textColor: textColor,
+              title: "Tự động dọn rác",
+              subtitle: "Xóa bộ nhớ đệm định kỳ",
+              trailing: DropdownButton<int>(
+                value: _autoClearDays,
+                dropdownColor: cardColor,
+                underline: const SizedBox(),
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                style: TextStyle(color: textColor, fontSize: 14),
+                items: const [
+                  DropdownMenuItem(value: 0, child: Text("Không")),
+                  DropdownMenuItem(value: 3, child: Text("Mỗi 3 ngày")),
+                  DropdownMenuItem(value: 7, child: Text("Mỗi 7 ngày")),
+                  DropdownMenuItem(value: 30, child: Text("Mỗi 30 ngày")),
+                ],
+                onChanged: (val) async {
+                  if (val != null) {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setInt('auto_clear_cache_days', val);
+                    setState(() {
+                      _autoClearDays = val;
+                    });
+                    if (val > 0) {
+                       // Set initial clear time if not set
+                       if (prefs.getInt('last_cache_clear_time') == null) {
+                          await prefs.setInt('last_cache_clear_time', DateTime.now().millisecondsSinceEpoch);
+                       }
+                    }
+                  }
+                },
+              ),
+            ),
+            MenuRowTile(
+              icon: Icons.share_outlined,
+              iconColor: Colors.cyan,
+              textColor: textColor,
+              title: "Chia sẻ ứng dụng",
+              onTap: () {
+                Share.share('Cùng xem phim trên PhimTop1 nhé: ${AppConfig.baseUrl}');
+              },
+            ),
+            MenuRowTile(
+              icon: Icons.star_outline,
+              iconColor: Colors.amber,
+              textColor: textColor,
+              title: "Đánh giá ứng dụng",
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cảm ơn bạn đã đánh giá!')));
+              },
+            ),
+          ]),
           const SizedBox(height: 32),
         ],
       ),

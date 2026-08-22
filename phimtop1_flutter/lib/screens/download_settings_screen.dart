@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../providers/download_provider.dart';
+import '../widgets/menu_row_tile.dart';
 
 class DownloadSettingsScreen extends StatefulWidget {
   const DownloadSettingsScreen({super.key});
@@ -62,10 +63,12 @@ class _DownloadSettingsScreenState extends State<DownloadSettingsScreen> {
                 padding: EdgeInsets.all(16.0),
                 child: Text('Chọn vị trí lưu trữ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
-              ListTile(
-                leading: const Icon(Icons.phone_android),
-                title: const Text('Bộ nhớ trong (Khuyên dùng)'),
-                subtitle: const Text('Bảo mật hơn, tốc độ cao hơn'),
+              MenuRowTile(
+                icon: Icons.phone_android,
+                iconColor: Colors.blueAccent,
+                textColor: Theme.of(ctx).brightness == Brightness.dark ? Colors.white : Colors.black,
+                title: 'Bộ nhớ trong (Khuyên dùng)',
+                subtitle: 'Bảo mật hơn, tốc độ cao hơn',
                 trailing: _customPath == null ? const Icon(Icons.check, color: Colors.green) : null,
                 onTap: () async {
                   final prefs = await SharedPreferences.getInstance();
@@ -80,10 +83,12 @@ class _DownloadSettingsScreenState extends State<DownloadSettingsScreen> {
                 ...extDirs.map((dir) {
                   final isCurrent = _customPath == dir.path;
                   bool isSDCard = !dir.path.contains('emulated/0');
-                  return ListTile(
-                    leading: Icon(isSDCard ? Icons.sd_storage : Icons.folder_shared),
-                    title: Text(isSDCard ? 'Thẻ nhớ SD / USB' : 'Bộ nhớ dùng chung'),
-                    subtitle: Text(dir.path, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
+                  return MenuRowTile(
+                    icon: isSDCard ? Icons.sd_storage : Icons.folder_shared,
+                    iconColor: isSDCard ? Colors.orange : Colors.purple,
+                    textColor: Theme.of(ctx).brightness == Brightness.dark ? Colors.white : Colors.black,
+                    title: isSDCard ? 'Thẻ nhớ SD / USB' : 'Bộ nhớ dùng chung',
+                    subtitle: dir.path,
                     trailing: isCurrent ? const Icon(Icons.check, color: Colors.green) : null,
                     onTap: () async {
                       final prefs = await SharedPreferences.getInstance();
@@ -126,10 +131,12 @@ class _DownloadSettingsScreenState extends State<DownloadSettingsScreen> {
             ),
             child: Column(
               children: [
-                ListTile(
-                  leading: Icon(Icons.wifi, color: Theme.of(context).primaryColor),
-                  title: Text('Chỉ tải qua Wi-Fi', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                  subtitle: Text('Tạm dừng tải phim nếu dùng mạng di động (3G/4G/5G)', style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 12)),
+                MenuRowTile(
+                  icon: Icons.wifi,
+                  iconColor: Colors.blue,
+                  textColor: textColor,
+                  title: 'Chỉ tải qua Wi-Fi',
+                  subtitle: 'Tạm dừng tải phim nếu dùng mạng di động (3G/4G/5G)',
                   trailing: Switch(
                     value: _wifiOnlyDownload,
                     activeColor: Theme.of(context).primaryColor,
@@ -154,22 +161,14 @@ class _DownloadSettingsScreenState extends State<DownloadSettingsScreen> {
                   }),
                   builder: (context, snapshot) {
                     int threadLevel = snapshot.data ?? 1;
-                    return ListTile(
-                      leading: Icon(
-                        threadLevel == 15 ? Icons.rocket_launch : Icons.speed, 
-                        color: threadLevel == 15 ? Colors.redAccent : Theme.of(context).primaryColor
-                      ),
-                      title: Text('Chế độ tải phim', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                      subtitle: Text(
-                        threadLevel == 15 ? 'DỒN TOÀN LỰC: Max băng thông, có thể nóng máy' : 
+                    return MenuRowTile(
+                      icon: threadLevel == 15 ? Icons.rocket_launch : Icons.speed, 
+                      iconColor: threadLevel == 15 ? Colors.redAccent : Colors.amber,
+                      textColor: textColor,
+                      title: 'Chế độ tải phim',
+                      subtitle: threadLevel == 15 ? 'DỒN TOÀN LỰC: Max băng thông, có thể nóng máy' : 
                         threadLevel == 5 ? 'TỐC ĐỘ CAO: Nhanh nhưng vẫn ổn định' : 
                         'BÌNH THƯỜNG: Tiết kiệm pin và RAM', 
-                        style: TextStyle(
-                          color: threadLevel == 15 ? Colors.redAccent : (isDark ? Colors.grey[400] : Colors.grey[600]), 
-                          fontSize: 12,
-                          fontWeight: threadLevel == 15 ? FontWeight.bold : FontWeight.normal
-                        )
-                      ),
                       trailing: DropdownButton<int>(
                         value: threadLevel,
                         dropdownColor: cardColor,
@@ -192,9 +191,11 @@ class _DownloadSettingsScreenState extends State<DownloadSettingsScreen> {
                   },
                 ),
                 Divider(color: isDark ? Colors.grey[800] : Colors.grey[300], height: 1),
-                ListTile(
-                  leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                  title: const Text('Xóa tất cả phim đã tải', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                MenuRowTile(
+                  icon: Icons.delete_outline,
+                  iconColor: Colors.redAccent,
+                  textColor: Colors.redAccent,
+                  title: 'Xóa tất cả phim đã tải',
                   onTap: () {
                     showDialog(
                       context: context,
@@ -231,10 +232,12 @@ class _DownloadSettingsScreenState extends State<DownloadSettingsScreen> {
               color: cardColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: ListTile(
-              leading: Icon(Icons.storage, color: Theme.of(context).primaryColor),
-              title: Text('Vị trí lưu trữ', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              subtitle: Text(_downloadPathName, style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 12)),
+            child: MenuRowTile(
+              icon: Icons.storage,
+              iconColor: Colors.deepPurple,
+              textColor: textColor,
+              title: 'Vị trí lưu trữ',
+              subtitle: _downloadPathName,
               trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
               onTap: _changeStorageLocation,
             ),

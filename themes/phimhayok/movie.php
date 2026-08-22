@@ -47,6 +47,34 @@ if ($tmdbId && $tmdbApiKey) {
 // Extract TMDB info
 $tmdbVote = $movie['tmdb']['vote_average'] ?? 0;
 $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
+
+// Auto redirect for watch party
+if (!empty($_GET['party'])) {
+    $partyCode = strtoupper(trim($_GET['party']));
+    $pdo = getPDO();
+    if ($pdo) {
+        $stmt = $pdo->prepare("SELECT episode_name FROM watch_parties WHERE room_code = ? AND status = 'active'");
+        $stmt->execute([$partyCode]);
+        $partyRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($partyRow) {
+            $epName = $partyRow['episode_name'];
+            $targetEpSlug = '';
+            if (!empty($episodes[0]['server_data'])) {
+                foreach ($episodes[0]['server_data'] as $e) {
+                    if ($e['name'] == $epName) {
+                        $targetEpSlug = $e['slug'];
+                        break;
+                    }
+                }
+            }
+            if ($targetEpSlug) {
+                $watchUrl = '/' . ($settings["slugWatch"] ?? "xem-phim") . '/' . urlencode($slug) . '/' . urlencode($targetEpSlug) . '?party=' . urlencode($partyCode);
+                header("Location: $watchUrl");
+                exit;
+            }
+        }
+    }
+}
 ?>
 
 <!-- Backdrop Header -->

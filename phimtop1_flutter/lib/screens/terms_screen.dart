@@ -60,11 +60,12 @@ Bằng việc tiếp tục sử dụng ứng dụng này, bạn đồng ý với
 
 3. QUY ĐỊNH SỬ DỤNG
 - Không sử dụng ứng dụng vào mục đích thương mại khi chưa có sự cho phép.
-- Không thực hiện các hành vi 리(reverse engineering) hoặc can thiệp vào mã nguồn của ứng dụng.
+- Không thực hiện các hành vi dịch ngược (reverse engineering) hoặc can thiệp vào mã nguồn của ứng dụng.
 
 4. THAY ĐỔI ĐIỀU KHOẢN
 - Chúng tôi có quyền thay đổi điều khoản dịch vụ mà không cần báo trước. Các thay đổi sẽ có hiệu lực ngay khi được cập nhật trên ứng dụng.
 
+Cảm ơn bạn đã tin tưởng và sử dụng PhimTop1!
 Vui lòng đọc kỹ các điều khoản này. Nếu bạn không đồng ý, xin vui lòng ngừng sử dụng ứng dụng và gỡ cài đặt.
 ''',
                     style: TextStyle(

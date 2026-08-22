@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
 import '../models/models.dart';
+import '../widgets/menu_row_tile.dart';
 
 class ProfilesScreen extends StatefulWidget {
   const ProfilesScreen({super.key});
@@ -48,15 +49,21 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                leading: const Icon(Icons.lock, color: Colors.white),
-                title: Text(profile.hasPin ? 'Đổi/Xóa mã PIN' : 'Tạo mã PIN', style: const TextStyle(color: Colors.white)),
+              MenuRowTile(
+                icon: Icons.lock,
+                iconColor: Colors.blueAccent,
+                textColor: Colors.white,
+                title: profile.hasPin ? 'Đổi/Xóa mã PIN' : 'Tạo mã PIN',
                 onTap: () => Navigator.pop(ctx, 'pin'),
+                showTrailing: false,
               ),
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Xóa hồ sơ', style: TextStyle(color: Colors.red)),
+              MenuRowTile(
+                icon: Icons.delete,
+                iconColor: Colors.red,
+                textColor: Colors.red,
+                title: 'Xóa hồ sơ',
                 onTap: () => Navigator.pop(ctx, 'delete'),
+                showTrailing: false,
               ),
             ],
           ),
@@ -208,15 +215,19 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  SwitchListTile(
-                    title: const Text("Chế độ Trẻ em (Kids Mode)", style: TextStyle(color: Colors.white)),
-                    subtitle: const Text("Chỉ hiển thị nội dung phù hợp cho trẻ em", style: TextStyle(color: Colors.white54, fontSize: 12)),
-                    value: isKidsMode,
-                    activeColor: Theme.of(context).primaryColor,
-                    onChanged: (val) {
-                      setStateModal(() { isKidsMode = val; });
-                    },
-                    contentPadding: EdgeInsets.zero,
+                  MenuRowTile(
+                    icon: Icons.child_care,
+                    iconColor: Colors.pinkAccent,
+                    textColor: Colors.white,
+                    title: "Chế độ Trẻ em (Kids Mode)",
+                    subtitle: "Chỉ hiển thị nội dung phù hợp cho trẻ em",
+                    trailing: Switch(
+                      value: isKidsMode,
+                      activeColor: Theme.of(context).primaryColor,
+                      onChanged: (val) {
+                        setStateModal(() { isKidsMode = val; });
+                      },
+                    ),
                   ),
                   const SizedBox(height: 24),
                   SizedBox(

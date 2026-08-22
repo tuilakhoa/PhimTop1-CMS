@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../widgets/menu_row_tile.dart';
 
 class AppearanceSettingsScreen extends StatelessWidget {
   const AppearanceSettingsScreen({super.key});
@@ -31,12 +32,12 @@ class AppearanceSettingsScreen extends StatelessWidget {
               color: cardColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: ListTile(
-              title: Text('Cài đặt theo hệ thống', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              subtitle: Text(
-                'Khi mở ứng dụng, chế độ màu sẽ tự động điều chỉnh dựa trên cài đặt hệ thống của bạn.',
-                style: TextStyle(color: subtitleColor, fontSize: 12),
-              ),
+            child: MenuRowTile(
+              icon: Icons.brightness_auto,
+              iconColor: Colors.deepPurpleAccent,
+              textColor: textColor,
+              title: 'Cài đặt theo hệ thống',
+              subtitle: 'Khi mở ứng dụng, chế độ màu sẽ tự động điều chỉnh dựa trên cài đặt hệ thống của bạn.',
               trailing: Switch(
                 value: themeProvider.useSystem,
                 activeColor: Theme.of(context).primaryColor,

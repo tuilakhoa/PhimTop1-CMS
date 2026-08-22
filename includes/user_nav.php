@@ -70,6 +70,9 @@ if (isset($_SESSION['user'])) {
                     <a href="/shop.php" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors mb-1">
                         <i data-lucide="store" class="w-4 h-4 mr-2 text-red-400"></i> Cửa hàng vật phẩm
                     </a>
+                    <button onclick="if(typeof openGlobalWatchParty === 'function') openGlobalWatchParty(); else alert('Tính năng chưa sẵn sàng!');" class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors mb-1">
+                        <i data-lucide="users" class="w-4 h-4 mr-2 text-[#8B5CF6]"></i> Vào phòng xem chung
+                    </button>
                     <a href="/api/auth.php?action=logout" class="flex items-center px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors">
                         <i data-lucide="log-out" class="w-4 h-4 mr-2"></i> Đăng xuất
                     </a>

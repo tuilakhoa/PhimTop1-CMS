@@ -144,7 +144,11 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.amberAccent),
+                style: TextStyle(
+                  fontSize: 20, 
+                  fontWeight: FontWeight.bold, 
+                  color: Theme.of(context).brightness == Brightness.dark ? Colors.amberAccent : Colors.orange[800]
+                ),
               ),
             ],
           ),
