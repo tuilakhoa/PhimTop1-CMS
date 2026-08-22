@@ -301,48 +301,7 @@ if (isset($_SESSION['user'])) {
 </div>
 
 <script>
-// Smart App Prompt Logic
-document.addEventListener('DOMContentLoaded', function() {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const hasDismissed = localStorage.getItem('phimtop1_app_prompt_dismissed');
-    
-    if (isMobile && !hasDismissed) {
-        const intentUrl = "intent://movie/<?= urlencode($slug) ?>#Intent;scheme=phimtop1;package=com.phimtop1.app;S.browser_fallback_url=<?= urlencode($settings['appDownloadUrl'] ?? '') ?>;end;";
-        
-        const banner = document.createElement('div');
-        banner.id = 'app-prompt-banner';
-        banner.className = 'fixed bottom-4 left-4 right-4 z-[200] bg-[#181a20]/85 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.5)] transform transition-transform duration-500 translate-y-[150%]';
-        banner.innerHTML = `
-            <div class="flex items-center gap-3">
-                <img src="/phimtop1_logo_512.png" onerror="this.src='/favicon.ico'" alt="App" decoding="async" class="w-12 h-12 rounded-xl object-cover shadow-lg border border-white/5">
-                <div class="flex-1">
-                    <h3 class="text-[15px] font-bold text-white leading-tight mb-0.5">Mở trong Ứng dụng</h3>
-                    <p class="text-[12px] text-gray-300 line-clamp-1">Xem <strong class="text-white"><?= htmlspecialchars($movie['name']) ?></strong> mượt mà hơn!</p>
-                </div>
-                <button id="btn-close-banner" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <div class="mt-3">
-                <a href="${intentUrl}" onclick="localStorage.setItem('phimtop1_app_prompt_dismissed', 'true');" class="w-full bg-gradient-to-r from-[#ff8f00] to-[#ffaa33] hover:from-[#e68000] hover:to-[#ff9900] text-black py-2.5 rounded-xl font-bold transition-all shadow-[0_4px_15px_rgba(255,143,0,0.3)] flex items-center justify-center text-[14px]">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                    Mở Ứng Dụng Ngay
-                </a>
-            </div>
-        `;
-        document.body.appendChild(banner);
-        
-        setTimeout(() => {
-            banner.classList.remove('translate-y-[150%]');
-        }, 500);
-        
-        document.getElementById('btn-close-banner').addEventListener('click', function() {
-            localStorage.setItem('phimtop1_app_prompt_dismissed', 'true');
-            banner.classList.add('translate-y-[150%]');
-            setTimeout(() => banner.remove(), 500);
-        });
-    }
-});
+
 </script>
 
 <script>
@@ -783,6 +742,8 @@ function startWpSync() {
     }, 2000);
 }
 </script>
+
+
 
 <!-- Download App Modal -->
 <div id="download-app-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center p-4 transition-opacity">

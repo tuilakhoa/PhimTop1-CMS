@@ -18,15 +18,26 @@ $seoDesc = $pageDesc ?? ($settings['seoDesc'] ?? 'Hệ thống xem phim trực t
 $seoKeywords = $pageKeywords ?? ($settings['seoKeywords'] ?? 'xem phim, phim online');
 $siteName = $settings['siteName'] ?? 'PhimTop1';
 
-// Fetch Categories
-$pdo = getPDO();
+// Fetch Categories with Cache
+require_once __DIR__ . '/../../includes/cache_manager.php';
+$cache = new CacheManager();
+$cachedCats = $cache->get('site_categories_all', 86400); // 1 day
 $genres = [];
 $countries = [];
-if ($pdo) {
-    $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        if ($row['type'] === 'genre') $genres[] = $row;
-        else if ($row['type'] === 'country') $countries[] = $row;
+
+if ($cachedCats) {
+    $cats = json_decode($cachedCats, true);
+    $genres = $cats['genres'] ?? [];
+    $countries = $cats['countries'] ?? [];
+} else {
+    $pdo = getPDO();
+    if ($pdo) {
+        $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            if ($row['type'] === 'genre') $genres[] = $row;
+            else if ($row['type'] === 'country') $countries[] = $row;
+        }
+        $cache->set('site_categories_all', json_encode(['genres' => $genres, 'countries' => $countries]));
     }
 }
 ?>
@@ -71,10 +82,14 @@ if ($pdo) {
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="shortcut icon" href="/favicon.ico">
     <?php endif; ?>
+    <!-- Preconnect to CDNs to improve speed -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/themes/dark/assets/css/style.css?v=<?= time() ?>">
     <style>
         /* CSS Optimizations for Mobile */
