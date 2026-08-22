@@ -146,38 +146,44 @@
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="/api/auth.php" id="auth-form" class="space-y-5">
+                    <form method="POST" action="/api/auth.php" id="auth-form" class="space-y-4">
                         <input type="hidden" name="action" id="action-input" value="<?= $mode === 'register' ? 'register' : 'login' ?>">
                         
                         <div id="name-field" class="<?= $mode === 'register' ? 'block' : 'hidden' ?>">
-                            <label class="block text-sm font-medium text-zinc-300 mb-2">Tên hiển thị</label>
+                            <label class="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Tên hiển thị</label>
                             <div class="relative">
-                                <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
-                                <input type="text" name="name" class="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-500" placeholder="Nguyễn Văn A">
+                                <i data-lucide="user" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500"></i>
+                                <input type="text" name="name" id="name-input" class="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-600" placeholder="Nguyễn Văn A">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-zinc-300 mb-2">Email</label>
+                            <label class="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Email</label>
                             <div class="relative">
-                                <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
-                                <input type="email" name="email" required class="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-500" placeholder="bạn@domain.com">
+                                <i data-lucide="mail" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500"></i>
+                                <input type="email" name="email" id="email-input" required class="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-600" placeholder="bạn@domain.com">
                             </div>
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-zinc-300 mb-2">Mật khẩu</label>
+                        <div id="password-field" class="block">
+                            <label class="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Mật khẩu</label>
                             <div class="relative">
-                                <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
-                                <input type="password" name="password" required class="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-500" placeholder="••••••••">
+                                <i data-lucide="lock" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500"></i>
+                                <input type="password" name="password" id="password-input" class="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-600" placeholder="••••••••">
                             </div>
                         </div>
+                        
+                        <div id="forgot-password-link" class="<?= $mode === 'login' ? 'flex justify-end' : 'hidden' ?>">
+                            <button type="button" onclick="toggleForgotPassword()" class="text-xs text-red-500 hover:text-red-400 font-medium transition-colors">Quên mật khẩu?</button>
+                        </div>
 
-                        <button type="submit" id="submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg shadow-red-600/30 flex items-center justify-center">
-                            <i data-lucide="log-in" class="w-5 h-5 mr-2" id="submit-icon"></i> 
+                        <button type="submit" id="submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all shadow-lg shadow-red-600/20 flex items-center justify-center">
+                            <i data-lucide="log-in" class="w-4 h-4 mr-2" id="submit-icon"></i> 
                             <span id="submit-text"><?= $mode === 'register' ? 'Đăng Ký Tài Khoản' : 'Đăng Nhập' ?></span>
                         </button>
                     </form>
+                    
+                    <div id="status-message" class="hidden mt-4 p-3 rounded-lg text-sm font-medium border"></div>
 
                     <?php do_action('social_login_buttons'); ?>
 
@@ -262,6 +268,68 @@
         
         let currentMode = '<?= $mode ?>';
         
+        // Handle Form Submission for Forgot Password via AJAX
+        document.getElementById('auth-form').addEventListener('submit', function(e) {
+            if (currentMode === 'forgot') {
+                e.preventDefault(); // Prevent standard form submission
+                
+                const email = document.getElementById('email-input').value;
+                const statusDiv = document.getElementById('status-message');
+                const submitBtn = document.getElementById('submit-btn');
+                const submitText = document.getElementById('submit-text');
+                
+                submitBtn.disabled = true;
+                submitText.innerText = 'Đang gửi...';
+                statusDiv.classList.add('hidden');
+                
+                fetch('/api/v1/auth.php?action=forgot_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    statusDiv.classList.remove('hidden', 'bg-red-500/10', 'text-red-400', 'border-red-500/30', 'bg-green-500/10', 'text-green-400', 'border-green-500/30');
+                    if (data.status === 'success') {
+                        statusDiv.classList.add('bg-green-500/10', 'text-green-400', 'border-green-500/30');
+                        statusDiv.innerText = data.message;
+                    } else {
+                        statusDiv.classList.add('bg-red-500/10', 'text-red-400', 'border-red-500/30');
+                        statusDiv.innerText = data.message;
+                    }
+                })
+                .catch(err => {
+                    statusDiv.classList.remove('hidden', 'bg-green-500/10', 'text-green-400', 'border-green-500/30');
+                    statusDiv.classList.add('bg-red-500/10', 'text-red-400', 'border-red-500/30');
+                    statusDiv.innerText = 'Có lỗi xảy ra, vui lòng thử lại sau.';
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitText.innerText = 'Gửi link khôi phục';
+                });
+            }
+        });
+
+        function toggleForgotPassword() {
+            currentMode = 'forgot';
+            document.getElementById('form-title').innerText = 'Khôi Phục Mật Khẩu';
+            document.getElementById('form-subtitle').innerText = 'Nhập email để nhận liên kết đặt lại mật khẩu';
+            
+            document.getElementById('name-field').classList.add('hidden');
+            document.getElementById('password-field').classList.add('hidden');
+            document.getElementById('password-input').removeAttribute('required');
+            document.getElementById('forgot-password-link').classList.add('hidden');
+            
+            document.getElementById('submit-text').innerText = 'Gửi link khôi phục';
+            document.getElementById('submit-icon').setAttribute('data-lucide', 'send');
+            
+            document.getElementById('toggle-text').childNodes[0].nodeValue = 'Nhớ mật khẩu rồi? ';
+            document.getElementById('toggle-btn').innerText = 'Đăng nhập ngay';
+            document.getElementById('toggle-btn').setAttribute('onclick', "currentMode='register'; toggleMode();");
+            
+            lucide.createIcons();
+        }
+        
         function toggleMode() {
             currentMode = currentMode === 'login' ? 'register' : 'login';
             
@@ -280,27 +348,39 @@
                 document.getElementById('action-input').value = 'register';
                 document.getElementById('name-field').classList.remove('hidden');
                 document.getElementById('name-field').classList.add('block');
-                document.getElementById('name-field').querySelector('input').setAttribute('required', 'required');
+                document.getElementById('name-input').setAttribute('required', 'required');
+                
+                document.getElementById('password-field').classList.remove('hidden');
+                document.getElementById('password-input').setAttribute('required', 'required');
+                document.getElementById('forgot-password-link').classList.add('hidden');
                 
                 document.getElementById('submit-text').innerText = 'Đăng Ký Tài Khoản';
                 document.getElementById('submit-icon').setAttribute('data-lucide', 'user-plus');
                 
                 document.getElementById('toggle-text').childNodes[0].nodeValue = 'Đã có tài khoản? ';
                 document.getElementById('toggle-btn').innerText = 'Đăng nhập ngay';
+                document.getElementById('toggle-btn').setAttribute('onclick', 'toggleMode();');
             } else {
                 document.getElementById('form-title').innerText = 'Đăng Nhập Hệ Thống';
                 document.getElementById('form-subtitle').innerText = 'Mừng bạn trở lại với <?= htmlspecialchars($settings['siteName']) ?>';
                 document.getElementById('action-input').value = 'login';
                 document.getElementById('name-field').classList.add('hidden');
                 document.getElementById('name-field').classList.remove('block');
-                document.getElementById('name-field').querySelector('input').removeAttribute('required');
+                document.getElementById('name-input').removeAttribute('required');
+                
+                document.getElementById('password-field').classList.remove('hidden');
+                document.getElementById('password-input').setAttribute('required', 'required');
+                document.getElementById('forgot-password-link').classList.remove('hidden');
+                document.getElementById('forgot-password-link').classList.add('flex', 'justify-end');
                 
                 document.getElementById('submit-text').innerText = 'Đăng Nhập';
                 document.getElementById('submit-icon').setAttribute('data-lucide', 'log-in');
                 
                 document.getElementById('toggle-text').childNodes[0].nodeValue = 'Chưa có tài khoản? ';
                 document.getElementById('toggle-btn').innerText = 'Đăng ký ngay';
+                document.getElementById('toggle-btn').setAttribute('onclick', 'toggleMode();');
             }
+            document.getElementById('status-message').classList.add('hidden');
             lucide.createIcons();
         }
     </script>
