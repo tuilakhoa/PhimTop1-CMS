@@ -90,11 +90,16 @@ if ($action === 'list') {
         $stmt->execute([$user['email'], $user['email']]);
         $frames = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+        
         // Convert to boolean for JSON
         foreach ($frames as &$f) {
             $f['is_owned'] = $f['is_owned'] == 1;
             $f['is_active'] = $f['is_active'] == 1;
             $f['price'] = (int)$f['price'];
+            if (!preg_match('/^http/', $f['image_url'])) {
+                $f['image_url'] = $baseUrl . '/' . ltrim($f['image_url'], '/');
+            }
         }
         
         echo json_encode(['status' => 'success', 'data' => $frames]);

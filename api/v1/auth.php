@@ -63,6 +63,12 @@ function verifyToken($token) {
     return null;
 }
 
+function getAbsoluteUrl($url) {
+    if (empty($url) || preg_match('/^http/', $url)) return $url;
+    $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+    return $baseUrl . '/' . ltrim($url, '/');
+}
+
 $pdo = getPDO();
 
 if ($action === 'login') {
@@ -104,8 +110,8 @@ if ($action === 'login') {
                 'id' => $user['id'],
                 'name' => $user['name'],
                 'email' => $user['email'],
-                'avatar' => $user['avatar'],
-                'active_frame' => $user['active_frame_url'] ?? null
+                'avatar' => getAbsoluteUrl($user['avatar']),
+                'active_frame' => getAbsoluteUrl($user['active_frame_url'] ?? null)
             ]
         ]);
     } else {
@@ -265,8 +271,8 @@ if ($action === 'firebase_login') {
             'id' => $userId,
             'name' => $name,
             'email' => $email,
-            'avatar' => $avatar,
-            'active_frame' => $user['active_frame_url'] ?? null
+            'avatar' => getAbsoluteUrl($avatar),
+            'active_frame' => getAbsoluteUrl($user['active_frame_url'] ?? null)
         ]
     ]);
     exit;
@@ -352,6 +358,8 @@ if ($action === 'profile') {
     }
     
     if ($user) {
+        $user['avatar'] = getAbsoluteUrl($user['avatar']);
+        $user['active_frame_url'] = getAbsoluteUrl($user['active_frame_url'] ?? null);
         echo json_encode([
             'status' => 'success',
             'user' => $user

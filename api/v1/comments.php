@@ -51,9 +51,13 @@ if ($method === 'GET') {
 
     try {
         $comments = $repo->getCommentsByMovie($slug, true);
+        $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 
-        // Format date
+        // Format date and urls
         foreach ($comments as &$c) {
+            if (!empty($c['active_frame_url']) && !preg_match('/^http/', $c['active_frame_url'])) {
+                $c['active_frame_url'] = $baseUrl . '/' . ltrim($c['active_frame_url'], '/');
+            }
             $createdAt = $c['created_at'] ?? 'now';
             if (empty($createdAt)) $createdAt = 'now';
             try {
