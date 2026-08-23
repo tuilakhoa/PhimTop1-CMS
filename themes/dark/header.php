@@ -18,6 +18,12 @@ $seoDesc = $pageDesc ?? ($settings['seoDesc'] ?? 'Hệ thống xem phim trực t
 $seoKeywords = $pageKeywords ?? ($settings['seoKeywords'] ?? 'xem phim, phim online');
 $siteName = $settings['siteName'] ?? 'PhimTop1';
 
+function getNormalizedUrl($url) {
+    if (empty($url)) return '';
+    if (strpos($url, 'http') === 0 || strpos($url, '/') === 0) return $url;
+    return '/' . $url;
+}
+
 // Fetch Categories with Cache
 require_once __DIR__ . '/../../includes/cache_manager.php';
 $cache = new CacheManager();
@@ -62,9 +68,9 @@ if ($cachedCats) {
 
     <meta name="keywords" content="<?= htmlspecialchars($seoKeywords) ?>">
     <?php if (!empty($settings['appleTouchIconUrl'])): ?>
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= htmlspecialchars($settings['appleTouchIconUrl']) ?>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= htmlspecialchars(getNormalizedUrl($settings['appleTouchIconUrl'])) ?>">
     <?php elseif (!empty($settings['useLogoAsFavicon']) && !empty($settings['logoUrl'])): ?>
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= htmlspecialchars($settings['logoUrl']) ?>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= htmlspecialchars(getNormalizedUrl($settings['logoUrl'])) ?>">
     <?php else: ?>
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <?php endif; ?>
@@ -73,9 +79,9 @@ if ($cachedCats) {
     
     <!-- Favicon -->
     <?php if (!empty($settings['faviconUrl'])): ?>
-    <link rel="icon" href="<?= htmlspecialchars($settings['faviconUrl']) ?>">
+    <link rel="icon" href="<?= htmlspecialchars(getNormalizedUrl($settings['faviconUrl'])) ?>">
     <?php elseif (!empty($settings['useLogoAsFavicon']) && !empty($settings['logoUrl'])): ?>
-    <link rel="icon" href="<?= htmlspecialchars($settings['logoUrl']) ?>">
+    <link rel="icon" href="<?= htmlspecialchars(getNormalizedUrl($settings['logoUrl'])) ?>">
     <?php else: ?>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -132,7 +138,7 @@ if ($cachedCats) {
                     <!-- Logo -->
                     <a href="/" class="flex items-center space-x-2">
                         <?php if (!empty($settings['logoUrl'])): ?>
-                            <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" decoding="async" class="w-8 h-8 object-contain">
+                            <img src="<?= htmlspecialchars(getNormalizedUrl($settings['logoUrl'])) ?>" alt="Logo" decoding="async" class="w-8 h-8 object-contain">
                         <?php else: ?>
                             <div class="w-10 h-10 bg-gray-800/50 rounded-xl flex items-center justify-center">
                                 <i data-lucide="monitor-play" class="w-6 h-6 text-white"></i>

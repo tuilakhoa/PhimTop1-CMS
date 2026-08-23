@@ -7,7 +7,7 @@
             <div>
                 <a href="/" class="flex items-center space-x-2 mb-4 hover:opacity-80 transition-opacity">
                     <?php if (!empty($settings['logoUrl'])): ?>
-                        <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" class="w-8 h-8 object-contain">
+                        <img src="<?= htmlspecialchars(getNormalizedUrl($settings['logoUrl'])) ?>" alt="Logo" class="w-8 h-8 object-contain">
                     <?php else: ?>
                         <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
                             <i data-lucide="monitor-play" class="w-5 h-5 text-white fill-current"></i>
@@ -91,7 +91,11 @@
               }
           }
       }
-      lucide.createIcons();
+      document.addEventListener('DOMContentLoaded', function() {
+          if (typeof lucide !== 'undefined') {
+              lucide.createIcons();
+          }
+      });
     </script>
 
     <?php if (!empty($settings['customBody'])): ?>
