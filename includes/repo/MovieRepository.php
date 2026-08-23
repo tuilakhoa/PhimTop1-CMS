@@ -155,32 +155,52 @@ class MovieRepository {
 
     public function blockMovie($slug, $name) {
         if (!$this->pdo) return false;
-        $stmt = $this->pdo->prepare("INSERT IGNORE INTO blocked_movies (slug, name) VALUES (?, ?)");
-        return $stmt->execute([$slug, $name]);
+        try {
+            $stmt = $this->pdo->prepare("INSERT IGNORE INTO blocked_movies (slug, name) VALUES (?, ?)");
+            return $stmt->execute([$slug, $name]);
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 
     public function restoreMovie($slug) {
         if (!$this->pdo) return false;
-        $stmt = $this->pdo->prepare("DELETE FROM blocked_movies WHERE slug = ?");
-        return $stmt->execute([$slug]);
+        try {
+            $stmt = $this->pdo->prepare("DELETE FROM blocked_movies WHERE slug = ?");
+            return $stmt->execute([$slug]);
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 
     public function getBlockedSlugs() {
         if (!$this->pdo) return [];
-        $stmt = $this->pdo->query("SELECT slug FROM blocked_movies");
-        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        try {
+            $stmt = $this->pdo->query("SELECT slug FROM blocked_movies");
+            return $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
+        } catch (PDOException $e) {
+            return [];
+        }
     }
 
     public function isMovieBlocked($slug) {
         if (!$this->pdo) return false;
-        $stmt = $this->pdo->prepare("SELECT 1 FROM blocked_movies WHERE slug = ?");
-        $stmt->execute([$slug]);
-        return $stmt->fetchColumn() !== false;
+        try {
+            $stmt = $this->pdo->prepare("SELECT 1 FROM blocked_movies WHERE slug = ?");
+            $stmt->execute([$slug]);
+            return $stmt->fetchColumn() !== false;
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 
     public function getBlockedMoviesList() {
         if (!$this->pdo) return [];
-        $stmt = $this->pdo->query("SELECT * FROM blocked_movies ORDER BY created_at DESC");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->pdo->query("SELECT * FROM blocked_movies ORDER BY created_at DESC");
+            return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        } catch (PDOException $e) {
+            return [];
+        }
     }
 }
