@@ -336,7 +336,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                     <?php 
                     $rank = 1;
                     foreach ($list as $item): 
-                        $thumb = !empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? '');
+                        $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
                         $rankColor = $rank <= 3 ? 'text-white' : 'text-gray-600';
                         $views = !empty($item['view']) ? $item['view'] : rand(1000, 50000);
                     ?>

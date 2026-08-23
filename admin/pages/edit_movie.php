@@ -23,18 +23,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $lang = $_POST['lang'] ?? '';
     $chieu_rap = isset($_POST['chieu_rap']) ? 1 : 0;
     $content = $_POST['content'] ?? '';
+    $actor = $_POST['actor'] ?? '';
+    $director = $_POST['director'] ?? '';
 
     if ($pdo) {
         $sql = "UPDATE movies SET 
                 name = ?, origin_name = ?, thumb_url = ?, poster_url = ?, 
                 year = ?, type = ?, status = ?, episode_current = ?, 
-                quality = ?, lang = ?, chieu_rap = ?, content = ?
+                quality = ?, lang = ?, chieu_rap = ?, content = ?, actor = ?, director = ?
                 WHERE slug = ?";
         $stmt = $pdo->prepare($sql);
         if ($stmt->execute([
             $name, $origin_name, $thumb_url, $poster_url, 
             $year, $type, $status, $episode_current, 
-            $quality, $lang, $chieu_rap, $content, $slug
+            $quality, $lang, $chieu_rap, $content, $actor, $director, $slug
         ])) {
             $success = "Cập nhật phim thành công!";
         } else {
@@ -54,6 +56,23 @@ if ($pdo) {
 if (!$movie) {
     echo "<div class='text-red-500 p-4'>Phim không tồn tại.</div>";
     return;
+}
+
+// Nếu trong DB chưa có actor/director, thử fetch từ API PhimAPI để điền sẵn cho admin
+if (empty($movie['actor']) && empty($movie['director'])) {
+    require_once __DIR__ . '/../../includes/api_client.php';
+    $apiData = fetchApiWithCache("https://phimapi.com/phim/" . urlencode($movie['slug']), 86400);
+    if ($apiData) {
+        $apiJson = json_decode($apiData, true);
+        if (!empty($apiJson['movie'])) {
+            if (empty($movie['director']) && !empty($apiJson['movie']['director'])) {
+                $movie['director'] = is_array($apiJson['movie']['director']) ? implode(', ', $apiJson['movie']['director']) : $apiJson['movie']['director'];
+            }
+            if (empty($movie['actor']) && !empty($apiJson['movie']['actor'])) {
+                $movie['actor'] = is_array($apiJson['movie']['actor']) ? implode(', ', $apiJson['movie']['actor']) : $apiJson['movie']['actor'];
+            }
+        }
+    }
 }
 ?>
 
@@ -180,7 +199,18 @@ if (!$movie) {
                         <?php do_action('admin_movie_content_buttons', $movie); ?>
                     </div>
                 </div>
-                <textarea name="content" id="movie-content" rows="6" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all custom-scrollbar"><?= htmlspecialchars($movie['content']) ?></textarea>
+                <textarea name="content" id="movie-content" rows="6" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all custom-scrollbar"><?= htmlspecialchars($movie['content'] ?? '') ?></textarea>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Đạo Diễn (cách nhau bởi dấu phẩy)</label>
+                    <input type="text" name="director" value="<?= htmlspecialchars($movie['director'] ?? '') ?>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Diễn Viên (cách nhau bởi dấu phẩy)</label>
+                    <input type="text" name="actor" value="<?= htmlspecialchars($movie['actor'] ?? '') ?>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all">
+                </div>
             </div>
         </div>
     </div>

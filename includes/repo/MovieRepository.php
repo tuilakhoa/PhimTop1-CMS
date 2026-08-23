@@ -57,7 +57,7 @@ class MovieRepository {
                 ];
             }
 
-            $where = "1=1";
+            $where = "slug NOT IN (SELECT slug FROM blocked_movies)";
             $params = [];
             
             if ($type) {
@@ -99,12 +99,12 @@ class MovieRepository {
         } else {
             if (!$this->pdo) return false;
             
-            $sql = "INSERT INTO movies (id, name, origin_name, slug, thumb_url, poster_url, year, type, status, episode_current, quality, lang, chieu_rap, content, view, updated_at)
-                VALUES (:id, :name, :origin_name, :slug, :thumb_url, :poster_url, :year, :type, :status, :episode_current, :quality, :lang, :chieu_rap, :content, :view, :updated_at)
+            $sql = "INSERT INTO movies (id, name, origin_name, slug, thumb_url, poster_url, year, type, status, episode_current, quality, lang, chieu_rap, content, actor, director, view, updated_at)
+                VALUES (:id, :name, :origin_name, :slug, :thumb_url, :poster_url, :year, :type, :status, :episode_current, :quality, :lang, :chieu_rap, :content, :actor, :director, :view, :updated_at)
                 ON DUPLICATE KEY UPDATE 
                 name=VALUES(name), origin_name=VALUES(origin_name), thumb_url=VALUES(thumb_url), poster_url=VALUES(poster_url), 
                 year=VALUES(year), type=VALUES(type), status=VALUES(status), episode_current=VALUES(episode_current), 
-                quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap), content=VALUES(content), view=VALUES(view), updated_at=VALUES(updated_at)";
+                quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap), content=VALUES(content), actor=VALUES(actor), director=VALUES(director), view=VALUES(view), updated_at=VALUES(updated_at)";
             $stmt = $this->pdo->prepare($sql);
             
             // Lọc các trường có trong SQL
@@ -123,6 +123,8 @@ class MovieRepository {
                 ':lang' => $data['lang'] ?? '',
                 ':chieu_rap' => $data['chieu_rap'] ?? 0,
                 ':content' => $data['content'] ?? '',
+                ':actor' => $data['actor'] ?? '',
+                ':director' => $data['director'] ?? '',
                 ':view' => $data['view'] ?? 0,
                 ':updated_at' => $data['updated_at']
             ];
@@ -149,5 +151,36 @@ class MovieRepository {
             $stmt->execute([$slug]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         }
+    }
+
+    public function blockMovie($slug, $name) {
+        if (!$this->pdo) return false;
+        $stmt = $this->pdo->prepare("INSERT IGNORE INTO blocked_movies (slug, name) VALUES (?, ?)");
+        return $stmt->execute([$slug, $name]);
+    }
+
+    public function restoreMovie($slug) {
+        if (!$this->pdo) return false;
+        $stmt = $this->pdo->prepare("DELETE FROM blocked_movies WHERE slug = ?");
+        return $stmt->execute([$slug]);
+    }
+
+    public function getBlockedSlugs() {
+        if (!$this->pdo) return [];
+        $stmt = $this->pdo->query("SELECT slug FROM blocked_movies");
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function isMovieBlocked($slug) {
+        if (!$this->pdo) return false;
+        $stmt = $this->pdo->prepare("SELECT 1 FROM blocked_movies WHERE slug = ?");
+        $stmt->execute([$slug]);
+        return $stmt->fetchColumn() !== false;
+    }
+
+    public function getBlockedMoviesList() {
+        if (!$this->pdo) return [];
+        $stmt = $this->pdo->query("SELECT * FROM blocked_movies ORDER BY created_at DESC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

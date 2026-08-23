@@ -12,7 +12,7 @@ include __DIR__ . '/header.php';
             $rank = ($currentPage - 1) * 24;
             foreach ($movies as $movie): 
                 $rank++;
-                $thumb = !empty($movie['thumb_url']) ? $movie['thumb_url'] : (!empty($movie['poster_url']) ? $movie['poster_url'] : '');
+                $thumb = !empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '');
                 if (!preg_match('/^http/', $thumb) && $thumb) {
                     if (preg_match('/^\/[a-zA-Z0-9_-]+\.(jpg|jpeg|png|webp)$/i', $thumb)) {
                         $thumb = 'https://image.tmdb.org/t/p/w500' . $thumb;

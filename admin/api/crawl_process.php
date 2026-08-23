@@ -186,7 +186,9 @@ if (!empty($items)) {
             'episode_current' => extractField($item, ['episode_current', 'current_episode', 'episodes']),
             'quality' => extractField($item, ['quality', 'hd']),
             'lang' => extractField($item, ['lang', 'language']),
-            'chieu_rap' => !empty(extractField($item, ['chieu_rap', 'cinema'])) ? 1 : 0
+            'chieu_rap' => !empty(extractField($item, ['chieu_rap', 'cinema'])) ? 1 : 0,
+            'actor' => is_array($item['actor'] ?? null) ? implode(', ', $item['actor']) : (is_array($item['casts'] ?? null) ? implode(', ', $item['casts']) : extractField($item, ['actor', 'casts'])),
+            'director' => is_array($item['director'] ?? null) ? implode(', ', $item['director']) : extractField($item, ['director'])
         ];
         if (empty($m['slug'])) continue;
         

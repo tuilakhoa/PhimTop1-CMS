@@ -166,6 +166,18 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
             $result['items'] = $safeItems;
         }
     }
+    if (!empty($result['items'])) {
+        require_once __DIR__ . '/repositories.php';
+        $repo = getMovieRepository();
+        $blockedSlugs = $repo->getBlockedSlugs();
+        
+        if (!empty($blockedSlugs)) {
+            $result['items'] = array_filter($result['items'], function($item) use ($blockedSlugs) {
+                return !in_array($item['slug'] ?? '', $blockedSlugs);
+            });
+            $result['items'] = array_values($result['items']);
+        }
+    }
     
     return $result;
 }

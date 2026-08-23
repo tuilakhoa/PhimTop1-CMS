@@ -346,7 +346,7 @@ $homeSliders = [
                     <?php 
                     $rank = 1;
                     foreach ($category['data'] as $item): 
-                        $thumb = !empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? '');
+                        $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
                         $rankColor = $rank === 1 ? 'text-yellow-400 [text-shadow:0_0_12px_rgba(250,204,21,0.8)]' : 
                                     ($rank === 2 ? 'text-gray-300 [text-shadow:0_0_12px_rgba(209,213,219,0.7)]' : 
                                     ($rank === 3 ? 'text-amber-600 [text-shadow:0_0_12px_rgba(217,119,6,0.8)]' : 'text-gray-700'));

@@ -12,6 +12,7 @@
                         'watch_parties' => ['icon' => 'users', 'title' => 'Phòng Xem Chung'],
                         'watching_sessions' => ['icon' => 'monitor-play', 'title' => 'Người Đang Xem'],
                         'movies' => ['icon' => 'film', 'title' => 'Quản Lý Phim'],
+                        'blocked_movies' => ['icon' => 'shield-alert', 'title' => 'Phim Đã Gỡ'],
                         'categories' => ['icon' => 'list-tree', 'title' => 'Thể Loại & Quốc Gia'],
                         'comments' => ['icon' => 'message-square', 'title' => 'Quản Lý Bình Luận'],
                         'feedbacks' => ['icon' => 'message-circle', 'title' => 'Quản Lý Phản Hồi'],

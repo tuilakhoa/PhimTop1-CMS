@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../api/cms_api.dart';
 import '../models/models.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:dio/dio.dart';
 
 class DetailProvider with ChangeNotifier {
   bool isLoading = true;
@@ -57,8 +58,14 @@ class DetailProvider with ChangeNotifier {
       } else {
         error = "Không tìm thấy phim";
       }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        error = "Nội dung này không tồn tại hoặc đã bị gỡ bỏ.";
+      } else {
+        error = "Lỗi kết nối: \${e.message}";
+      }
     } catch (e) {
-      error = e.toString();
+      error = "Đã xảy ra lỗi: \${e.toString()}";
     } finally {
       isLoading = false;
       notifyListeners();

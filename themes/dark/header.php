@@ -300,4 +300,97 @@ if ($cachedCats) {
         }
     }
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchForms = document.querySelectorAll('form[action="/search"]');
+        searchForms.forEach(form => {
+            const input = form.querySelector('input[name="keyword"]');
+            if (!input) return;
+            
+            input.setAttribute('autocomplete', 'off');
+            
+            let container = document.createElement('div');
+            container.className = 'absolute top-full left-0 mt-2 w-full bg-gray-900 border border-gray-800 rounded-xl shadow-2xl z-[100] overflow-hidden hidden';
+            container.style.maxHeight = '400px';
+            container.style.overflowY = 'auto';
+            if(window.innerWidth < 1024 && form.closest('#mobileMenu')) {
+                 container.style.position = 'static';
+                 container.style.marginTop = '8px';
+            }
+            form.style.position = 'relative';
+            form.appendChild(container);
+            
+            let timeout = null;
+            
+            input.addEventListener('input', function() {
+                clearTimeout(timeout);
+                const q = this.value.trim();
+                if (q.length < 2) {
+                    container.classList.add('hidden');
+                    return;
+                }
+                
+                // Show loading
+                container.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang tìm...</div>`;
+                container.classList.remove('hidden');
+                lucide.createIcons();
+                
+                timeout = setTimeout(() => {
+                    fetch('/api/v1/search.php?keyword=' + encodeURIComponent(q))
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === 'success' && data.data && data.data.items && data.data.items.length > 0) {
+                                let html = '<div class="py-2">';
+                                const domain = data.data.APP_DOMAIN_CDN_IMAGE || data.data.domain || 'https://phimimg.com/';
+                                
+                                data.data.items.slice(0, 5).forEach(item => {
+                                    let thumb = item.thumb_url || item.poster_url || '';
+                                    if (!thumb.startsWith('http')) {
+                                        thumb = domain.replace(/\/$/, '') + '/' + thumb.replace(/^\//, '');
+                                    }
+                                    html += `
+                                        <a href="/phim/${item.slug}" class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors gap-3 group">
+                                            <div class="w-10 h-14 bg-gray-800 rounded overflow-hidden flex-shrink-0 shadow">
+                                                <img src="${thumb}" alt="${item.name.replace(/"/g, '&quot;')}" class="w-full h-full object-cover">
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-white text-sm font-medium truncate group-hover:text-red-500 transition-colors">${item.name}</div>
+                                                <div class="text-gray-500 text-[11px] truncate">${item.origin_name || ''}</div>
+                                            </div>
+                                        </a>
+                                    `;
+                                });
+                                html += `
+                                    <a href="/search?keyword=${encodeURIComponent(q)}" class="block px-4 py-3 text-center text-sm text-red-500 hover:bg-gray-800 transition-colors font-medium border-t border-gray-800 mt-2">
+                                        Xem tất cả kết quả <i data-lucide="arrow-right" class="w-3 h-3 inline-block ml-1"></i>
+                                    </a>
+                                </div>`;
+                                container.innerHTML = html;
+                                lucide.createIcons();
+                            } else {
+                                container.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm">Không tìm thấy "${q}"</div>`;
+                            }
+                        })
+                        .catch(e => {
+                            container.classList.add('hidden');
+                        });
+                }, 500);
+            });
+            
+            // Hide when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!form.contains(e.target)) {
+                    container.classList.add('hidden');
+                }
+            });
+            
+            // Show again when focusing
+            input.addEventListener('focus', function() {
+                if (this.value.trim().length >= 2 && container.innerHTML !== '') {
+                    container.classList.remove('hidden');
+                }
+            });
+        });
+    });
+    </script>
     <div class="pt-20 pb-12">

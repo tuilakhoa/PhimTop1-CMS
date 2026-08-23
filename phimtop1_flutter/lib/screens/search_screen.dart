@@ -247,7 +247,58 @@ class _SearchScreenState extends State<SearchScreen> {
 
         if (!isTv && !isSearching) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
-          return Center(child: Text("Nhập từ khóa để tìm kiếm", style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)));
+          final suggestions = provider.trendingMovies.take(8).map((e) => e.name).toList();
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Gợi ý tìm kiếm",
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: suggestions.map((s) => InkWell(
+                    onTap: () {
+                      _controller.text = s;
+                      context.read<ExploreProvider>().setFilters(searchKeyword: s);
+                      setState(() {});
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: isDark ? Colors.white24 : Colors.black12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.trending_up, size: 16, color: Theme.of(context).primaryColor),
+                          const SizedBox(width: 6),
+                          Text(
+                            s,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )).toList(),
+                ),
+              ],
+            ),
+          );
         }
         if (isSearching && provider.movies.isEmpty) {
           final isDark = Theme.of(context).brightness == Brightness.dark;

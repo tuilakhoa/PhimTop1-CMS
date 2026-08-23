@@ -647,6 +647,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              if (person.character.isNotEmpty)
+                                Text(
+                                  person.character,
+                                  style: TextStyle(color: _iconColor, fontSize: 10),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                             ],
                           ),
                         );

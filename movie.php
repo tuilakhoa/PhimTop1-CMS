@@ -10,6 +10,13 @@ if (!$slug) {
 
 $originalSlug = resolveCustomSlug('movie', $slug);
 
+$repo = getMovieRepository();
+if ($repo->isMovieBlocked($originalSlug)) {
+    header("HTTP/1.0 404 Not Found");
+    echo "<h1>404 Not Found</h1><p>Nội dung này không tồn tại hoặc đã bị gỡ bỏ.</p>";
+    exit;
+}
+
 $settings = getSettings();
 $movie = null;
 $episodes = [];

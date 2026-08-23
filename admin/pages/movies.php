@@ -142,6 +142,9 @@ if ($displayMode === 'crawl') {
                                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                     <?php else: ?>
+                                    <button onclick="blockMovie('<?= $movie['slug'] ?>', '<?= htmlspecialchars($movie['name'] ?? '', ENT_QUOTES) ?>')" class="text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors p-2 rounded-lg" title="Gỡ bỏ/Chặn phim này">
+                                        <i data-lucide="ban" class="w-4 h-4"></i>
+                                    </button>
                                     <a href="?page=crawl&action=crawl_movie&slug=<?= $movie['slug'] ?>" class="text-green-400 hover:text-green-300 hover:bg-green-400/10 transition-colors p-2 rounded-lg" title="Cào phim này về DB">
                                         <i data-lucide="download" class="w-4 h-4"></i>
                                     </a>
@@ -237,6 +240,33 @@ if ($displayMode === 'crawl') {
                 }
             } else {
                 alert('Lỗi: ' + (data.message || 'Không thể xóa phim'));
+            }
+        } catch (err) {
+            alert('Lỗi kết nối: ' + err.message);
+        }
+    }
+
+    async function blockMovie(slug, name) {
+        if (!confirm(`Bạn có chắc chắn muốn GỠ BỎ và CHẶN phim "${name}"?\nPhim sẽ biến mất hoàn toàn trên web và app (dù ở chế độ API hay Crawl).`)) {
+            return;
+        }
+        
+        try {
+            const res = await fetch('api/block_movie.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'block', slug, name })
+            });
+            
+            const data = await res.json();
+            if (data.status === 'success') {
+                const row = document.getElementById('movie-' + slug);
+                if (row) {
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 300);
+                }
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể chặn phim'));
             }
         } catch (err) {
             alert('Lỗi kết nối: ' + err.message);

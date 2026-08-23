@@ -25,6 +25,13 @@ if (empty($slug)) {
     exit;
 }
 
+$repo = getMovieRepository();
+if ($repo->isMovieBlocked($slug)) {
+    http_response_code(404);
+    echo json_encode(['status' => 'error', 'message' => 'Movie is not available']);
+    exit;
+}
+
 $displayMode = $settings['displayMode'] ?? 'api';
 if ($displayMode === 'crawl') {
     $repo = getMovieRepository();
@@ -79,6 +86,66 @@ if ($displayMode === 'crawl') {
                 $peoples = $pData['data']['peoples'];
             }
         }
+        
+        if (empty($peoples) && !empty($movie['imdb']['id'])) {
+            $imdbId = $movie['imdb']['id'];
+            $imdbRes = fetchApiWithCache("https://phimapi.com/imdb/title/" . urlencode($imdbId), 86400);
+            if ($imdbRes) {
+                $imdbData = json_decode($imdbRes, true);
+                if (!empty($imdbData['movie']['director'])) {
+                    foreach ((array)$imdbData['movie']['director'] as $director) {
+                        if (!empty($director) && $director !== 'Đang cập nhật') {
+                            $peoples[] = [
+                                'name' => $director,
+                                'character' => 'Đạo diễn',
+                                'profile_path' => ''
+                            ];
+                        }
+                    }
+                }
+                if (!empty($imdbData['movie']['actor'])) {
+                    foreach ((array)$imdbData['movie']['actor'] as $actor) {
+                        if (!empty($actor) && $actor !== 'Đang cập nhật') {
+                            $peoples[] = [
+                                'name' => $actor,
+                                'character' => 'Diễn viên',
+                                'profile_path' => ''
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        if (empty($peoples)) {
+            if (!empty($movie['director'])) {
+                $dirs = is_array($movie['director']) ? $movie['director'] : explode(',', $movie['director']);
+                foreach ($dirs as $director) {
+                    $director = trim($director);
+                    if (!empty($director) && $director !== 'Đang cập nhật') {
+                        $peoples[] = [
+                            'name' => $director,
+                            'character' => 'Đạo diễn',
+                            'profile_path' => ''
+                        ];
+                    }
+                }
+            }
+            if (!empty($movie['actor'])) {
+                $acts = is_array($movie['actor']) ? $movie['actor'] : explode(',', $movie['actor']);
+                foreach ($acts as $actor) {
+                    $actor = trim($actor);
+                    if (!empty($actor) && $actor !== 'Đang cập nhật') {
+                        $peoples[] = [
+                            'name' => $actor,
+                            'character' => 'Diễn viên',
+                            'profile_path' => ''
+                        ];
+                    }
+                }
+            }
+        }
+
         $data['peoples'] = $peoples;
         
     } else if (!$data) {
