@@ -1,4 +1,4 @@
-<h2 class="text-2xl font-bold text-white mb-6">Quản Lý Phim</h2>
+<h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-8 tracking-tight">Quản Lý Phim</h2>
 
 <?php
 $pdo = getPDO();
@@ -60,77 +60,79 @@ if ($displayMode === 'crawl') {
 }
 ?>
 
-<div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-8">
-    <form method="GET" action="" class="flex items-center gap-4">
+<div class="bg-admin-panel backdrop-blur-xl border border-admin-border rounded-[2rem] p-6 mb-10 shadow-2xl relative overflow-hidden group">
+    <div class="absolute -top-32 -right-32 w-64 h-64 bg-admin-primary/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-admin-primary/10 transition-colors duration-700"></div>
+    <form method="GET" action="" class="flex items-center gap-4 relative z-10">
         <input type="hidden" name="page" value="movies">
-        <div class="flex-1 relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i data-lucide="search" class="w-5 h-5 text-gray-500"></i>
+        <div class="flex-1 relative group/input">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-transform group-focus-within/input:scale-110">
+                <i data-lucide="search" class="w-5 h-5 text-gray-500 group-focus-within/input:text-admin-primary transition-colors"></i>
             </div>
-            <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Tìm kiếm phim theo tên, tên gốc, hoặc slug..." class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all">
+            <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Tìm kiếm phim theo tên, tên gốc, hoặc slug..." class="w-full bg-black/40 backdrop-blur-sm border border-white/10 text-white rounded-xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-admin-primary focus:ring-1 focus:ring-admin-primary transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
         </div>
-        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-lg transition-colors flex items-center shadow-lg shadow-red-600/20">
-            Tìm Kiếm
+        <button type="submit" class="bg-gradient-to-r from-admin-primary to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold py-3.5 px-8 rounded-xl transition-all shadow-[0_0_20px_rgba(244,63,94,0.3)] hover:shadow-[0_0_25px_rgba(244,63,94,0.5)] flex items-center gap-2 transform hover:-translate-y-0.5">
+            <i data-lucide="search" class="w-4 h-4"></i> Tìm Kiếm
         </button>
         <?php if ($q !== ''): ?>
-        <a href="?page=movies" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-2.5 px-6 rounded-lg transition-colors flex items-center border border-gray-700">
-            Xóa Lọc
+        <a href="?page=movies" class="bg-white/5 hover:bg-white/10 text-gray-300 font-bold py-3.5 px-6 rounded-xl transition-all border border-white/10 hover:border-white/20 hover:text-white flex items-center gap-2 transform hover:-translate-y-0.5">
+            <i data-lucide="x" class="w-4 h-4"></i> Xóa
         </a>
         <?php endif; ?>
     </form>
 </div>
 
-<div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+<div class="bg-admin-panel backdrop-blur-2xl border border-admin-border rounded-[2rem] overflow-hidden shadow-2xl relative">
+    <div class="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none"></div>
     <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-gray-400">
-            <thead class="text-xs text-gray-400 uppercase bg-gray-800/50">
+        <table class="w-full text-left text-sm text-gray-400 relative z-10">
+            <thead class="text-[11px] text-gray-400 uppercase tracking-widest bg-black/40 backdrop-blur-md border-b border-white/5">
                 <tr>
-                    <th scope="col" class="px-6 py-4">Phim</th>
-                    <th scope="col" class="px-6 py-4 text-center">Năm</th>
-                    <th scope="col" class="px-6 py-4 text-center">Tập</th>
-                    <th scope="col" class="px-6 py-4 text-center">Lượt xem</th>
-                    <th scope="col" class="px-6 py-4 text-center">Cập nhật</th>
-                    <th scope="col" class="px-6 py-4 text-right">Thao tác</th>
+                    <th scope="col" class="px-8 py-5 font-bold">Phim</th>
+                    <th scope="col" class="px-6 py-5 font-bold text-center">Năm</th>
+                    <th scope="col" class="px-6 py-5 font-bold text-center">Tập</th>
+                    <th scope="col" class="px-6 py-5 font-bold text-center">Lượt xem</th>
+                    <th scope="col" class="px-6 py-5 font-bold text-center">Cập nhật</th>
+                    <th scope="col" class="px-8 py-5 font-bold text-right">Thao tác</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-white/5">
                 <?php if (count($movies) > 0): ?>
                     <?php foreach ($movies as $movie): ?>
-                        <tr class="border-b border-gray-800 hover:bg-gray-800/50 transition-colors" id="movie-<?= $movie['slug'] ?>">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center space-x-4">
-                                    <div class="relative w-12 h-16 rounded-md overflow-hidden shadow-lg bg-gray-800 shrink-0">
-                                        <img src="<?= htmlspecialchars($movie['thumb_url'] ?? '') ?>" alt="<?= htmlspecialchars($movie['name'] ?? '') ?>" class="w-full h-full object-cover">
+                        <tr class="hover:bg-white/[0.02] transition-colors duration-300 group/row" id="movie-<?= $movie['slug'] ?>">
+                            <td class="px-8 py-4">
+                                <div class="flex items-center space-x-5">
+                                    <div class="relative w-14 h-20 rounded-xl overflow-hidden shadow-lg bg-black/50 shrink-0 border border-white/5 group-hover/row:border-admin-primary/30 transition-colors">
+                                        <img src="<?= htmlspecialchars($movie['thumb_url'] ?? '') ?>" alt="<?= htmlspecialchars($movie['name'] ?? '') ?>" class="w-full h-full object-cover group-hover/row:scale-110 transition-transform duration-500">
                                         <?php if (!empty($movie['quality'])): ?>
-                                            <div class="absolute top-0 right-0 bg-red-600 text-[10px] font-bold text-white px-1 py-0.5 rounded-bl">
+                                            <div class="absolute top-0 right-0 bg-gradient-to-r from-admin-primary to-rose-600 text-[9px] font-black tracking-wider text-white px-1.5 py-0.5 rounded-bl-lg shadow-md">
                                                 <?= htmlspecialchars($movie['quality']) ?>
                                             </div>
                                         <?php endif; ?>
                                     </div>
                                     <div>
-                                        <div class="text-white font-medium text-base mb-1 line-clamp-1">
-                                            <a href="/phim/<?= $movie['slug'] ?>" target="_blank" class="hover:text-red-500 transition-colors">
+                                        <div class="text-white font-bold text-base mb-1.5 line-clamp-1 group-hover/row:text-admin-primary transition-colors tracking-wide">
+                                            <a href="/phim/<?= $movie['slug'] ?>" target="_blank">
                                                 <?= htmlspecialchars($movie['name'] ?? '') ?>
                                             </a>
                                         </div>
-                                        <div class="text-xs text-gray-500 line-clamp-1"><?= htmlspecialchars($movie['origin_name'] ?? '') ?></div>
+                                        <div class="text-xs text-gray-500 font-medium tracking-wide line-clamp-1"><?= htmlspecialchars($movie['origin_name'] ?? '') ?></div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-center"><?= $movie['year'] ?? 'N/A' ?></td>
+                            <td class="px-6 py-4 text-center font-medium"><?= $movie['year'] ?? 'N/A' ?></td>
                             <td class="px-6 py-4 text-center">
-                                <span class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-xs whitespace-nowrap"><?= htmlspecialchars($movie['episode_current'] ?? 'N/A') ?></span>
+                                <span class="bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap shadow-[0_0_10px_rgba(59,130,246,0.1)]"><?= htmlspecialchars($movie['episode_current'] ?? 'N/A') ?></span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <div class="flex items-center justify-center text-gray-300">
-                                    <i data-lucide="eye" class="w-3 h-3 mr-1"></i> <?= number_format($movie['view'] ?? 0) ?>
+                                <div class="flex items-center justify-center text-gray-300 font-medium">
+                                    <i data-lucide="eye" class="w-4 h-4 mr-1.5 text-indigo-400"></i> <?= number_format($movie['view'] ?? 0) ?>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-center text-xs">
+                            <td class="px-6 py-4 text-center text-xs text-gray-400">
                                 <?= date('d/m/Y H:i', strtotime($movie['updated_at'])) ?>
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end space-x-2">
+                            <td class="px-8 py-4 text-right">
+                                <div class="flex items-center justify-end space-x-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300">
                                     <a href="/phim/<?= $movie['slug'] ?>" target="_blank" class="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 transition-colors p-2 rounded-lg" title="Xem trên web">
                                         <i data-lucide="external-link" class="w-4 h-4"></i>
                                     </a>
@@ -169,17 +171,17 @@ if ($displayMode === 'crawl') {
     
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
-        <div class="p-4 border-t border-gray-800 flex justify-between items-center bg-gray-800/30">
-            <div class="text-sm text-gray-400">
+        <div class="px-8 py-5 border-t border-white/5 flex justify-between items-center bg-black/40 backdrop-blur-md relative z-10">
+            <div class="text-sm text-gray-400 font-medium">
                 Hiển thị trang <span class="font-medium text-white"><?= $page ?></span> / <span class="font-medium text-white"><?= $totalPages ?></span>
                 (Tổng cộng <span class="font-medium text-white"><?= number_format($totalMovies) ?></span> phim)
             </div>
             <div class="flex space-x-1">
                 <?php if ($page > 1): ?>
-                    <a href="?page=movies&p=1<?= $q ? '&q=' . urlencode($q) : '' ?>" class="px-3 py-1.5 bg-gray-800 text-gray-400 rounded-md hover:bg-gray-700 hover:text-white transition-colors" title="Trang đầu">
+                    <a href="?page=movies&p=1<?= $q ? '&q=' . urlencode($q) : '' ?>" class="p-2 bg-white/5 border border-white/10 text-gray-400 rounded-lg hover:bg-white/10 hover:text-white transition-all hover:border-white/20" title="Trang đầu">
                         <i data-lucide="chevrons-left" class="w-4 h-4"></i>
                     </a>
-                    <a href="?page=movies&p=<?= $page - 1 ?><?= $q ? '&q=' . urlencode($q) : '' ?>" class="px-3 py-1.5 bg-gray-800 text-gray-400 rounded-md hover:bg-gray-700 hover:text-white transition-colors">
+                    <a href="?page=movies&p=<?= $page - 1 ?><?= $q ? '&q=' . urlencode($q) : '' ?>" class="p-2 bg-white/5 border border-white/10 text-gray-400 rounded-lg hover:bg-white/10 hover:text-white transition-all hover:border-white/20">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </a>
                 <?php endif; ?>
@@ -188,25 +190,24 @@ if ($displayMode === 'crawl') {
                 $startPage = max(1, $page - 2);
                 $endPage = min($totalPages, $page + 2);
                 
-                // Adjust if near ends
                 if ($page <= 2) $endPage = min($totalPages, 5);
                 if ($page >= $totalPages - 1) $startPage = max(1, $totalPages - 4);
                 
                 for ($i = $startPage; $i <= $endPage; $i++):
                     if ($i === $page) {
-                        $activeClass = 'bg-red-600 text-white font-medium shadow-md';
+                        $activeClass = 'bg-gradient-to-r from-admin-primary to-rose-600 text-white font-bold shadow-[0_0_15px_rgba(244,63,94,0.4)] border-transparent';
                     } else {
-                        $activeClass = 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors';
+                        $activeClass = 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all border-white/10 hover:border-white/20';
                     }
                 ?>
-                    <a href="?page=movies&p=<?= $i ?><?= $q ? '&q=' . urlencode($q) : '' ?>" class="px-3 py-1.5 rounded-md min-w-[32px] text-center <?= $activeClass ?>"><?= $i ?></a>
+                    <a href="?page=movies&p=<?= $i ?><?= $q ? '&q=' . urlencode($q) : '' ?>" class="w-9 h-9 flex items-center justify-center rounded-lg text-sm border <?= $activeClass ?>"><?= $i ?></a>
                 <?php endfor; ?>
                 
                 <?php if ($page < $totalPages): ?>
-                    <a href="?page=movies&p=<?= $page + 1 ?><?= $q ? '&q=' . urlencode($q) : '' ?>" class="px-3 py-1.5 bg-gray-800 text-gray-400 rounded-md hover:bg-gray-700 hover:text-white transition-colors">
+                    <a href="?page=movies&p=<?= $page + 1 ?><?= $q ? '&q=' . urlencode($q) : '' ?>" class="p-2 bg-white/5 border border-white/10 text-gray-400 rounded-lg hover:bg-white/10 hover:text-white transition-all hover:border-white/20">
                         <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </a>
-                    <a href="?page=movies&p=<?= $totalPages ?><?= $q ? '&q=' . urlencode($q) : '' ?>" class="px-3 py-1.5 bg-gray-800 text-gray-400 rounded-md hover:bg-gray-700 hover:text-white transition-colors" title="Trang cuối">
+                    <a href="?page=movies&p=<?= $totalPages ?><?= $q ? '&q=' . urlencode($q) : '' ?>" class="p-2 bg-white/5 border border-white/10 text-gray-400 rounded-lg hover:bg-white/10 hover:text-white transition-all hover:border-white/20" title="Trang cuối">
                         <i data-lucide="chevrons-right" class="w-4 h-4"></i>
                     </a>
                 <?php endif; ?>

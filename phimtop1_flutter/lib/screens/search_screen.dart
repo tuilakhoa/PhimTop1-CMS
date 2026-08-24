@@ -245,69 +245,77 @@ class _SearchScreenState extends State<SearchScreen> {
         final isSearching = provider.keyword.isNotEmpty;
         final displayList = isSearching ? provider.movies : provider.trendingMovies;
 
-        if (!isTv && !isSearching) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          final suggestions = provider.trendingMovies.take(8).map((e) => e.name).toList();
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Gợi ý tìm kiếm",
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: suggestions.map((s) => InkWell(
-                    onTap: () {
-                      _controller.text = s;
-                      context.read<ExploreProvider>().setFilters(searchKeyword: s);
-                      setState(() {});
-                    },
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: isDark ? Colors.white24 : Colors.black12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.trending_up, size: 16, color: Theme.of(context).primaryColor),
-                          const SizedBox(width: 6),
-                          Text(
-                            s,
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black87,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )).toList(),
-                ),
-              ],
-            ),
-          );
-        }
         if (isSearching && provider.movies.isEmpty) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
           return Center(child: Text("Không tìm thấy kết quả nào", style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)));
         }
 
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final suggestions = isSearching 
+            ? displayList.take(6).map((e) => e.name).toList()
+            : provider.trendingMovies.take(8).map((e) => e.name).toList();
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (!isTv && suggestions.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isSearching ? "Có phải bạn muốn tìm" : "Gợi ý tìm kiếm",
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: suggestions.map((s) => InkWell(
+                        onTap: () {
+                          _controller.text = s;
+                          context.read<ExploreProvider>().setFilters(searchKeyword: s);
+                          setState(() {});
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 32),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: isDark ? Colors.white24 : Colors.black12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(isSearching ? Icons.search : Icons.trending_up, size: 16, color: Theme.of(context).primaryColor),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  s,
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
             if (isTv)
               Padding(
                 padding: const EdgeInsets.only(left: 16, bottom: 8, top: 16),

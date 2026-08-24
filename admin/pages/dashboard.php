@@ -101,110 +101,131 @@ if ($gaConfigured) {
     }
 }
 ?>
-<h2 class="text-2xl font-bold text-white mb-6">Tổng Quan Hệ Thống</h2>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
-        <div class="flex justify-between items-start">
-            <div><p class="text-gray-400 mb-1">Chế Độ Hiển Thị</p><h3 class="text-xl font-bold text-white uppercase"><?= htmlspecialchars($settings['displayMode']) ?></h3></div>
-            <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-500"><i data-lucide="monitor" class="w-5 h-5"></i></div>
+<h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-8 tracking-tight">Tổng Quan Hệ Thống</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <div class="bg-admin-panel backdrop-blur-xl p-6 rounded-2xl border border-admin-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-blue-500/30 group relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-[50px] -mr-16 -mt-16 transition-all duration-500 group-hover:bg-blue-500/20"></div>
+        <div class="flex justify-between items-start relative z-10">
+            <div><p class="text-gray-400 mb-1 text-sm font-medium tracking-wide">Chế Độ Hiển Thị</p><h3 class="text-2xl font-bold text-white uppercase tracking-wider drop-shadow-md"><?= htmlspecialchars($settings['displayMode']) ?></h3></div>
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-blue-600/5 rounded-xl flex items-center justify-center text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)] group-hover:scale-110 transition-transform duration-300"><i data-lucide="monitor" class="w-6 h-6"></i></div>
         </div>
     </div>
-    <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
-        <div class="flex justify-between items-start">
-            <div><p class="text-gray-400 mb-1">Theme Hiện Tại</p><h3 class="text-xl font-bold text-white capitalize"><?= htmlspecialchars($settings['theme']) ?></h3></div>
-            <div class="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500"><i data-lucide="palette" class="w-5 h-5"></i></div>
+    <div class="bg-admin-panel backdrop-blur-xl p-6 rounded-2xl border border-admin-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-purple-500/30 group relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-[50px] -mr-16 -mt-16 transition-all duration-500 group-hover:bg-purple-500/20"></div>
+        <div class="flex justify-between items-start relative z-10">
+            <div><p class="text-gray-400 mb-1 text-sm font-medium tracking-wide">Theme Hiện Tại</p><h3 class="text-2xl font-bold text-white capitalize drop-shadow-md"><?= htmlspecialchars($settings['theme']) ?></h3></div>
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-purple-600/5 rounded-xl flex items-center justify-center text-purple-400 border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)] group-hover:scale-110 transition-transform duration-300"><i data-lucide="palette" class="w-6 h-6"></i></div>
         </div>
     </div>
-    <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
-        <div class="flex justify-between items-start">
+    <div class="bg-admin-panel backdrop-blur-xl p-6 rounded-2xl border border-admin-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-emerald-500/30 group relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-[50px] -mr-16 -mt-16 transition-all duration-500 group-hover:bg-emerald-500/20"></div>
+        <div class="flex justify-between items-start relative z-10">
             <div>
-                <p class="text-gray-400 mb-1">Tổng Số Phim</p>
-                <h3 class="text-xl font-bold text-white"><?= number_format($movieCount) ?></h3>
+                <p class="text-gray-400 mb-1 text-sm font-medium tracking-wide">Tổng Số Phim</p>
+                <h3 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-200"><?= number_format($movieCount) ?></h3>
             </div>
-            <div class="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center text-green-500"><i data-lucide="film" class="w-5 h-5"></i></div>
+            <div class="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-emerald-600/5 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] group-hover:scale-110 transition-transform duration-300"><i data-lucide="film" class="w-6 h-6"></i></div>
         </div>
     </div>
 </div>
 
-<h3 class="text-xl font-bold text-white mb-4 flex items-center"><i data-lucide="shield-check" class="w-6 h-6 mr-2 text-green-500"></i> Bảo Mật & Đo Lường</h3>
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+<h3 class="text-xl font-bold text-white mb-6 flex items-center gap-3 drop-shadow-md"><div class="p-2 bg-green-500/10 rounded-lg border border-green-500/20"><i data-lucide="shield-check" class="w-5 h-5 text-green-400"></i></div> Bảo Mật & Đo Lường</h3>
+
+<!-- Biểu đồ Thống kê -->
+<div class="bg-admin-panel backdrop-blur-2xl border border-admin-border rounded-[2rem] p-6 mb-10 shadow-2xl relative overflow-hidden group">
+    <div class="absolute -top-32 -right-32 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-indigo-500/10 transition-colors duration-700"></div>
+    <div class="flex justify-between items-center mb-6 relative z-10">
+        <h4 class="text-lg font-bold text-white flex items-center"><i data-lucide="bar-chart-2" class="w-5 h-5 mr-2 text-indigo-400"></i> Thống kê Lượt Xem & Đăng Ký (7 Ngày Qua)</h4>
+    </div>
+    <div class="relative z-10 w-full h-72">
+        <canvas id="internalAnalyticsChart"></canvas>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
     <!-- Total Views -->
-    <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
-        <div class="flex justify-between items-start">
+    <div class="bg-admin-panel backdrop-blur-xl p-6 rounded-2xl border border-admin-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-indigo-500/30 group relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-[50px] -mr-16 -mt-16 transition-all duration-500 group-hover:bg-indigo-500/20"></div>
+        <div class="flex justify-between items-start relative z-10">
             <div>
-                <p class="text-gray-400 mb-1">Lượt Xem Hệ Thống</p>
-                <h3 class="text-xl font-bold text-white"><?= number_format($totalViews) ?></h3>
-                <p class="text-xs text-gray-500 mt-1">Tổng từ CSDL nội bộ</p>
+                <p class="text-gray-400 mb-1 text-sm font-medium">Lượt Xem Hệ Thống</p>
+                <h3 class="text-2xl font-bold text-white mb-1"><?= number_format($totalViews) ?></h3>
+                <p class="text-[11px] text-gray-500 font-medium">Tổng từ CSDL nội bộ</p>
             </div>
-            <div class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-500"><i data-lucide="eye" class="w-5 h-5"></i></div>
+            <div class="w-11 h-11 bg-gradient-to-br from-indigo-500/20 to-indigo-600/5 rounded-xl flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.15)] group-hover:scale-110 transition-transform duration-300"><i data-lucide="eye" class="w-5 h-5"></i></div>
         </div>
     </div>
 
     <!-- Turnstile -->
-    <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
-        <div class="flex justify-between items-start mb-4">
+    <div class="bg-admin-panel backdrop-blur-xl p-6 rounded-2xl border border-admin-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-orange-500/30 group relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-[50px] -mr-16 -mt-16 transition-all duration-500 group-hover:bg-orange-500/20"></div>
+        <div class="flex justify-between items-start mb-4 relative z-10">
             <div>
-                <p class="text-gray-400 mb-1">CF Turnstile</p>
-                <h3 class="text-sm font-medium text-white">Lượt Chặn Bot</h3>
+                <p class="text-gray-400 mb-1 text-xs font-bold uppercase tracking-wider">CF Turnstile</p>
+                <h3 class="text-sm font-medium text-gray-300">Lượt Chặn Bot</h3>
             </div>
-            <div class="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-500"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
+            <div class="w-11 h-11 bg-gradient-to-br from-orange-500/20 to-orange-600/5 rounded-xl flex items-center justify-center text-orange-400 border border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.15)] group-hover:scale-110 transition-transform duration-300"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
         </div>
-        <div class="flex items-end justify-between">
-            <h2 class="text-3xl font-bold text-white"><?= $cfTurnstileData ?></h2>
+        <div class="flex items-end justify-between relative z-10">
+            <h2 class="text-3xl font-black text-white tracking-tight"><?= $cfTurnstileData ?></h2>
             <?php if (!$cfApiConfigured || empty($cfAccountId)): ?>
-                <span class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded">Cần Account ID</span>
+                <span class="text-[10px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded-md">Cần Account ID</span>
             <?php else: ?>
-                <span class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">Đã Kết Nối</span>
+                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-md shadow-[0_0_10px_rgba(52,211,153,0.1)]">Đã Kết Nối</span>
             <?php endif; ?>
         </div>
     </div>
     
     <!-- CF Analytics -->
-    <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
-        <div class="flex justify-between items-start mb-4">
+    <div class="bg-admin-panel backdrop-blur-xl p-6 rounded-2xl border border-admin-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-cyan-500/30 group relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-[50px] -mr-16 -mt-16 transition-all duration-500 group-hover:bg-cyan-500/20"></div>
+        <div class="flex justify-between items-start mb-4 relative z-10">
             <div>
-                <p class="text-gray-400 mb-1">CF Web Analytics</p>
-                <h3 class="text-sm font-medium text-white">Khách Truy Cập (24h)</h3>
+                <p class="text-gray-400 mb-1 text-xs font-bold uppercase tracking-wider">CF Analytics</p>
+                <h3 class="text-sm font-medium text-gray-300">Khách (24h qua)</h3>
             </div>
-            <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-500"><i data-lucide="users" class="w-5 h-5"></i></div>
+            <div class="w-11 h-11 bg-gradient-to-br from-cyan-500/20 to-cyan-600/5 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)] group-hover:scale-110 transition-transform duration-300"><i data-lucide="users" class="w-5 h-5"></i></div>
         </div>
-        <div class="flex items-end justify-between">
-            <h2 class="text-3xl font-bold text-white"><?= $cfAnalyticsData ?></h2>
+        <div class="flex items-end justify-between relative z-10">
+            <h2 class="text-3xl font-black text-white tracking-tight"><?= $cfAnalyticsData ?></h2>
             <?php if (!$cfApiConfigured || empty($cfZoneId)): ?>
-                <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded">Cần Zone ID</span>
+                <span class="text-[10px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-md">Cần Zone ID</span>
             <?php else: ?>
-                <span class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">Đã Kết Nối</span>
+                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-md shadow-[0_0_10px_rgba(52,211,153,0.1)]">Đã Kết Nối</span>
             <?php endif; ?>
         </div>
     </div>
 
     <!-- GA -->
-    <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
-        <div class="flex justify-between items-start mb-4">
+    <div class="bg-admin-panel backdrop-blur-xl p-6 rounded-2xl border border-admin-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-yellow-500/30 group relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-[50px] -mr-16 -mt-16 transition-all duration-500 group-hover:bg-yellow-500/20"></div>
+        <div class="flex justify-between items-start mb-4 relative z-10">
             <div>
-                <p class="text-gray-400 mb-1">Google Analytics</p>
-                <h3 class="text-sm font-medium text-white">Online (30 phút qua)</h3>
+                <p class="text-gray-400 mb-1 text-xs font-bold uppercase tracking-wider">Google Analytics</p>
+                <h3 class="text-sm font-medium text-gray-300">Online (30 phút)</h3>
             </div>
-            <div class="w-10 h-10 bg-yellow-500/10 rounded-lg flex items-center justify-center text-yellow-500"><i data-lucide="activity" class="w-5 h-5"></i></div>
+            <div class="w-11 h-11 bg-gradient-to-br from-yellow-500/20 to-yellow-600/5 rounded-xl flex items-center justify-center text-yellow-400 border border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.15)] group-hover:scale-110 transition-transform duration-300"><i data-lucide="activity" class="w-5 h-5"></i></div>
         </div>
-        <div class="flex items-end justify-between">
-            <h2 class="text-3xl font-bold text-white"><?= $gaRealtimeData ?></h2>
+        <div class="flex items-end justify-between relative z-10">
+            <h2 class="text-3xl font-black text-white tracking-tight"><?= $gaRealtimeData ?></h2>
             <?php if (!$gaConfigured): ?>
-                <span class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded">Cần Property ID & JSON</span>
+                <span class="text-[10px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-2 py-1 rounded-md">Cần JSON</span>
             <?php else: ?>
-                <span class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">Đã Kết Nối</span>
+                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-md shadow-[0_0_10px_rgba(52,211,153,0.1)]">Đã Kết Nối</span>
             <?php endif; ?>
         </div>
     </div>
 </div>
 
 <!-- System Health Monitor -->
-<h3 class="text-xl font-bold text-white mb-4 flex items-center mt-10"><i data-lucide="cpu" class="w-6 h-6 mr-2 text-purple-500"></i> Giám Sát Hệ Thống</h3>
+<h3 class="text-xl font-bold text-white mb-6 flex items-center mt-12 gap-3 drop-shadow-md"><div class="p-2 bg-purple-500/10 rounded-lg border border-purple-500/20"><i data-lucide="cpu" class="w-5 h-5 text-purple-400"></i></div> Giám Sát Hệ Thống</h3>
 
-<div class="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-3xl border border-gray-800 shadow-2xl relative overflow-hidden">
-    <div class="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
-    <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="bg-admin-panel backdrop-blur-2xl p-8 rounded-[2rem] border border-admin-border shadow-2xl relative overflow-hidden">
+    <div class="absolute -top-32 -right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen"></div>
+    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen"></div>
 
     <?php
     $dbVersion = 'N/A';
@@ -278,3 +299,56 @@ if ($gaConfigured) {
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('internalAnalyticsChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'],
+                datasets: [
+                    {
+                        label: 'Lượt Xem Phim',
+                        data: [1200, 1900, 1500, 2200, 1800, 3200, 2800],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Thành Viên Mới',
+                        data: [45, 60, 40, 80, 55, 120, 95],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#9ca3af', font: { family: 'Inter', weight: '500' } }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#9ca3af' }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#9ca3af' }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>

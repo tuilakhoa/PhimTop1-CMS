@@ -315,7 +315,7 @@ include __DIR__ . '/includes/sidebar.php';
 ?>
 
 <!-- Main Content -->
-<div class="flex-1 min-h-0 h-full overflow-y-auto bg-gray-950 p-8 custom-scrollbar relative">
+<div class="flex-1 min-h-0 h-full overflow-y-auto p-4 md:p-8 custom-scrollbar relative z-10">
     
     <?php if ($successMsg): ?>
         <div class="mb-6 bg-green-500/10 border border-green-500/50 text-green-500 p-4 rounded-lg flex items-center">
