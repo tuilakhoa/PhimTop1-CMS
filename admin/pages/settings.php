@@ -147,7 +147,10 @@
     <div id="tab-smtp" class="tab-content hidden animate-fade-in">
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-6">
             <h4 class="text-white font-semibold mb-2"><i data-lucide="info" class="w-4 h-4 inline mr-2 text-blue-400"></i>Lưu ý về SMTP</h4>
-            <p class="text-sm text-gray-300">Cấu hình này được sử dụng để gửi email lấy lại mật khẩu cho người dùng. Đề xuất sử dụng Gmail SMTP hoặc các dịch vụ như SendGrid, Mailgun.</p>
+            <p class="text-sm text-gray-300 mb-3">Cấu hình này được sử dụng để gửi email lấy lại mật khẩu cho người dùng. Đề xuất sử dụng Gmail SMTP hoặc các dịch vụ như SendGrid, Mailgun, Zoho.</p>
+            <div class="bg-yellow-500/10 border border-yellow-500/20 rounded p-3 text-sm text-yellow-200">
+                <i data-lucide="alert-triangle" class="w-4 h-4 inline mr-1 text-yellow-400"></i> <strong>Quan trọng:</strong> Tính năng này yêu cầu thư viện PHPMailer. Nếu bị báo lỗi "Chưa cài đặt PHPMailer", vui lòng chạy lệnh <code class="bg-black/30 px-1 rounded text-red-300">composer install</code> ở thư mục gốc, hoặc nén thư mục <code class="bg-black/30 px-1 rounded">vendor</code> từ máy tính up lên hosting.
+            </div>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
