@@ -19,6 +19,55 @@ if ($action === 'get_total') {
     exit;
 }
 
+if ($action === 'test_email') {
+    $testEmail = $input['test_email'] ?? '';
+    if (empty($testEmail)) {
+        echo json_encode(['error' => 'Vui lòng nhập email người nhận.']);
+        exit;
+    }
+
+    if (!file_exists(__DIR__ . '/../vendor/autoload.php')) {
+        echo json_encode(['error' => 'Chưa cài đặt PHPMailer. Vui lòng chạy composer install trong terminal.']);
+        exit;
+    }
+    require_once __DIR__ . '/../vendor/autoload.php';
+
+    $settings = getSettings();
+    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+    
+    try {
+        if (!empty($settings['smtpHost'])) {
+            $mail->isSMTP();
+            $mail->Host       = $settings['smtpHost'];
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $settings['smtpUser'];
+            $mail->Password   = $settings['smtpPass'];
+            $mail->SMTPSecure = ((int)$settings['smtpPort'] === 465) ? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = $settings['smtpPort'];
+        } else {
+            $mail->isMail();
+        }
+        $mail->CharSet = 'UTF-8';
+        $fromEmail = !empty($settings['smtpUser']) ? $settings['smtpUser'] : 'no-reply@' . $_SERVER['HTTP_HOST'];
+        
+        $mail->setFrom($fromEmail, $settings['siteName'] ?? 'PhimTop1');
+        $mail->addAddress($testEmail);
+        
+        $mail->isHTML(true);
+        $mail->Subject = "Email thử nghiệm từ PhimTop1-CMS";
+        $mail->Body = "Chào bạn,<br><br>Đây là email thử nghiệm để kiểm tra cấu hình SMTP của hệ thống PhimTop1-CMS.<br>Nếu bạn nhận được email này, nghĩa là tính năng gửi email đã hoạt động tốt.<br><br>Trân trọng,<br>Ban Quản Trị.";
+        
+        if ($mail->send()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['error' => 'Không thể gửi email.']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['error' => "Lỗi gửi mail: {$mail->ErrorInfo}"]);
+    }
+    exit;
+}
+
 if ($action === 'send_batch') {
     $page = (int)($input['page'] ?? 1);
     $limit = (int)($input['limit'] ?? 10);
@@ -135,7 +184,7 @@ if ($action === 'send_batch') {
             $mail->SMTPAuth   = true;
             $mail->Username   = $settings['smtpUser'];
             $mail->Password   = $settings['smtpPass'];
-            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->SMTPSecure = ((int)$settings['smtpPort'] === 465) ? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = $settings['smtpPort'];
         } else {
             $mail->isMail();

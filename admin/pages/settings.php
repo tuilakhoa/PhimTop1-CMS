@@ -171,6 +171,20 @@
                 <input type="password" name="smtpPass" value="<?= htmlspecialchars($settings['smtpPass'] ?? '') ?>" placeholder="Mật khẩu hoặc App Password" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
             </div>
         </div>
+
+        <div class="mt-6 border-t border-gray-700 pt-6">
+            <h4 class="text-white font-semibold mb-4">Gửi Email Thử Nghiệm</h4>
+            <div class="flex gap-4 items-end">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Người Nhận</label>
+                    <input type="email" id="testEmailInput" placeholder="vd: ban@gmail.com" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                </div>
+                <button type="button" onclick="testEmail()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-all shadow-lg shadow-blue-600/20 flex items-center h-[42px]">
+                    <i data-lucide="send" class="w-4 h-4 mr-2"></i> Thử Gửi
+                </button>
+            </div>
+            <p id="testEmailResult" class="text-sm mt-3 hidden"></p>
+        </div>
     </div>
     
 
@@ -324,6 +338,41 @@ service cloud.firestore {
             countWrapper.style.display = 'block';
         } else {
             countWrapper.style.display = 'none';
+        }
+    }
+
+    async function testEmail() {
+        const emailInput = document.getElementById('testEmailInput');
+        const resultEl = document.getElementById('testEmailResult');
+        const email = emailInput.value.trim();
+        
+        if (!email) {
+            resultEl.textContent = 'Vui lòng nhập email người nhận!';
+            resultEl.className = 'text-sm mt-3 text-red-500 block';
+            return;
+        }
+        
+        resultEl.textContent = 'Đang gửi email... Vui lòng đợi!';
+        resultEl.className = 'text-sm mt-3 text-yellow-500 block';
+        
+        try {
+            const res = await fetch('ajax_email.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: 'test_email', test_email: email})
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                resultEl.textContent = 'Đã gửi email thử nghiệm thành công! Hãy kiểm tra hộp thư của bạn.';
+                resultEl.className = 'text-sm mt-3 text-green-500 block';
+            } else {
+                resultEl.textContent = data.error || 'Lỗi không xác định.';
+                resultEl.className = 'text-sm mt-3 text-red-500 block';
+            }
+        } catch (e) {
+            resultEl.textContent = 'Lỗi kết nối: ' + e.message;
+            resultEl.className = 'text-sm mt-3 text-red-500 block';
         }
     }
 </script>

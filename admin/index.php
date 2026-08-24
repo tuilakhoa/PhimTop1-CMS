@@ -92,6 +92,12 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     if (isset($_POST['openaiApiKey'])) $updates['openaiApiKey'] = $_POST['openaiApiKey'];
     if (isset($_POST['aiProvider'])) $updates['aiProvider'] = $_POST['aiProvider'];
 
+    // SMTP Settings
+    if (isset($_POST['smtpHost'])) $updates['smtpHost'] = $_POST['smtpHost'];
+    if (isset($_POST['smtpPort'])) $updates['smtpPort'] = $_POST['smtpPort'];
+    if (isset($_POST['smtpUser'])) $updates['smtpUser'] = $_POST['smtpUser'];
+    if (isset($_POST['smtpPass'])) $updates['smtpPass'] = $_POST['smtpPass'];
+
     // Update Settings
     if (isset($_POST['allowAutoUpdate'])) $updates['allowAutoUpdate'] = (int)$_POST['allowAutoUpdate'];
     if (isset($_POST['enableContinueWatching'])) $updates['enableContinueWatching'] = (int)$_POST['enableContinueWatching'];
