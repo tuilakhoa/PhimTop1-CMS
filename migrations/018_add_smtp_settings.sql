@@ -1,0 +1,4 @@
+ALTER TABLE settings ADD COLUMN `smtpHost` TEXT;
+ALTER TABLE settings ADD COLUMN `smtpPort` VARCHAR(10) DEFAULT '587';
+ALTER TABLE settings ADD COLUMN `smtpUser` TEXT;
+ALTER TABLE settings ADD COLUMN `smtpPass` TEXT;
