@@ -29,7 +29,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
   String _statusMessage = '';
 
   Future<void> _startDownload() async {
-    if (!widget.downloadUrl.endsWith('.apk')) {
+    if (!widget.downloadUrl.endsWith('.apk') && !widget.downloadUrl.contains('.apk?')) {
       // If it's not a direct APK link (e.g. Play Store), just launch it
       final uri = Uri.parse(widget.downloadUrl);
       if (await canLaunchUrl(uri)) {
@@ -49,8 +49,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
       final dir = await getExternalStorageDirectory() ?? await getApplicationDocumentsDirectory();
       final filePath = '${dir.path}/update_v${widget.version}.apk';
 
+      // Bypass cache to ensure we get the latest APK
+      String actualUrl = widget.downloadUrl;
+      if (actualUrl.contains('?')) {
+        actualUrl += '&t=${DateTime.now().millisecondsSinceEpoch}';
+      } else {
+        actualUrl += '?t=${DateTime.now().millisecondsSinceEpoch}';
+      }
+
       await dio.download(
-        widget.downloadUrl,
+        actualUrl,
         filePath,
         onReceiveProgress: (received, total) {
           if (total != -1) {
@@ -67,21 +75,37 @@ class _UpdateDialogState extends State<UpdateDialog> {
       });
 
       final result = await OpenFilex.open(filePath);
-      if (result.type != ResultType.done) {
+      
+      if (mounted) {
         setState(() {
-          _statusMessage = 'Không thể tự động cài đặt. Vui lòng cập nhật thủ công.';
           _isDownloading = false;
         });
+      }
+
+      if (result.type != ResultType.done) {
+        if (mounted) {
+          setState(() {
+            _statusMessage = 'Không thể tự động cài đặt. Vui lòng cập nhật thủ công.';
+          });
+        }
       } else {
         if (!widget.forceUpdate) {
           if (mounted) Navigator.pop(context);
+        } else {
+          if (mounted) {
+            setState(() {
+              _statusMessage = 'Vui lòng hoàn tất cài đặt ứng dụng.';
+            });
+          }
         }
       }
     } catch (e) {
-      setState(() {
-        _statusMessage = 'Có lỗi xảy ra khi tải. Vui lòng thử lại sau.';
-        _isDownloading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _statusMessage = 'Có lỗi xảy ra khi tải. Vui lòng thử lại sau.';
+          _isDownloading = false;
+        });
+      }
     }
   }
 

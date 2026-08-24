@@ -20,6 +20,7 @@ class AppInitData {
   final bool maintenance;
   final int appBannerEnabled;
   final String appDownloadUrl;
+  final String appInAppUpdateUrl;
   final int enableComics;
   final bool? isComicPluginActive;
   final String version;
@@ -38,6 +39,7 @@ class AppInitData {
         maintenance = json['maintenance'] ?? false,
         appBannerEnabled = json['appBannerEnabled'] ?? 0,
         appDownloadUrl = json['appDownloadUrl'] ?? '',
+        appInAppUpdateUrl = json['appInAppUpdateUrl'] ?? json['appDownloadUrl'] ?? '',
         enableComics = json['enableComics'] ?? 0,
         isComicPluginActive = json['isComicPluginActive'],
         version = json['version'] ?? '',

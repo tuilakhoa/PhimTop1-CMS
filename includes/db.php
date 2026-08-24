@@ -153,6 +153,7 @@ function getSettings() {
         'appApiKey' => '',
         'appBannerEnabled' => 0,
         'appDownloadUrl' => '',
+        'appInAppUpdateUrl' => '',
         'appDownloadUrlTv' => '',
         'appSchemaEnabled' => 0,
         'appSchemaName' => '',
@@ -200,10 +201,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 14) {
+            if (!isset($row['db_version']) || $row['db_version'] < 17) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 14]);
-                $row['db_version'] = 14;
+                updateSettings(['db_version' => 17]);
+                $row['db_version'] = 17;
             }
             
             return array_merge($defaultSettings, $row);

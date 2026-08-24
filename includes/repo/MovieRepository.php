@@ -203,4 +203,52 @@ class MovieRepository {
             return [];
         }
     }
+
+    public function getAllCasts() {
+        $casts = [];
+        
+        if ($this->isFirestore()) {
+            $allMovies = $this->fs->getAllDocuments('movies');
+            foreach ($allMovies as $row) {
+                $this->extractCastsFromRow($row, $casts);
+            }
+        } else {
+            if (!$this->pdo) return [];
+            try {
+                $stmt = $this->pdo->query("SELECT actor, director FROM movies WHERE actor != '' OR director != ''");
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $this->extractCastsFromRow($row, $casts);
+                }
+            } catch (PDOException $e) {
+                // Ignore
+            }
+        }
+        
+        return array_values($casts);
+    }
+
+    private function extractCastsFromRow($row, &$casts) {
+        if (!empty($row['actor'])) {
+            $actors = array_map('trim', explode(',', $row['actor']));
+            foreach ($actors as $a) {
+                if ($a === '' || strtolower($a) === 'đang cập nhật') continue;
+                if (!isset($casts[$a])) {
+                    $casts[$a] = ['name' => $a, 'role' => 'Diễn Viên', 'count' => 0];
+                }
+                $casts[$a]['count']++;
+            }
+        }
+        if (!empty($row['director'])) {
+            $directors = array_map('trim', explode(',', $row['director']));
+            foreach ($directors as $d) {
+                if ($d === '' || strtolower($d) === 'đang cập nhật') continue;
+                if (!isset($casts[$d])) {
+                    $casts[$d] = ['name' => $d, 'role' => 'Đạo Diễn', 'count' => 0];
+                } else {
+                    $casts[$d]['role'] = 'Đạo/Diễn Viên';
+                }
+                $casts[$d]['count']++;
+            }
+        }
+    }
 }

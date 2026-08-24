@@ -28,6 +28,7 @@ echo json_encode([
         'maintenance' => false,
         'appBannerEnabled' => $settings['appBannerEnabled'] ?? 0,
         'appDownloadUrl' => $settings['appDownloadUrl'] ?? '',
+        'appInAppUpdateUrl' => !empty($settings['appInAppUpdateUrl']) ? $settings['appInAppUpdateUrl'] : ($settings['appDownloadUrl'] ?? ''),
         'appDownloadUrlTv' => $settings['appDownloadUrlTv'] ?? '',
         'enableComics' => (int)($settings['enableComics'] ?? 0),
         'isComicPluginActive' => in_array('comics', getActivePlugins()),

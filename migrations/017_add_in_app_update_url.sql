@@ -1,0 +1,1 @@
+ALTER TABLE settings ADD COLUMN appInAppUpdateUrl VARCHAR(255) DEFAULT '';

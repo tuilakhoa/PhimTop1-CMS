@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final int targetBuild = isIOS ? provider.appBuildNumberIos : provider.appBuildNumber;
     final String targetVersion = isIOS ? provider.appLatestVersionIos : provider.appLatestVersion;
     final bool forceUpdate = isIOS ? provider.appForceUpdateIos : provider.appForceUpdate;
-    final String downloadUrl = isIOS ? provider.appDownloadUrlIos : provider.appDownloadUrl;
+    final String downloadUrl = isIOS ? provider.appDownloadUrlIos : (provider.appInAppUpdateUrl.isNotEmpty ? provider.appInAppUpdateUrl : provider.appDownloadUrl);
 
     if (downloadUrl.isEmpty) return;
 

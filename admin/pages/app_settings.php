@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $appApiKey = trim($_POST['appApiKey'] ?? '');
     $appBannerEnabled = isset($_POST['appBannerEnabled']) ? 1 : 0;
     $appDownloadUrl = trim($_POST['appDownloadUrl'] ?? '');
+    $appInAppUpdateUrl = trim($_POST['appInAppUpdateUrl'] ?? '');
     $appDownloadUrlTv = trim($_POST['appDownloadUrlTv'] ?? '');
     
     $appSchemaEnabled = isset($_POST['appSchemaEnabled']) ? 1 : 0;
@@ -22,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'appApiKey' => $appApiKey,
         'appBannerEnabled' => $appBannerEnabled,
         'appDownloadUrl' => $appDownloadUrl,
+        'appInAppUpdateUrl' => $appInAppUpdateUrl,
         'appDownloadUrlTv' => $appDownloadUrlTv,
         'appSchemaEnabled' => $appSchemaEnabled,
         'appSchemaName' => $appSchemaName,
@@ -92,9 +94,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </div>
 
             <div class="border-t border-gray-800 pt-6">
-                <label class="block text-sm font-medium text-gray-300 mb-2">Link Tải App Mobile (APK / Play Store)</label>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Link Tải App Mobile (Trang Web / Play Store)</label>
                 <input type="text" name="appDownloadUrl" value="<?= htmlspecialchars($settings['appDownloadUrl'] ?? '') ?>" placeholder="https://..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
-                <p class="text-xs text-gray-500 mt-2">Đường dẫn tải ứng dụng Mobile. Nếu để trống, nút tải app trên web sẽ không hiển thị.</p>
+                <p class="text-xs text-gray-500 mt-2">Đường dẫn tải ứng dụng Mobile để hiển thị trên trình duyệt Web (Nút tải app). Nếu để trống, nút sẽ không hiển thị.</p>
+            </div>
+
+            <div class="border-t border-gray-800 pt-6">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Link Tải Cập Nhật (In-App Update APK)</label>
+                <input type="text" name="appInAppUpdateUrl" value="<?= htmlspecialchars($settings['appInAppUpdateUrl'] ?? '') ?>" placeholder="https://..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <p class="text-xs text-gray-500 mt-2">Đường dẫn file APK trực tiếp dùng cho tính năng tự động cập nhật bên trong App (In-App Updater). Nếu để trống sẽ sử dụng link tải App Mobile ở trên.</p>
             </div>
 
             <div class="border-t border-gray-800 pt-6">
@@ -149,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             </div>
                             <div class="ml-2 text-xs font-medium text-gray-300">Bắt buộc cập nhật Android</div>
                         </label>
-                        <p class="text-[11px] text-gray-500">Link tải Android sử dụng "Link Tải App Mobile" ở trên.</p>
+                        <p class="text-[11px] text-gray-500">Link tải Android sử dụng "Link Tải Cập Nhật (In-App Update)" ở trên.</p>
                     </div>
 
                     <!-- IOS SECTION -->

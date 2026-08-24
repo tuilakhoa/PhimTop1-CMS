@@ -29,6 +29,7 @@ class HomeProvider with ChangeNotifier {
 
   String appUpdateMessage = "";
   String appDownloadUrl = "";
+  String appInAppUpdateUrl = "";
 
   Future<void> fetchHomeData() async {
     isLoading = true;
@@ -50,6 +51,7 @@ class HomeProvider with ChangeNotifier {
 
         appUpdateMessage = initRes.data!.appUpdateMessage;
         appDownloadUrl = initRes.data!.appDownloadUrl;
+        appInAppUpdateUrl = initRes.data!.appInAppUpdateUrl;
       }
 
       final homeResponse = await cmsApi.getHome();

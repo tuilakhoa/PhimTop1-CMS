@@ -18,6 +18,7 @@
                         'feedbacks' => ['icon' => 'message-circle', 'title' => 'Quản Lý Phản Hồi'],
                     ],
                     'Công Cụ & Tiện Ích' => [
+                        'email_marketing' => ['icon' => 'mail', 'title' => 'Email Marketing'],
                         'notifications' => ['icon' => 'bell', 'title' => 'Push Notifications'],
                         'cast' => ['icon' => 'users', 'title' => 'Diễn Viên & Đạo Diễn'],
                         'crawl' => ['icon' => 'download-cloud', 'title' => 'Cào Dữ Liệu'],
