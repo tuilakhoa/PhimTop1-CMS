@@ -78,6 +78,12 @@ if ($displayMode === 'crawl') {
             <i data-lucide="x" class="w-4 h-4"></i> Xóa
         </a>
         <?php endif; ?>
+        
+        <?php if ($displayMode === 'crawl'): ?>
+        <button type="button" onclick="deleteAllMovies()" class="bg-red-900/50 hover:bg-red-800 text-red-200 font-bold py-3.5 px-6 rounded-xl transition-all border border-red-800/50 hover:border-red-600 flex items-center gap-2 transform hover:-translate-y-0.5 ml-auto shadow-[0_0_15px_rgba(220,38,38,0.2)] hover:shadow-[0_0_25px_rgba(220,38,38,0.4)]">
+            <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa Tất Cả Phim
+        </button>
+        <?php endif; ?>
     </form>
 </div>
 
@@ -217,6 +223,30 @@ if ($displayMode === 'crawl') {
 </div>
 
 <script>
+    async function deleteAllMovies() {
+        if (!confirm('CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ phim khỏi cơ sở dữ liệu? Hành động này không thể hoàn tác!')) {
+            return;
+        }
+        
+        try {
+            const res = await fetch('api/delete_all_movies.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                alert('Đã xóa tất cả phim thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể xóa tất cả phim'));
+            }
+        } catch (err) {
+            alert('Lỗi kết nối: ' + err.message);
+        }
+    }
+
     async function deleteMovie(slug) {
         if (!confirm('Bạn có chắc chắn muốn xóa phim này khỏi cơ sở dữ liệu? Phim sẽ không thể hiển thị trên web nữa.')) {
             return;

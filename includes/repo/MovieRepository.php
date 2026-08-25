@@ -143,6 +143,22 @@ class MovieRepository {
         }
     }
 
+    public function deleteAllMovies() {
+        if ($this->isFirestore()) {
+            $allMovies = $this->fs->getAllDocuments('movies');
+            foreach ($allMovies as $m) {
+                if (isset($m['slug'])) {
+                    $this->fs->deleteDocument('movies', $m['slug']);
+                }
+            }
+            return true;
+        } else {
+            if (!$this->pdo) return false;
+            $stmt = $this->pdo->prepare("DELETE FROM movies");
+            return $stmt->execute();
+        }
+    }
+
     public function getMovieBySlug($slug) {
         if ($this->isFirestore()) {
             return $this->fs->getDocument('movies', $slug);

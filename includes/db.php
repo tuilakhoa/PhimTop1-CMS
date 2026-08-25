@@ -76,6 +76,7 @@ function getSettings() {
         'id' => 1,
         'adminPath' => '/admin',
         'displayMode' => 'api',
+        'apiSource' => 'kkphim',
         'theme' => 'dark',
         'cmsVersion' => '1.0.2',
         'githubRepo' => 'kkphim/cms-core',
@@ -201,10 +202,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 18) {
+            if (!isset($row['db_version']) || $row['db_version'] < 19) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 18]);
-                $row['db_version'] = 18;
+                updateSettings(['db_version' => 19]);
+                $row['db_version'] = 19;
             }
             
             return array_merge($defaultSettings, $row);
