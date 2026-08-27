@@ -141,9 +141,9 @@ if ($seoOverride) {
 }
 
 $theme = $settings['theme'] ?? 'dark';
-$themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);
+$themeFile = __DIR__ . "/themes/{$theme}/movie.php";
 if (file_exists($themeFile)) {
     require $themeFile;
 } else {
-    require __DIR__ . "/themes/dark/" . basename(__FILE__);
+    require __DIR__ . "/themes/dark/movie.php";
 }

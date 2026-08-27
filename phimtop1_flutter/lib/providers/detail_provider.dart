@@ -16,6 +16,7 @@ class DetailProvider with ChangeNotifier {
   
   int currentEpisodeIndex = 0;
   int currentServerIndex = 0;
+  HistoryItem? historyMatch;
 
   Future<void> fetchDetail(String slug, {String? token}) async {
     isLoading = true;
@@ -42,6 +43,7 @@ class DetailProvider with ChangeNotifier {
                 (item) => item.movieSlug == slug,
                 orElse: () => HistoryItem.fromJson({}),
               );
+              historyMatch = match;
               if (match.id != 0 && match.episodeSlug.isNotEmpty) {
                 for (int s = 0; s < episodes.length; s++) {
                   final idx = episodes[s].serverData.indexWhere((ep) => ep.slug == match.episodeSlug);

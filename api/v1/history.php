@@ -144,7 +144,7 @@ if ($action === 'add') {
     }
     
     try {
-        $stmt = $pdo->prepare("SELECT id, thumb_url FROM watch_history WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
+        $stmt = $pdo->prepare("SELECT id, thumb_url, episode_slug, current_time, duration FROM watch_history WHERE user_email = ? AND movie_slug = ? AND profile_id = ?");
         $stmt->execute([$user['email'], $slug, $profileId]);
         $existing = $stmt->fetch();
         
@@ -152,6 +152,13 @@ if ($action === 'add') {
             if (empty($thumb) && !empty($existing['thumb_url'])) {
                 $thumb = $existing['thumb_url'];
             }
+            
+            // Preserve time if the app/web sends 0 (e.g. initial load) but it's the same episode
+            if ($existing['episode_slug'] === $episodeSlug && $currentTime == 0) {
+                $currentTime = (int)$existing['current_time'];
+                if ($duration == 0) $duration = (int)$existing['duration'];
+            }
+            
             $stmt = $pdo->prepare("UPDATE watch_history SET episode_name = ?, episode_slug = ?, thumb_url = ?, current_time = ?, duration = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
             $stmt->execute([$episodeName, $episodeSlug, $thumb, $currentTime, $duration, $existing['id']]);
         } else {

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/detail_provider.dart';
@@ -29,6 +33,12 @@ class MovieDetailScreen extends StatefulWidget {
 }
 
 class _MovieDetailScreenState extends State<MovieDetailScreen> {
+  bool _isPlayingInline = false;
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
+  Timer? _historySyncTimer;
+
+  bool _hasAutoPlayed = false;
   Color get _textColor => Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87;
   Color get _subtitleColor => Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54;
   Color get _iconColor => Theme.of(context).brightness == Brightness.dark ? Colors.white54 : Colors.black45;
@@ -52,6 +62,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
       provider.fetchDetail(widget.slug, token: token).then((_) {
         provider.fetchComments(widget.slug);
         provider.fetchReviews(widget.slug);
+        
       });
       if (token != null) {
         provider.checkFollow(token, widget.slug);
@@ -61,9 +72,97 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
   @override
   void dispose() {
+    _historySyncTimer?.cancel();
+    if (_videoController != null && _isPlayingInline) {
+      final token = context.read<AuthProvider>().token;
+      if (token != null) {
+        final provider = context.read<DetailProvider>();
+        final ep = provider.episodes[provider.currentServerIndex].serverData[provider.currentEpisodeIndex];
+        cmsApi.addHistory(
+          token,
+          provider.movie!.slug,
+          provider.movie!.name,
+          ep.name,
+          episodeSlug: ep.slug,
+          thumbUrl: provider.movie!.thumbUrl ?? '',
+          currentTime: _videoController!.value.position.inSeconds,
+          duration: _videoController!.value.duration.inSeconds,
+        );
+      }
+    }
+    _videoController?.dispose();
+    _chewieController?.dispose();
+
     _commentController.dispose();
     _episodeSearchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initInlinePlayer(String url, ServerData episode, DetailProvider provider) async {
+    _videoController?.dispose();
+    _chewieController?.dispose();
+    _videoController = VideoPlayerController.networkUrl(Uri.parse(url));
+    await _videoController!.initialize();
+    
+    Duration? startAt;
+    if (provider.historyMatch != null && provider.historyMatch!.episodeSlug == episode.slug) {
+      if (provider.historyMatch!.currentTime > 0) {
+        startAt = Duration(seconds: provider.historyMatch!.currentTime);
+        await _videoController!.seekTo(startAt);
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _chewieController = ChewieController(
+          videoPlayerController: _videoController!,
+          autoPlay: true,
+          looping: false,
+          startAt: startAt,
+          aspectRatio: _videoController!.value.aspectRatio,
+          allowPlaybackSpeedChanging: true,
+          materialProgressColors: ChewieProgressColors(
+            playedColor: Theme.of(context).primaryColor,
+            handleColor: Theme.of(context).primaryColor,
+            backgroundColor: Colors.white24,
+            bufferedColor: Colors.white38,
+          ),
+        );
+      });
+      
+      final token = context.read<AuthProvider>().token;
+      if (token != null) {
+        _historySyncTimer?.cancel();
+        _historySyncTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+          if (!mounted || _videoController == null || !_videoController!.value.isPlaying) return;
+          cmsApi.addHistory(
+            token, provider.movie!.slug, provider.movie!.name, episode.name,
+            episodeSlug: episode.slug, thumbUrl: provider.movie!.thumbUrl ?? '',
+            currentTime: _videoController!.value.position.inSeconds,
+            duration: _videoController!.value.duration.inSeconds,
+          );
+        });
+      }
+    }
+  }
+
+  Widget _buildInlinePlayer() {
+    if (_chewieController != null && _chewieController!.videoPlayerController.value.isInitialized) {
+      return Container(
+        color: Colors.black,
+        child: Chewie(controller: _chewieController!),
+      );
+    }
+    if (_videoController != null && _videoController!.value.hasError) {
+      return Container(
+        color: Colors.black,
+        child: const Center(child: Icon(Icons.error_outline, color: Colors.red, size: 48)),
+      );
+    }
+    return Container(
+      color: Colors.black,
+      child: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+    );
   }
 
   void _watchMovie(DetailProvider provider) {
@@ -91,29 +190,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
           }
 
           if (m3u8Link.isNotEmpty) {
-            final movie = provider.movie!;
-            final thumbUrl = movie.thumbUrl ?? movie.posterUrl ?? '';
-            MiniPlayerService().hideMiniPlayer();
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => WatchMovieScreen(
-                  m3u8Link: m3u8Link,
-                  title: provider.movie?.name ?? "",
-                  movieSlug: provider.movie?.slug ?? "",
-                  episodeName: episode.name,
-                  episodeSlug: episode.slug,
-                  thumbUrl: thumbUrl,
-                ),
-              ),
-            ).then((result) {
-              if (result == 'next_episode') {
-                if (provider.currentEpisodeIndex < provider.episodes[provider.currentServerIndex].serverData.length - 1) {
-                  provider.changeEpisode(provider.currentEpisodeIndex + 1, provider.currentServerIndex);
-                  _watchMovie(provider);
-                }
-              }
-            });
+            setState(() { _isPlayingInline = true; });
+            _initInlinePlayer(m3u8Link, episode, provider);
+          } else if (embedLink.isNotEmpty) {;
           } else if (embedLink.isNotEmpty) {
             Navigator.push(
               context,
@@ -352,6 +431,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                             itemBuilder: (context, i) {
                               final index = filteredEps[i].key;
                               final ep = filteredEps[i].value;
+                              
+                              double progress = 0;
+                              if (provider.historyMatch != null && provider.historyMatch!.episodeSlug == ep.slug && provider.historyMatch!.duration > 0) {
+                                progress = provider.historyMatch!.currentTime / provider.historyMatch!.duration;
+                                if (progress > 1.0) progress = 1.0;
+                              }
+                              
                               return Focus(
                                 child: Builder(
                                   builder: (context) {
@@ -364,7 +450,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                       child: AnimatedContainer(
                                         duration: const Duration(milliseconds: 200),
-                                        alignment: Alignment.center,
                                         decoration: BoxDecoration(
                                           color: hasFocus ? _textColor : _bgOpacity,
                                           borderRadius: BorderRadius.circular(8),
@@ -373,15 +458,37 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                             width: 2,
                                           ),
                                         ),
-                                        child: Text(
-                                          ep.name,
-                                          style: TextStyle(
-                                            color: hasFocus ? Colors.black : _textColor,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                        child: Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            Center(
+                                              child: Text(
+                                                ep.name,
+                                                style: TextStyle(
+                                                  color: hasFocus ? Colors.black : _textColor,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            if (progress > 0)
+                                              Positioned(
+                                                bottom: 0,
+                                                left: 0,
+                                                right: 0,
+                                                child: ClipRRect(
+                                                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(6), bottomRight: Radius.circular(6)),
+                                                  child: LinearProgressIndicator(
+                                                    value: progress,
+                                                    backgroundColor: Colors.transparent,
+                                                    color: Colors.orange,
+                                                    minHeight: 4,
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
                                         ),
                                       ),
                                     );
@@ -419,7 +526,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
           flexibleSpace: FlexibleSpaceBar(
-            background: Stack(
+            background: _isPlayingInline ? _buildInlinePlayer() : Stack(
               fit: StackFit.expand,
               children: [
                 if (imageUrl.isNotEmpty)

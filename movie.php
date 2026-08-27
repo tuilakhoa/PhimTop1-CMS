@@ -65,7 +65,59 @@ if ($seoOverride) {
     if (!empty($seoOverride['seo_keywords'])) $pageKeywords = $seoOverride['seo_keywords'];
 }
 
+
+// Auto-select episode for inline playing on the detail page
+$currentEp = null;
+$videoUrl = '';
+$isM3U8 = false;
+
+if (!empty($episodes[0]['server_data'])) {
+    $epToPlay = null;
+    $epParam = $_GET['ep'] ?? '';
+    
+    // Check if user requested a specific episode via ?ep= parameter
+    if ($epParam) {
+        foreach ($episodes[0]['server_data'] as $e) {
+            if ($e['slug'] === $epParam) {
+                $epToPlay = $e;
+                break;
+            }
+        }
+    }
+    
+    // Check watch history
+    if (!$epToPlay && isset($_SESSION['user']) && !empty($_SESSION['user']['email'])) {
+        $pdo = getPDO();
+        if ($pdo) {
+            try {
+                $profileId = isset($_SESSION['current_profile']) ? (int)$_SESSION['current_profile']['id'] : 0;
+                $stmt = $pdo->prepare("SELECT episode_slug FROM watch_history WHERE user_email = ? AND movie_slug = ? AND profile_id = ? LIMIT 1");
+                $stmt->execute([$_SESSION['user']['email'], $originalSlug, $profileId]);
+                $row = $stmt->fetch();
+                if ($row && !empty($row['episode_slug'])) {
+                    foreach ($episodes[0]['server_data'] as $e) {
+                        if ($e['slug'] === $row['episode_slug']) {
+                            $epToPlay = $e;
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception $ex) {}
+        }
+    }
+    
+    // Fallback to first episode
+    if (!$epToPlay) {
+        $epToPlay = $episodes[0]['server_data'][0];
+    }
+    
+    $currentEp = $epToPlay;
+    $videoUrl = $currentEp['link_m3u8'] ?? $currentEp['link_embed'] ?? '';
+    $isM3U8 = strpos($videoUrl, '.m3u8') !== false;
+}
+
 $theme = $settings['theme'] ?? 'dark';
+
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);
 if (file_exists($themeFile)) {
     require $themeFile;
