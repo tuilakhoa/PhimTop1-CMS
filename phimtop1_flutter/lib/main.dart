@@ -58,7 +58,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final hasAgreed = prefs.getBool('has_agreed_terms') ?? false;
   final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
-  final hasAppLock = prefs.getString('app_lock_pin') != null;
+  final hasAppLock = prefs.getString('app_lock_pin') != null || prefs.getBool('app_lock_biometric') == true;
 
   // Auto clear cache
   final autoClearDays = prefs.getInt('auto_clear_cache_days') ?? 0;

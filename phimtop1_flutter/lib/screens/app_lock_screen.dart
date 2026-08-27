@@ -15,10 +15,20 @@ class _AppLockScreenState extends State<AppLockScreen> {
   String? _error;
   bool _canCheckBiometrics = false;
 
+  bool _hasPin = false;
+
   @override
   void initState() {
     super.initState();
     _checkBiometrics();
+    _checkPin();
+  }
+
+  Future<void> _checkPin() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _hasPin = prefs.getString('app_lock_pin') != null;
+    });
   }
 
   Future<void> _checkBiometrics() async {
@@ -69,38 +79,43 @@ class _AppLockScreenState extends State<AppLockScreen> {
               const SizedBox(height: 24),
               const Text("Ứng dụng đã bị khóa", style: TextStyle(color: Colors.white, fontSize: 20)),
               if (_canCheckBiometrics)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0),
-                  child: Text("Nhấn vào biểu tượng vân tay để mở khóa", style: TextStyle(color: Colors.white54, fontSize: 14)),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: TextButton.icon(
+                    onPressed: _authenticateBiometric,
+                    icon: const Icon(Icons.fingerprint),
+                    label: const Text("Mở khóa bằng Sinh trắc học"),
+                  ),
                 ),
               const SizedBox(height: 24),
-              TextField(
-                controller: _controller,
-                obscureText: true,
-                keyboardType: TextInputType.number,
-                maxLength: 4,
-                autofocus: !_canCheckBiometrics,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 16),
-                decoration: InputDecoration(
-                  counterText: "",
-                  errorText: _error,
-                  enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
-                ),
-                onChanged: (val) async {
-                  if (val.length == 4) {
-                    final prefs = await SharedPreferences.getInstance();
-                    final pin = prefs.getString('app_lock_pin');
-                    if (val == pin) {
-                       if (context.mounted) context.go('/');
-                    } else {
-                       setState(() => _error = "Mã PIN không đúng");
-                       _controller.clear();
+              if (_hasPin)
+                TextField(
+                  controller: _controller,
+                  obscureText: true,
+                  keyboardType: TextInputType.number,
+                  maxLength: 4,
+                  autofocus: !_canCheckBiometrics,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 16),
+                  decoration: InputDecoration(
+                    counterText: "",
+                    errorText: _error,
+                    enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+                  ),
+                  onChanged: (val) async {
+                    if (val.length == 4) {
+                      final prefs = await SharedPreferences.getInstance();
+                      final pin = prefs.getString('app_lock_pin');
+                      if (val == pin) {
+                         if (context.mounted) context.go('/');
+                      } else {
+                         setState(() => _error = "Mã PIN không đúng");
+                         _controller.clear();
+                      }
                     }
-                  }
-                },
-              ),
+                  },
+                ),
             ],
           ),
         ),

@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
 import '../models/models.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
@@ -319,8 +320,8 @@ class _ShopScreenState extends State<ShopScreen> {
                                   radius: 42,
                                   backgroundColor: const Color(0xFF334155),
                                   backgroundImage: auth.currentProfile != null && auth.currentProfile!.avatarUrl.isNotEmpty
-                                      ? NetworkImage(auth.currentProfile!.avatarUrl)
-                                      : (user?.avatar != null && user!.avatar!.isNotEmpty ? NetworkImage(user.avatar!) : null),
+                                      ? CachedNetworkImageProvider(auth.currentProfile!.avatarUrl) as ImageProvider
+                                      : (user?.avatar != null && user!.avatar!.isNotEmpty ? CachedNetworkImageProvider(user.avatar!) : null),
                                   child: (auth.currentProfile == null || auth.currentProfile!.avatarUrl.isEmpty) && (user?.avatar == null || user!.avatar!.isEmpty)
                                       ? Text(
                                           auth.currentProfile?.profileName.isNotEmpty == true 
@@ -334,7 +335,7 @@ class _ShopScreenState extends State<ShopScreen> {
                               Positioned.fill(
                                 child: Transform.scale(
                                   scale: 1.18,
-                                  child: Image.network(frame.imageUrl, fit: BoxFit.cover),
+                                  child: CachedNetworkImage(imageUrl: frame.imageUrl, fit: BoxFit.cover, errorWidget: (c, u, e) => Icon(Icons.broken_image)),
                                 ),
                               ),
                             ],

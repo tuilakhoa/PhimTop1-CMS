@@ -16,6 +16,7 @@ import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:local_auth/local_auth.dart';
 import '../widgets/menu_row_tile.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -30,6 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _version = "Đang tải...";
   int _buildNumber = 0;
   bool _hasAppLock = false;
+  bool _bioAppLock = false;
   String _cacheSize = "Đang tính...";
   int _autoClearDays = 0;
 
@@ -87,6 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _version = info.version;
         _buildNumber = int.tryParse(info.buildNumber) ?? 0;
         _hasAppLock = prefs.getString('app_lock_pin') != null;
+        _bioAppLock = prefs.getBool('app_lock_biometric') ?? false;
         _autoClearDays = prefs.getInt('auto_clear_cache_days') ?? 0;
       });
     }
@@ -472,12 +475,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.lock_outline,
               iconColor: Colors.brown,
               textColor: textColor,
-              title: "Khóa ứng dụng",
-              subtitle: "Mã PIN, Vân tay, Khuôn mặt",
+              title: "Khóa ứng dụng bằng PIN",
+              subtitle: "Mã PIN 4 số",
               trailing: Switch(
                 value: _hasAppLock,
                 activeColor: Theme.of(context).primaryColor,
                 onChanged: (val) => _toggleAppLock(),
+              ),
+            ),
+            MenuRowTile(
+              icon: Icons.fingerprint,
+              iconColor: Colors.purple,
+              textColor: textColor,
+              title: "Khóa Sinh trắc học",
+              subtitle: "Vân tay / Khuôn mặt",
+              trailing: Switch(
+                value: _bioAppLock,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (val) async {
+                  if (val) {
+                    try {
+                      final auth = LocalAuthentication();
+                      final canCheck = await auth.canCheckBiometrics;
+                      final isDeviceSupported = await auth.isDeviceSupported();
+                      if (canCheck || isDeviceSupported) {
+                        final authenticated = await auth.authenticate(localizedReason: 'Xác thực để bật khóa sinh trắc học');
+                        if (authenticated) {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('app_lock_biometric', true);
+                          setState(() => _bioAppLock = true);
+                        }
+                      } else {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thiết bị không hỗ trợ Sinh trắc học')));
+                      }
+                    } catch (e) {
+                      // Ignore
+                    }
+                  } else {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('app_lock_biometric');
+                    setState(() => _bioAppLock = false);
+                  }
+                },
               ),
             ),
             MenuRowTile(
