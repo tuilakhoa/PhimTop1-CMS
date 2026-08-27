@@ -13,7 +13,6 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
             $sugDomain = $apiResult['domain'] ?? 'https://phimimg.com/';
         }
     }
-    }
 }
 
 // Fetch images gallery
@@ -28,7 +27,6 @@ if ($tmdbId && $tmdbApiKey) {
         $tmdbData = json_decode($tmdbRes, true);
         if (isset($tmdbData['backdrops'])) $movieImages['backdrops'] = $tmdbData['backdrops'];
         if (isset($tmdbData['posters'])) $movieImages['posters'] = $tmdbData['posters'];
-        if (isset($tmdbData['logos'])) $movieImages['logos'] = $tmdbData['logos'];
     }
 } else {
     $imgRes = fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images", 86400);
@@ -37,10 +35,8 @@ if ($tmdbId && $tmdbApiKey) {
         if (isset($imgData['data'])) {
             $movieImages['backdrops'] = $imgData['data']['backdrops'] ?? [];
             $movieImages['posters'] = $imgData['data']['posters'] ?? [];
-            $movieImages['logos'] = $imgData['data']['logos'] ?? [];
         }
     }
-}
 }
 
 // Extract TMDB info

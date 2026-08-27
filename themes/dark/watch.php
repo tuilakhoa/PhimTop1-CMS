@@ -14,7 +14,6 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
             $sugDomain = $apiResult['domain'] ?? 'https://phimimg.com/';
         }
     }
-    }
 }
 
 // Meta for movie
