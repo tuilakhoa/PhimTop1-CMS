@@ -1,4 +1,4 @@
-
+<?php
 function _parseApiFilms($data, $apiSource, $isKids, $type, $slug, $page) {
     $result = [
         'items' => [],
@@ -83,8 +83,6 @@ function _parseApiFilms($data, $apiSource, $isKids, $type, $slug, $page) {
     
     return $result;
 }
-
-<?php
 // API Fetch Helper
 require_once __DIR__ . '/cache_manager.php';
 
