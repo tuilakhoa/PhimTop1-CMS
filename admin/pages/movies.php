@@ -4,7 +4,6 @@
 try {
 $pdo = getPDO();
 $settings = getSettings();
-$displayMode = $settings['displayMode'] ?? 'api';
 
 
 $page = isset($_GET['p']) ? (int)$_GET['p'] : 1;
@@ -211,7 +210,7 @@ $movies = [];
     
 
     async function blockMovie(slug, name) {
-        if (!confirm(`Bạn có chắc chắn muốn GỠ BỎ và CHẶN phim "${name}"?\nPhim sẽ biến mất hoàn toàn trên web và app (dù ở chế độ API hay Crawl).`)) {
+        if (!confirm(`Bạn có chắc chắn muốn GỠ BỎ và CHẶN phim "${name}"?\nPhim sẽ biến mất hoàn toàn trên web và app (trên toàn hệ thống).`)) {
             return;
         }
         

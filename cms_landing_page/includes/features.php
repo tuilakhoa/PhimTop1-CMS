@@ -31,7 +31,7 @@
                         <i data-lucide="database"></i>
                     </div>
                     <h3 class="title-md">Quản Lý Phim Dễ Dàng</h3>
-                    <p style="color: var(--color-text-muted); font-size: 14px; line-height: 1.6;">Cơ chế Crawler tự động hoặc kết nối API nguồn phim. Hỗ trợ đầy đủ chức năng Thêm/Sửa/Xóa phim và phân loại theo danh mục.</p>
+                    <p style="color: var(--color-text-muted); font-size: 14px; line-height: 1.6;">Cơ chế API thông minh kết nối tự động với nguồn phim. Hỗ trợ đầy đủ chức năng Thêm/Sửa/Xóa phim và phân loại theo danh mục.</p>
                 </div>
 
                 <!-- Feature 4 -->

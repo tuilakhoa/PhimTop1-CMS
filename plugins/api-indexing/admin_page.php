@@ -95,7 +95,7 @@ if ($json) {
                     <i data-lucide="clock" class="w-5 h-5 mr-2 text-purple-500"></i> Tự Động Push (Cronjob)
                 </h3>
                 <p class="text-sm text-gray-400 mb-4 leading-relaxed">
-                    Hệ thống đã hỗ trợ Tự động Ping khi có phim mới bất kể bạn đang dùng cơ chế <strong>API</strong> hay <strong>Crawl</strong>. 
+                    Hệ thống đã hỗ trợ Tự động Ping khi có phim mới . 
                     Để kích hoạt, bạn hãy thêm dòng lệnh Cronjob sau vào hosting/VPS (chạy mỗi 15 hoặc 30 phút một lần):
                 </p>
                 <div class="bg-black rounded-lg border border-gray-800 p-4 font-mono text-sm text-green-400 overflow-x-auto">

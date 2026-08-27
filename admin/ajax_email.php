@@ -106,8 +106,7 @@ if ($action === 'send_batch') {
     $settings = getSettings();
     
     
-    if (true) {
-        require_once __DIR__ . '/../includes/api_client.php';
+    require_once __DIR__ . '/../includes/api_client.php';
         if ($movieSource === 'newest' || $movieSource === 'trending') {
             // API mode usually only supports "newest" via home endpoint
             $apiData = fetchApiFilms('home', '', 1);
@@ -135,20 +134,6 @@ if ($action === 'send_batch') {
                     $m['thumb_url'] = rtrim($domain, '/') . '/' . ltrim($thumb, '/');
                 }
             }
-        }
-    } else {
-        // Crawl Mode (DB)
-        if ($movieSource === 'newest') {
-            $stmt = $pdo->query("SELECT name, slug, thumb_url FROM movies ORDER BY updated_at DESC LIMIT 6");
-            $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } elseif ($movieSource === 'trending') {
-            $stmt = $pdo->query("SELECT name, slug, thumb_url FROM movies ORDER BY view DESC LIMIT 6");
-            $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } elseif ($movieSource === 'manual' && !empty($movieSlugs)) {
-            $inQuery = implode(',', array_fill(0, count($movieSlugs), '?'));
-            $stmt = $pdo->prepare("SELECT name, slug, thumb_url FROM movies WHERE slug IN ($inQuery)");
-            $stmt->execute($movieSlugs);
-            $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     }
 

@@ -186,7 +186,7 @@ foreach ($checkDirs as $label => $path) {
 // --- 4. PHP EXTENSIONS ---
 $requiredExts = [
     'pdo_mysql' => 'Kết nối CSDL MySQL',
-    'curl' => 'Gửi request mạng ngoài (Crawl phim, kết nối API)',
+    'curl' => 'Gửi request mạng ngoài (Kết nối API lấy dữ liệu phim)',
     'mbstring' => 'Xử lý chuỗi Unicode (Tiếng Việt)',
     'json' => 'Xử lý dữ liệu JSON',
     'gd' => 'Xử lý hình ảnh (Tạo Favicon, crop ảnh)',

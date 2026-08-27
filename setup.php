@@ -69,17 +69,6 @@ if ($isPost) {
                     type VARCHAR(50) NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )");
-                $pdo->exec("CREATE TABLE IF NOT EXISTS movie_category (
-                    movie_slug VARCHAR(255),
-                    category_slug VARCHAR(255),
-                    PRIMARY KEY (movie_slug, category_slug)
-                )");
-                $pdo->exec("CREATE TABLE IF NOT EXISTS episodes (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    movie_slug VARCHAR(255), server_name VARCHAR(100), name VARCHAR(100), slug VARCHAR(255), filename VARCHAR(255),
-                    embed_url TEXT, m3u8_url TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    INDEX idx_movie_slug (movie_slug)
-                )");
                 $pdo->exec("CREATE TABLE IF NOT EXISTS playlists (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     user_email VARCHAR(255) NOT NULL,
