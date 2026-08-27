@@ -40,10 +40,10 @@ if ($action === 'test_email') {
             $mail->isSMTP();
             $mail->Host       = $settings['smtpHost'];
             $mail->SMTPAuth   = true;
-            $mail->Username   = $settings['smtpUser'];
-            $mail->Password   = $settings['smtpPass'];
-            $mail->SMTPSecure = ((int)$settings['smtpPort'] === 465) ? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = $settings['smtpPort'];
+            $mail->Username   = $settings['smtpUser'] ?? '';
+            $mail->Password   = $settings['smtpPass'] ?? '';
+            $mail->SMTPSecure = (((int)($settings['smtpPort'] ?? 587)) === 465) ? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = $settings['smtpPort'] ?? 587;
         } else {
             $mail->isMail();
         }
@@ -127,7 +127,8 @@ if ($action === 'send_batch') {
         
         // Normalize URLs for API mode
         if (!empty($movies)) {
-            $domain = $settings['apiSource'] === 'nguonc' ? '' : 'https://phimimg.com/';
+            $apiSource = $settings['apiSource'] ?? 'kkphim';
+            $domain = $apiSource === 'nguonc' ? '' : 'https://phimimg.com/';
             foreach ($movies as &$m) {
                 $thumb = $m['thumb_url'] ?? $m['poster_url'] ?? '';
                 if (!preg_match('/^http/', $thumb) && $thumb) {
@@ -182,10 +183,10 @@ if ($action === 'send_batch') {
             $mail->isSMTP();
             $mail->Host       = $settings['smtpHost'];
             $mail->SMTPAuth   = true;
-            $mail->Username   = $settings['smtpUser'];
-            $mail->Password   = $settings['smtpPass'];
-            $mail->SMTPSecure = ((int)$settings['smtpPort'] === 465) ? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = $settings['smtpPort'];
+            $mail->Username   = $settings['smtpUser'] ?? '';
+            $mail->Password   = $settings['smtpPass'] ?? '';
+            $mail->SMTPSecure = (((int)($settings['smtpPort'] ?? 587)) === 465) ? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = $settings['smtpPort'] ?? 587;
         } else {
             $mail->isMail();
         }

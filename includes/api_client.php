@@ -57,7 +57,7 @@ function isKidsModeActive() {
     return false;
 }
 
-function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = '', $country = '', $year = '') {
+function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = '', $country = '', $year = '', $sort = '') {
     $settings = getSettings();
     $apiSource = $settings['apiSource'] ?? 'kkphim';
     
@@ -71,6 +71,13 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
     if (!empty($category)) $queryParams[] = "category=" . urlencode($category);
     if (!empty($country)) $queryParams[] = "country=" . urlencode($country);
     if (!empty($year)) $queryParams[] = "year=" . urlencode($year);
+    if (!empty($sort)) {
+        $sortParts = explode('-', $sort);
+        if (count($sortParts) == 2) {
+            $queryParams[] = "sort_field=" . urlencode($sortParts[0]);
+            $queryParams[] = "sort_type=" . urlencode($sortParts[1]);
+        }
+    }
     
     $queryString = !empty($queryParams) ? '&' . implode('&', $queryParams) : '';
     
@@ -94,6 +101,7 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
         else if ($type === 'nam-phat-hanh') $url = "https://phimapi.com/v1/api/nam/$slug?page=$page$queryString";
         else $url = "https://phimapi.com/v1/api/danh-sach/" . ($slug ?: 'phim-le') . "?page=$page$queryString";
     }
+    
     
     $res = fetchApiWithCache($url, 900); // 15 mins cache for list
     if (!$res) return null;

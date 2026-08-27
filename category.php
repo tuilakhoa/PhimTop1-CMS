@@ -47,7 +47,12 @@ if (($settings['displayMode'] ?? 'api') === 'crawl') {
     $apiSlug = $originalSlug ?: $originalType;
     if (!$apiSlug) $apiSlug = 'phim-le';
     
-    $apiResult = fetchApiFilms($apiType, $apiSlug, $page);
+    $filterCategory = $_GET['category'] ?? '';
+    $filterCountry = $_GET['country'] ?? '';
+    $filterYear = $_GET['year'] ?? '';
+    $filterSort = $_GET['sort'] ?? '';
+    
+    $apiResult = fetchApiFilms($apiType, $apiSlug, $page, '', $filterCategory, $filterCountry, $filterYear, $filterSort);
     
     if ($apiResult) {
         if (!empty($apiResult['titlePage'])) {

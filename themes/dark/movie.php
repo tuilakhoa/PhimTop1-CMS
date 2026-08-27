@@ -111,7 +111,7 @@ if (!empty($_GET['party'])) {
                 <!-- "Player" Area (Banner) -->
                 <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden mb-6 group">
                     <img src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '')) ?>" 
-                         alt="Poster" decoding="async" class="w-full h-full object-cover opacity-60">
+                         alt="Poster" fetchpriority="high" decoding="async" class="w-full h-full object-cover opacity-60">
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                         <?php if ($first_ep_link !== '#'): ?>
                         <a href="<?= $first_ep_link ?>" class="w-16 h-16 md:w-20 md:h-20 bg-black/70 rounded-full flex items-center justify-center text-white hover:bg-[#ff8f00] hover:scale-110 transition-transform duration-300">
