@@ -32,15 +32,20 @@ class ExploreProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final homeResponse = await cmsApi.getHome();
-      if (homeResponse.data != null) {
-        trendingMovies = homeResponse.data!.items.take(12).toList();
+      final results = await Future.wait([
+        cmsApi.getHome(),
+        cmsApi.getCategories(),
+      ]);
+
+      final homeResponse = results[0] as ApiResponse<HomeData>?;
+      if (homeResponse?.data != null) {
+        trendingMovies = homeResponse!.data!.items.take(12).toList();
         domain = homeResponse.data!.domain;
       }
       
-      final catResponse = await cmsApi.getCategories();
-      if (catResponse.data != null) {
-        allCategories = catResponse.data!.items;
+      final catResponse = results[1] as ApiResponse<CategoriesData>?;
+      if (catResponse?.data != null) {
+        allCategories = catResponse!.data!.items;
       }
     } catch (e) {
       // ignore

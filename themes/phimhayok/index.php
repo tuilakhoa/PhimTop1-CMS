@@ -11,15 +11,28 @@ $featuredCount = max(1, (int)($settings['featuredCount'] ?? 5));
 
 if ($featuredType === 'admin') {
     $slugs = explode(',', $settings['featuredMovieSlug'] ?? '');
+    $validSlugs = [];
     foreach ($slugs as $s) {
         $s = trim($s);
-        if (!$s) continue;
-        if (($settings['displayMode'] ?? 'api') === 'crawl') {
+        if ($s) $validSlugs[] = $s;
+    }
+    
+    if (($settings['displayMode'] ?? 'api') === 'crawl') {
+        foreach ($validSlugs as $s) {
             $m = getMovieRepository()->getMovieBySlug($s);
             if ($m) $featuredMovies[] = $m;
+        }
+    } else {
+        if (function_exists('fetchApiMovieDetailMulti')) {
+            $results = fetchApiMovieDetailMulti($validSlugs);
+            foreach ($results as $res) {
+                if ($res && $res['movie']) $featuredMovies[] = $res['movie'];
+            }
         } else {
-            $res = fetchApiMovieDetail($s);
-            if ($res && $res['movie']) $featuredMovies[] = $res['movie'];
+            foreach ($validSlugs as $s) {
+                $res = fetchApiMovieDetail($s);
+                if ($res && $res['movie']) $featuredMovies[] = $res['movie'];
+            }
         }
     }
 } elseif ($featuredType === 'view') {
@@ -41,21 +54,36 @@ if (empty($featuredMovies) && !empty($movies)) {
 }
 
 // Fetch additional lists for Homepage
+$multiRequests = [
+    ['type' => 'danh-sach', 'slug' => 'phim-le', 'page' => 1],
+    ['type' => 'danh-sach', 'slug' => 'phim-bo', 'page' => 1],
+    ['type' => 'danh-sach', 'slug' => 'hoat-hinh', 'page' => 1]
+];
+
+$multiResults = [];
+if (function_exists('fetchApiFilmsMulti')) {
+    $multiResults = fetchApiFilmsMulti($multiRequests);
+} else {
+    foreach ($multiRequests as $req) {
+        $multiResults[] = fetchApiFilms($req['type'], $req['slug'], $req['page']);
+    }
+}
+
 $homeSliders = [
     [
         'title' => 'Phim Lẻ Mới',
         'url' => '/' . ($settings["slugList"] ?? "danh-sach") . '/phim-le',
-        'data' => fetchApiFilms('danh-sach', 'phim-le', 1)['items'] ?? []
+        'data' => $multiResults[0]['items'] ?? []
     ],
     [
         'title' => 'Phim Bộ Mới',
         'url' => '/' . ($settings["slugList"] ?? "danh-sach") . '/phim-bo',
-        'data' => fetchApiFilms('danh-sach', 'phim-bo', 1)['items'] ?? []
+        'data' => $multiResults[1]['items'] ?? []
     ],
     [
         'title' => 'Hoạt Hình',
         'url' => '/' . ($settings["slugList"] ?? "danh-sach") . '/hoat-hinh',
-        'data' => fetchApiFilms('danh-sach', 'hoat-hinh', 1)['items'] ?? []
+        'data' => $multiResults[2]['items'] ?? []
     ]
 ];
 ?>

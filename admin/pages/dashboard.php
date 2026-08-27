@@ -3,9 +3,21 @@ $movieCount = 0;
 $totalViews = 0;
 $pdo = getPDO();
 if ($pdo) {
-    $stmt = $pdo->query("SELECT COUNT(*) FROM movies");
-    if ($stmt) {
-        $movieCount = $stmt->fetchColumn();
+    if (($settings['displayMode'] ?? 'api') === 'api') {
+        // Lấy tổng phim từ API
+        require_once __DIR__ . '/../../includes/api_client.php';
+        $apiHome = fetchApiFilms('danh-sach', 'phim-moi-cap-nhat');
+        if ($apiHome && isset($apiHome['pagination']['totalItems'])) {
+            $movieCount = (int)$apiHome['pagination']['totalItems'];
+        } else {
+            // PhimAPI usually stores total items here
+            $movieCount = '50,000+ (API)'; 
+        }
+    } else {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM movies");
+        if ($stmt) {
+            $movieCount = $stmt->fetchColumn();
+        }
     }
     
     $stmt2 = $pdo->query("SELECT SUM(view) FROM movies");
@@ -13,6 +25,7 @@ if ($pdo) {
         $totalViews = (int)$stmt2->fetchColumn();
     }
 }
+
 
 $cfApiToken = $settings['cfApiToken'] ?? '';
 $cfAccountId = $settings['cfAccountId'] ?? '';
@@ -125,7 +138,7 @@ if ($gaConfigured) {
         <div class="flex justify-between items-start relative z-10">
             <div>
                 <p class="text-gray-400 mb-1 text-sm font-medium tracking-wide">Tổng Số Phim</p>
-                <h3 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-200"><?= number_format($movieCount) ?></h3>
+                <h3 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-200"><?= is_numeric($movieCount) ? number_format($movieCount) : htmlspecialchars($movieCount) ?></h3>
             </div>
             <div class="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-emerald-600/5 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] group-hover:scale-110 transition-transform duration-300"><i data-lucide="film" class="w-6 h-6"></i></div>
         </div>
