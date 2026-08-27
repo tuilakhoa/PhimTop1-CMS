@@ -25,28 +25,15 @@ $featuredCount = max(1, (int)($settings['featuredCount'] ?? 5));
 
 if ($featuredType === 'admin') {
     $slugs = explode(',', $settings['featuredMovieSlug'] ?? '');
-    $validSlugs = [];
     foreach ($slugs as $s) {
         $s = trim($s);
-        if ($s) $validSlugs[] = $s;
-    }
-    
-    if (($settings['displayMode'] ?? 'api') === 'crawl') {
-        foreach ($validSlugs as $s) {
+        if (!$s) continue;
+        if (($settings['displayMode'] ?? 'api') === 'crawl') {
             $m = getMovieRepository()->getMovieBySlug($s);
             if ($m) $featuredMovies[] = $m;
-        }
-    } else {
-        if (function_exists('fetchApiMovieDetailMulti')) {
-            $results = fetchApiMovieDetailMulti($validSlugs);
-            foreach ($results as $res) {
-                if ($res && $res['movie']) $featuredMovies[] = $res['movie'];
-            }
         } else {
-            foreach ($validSlugs as $s) {
-                $res = fetchApiMovieDetail($s);
-                if ($res && $res['movie']) $featuredMovies[] = $res['movie'];
-            }
+            $res = fetchApiMovieDetail($s);
+            if ($res && $res['movie']) $featuredMovies[] = $res['movie'];
         }
     }
 } elseif ($featuredType === 'view') {

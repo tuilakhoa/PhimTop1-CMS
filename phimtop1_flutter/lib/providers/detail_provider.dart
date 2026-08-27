@@ -36,7 +36,26 @@ class DetailProvider with ChangeNotifier {
         currentServerIndex = 0;
 
         if (token != null) {
-          _fetchHistoryBackground(token, slug);
+          try {
+            final historyRes = await cmsApi.getHistory(token);
+            if (historyRes.data != null) {
+              final match = historyRes.data!.firstWhere(
+                (item) => item.movieSlug == slug,
+                orElse: () => HistoryItem.fromJson({}),
+              );
+              historyMatch = match;
+              if (match.id != 0 && match.episodeSlug.isNotEmpty) {
+                for (int s = 0; s < episodes.length; s++) {
+                  final idx = episodes[s].serverData.indexWhere((ep) => ep.slug == match.episodeSlug);
+                  if (idx != -1) {
+                    currentServerIndex = s;
+                    currentEpisodeIndex = idx;
+                    break;
+                  }
+                }
+              }
+            }
+          } catch (_) {}
         }
       } else {
         error = "Không tìm thấy phim";
@@ -45,38 +64,14 @@ class DetailProvider with ChangeNotifier {
       if (e.response?.statusCode == 404) {
         error = "Nội dung này không tồn tại hoặc đã bị gỡ bỏ.";
       } else {
-        error = "Lỗi kết nối: ${e.message}";
+        error = "Lỗi kết nối: \${e.message}";
       }
     } catch (e) {
-      error = "Đã xảy ra lỗi: ${e.toString()}";
+      error = "Đã xảy ra lỗi: \${e.toString()}";
     } finally {
       isLoading = false;
       notifyListeners();
     }
-  }
-
-  Future<void> _fetchHistoryBackground(String token, String slug) async {
-    try {
-      final historyRes = await cmsApi.getHistory(token);
-      if (historyRes.data != null) {
-        final match = historyRes.data!.firstWhere(
-          (item) => item.movieSlug == slug,
-          orElse: () => HistoryItem.fromJson({}),
-        );
-        historyMatch = match;
-        if (match.id != 0 && match.episodeSlug.isNotEmpty) {
-          for (int s = 0; s < episodes.length; s++) {
-            final idx = episodes[s].serverData.indexWhere((ep) => ep.slug == match.episodeSlug);
-            if (idx != -1) {
-              currentServerIndex = s;
-              currentEpisodeIndex = idx;
-              notifyListeners();
-              break;
-            }
-          }
-        }
-      }
-    } catch (_) {}
   }
 
   bool isFollowing = false;

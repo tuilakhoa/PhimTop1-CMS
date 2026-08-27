@@ -37,23 +37,9 @@ class HomeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
-
-      final results = await Future.wait([
-        cmsApi.getAppInit(),
-        cmsApi.getHome(),
-        cmsApi.fetchTrending(),
-        cmsApi.getCategory("danh-sach", "phim-bo"),
-        cmsApi.getCategory("danh-sach", "phim-le"),
-        cmsApi.getCategory("danh-sach", "hoat-hinh"),
-        cmsApi.getCategory("danh-sach", "tv-shows"),
-        cmsApi.getRecommendations(token: token).catchError((_) => null),
-      ]);
-
-      final initRes = results[0] as ApiResponse<AppInitData>?;
-      if (initRes?.data != null) {
-        logoUrl = initRes!.data!.logoUrl;
+      final initRes = await cmsApi.getAppInit();
+      if (initRes.data != null) {
+        logoUrl = initRes.data!.logoUrl;
         appLatestVersion = initRes.data!.appLatestVersion;
         appBuildNumber = initRes.data!.appBuildNumber;
         appForceUpdate = initRes.data!.appForceUpdate;
@@ -68,30 +54,36 @@ class HomeProvider with ChangeNotifier {
         appInAppUpdateUrl = initRes.data!.appInAppUpdateUrl;
       }
 
-      final homeResponse = results[1] as ApiResponse<HomeData>?;
-      if (homeResponse?.data != null) {
-        featuredMovies = homeResponse!.data!.featuredMovies ?? [];
+      final homeResponse = await cmsApi.getHome();
+      if (homeResponse.data != null) {
+        featuredMovies = homeResponse.data!.featuredMovies ?? [];
         normalMovies = homeResponse.data!.items;
         domain = homeResponse.data!.domain;
       }
       
-      final trendingRes = results[2] as ApiResponse<HomeData>?;
-      if (trendingRes?.data != null) trendingMovies = trendingRes!.data!.items.take(12).toList();
+      final trendingRes = await cmsApi.fetchTrending();
+      if (trendingRes.data != null) trendingMovies = trendingRes.data!.items.take(12).toList();
       
-      final phimBoRes = results[3] as ApiResponse<HomeData>?;
-      if (phimBoRes?.data != null) phimBo = phimBoRes!.data!.items.take(12).toList();
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('auth_token');
+        final recommendRes = await cmsApi.getRecommendations(token: token);
+        if (recommendRes.data != null) recommendedMovies = recommendRes.data!.items.take(12).toList();
+      } catch (e) {
+        // Ignore recommend errors
+      }
       
-      final phimLeRes = results[4] as ApiResponse<HomeData>?;
-      if (phimLeRes?.data != null) phimLe = phimLeRes!.data!.items.take(12).toList();
+      final phimBoRes = await cmsApi.getCategory("danh-sach", "phim-bo");
+      if (phimBoRes.data != null) phimBo = phimBoRes.data!.items.take(12).toList();
       
-      final hoatHinhRes = results[5] as ApiResponse<HomeData>?;
-      if (hoatHinhRes?.data != null) hoatHinh = hoatHinhRes!.data!.items.take(12).toList();
+      final phimLeRes = await cmsApi.getCategory("danh-sach", "phim-le");
+      if (phimLeRes.data != null) phimLe = phimLeRes.data!.items.take(12).toList();
       
-      final tvShowsRes = results[6] as ApiResponse<HomeData>?;
-      if (tvShowsRes?.data != null) tvShows = tvShowsRes!.data!.items.take(12).toList();
-
-      final recommendRes = results[7] as ApiResponse<HomeData>?;
-      if (recommendRes?.data != null) recommendedMovies = recommendRes!.data!.items.take(12).toList();
+      final hoatHinhRes = await cmsApi.getCategory("danh-sach", "hoat-hinh");
+      if (hoatHinhRes.data != null) hoatHinh = hoatHinhRes.data!.items.take(12).toList();
+      
+      final tvShowsRes = await cmsApi.getCategory("danh-sach", "tv-shows");
+      if (tvShowsRes.data != null) tvShows = tvShowsRes.data!.items.take(12).toList();
 
     } catch (e) {
       error = e.toString();

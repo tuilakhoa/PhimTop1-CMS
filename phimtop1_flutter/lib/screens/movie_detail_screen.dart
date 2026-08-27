@@ -59,11 +59,11 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<DetailProvider>();
       final token = context.read<AuthProvider>().token;
-      
-      provider.fetchDetail(widget.slug, token: token);
-      provider.fetchComments(widget.slug);
-      provider.fetchReviews(widget.slug);
-      
+      provider.fetchDetail(widget.slug, token: token).then((_) {
+        provider.fetchComments(widget.slug);
+        provider.fetchReviews(widget.slug);
+        
+      });
       if (token != null) {
         provider.checkFollow(token, widget.slug);
       }
