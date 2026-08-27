@@ -88,6 +88,33 @@ class MovieRepository {
                     'totalPages' => ceil($total / $limit)
                 ];
             } catch (PDOException $e) {
+                // Tự động fix lỗi nếu table blocked_movies bị thiếu do lỗi migration
+                if (strpos($e->getMessage(), 'blocked_movies') !== false || $e->getCode() == '42S02') {
+                    try {
+                        $this->pdo->exec("CREATE TABLE IF NOT EXISTS blocked_movies (
+                            slug VARCHAR(255) PRIMARY KEY,
+                            name VARCHAR(255) NOT NULL,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+                        
+                        $stmtTotal = $this->pdo->prepare("SELECT COUNT(*) FROM movies WHERE $where");
+                        $stmtTotal->execute($params);
+                        $total = $stmtTotal->fetchColumn();
+                        
+                        $stmt = $this->pdo->prepare("SELECT * FROM movies WHERE $where ORDER BY updated_at DESC LIMIT $limit OFFSET $offset");
+                        $stmt->execute($params);
+                        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        
+                        return [
+                            'total' => $total,
+                            'items' => $items,
+                            'totalPages' => ceil($total / $limit)
+                        ];
+                    } catch (PDOException $ex) {
+                        error_log("Database error in getMovies after table creation: " . $ex->getMessage());
+                    }
+                }
+                
                 error_log("Database error in getMovies: " . $e->getMessage());
                 return [
                     'total' => 0,

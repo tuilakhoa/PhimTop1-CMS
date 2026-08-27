@@ -50,24 +50,27 @@ $tempZipFile = sys_get_temp_dir() . '/phimtop1_update_' . md5(time()) . '.zip';
 
 addLog("Đang tải xuống mã nguồn từ Github...");
 
+$fp = @fopen($tempZipFile, 'w+');
+if ($fp === false) {
+    echo json_encode(['status' => 'error', 'message' => 'Không thể tạo file cập nhật tạm thời.', 'logs' => $logs]);
+    exit;
+}
+
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $zipUrl);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FILE, $fp);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 curl_setopt($ch, CURLOPT_USERAGENT, 'PhimTop1-CMS-Updater');
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-$zipData = curl_exec($ch);
+$success = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
+fclose($fp);
 
-if ($zipData === false || $httpCode !== 200) {
+if ($success === false || $httpCode !== 200) {
+    @unlink($tempZipFile);
     echo json_encode(['status' => 'error', 'message' => "Không thể tải file cập nhật. (HTTP $httpCode)", 'logs' => $logs]);
-    exit;
-}
-
-if (@file_put_contents($tempZipFile, $zipData) === false) {
-    echo json_encode(['status' => 'error', 'message' => 'Không thể ghi file cập nhật tạm thời.', 'logs' => $logs]);
     exit;
 }
 

@@ -3,11 +3,31 @@
 
 <?php
 $movies = [];
-$pdo = getPDO();
-if ($pdo) {
-    // Fetch latest 50 movies to manually ping
-    $stmt = $pdo->query("SELECT id, name, slug, updated_at FROM movies ORDER BY updated_at DESC LIMIT 50");
-    $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$displayMode = $settings['displayMode'] ?? 'api';
+
+if ($displayMode === 'api') {
+    // Lấy phim từ API
+    $apiUrl = "https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1";
+    $json = @file_get_contents($apiUrl);
+    if ($json) {
+        $data = json_decode($json, true);
+        if (isset($data['items'])) {
+            foreach ($data['items'] as $item) {
+                $movies[] = [
+                    'name' => $item['name'] ?? $item['title'] ?? '',
+                    'slug' => $item['slug'] ?? '',
+                    'updated_at' => $item['modified']['time'] ?? $item['updated_at'] ?? date('Y-m-d H:i:s')
+                ];
+            }
+        }
+    }
+} else {
+    // Lấy phim từ DB cục bộ (Crawl)
+    $pdo = getPDO();
+    if ($pdo) {
+        $stmt = $pdo->query("SELECT id, name, slug, updated_at FROM movies ORDER BY updated_at DESC LIMIT 50");
+        $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>
 
@@ -80,7 +100,25 @@ if ($pdo) {
             <div class="bg-black rounded-lg border border-gray-800 p-4 relative">
                 <span class="absolute top-0 right-0 bg-gray-800 text-[10px] text-gray-400 px-2 py-1 rounded-bl-lg font-mono">Console Output</span>
                 <iframe name="pingIframe" class="w-full h-32 bg-transparent text-gray-300 font-mono text-xs outline-none" srcdoc='<body style="color:#aaa;font-family:monospace;font-size:12px;margin:0">Chờ lệnh Ping...</body>'></iframe>
+            <!-- Cronjob Auto Push -->
+            <div class="mt-8 bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-white mb-4 border-b border-gray-800 pb-2 flex items-center">
+                    <i data-lucide="clock" class="w-5 h-5 mr-2 text-purple-500"></i> Tự Động Push (Cronjob)
+                </h3>
+                <p class="text-sm text-gray-400 mb-4 leading-relaxed">
+                    Hệ thống đã hỗ trợ Tự động Ping khi có phim mới bất kể bạn đang dùng cơ chế <strong>API</strong> hay <strong>Crawl</strong>. 
+                    Để kích hoạt, bạn hãy thêm dòng lệnh Cronjob sau vào hosting/VPS (chạy mỗi 15 hoặc 30 phút một lần):
+                </p>
+                <div class="bg-black rounded-lg border border-gray-800 p-4 font-mono text-sm text-green-400 overflow-x-auto">
+                    <?php
+                    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+                    $cronUrl = $protocol . "://" . $_SERVER['HTTP_HOST'] . "/plugins/api-indexing/cron.php";
+                    ?>
+                    wget -qO- <?= htmlspecialchars($cronUrl) ?> &gt; /dev/null 2&gt;&amp;1
+                </div>
+                <p class="text-xs text-gray-500 mt-3">Cronjob sẽ kiểm tra danh sách phim mới nhất và tự động Push những URL chưa từng được Push.</p>
             </div>
+            
         </div>
     </div>
 </div>
