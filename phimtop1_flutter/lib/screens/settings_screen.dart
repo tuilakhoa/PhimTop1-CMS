@@ -473,6 +473,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               iconColor: Colors.brown,
               textColor: textColor,
               title: "Khóa ứng dụng",
+              subtitle: "Mã PIN, Vân tay, Khuôn mặt",
               trailing: Switch(
                 value: _hasAppLock,
                 activeColor: Theme.of(context).primaryColor,

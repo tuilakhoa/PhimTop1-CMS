@@ -27,7 +27,25 @@ if ($fs) {
     exit;
 }
 
+$login_method = $input['login_method'] ?? 'email';
+
 if ($user && ($user['password'] === $password || password_verify($password, $user['password']))) {
+    // Update login_method
+    if ($fs) {
+        $user['login_method'] = $login_method;
+        $fs->setDocument('members', $user['id'], $user);
+    } else if ($pdo) {
+        try {
+            $pdo->query("SELECT login_method FROM members LIMIT 1");
+        } catch (PDOException $e) {
+            try { $pdo->exec("ALTER TABLE members ADD COLUMN login_method VARCHAR(50) DEFAULT 'email'"); } catch (PDOException $ex) {}
+        }
+        try {
+            $stmt = $pdo->prepare("UPDATE members SET login_method = ? WHERE id = ?");
+            $stmt->execute([$login_method, $user['id']]);
+        } catch (Throwable $e) {}
+    }
+
     $token = generateToken($user['id'], $user['email'], $user['role']);
     echo json_encode([
         'status' => 'success',

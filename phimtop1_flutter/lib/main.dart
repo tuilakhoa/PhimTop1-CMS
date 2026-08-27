@@ -26,6 +26,8 @@ import 'dart:async';
 
 import 'firebase_options.dart';
 
+import 'providers/watch_party_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
@@ -96,6 +98,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ExploreProvider()),
         ChangeNotifierProvider(create: (_) => DownloadProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => WatchPartyProvider()),
         ChangeNotifierProxyProvider<AuthProvider, PlaylistProvider>(
           create: (context) => PlaylistProvider(authProvider: context.read<AuthProvider>()),
           update: (context, auth, previous) {

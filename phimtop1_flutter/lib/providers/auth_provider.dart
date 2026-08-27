@@ -54,13 +54,13 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {}
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String email, String password, {String method = 'email'}) async {
     isLoading = true;
     error = null;
     notifyListeners();
 
     try {
-      final response = await cmsApi.login(email, password);
+      final response = await cmsApi.login(email, password, method: method);
       if (response.status == 'success' && response.token != null && response.user != null) {
         token = response.token;
         user = response.user;

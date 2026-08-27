@@ -151,10 +151,10 @@ if (empty($featuredMovies) && !empty($movies)) {
 <?php endif; ?>
 
     <!-- Main Container -->
-    <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-16">
+    <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto flex flex-col gap-12 lg:gap-16">
         
-        <!-- Left Content: Movies Grid -->
-        <div class="lg:col-span-3">
+        <!-- Main Content -->
+        <div class="w-full">
             <?php
             $historyItems = [];
             $enableContinueWatching = isset($settings['enableContinueWatching']) ? (int)$settings['enableContinueWatching'] : 1;
@@ -263,7 +263,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                 </a>
             </div>
             
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-10">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-x-5 gap-y-10">
                 <?php foreach ($movies as $movie): 
                     $thumb = !empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '');
                     if (!preg_match('/^http/', $thumb) && $thumb) {
@@ -312,76 +312,73 @@ if (empty($featuredMovies) && !empty($movies)) {
             <?php endif; ?>
         </div>
 
-        <!-- Right Content: Minimal Leaderboard -->
-        <div class="lg:col-span-1">
-            <div class="sticky top-24">
-                <h2 class="text-xl font-bold text-white mb-6 tracking-tight">Xếp Hạng</h2>
+        <!-- Ranking Section: Horizontal Layout -->
+        <div class="w-full mb-12">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 border-b border-gray-800 pb-2">
+                <h2 class="text-2xl font-bold text-white tracking-tight mb-4 sm:mb-0">Bảng Xếp Hạng</h2>
                 
                 <!-- Minimal Tabs -->
-                <div class="flex border-b border-gray-800 mb-6">
-                    <button onclick="switchRankTab('day')" id="tab-day" class="pb-3 px-2 text-sm font-medium text-white border-b-2 border-white mr-4 transition-colors">Ngày</button>
-                    <button onclick="switchRankTab('week')" id="tab-week" class="pb-3 px-2 text-sm font-medium text-gray-500 hover:text-gray-300 border-b-2 border-transparent transition-colors mr-4">Tuần</button>
-                    <button onclick="switchRankTab('month')" id="tab-month" class="pb-3 px-2 text-sm font-medium text-gray-500 hover:text-gray-300 border-b-2 border-transparent transition-colors">Tháng</button>
+                <div class="flex">
+                    <button onclick="switchRankTab('day')" id="tab-day" class="pb-2 px-3 text-sm font-medium text-white border-b-2 border-white transition-colors">Ngày</button>
+                    <button onclick="switchRankTab('week')" id="tab-week" class="pb-2 px-3 text-sm font-medium text-gray-500 hover:text-gray-300 border-b-2 border-transparent transition-colors">Tuần</button>
+                    <button onclick="switchRankTab('month')" id="tab-month" class="pb-2 px-3 text-sm font-medium text-gray-500 hover:text-gray-300 border-b-2 border-transparent transition-colors">Tháng</button>
                 </div>
-                
-                <?php 
-                $rankData = [
-                    'day' => array_slice($movies, 0, 10),
-                    'week' => array_slice($movies, 5, 10) ?: array_slice($movies, 0, 10),
-                    'month' => array_slice($movies, 10, 10) ?: array_slice($movies, 0, 10)
-                ];
-                foreach ($rankData as $type => $list): 
-                ?>
-                <div id="rank-<?= $type ?>" class="space-y-5 <?= $type === 'day' ? 'block' : 'hidden' ?>">
+            </div>
+            
+            <?php 
+            $rankData = [
+                'day' => array_slice($movies, 0, 10),
+                'week' => array_slice($movies, 5, 10) ?: array_slice($movies, 0, 10),
+                'month' => array_slice($movies, 10, 10) ?: array_slice($movies, 0, 10)
+            ];
+            foreach ($rankData as $type => $list): 
+            ?>
+            <div id="rank-<?= $type ?>" class="<?= $type === 'day' ? 'block' : 'hidden' ?>">
+                <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-6">
                     <?php 
                     $rank = 1;
                     foreach ($list as $item): 
                         $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
-                        $rankColor = $rank <= 3 ? 'text-white' : 'text-gray-600';
+                        $rankColor = $rank <= 3 ? 'text-red-500' : 'text-gray-500';
                         $views = !empty($item['view']) ? $item['view'] : rand(1000, 50000);
                     ?>
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex items-center group">
-                        <div class="w-6 text-left shrink-0">
-                            <span class="text-lg font-bold <?= $rankColor ?>"><?= $rank ?></span>
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group shrink-0 w-36 sm:w-44 block relative">
+                        <div class="absolute -left-3 -bottom-4 text-6xl md:text-8xl font-black <?= $rankColor ?> opacity-80 z-20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8); -webkit-text-stroke: 1px #fff;"><?= $rank ?></div>
+                        <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-2 z-10 ml-4">
+                            <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <i data-lucide="play-circle" class="w-10 h-10 text-white"></i>
+                            </div>
                         </div>
-                        <div class="w-12 h-16 shrink-0 mx-3 rounded bg-[#111] overflow-hidden">
-                            <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-sm font-medium text-gray-200 truncate group-hover:text-white transition-colors mb-0.5"><?= htmlspecialchars($item['name']) ?></h3>
-                            <p class="text-xs text-gray-500 flex items-center">
-                                <?= number_format($views) ?> views
-                            </p>
+                        <div class="ml-4">
+                            <h3 class="text-sm font-medium text-gray-100 line-clamp-1 group-hover:text-white"><?= htmlspecialchars($item['name']) ?></h3>
+                            <p class="text-xs text-gray-500"><?= number_format($views) ?> views</p>
                         </div>
                     </a>
                     <?php $rank++; endforeach; ?>
                 </div>
-                <?php endforeach; ?>
-                
-                <script>
-                function switchRankTab(type) {
-                    ['day', 'week', 'month'].forEach(t => {
-                        document.getElementById('rank-' + t).classList.add('hidden');
-                        document.getElementById('rank-' + t).classList.remove('block');
-                        
-                        const tab = document.getElementById('tab-' + t);
-                        tab.classList.remove('text-white', 'border-white');
-                        tab.classList.add('text-gray-500', 'border-transparent');
-                    });
-                    
-                    document.getElementById('rank-' + type).classList.remove('hidden');
-                    document.getElementById('rank-' + type).classList.add('block');
-                    
-                    const activeTab = document.getElementById('tab-' + type);
-                    activeTab.classList.remove('text-gray-500', 'border-transparent');
-                    activeTab.classList.add('text-white', 'border-white');
-                }
-                </script>
-                
-                <button class="w-full mt-8 py-3 rounded-lg bg-[#111] hover:bg-[#1a1a1a] text-sm font-medium text-gray-300 transition-colors">
-                    Xem toàn bộ
-                </button>
             </div>
+            <?php endforeach; ?>
+            
+            <script>
+            function switchRankTab(type) {
+                ['day', 'week', 'month'].forEach(t => {
+                    document.getElementById('rank-' + t).classList.add('hidden');
+                    document.getElementById('rank-' + t).classList.remove('block');
+                    
+                    const tab = document.getElementById('tab-' + t);
+                    tab.classList.remove('text-white', 'border-white');
+                    tab.classList.add('text-gray-500', 'border-transparent');
+                });
+                
+                document.getElementById('rank-' + type).classList.remove('hidden');
+                document.getElementById('rank-' + type).classList.add('block');
+                
+                const activeTab = document.getElementById('tab-' + type);
+                activeTab.classList.remove('text-gray-500', 'border-transparent');
+                activeTab.classList.add('text-white', 'border-white');
+            }
+            </script>
         </div>
         
     </div>

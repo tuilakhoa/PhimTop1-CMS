@@ -26,7 +26,8 @@ if ($fs) {
         'email' => $email,
         'name' => $name,
         'password' => $hashedPassword,
-        'role' => 'user'
+        'role' => 'user',
+        'login_method' => 'email'
     ]);
 } else if ($pdo) {
     $stmt = $pdo->prepare("SELECT id FROM members WHERE email = ?");
@@ -36,7 +37,14 @@ if ($fs) {
         echo json_encode(['status' => 'error', 'message' => 'Email already registered']);
         exit;
     }
-    $stmt = $pdo->prepare("INSERT INTO members (email, name, password, role) VALUES (?, ?, ?, 'user')");
+    
+    try {
+        $pdo->query("SELECT login_method FROM members LIMIT 1");
+    } catch (PDOException $e) {
+        try { $pdo->exec("ALTER TABLE members ADD COLUMN login_method VARCHAR(50) DEFAULT 'email'"); } catch (PDOException $ex) {}
+    }
+    
+    $stmt = $pdo->prepare("INSERT INTO members (email, name, password, role, login_method) VALUES (?, ?, ?, 'user', 'email')");
     $stmt->execute([$email, $name, $hashedPassword]);
     $userId = $pdo->lastInsertId();
 } else {

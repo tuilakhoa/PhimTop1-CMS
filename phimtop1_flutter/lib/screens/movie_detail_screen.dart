@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/detail_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/playlist_provider.dart';
+import '../providers/watch_party_provider.dart';
 import '../models/models.dart';
 import '../api/cms_api.dart';
 import '../core/config.dart';
@@ -16,6 +17,7 @@ import '../providers/download_provider.dart';
 import '../models/download_task.dart';
 import '../widgets/error_view.dart';
 import '../widgets/movie_detail_modals.dart';
+import 'package:go_router/go_router.dart';
 
 class MovieDetailScreen extends StatefulWidget {
   final String slug;
@@ -488,15 +490,11 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 const SizedBox(height: 24),
                 
                 // Action Row
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: _bgOpacity,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: _bgOpacity),
-                  ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  clipBehavior: Clip.none,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       GestureDetector(
                         onTap: () {
@@ -515,24 +513,49 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           color: provider.isFollowing ? Theme.of(context).primaryColor : _textColor,
                         ),
                       ),
+                      const SizedBox(width: 12),
                       GestureDetector(
                         onTap: () {
                           showPlaylistModal(context, movie.slug, movie.name, imageUrl);
                         },
                         child: _buildActionButton(Icons.playlist_add_rounded, "Thêm"),
                       ),
+                      const SizedBox(width: 12),
                       GestureDetector(
                         onTap: () {
                           showDownloadModal(context, provider);
                         },
                         child: _buildActionButton(Icons.download_rounded, "Tải về"),
                       ),
+                      const SizedBox(width: 12),
                       GestureDetector(
                         onTap: () {
                           Share.share('${AppConfig.baseUrl}phim/${movie.slug}');
                         },
                         child: _buildActionButton(Icons.ios_share_rounded, "Chia sẻ"),
                       ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: () async {
+                          final auth = context.read<AuthProvider>();
+                          if (auth.token == null) {
+                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập để xem chung')));
+                             return;
+                          }
+                          // Require choosing episode first if not chosen
+                          if (provider.episodes.isNotEmpty && provider.episodes[0].serverData.isNotEmpty) {
+                             final ep = provider.episodes[0].serverData[0];
+                             final partyProvider = context.read<WatchPartyProvider>();
+                             partyProvider.initUser(auth.token ?? '', auth.user?.name ?? 'Khách');
+                             final code = await partyProvider.createParty(movie.slug, ep.slug, movie.name);
+                             if (context.mounted) context.push('/watch-party/$code');
+                          } else {
+                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Phim chưa có tập nào để xem chung')));
+                          }
+                        },
+                        child: _buildActionButton(Icons.group_add_rounded, "Xem chung"),
+                      ),
+                      const SizedBox(width: 12),
                       AnimatedBuilder(
                         animation: TvRemoteService(),
                         builder: (context, child) {
@@ -628,8 +651,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                 height: 70,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.grey[800],
-                                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8)],
+                                  color: _bgOpacity,
                                   image: person.profilePath.isNotEmpty 
                                       ? DecorationImage(
                                           image: CachedNetworkImageProvider("https://image.tmdb.org/t/p/w185${person.profilePath}"),
@@ -681,8 +703,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                 height: 70,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.grey[900],
-                                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8)],
+                                  color: _bgOpacity,
                                 ),
                                 child: Icon(Icons.person, color: _iconColor, size: 32),
                               ),
@@ -1030,12 +1051,20 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     final fallbackColor = isDark ? Colors.white : Colors.black87;
     final _subtitleColor = isDark ? Colors.white70 : Colors.black54;
 
-    return Column(
-      children: [
-        Icon(icon, color: color ?? fallbackColor, size: 24),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: _subtitleColor, fontSize: 12)),
-      ],
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: _bgOpacity,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color ?? fallbackColor, size: 20),
+          const SizedBox(width: 8),
+          Text(label, style: TextStyle(color: _subtitleColor, fontSize: 13, fontWeight: FontWeight.w600)),
+        ],
+      ),
     );
   }
 

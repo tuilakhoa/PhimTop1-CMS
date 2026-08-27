@@ -157,7 +157,7 @@ class CmsApiService {
       rethrow;
     }
   }
-  Future<AuthResponse> login(String email, String password) async {
+  Future<AuthResponse> login(String email, String password, {String method = 'email'}) async {
     try {
       final response = await _dio.post('api/v1/auth.php', queryParameters: {
         'key': AppConfig.apiKey,
@@ -165,6 +165,7 @@ class CmsApiService {
       }, data: {
         'email': email,
         'password': password,
+        'login_method': method,
       });
       if (response.data == null || response.data is! Map<String, dynamic>) {
         throw Exception('Dữ liệu từ máy chủ không hợp lệ');
@@ -185,6 +186,7 @@ class CmsApiService {
         'name': name,
         'avatar': avatar,
         'uid': uid,
+        'login_method': 'google',
       });
       if (response.data == null || response.data is! Map<String, dynamic>) {
         throw Exception('Dữ liệu từ máy chủ không hợp lệ');

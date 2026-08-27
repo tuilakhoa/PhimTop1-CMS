@@ -29,7 +29,7 @@ if ($action === 'firebase_login') {
             $userRole = $user['role'] ?? 'user';
             
             // Update avatar/name/google_id
-            $fs->setDocument('members', $userId, array_merge($user, ['name' => $name, 'avatar' => $avatar, 'google_id' => $uid]));
+            $fs->setDocument('members', $userId, array_merge($user, ['name' => $name, 'avatar' => $avatar, 'google_id' => $uid, 'login_method' => 'google']));
         } else {
             // Register new user
             $userId = uniqid();
@@ -39,7 +39,8 @@ if ($action === 'firebase_login') {
                 'avatar' => $avatar,
                 'google_id' => $uid,
                 'firebase_uid' => $uid,
-                'role' => 'user'
+                'role' => 'user',
+                'login_method' => 'google'
             ]);
         }
     } else if ($pdo) {
@@ -56,10 +57,20 @@ if ($action === 'firebase_login') {
         if ($user) {
             $userId = $user['id'];
             $userRole = $user['role'] ?? 'user';
-            $updateStmt = $pdo->prepare("UPDATE members SET name = ?, avatar = ?, google_id = ? WHERE id = ?");
+            try {
+                $pdo->query("SELECT login_method FROM members LIMIT 1");
+            } catch (PDOException $e) {
+                try { $pdo->exec("ALTER TABLE members ADD COLUMN login_method VARCHAR(50) DEFAULT 'email'"); } catch (PDOException $ex) {}
+            }
+            $updateStmt = $pdo->prepare("UPDATE members SET name = ?, avatar = ?, google_id = ?, login_method = 'google' WHERE id = ?");
             $updateStmt->execute([$name, $avatar, $uid, $userId]);
         } else {
-            $stmt = $pdo->prepare("INSERT INTO members (email, name, avatar, role, google_id) VALUES (?, ?, ?, 'user', ?)");
+            try {
+                $pdo->query("SELECT login_method FROM members LIMIT 1");
+            } catch (PDOException $e) {
+                try { $pdo->exec("ALTER TABLE members ADD COLUMN login_method VARCHAR(50) DEFAULT 'email'"); } catch (PDOException $ex) {}
+            }
+            $stmt = $pdo->prepare("INSERT INTO members (email, name, avatar, role, google_id, login_method) VALUES (?, ?, ?, 'user', ?, 'google')");
             $stmt->execute([$email, $name, $avatar, $uid]);
             $userId = $pdo->lastInsertId();
         }

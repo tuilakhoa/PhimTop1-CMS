@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'dart:ui';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,8 +18,62 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscurePassword = true;
+  
+  final LocalAuthentication _localAuth = LocalAuthentication();
+  bool _canCheckBiometrics = false;
+  bool _hasSavedCredentials = false;
 
-  void _login() async {
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometricSetup();
+  }
+
+  Future<void> _checkBiometricSetup() async {
+    try {
+      final canCheck = await _localAuth.canCheckBiometrics;
+      final isDeviceSupported = await _localAuth.isDeviceSupported();
+      final prefs = await SharedPreferences.getInstance();
+      final bioEmail = prefs.getString('bio_email');
+      final bioPass = prefs.getString('bio_password');
+      
+      if (mounted) {
+        setState(() {
+          _canCheckBiometrics = canCheck || isDeviceSupported;
+          _hasSavedCredentials = bioEmail != null && bioEmail.isNotEmpty && bioPass != null && bioPass.isNotEmpty;
+        });
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  void _loginWithBiometrics() async {
+    try {
+      final authenticated = await _localAuth.authenticate(
+        localizedReason: 'Xác thực vân tay / khuôn mặt để đăng nhập',
+      );
+      if (authenticated) {
+        final prefs = await SharedPreferences.getInstance();
+        final bioEmail = prefs.getString('bio_email');
+        final bioPass = prefs.getString('bio_password');
+        if (bioEmail != null && bioPass != null) {
+           _emailCtrl.text = bioEmail;
+           _passCtrl.text = bioPass;
+           _login(isBiometric: true);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+           content: Text("Không thể xác thực sinh trắc học"),
+           backgroundColor: Colors.redAccent,
+         ));
+      }
+    }
+  }
+
+  void _login({bool isBiometric = false}) async {
     if (_emailCtrl.text.trim().isEmpty || _passCtrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Vui lòng nhập đầy đủ thông tin"),
@@ -26,8 +82,12 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     
-    final success = await context.read<AuthProvider>().login(_emailCtrl.text.trim(), _passCtrl.text.trim());
+    final method = isBiometric ? 'biometric' : 'email';
+    final success = await context.read<AuthProvider>().login(_emailCtrl.text.trim(), _passCtrl.text.trim(), method: method);
     if (success && mounted) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('bio_email', _emailCtrl.text.trim());
+      await prefs.setString('bio_password', _passCtrl.text.trim());
       context.go('/select_profile');
     } else if (mounted) {
       final error = context.read<AuthProvider>().error;
@@ -229,17 +289,38 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (auth.isLoading)
                           const Center(child: CircularProgressIndicator())
                         else
-                          ElevatedButton(
-                            onPressed: _login,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              elevation: 4,
-                              shadowColor: Theme.of(context).primaryColor.withOpacity(0.5),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            ),
-                            child: const Text("ĐĂNG NHẬP", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: _login,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    elevation: 4,
+                                    shadowColor: Theme.of(context).primaryColor.withOpacity(0.5),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  ),
+                                  child: const Text("ĐĂNG NHẬP", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                ),
+                              ),
+                              if (_canCheckBiometrics && _hasSavedCredentials) ...[
+                                const SizedBox(width: 12),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: _loginWithBiometrics,
+                                    icon: const Icon(Icons.fingerprint_rounded, color: Colors.white, size: 28),
+                                    padding: const EdgeInsets.all(12),
+                                  ),
+                                ),
+                              ]
+                            ],
                           ),
                         
                         const SizedBox(height: 24),

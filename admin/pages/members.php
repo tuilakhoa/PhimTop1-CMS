@@ -152,6 +152,7 @@ if ($action === 'history') {
                             <th class="px-6 py-4 font-semibold">Người Dùng</th>
                             <th class="px-6 py-4 font-semibold">Vai Trò</th>
                             <th class="px-6 py-4 font-semibold">Loại Tài Khoản</th>
+                            <th class="px-6 py-4 font-semibold text-center">Đăng Nhập Cuối</th>
                             <th class="px-6 py-4 font-semibold text-center">Số Phim Đã Xem</th>
                             <th class="px-6 py-4 font-semibold">Ngày Tham Gia</th>
                             <th class="px-6 py-4 font-semibold text-right">Thao Tác</th>
@@ -187,6 +188,27 @@ if ($action === 'history') {
                                             <i data-lucide="mail" class="w-3 h-3"></i>
                                             <span>Email</span>
                                         </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <?php 
+                                    $method = $m['login_method'] ?? '';
+                                    if ($method === 'google'): ?>
+                                        <span class="inline-flex items-center space-x-1 bg-white/10 text-gray-200 px-2.5 py-1 rounded-lg text-xs font-semibold border border-white/20">
+                                            <span>Google</span>
+                                        </span>
+                                    <?php elseif ($method === 'biometric'): ?>
+                                        <span class="inline-flex items-center space-x-1 bg-purple-500/10 text-purple-400 px-2.5 py-1 rounded-lg text-xs font-semibold border border-purple-500/20">
+                                            <i data-lucide="fingerprint" class="w-3 h-3"></i>
+                                            <span>Sinh trắc học</span>
+                                        </span>
+                                    <?php elseif ($method === 'email'): ?>
+                                        <span class="inline-flex items-center space-x-1 bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-lg text-xs font-semibold border border-blue-500/20">
+                                            <i data-lucide="mail" class="w-3 h-3"></i>
+                                            <span>Mật khẩu</span>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="text-gray-500 text-xs italic">Chưa rõ</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4 text-center">
