@@ -18,6 +18,19 @@ class Logger {
 
         $formattedMessage = "[$time] [$level] [$ip] [$uri] $message" . PHP_EOL;
         @file_put_contents($logFile, $formattedMessage, FILE_APPEND);
+        
+        // Auto cleanup logs older than 7 days (2% chance to trigger)
+        if (rand(1, 50) === 1) {
+            $files = glob(self::$logDir . '/app-*.log');
+            if ($files) {
+                $now = time();
+                foreach ($files as $file) {
+                    if ($now - filemtime($file) >= 7 * 86400) { // 7 days
+                        @unlink($file);
+                    }
+                }
+            }
+        }
     }
 
     public static function info($message) {
