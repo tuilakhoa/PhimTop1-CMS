@@ -73,19 +73,28 @@ class MovieRepository {
                 $params[] = $searchLike;
             }
             
-            $stmtTotal = $this->pdo->prepare("SELECT COUNT(*) FROM movies WHERE $where");
-            $stmtTotal->execute($params);
-            $total = $stmtTotal->fetchColumn();
-            
-            $stmt = $this->pdo->prepare("SELECT * FROM movies WHERE $where ORDER BY updated_at DESC LIMIT $limit OFFSET $offset");
-            $stmt->execute($params);
-            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            return [
-                'total' => $total,
-                'items' => $items,
-                'totalPages' => ceil($total / $limit)
-            ];
+            try {
+                $stmtTotal = $this->pdo->prepare("SELECT COUNT(*) FROM movies WHERE $where");
+                $stmtTotal->execute($params);
+                $total = $stmtTotal->fetchColumn();
+                
+                $stmt = $this->pdo->prepare("SELECT * FROM movies WHERE $where ORDER BY updated_at DESC LIMIT $limit OFFSET $offset");
+                $stmt->execute($params);
+                $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                return [
+                    'total' => $total,
+                    'items' => $items,
+                    'totalPages' => ceil($total / $limit)
+                ];
+            } catch (PDOException $e) {
+                error_log("Database error in getMovies: " . $e->getMessage());
+                return [
+                    'total' => 0,
+                    'items' => [],
+                    'totalPages' => 1
+                ];
+            }
         }
     }
 

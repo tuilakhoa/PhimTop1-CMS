@@ -1,9 +1,11 @@
 <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-8 tracking-tight">Quản Lý Phim</h2>
 
 <?php
+try {
 $pdo = getPDO();
 $settings = getSettings();
 $displayMode = $settings['displayMode'] ?? 'api';
+
 
 $page = isset($_GET['p']) ? (int)$_GET['p'] : 1;
 if ($page < 1) $page = 1;
@@ -57,6 +59,9 @@ if ($displayMode === 'crawl') {
         }
         $movie['updated_at'] = $movie['modified']['time'] ?? date('c');
     }
+}
+} catch (\Throwable $e) {
+    echo "<div class='text-red-500 bg-red-100 p-4 rounded mb-4'>Error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . "</div>";
 }
 ?>
 
@@ -135,7 +140,7 @@ if ($displayMode === 'crawl') {
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center text-xs text-gray-400">
-                                <?= date('d/m/Y H:i', strtotime($movie['updated_at'])) ?>
+                                <?= date('d/m/Y H:i', strtotime($movie['updated_at'] ?? 'now')) ?>
                             </td>
                             <td class="px-8 py-4 text-right">
                                 <div class="flex items-center justify-end space-x-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300">
