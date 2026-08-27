@@ -132,8 +132,8 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-gray-900/50 rounded-2xl p-5 border border-gray-800">
                 <i data-lucide="download-cloud" class="w-6 h-6 text-blue-400 mb-3"></i>
-                <h4 class="font-bold text-gray-200 mb-2">Tải Từng File (No ZIP)</h4>
-                <p class="text-sm text-gray-400 leading-relaxed">Hệ thống sẽ kiểm tra danh sách file bị thay đổi từ nguồn cấp và chỉ tải về, ghi đè những file đó thay vì toàn bộ mã nguồn.</p>
+                <h4 class="font-bold text-gray-200 mb-2">Sử dụng ZIP an toàn</h4>
+                <p class="text-sm text-gray-400 leading-relaxed">Hệ thống sẽ tải toàn bộ mã nguồn dưới dạng ZIP từ Github và ghi đè an toàn, đặc biệt phù hợp cho các hosting như cPanel, aaPanel không bị lỗi quá tải HTTP request.</p>
             </div>
             <div class="bg-gray-900/50 rounded-2xl p-5 border border-gray-800">
                 <i data-lucide="database" class="w-6 h-6 text-green-400 mb-3"></i>

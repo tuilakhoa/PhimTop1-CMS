@@ -38,127 +38,112 @@ $configFile = __DIR__ . '/../../config/update.php';
 $configUpdate = file_exists($configFile) ? require $configFile : ['current_version' => '1.0.0'];
 $currentVersion = $configUpdate['current_version'] ?? '1.0.0';
 
-addLog("Khởi tạo cập nhật (Github API)...");
+addLog("Khởi tạo cập nhật (Chế độ ZIP Download)...");
 
-function callGithub($url) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'PhimTop1-CMS-Updater');
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    if ($httpCode === 200) return json_decode($response, true);
-    return false;
-}
-
-$baseTag = 'v' . ltrim($currentVersion, 'v');
-$compareUrl = "https://api.github.com/repos/$repo/compare/$baseTag...$targetTag";
-$diff = callGithub($compareUrl);
-
-if (!$diff) {
-    $baseTag = ltrim($currentVersion, 'v');
-    $compareUrl = "https://api.github.com/repos/$repo/compare/$baseTag...$targetTag";
-    $diff = callGithub($compareUrl);
-}
-
-if (!$diff) {
-    echo json_encode(['status' => 'error', 'message' => "Không thể kết nối hoặc so sánh phiên bản ($baseTag...$targetTag).", 'logs' => $logs]);
+if (!class_exists('ZipArchive')) {
+    echo json_encode(['status' => 'error', 'message' => 'Server không hỗ trợ ZipArchive. Vui lòng bật extension zip trong PHP.', 'logs' => $logs]);
     exit;
 }
 
-$changedFiles = [];
-$removedFiles = [];
-foreach ($diff['files'] as $file) {
-    if ($file['status'] === 'removed') {
-        $removedFiles[] = $file['filename'];
-    } else {
-        $changedFiles[] = $file['filename'];
-    }
+$zipUrl = "https://github.com/$repo/archive/$targetTag.zip";
+$tempZipFile = sys_get_temp_dir() . '/phimtop1_update_' . md5(time()) . '.zip';
+
+addLog("Đang tải xuống mã nguồn từ Github...");
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $zipUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+curl_setopt($ch, CURLOPT_USERAGENT, 'PhimTop1-CMS-Updater');
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+$zipData = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($zipData === false || $httpCode !== 200) {
+    echo json_encode(['status' => 'error', 'message' => "Không thể tải file cập nhật. (HTTP $httpCode)", 'logs' => $logs]);
+    exit;
 }
 
-$totalFiles = count($changedFiles) + count($removedFiles);
-addLog("Phát hiện $totalFiles tệp tin thay đổi.");
+if (@file_put_contents($tempZipFile, $zipData) === false) {
+    echo json_encode(['status' => 'error', 'message' => 'Không thể ghi file cập nhật tạm thời.', 'logs' => $logs]);
+    exit;
+}
+
+addLog("Tải xuống hoàn tất. Bắt đầu giải nén và cập nhật...");
+
+$zip = new ZipArchive();
+if ($zip->open($tempZipFile) !== true) {
+    @unlink($tempZipFile);
+    echo json_encode(['status' => 'error', 'message' => 'File tải về bị lỗi, không thể mở.', 'logs' => $logs]);
+    exit;
+}
 
 $rootDir = realpath(__DIR__ . '/../../');
+$adminFolderName = ltrim($settings['adminPath'] ?? '/admin', '/');
+
 $successCount = 0;
 $failCount = 0;
 
-foreach ($changedFiles as $filename) {
-    $fileUrl = "https://raw.githubusercontent.com/$repo/$targetTag/" . str_replace(' ', '%20', $filename);
+for ($i = 0; $i < $zip->numFiles; $i++) {
+    $filename = $zip->getNameIndex($i);
     
-    $actualFilename = $filename;
-    $adminFolderName = ltrim($settings['adminPath'] ?? '/admin', '/');
-    if ($adminFolderName !== 'admin' && strpos($filename, 'admin/') === 0) {
-        $actualFilename = $adminFolderName . '/' . substr($filename, 6);
+    // Bỏ qua thư mục gốc của repo trong zip (VD: PhimTop1-CMS-main/)
+    $parts = explode('/', $filename, 2);
+    if (count($parts) < 2 || empty($parts[1])) continue;
+    $relativePath = $parts[1];
+    
+    if (empty($relativePath)) continue;
+    if (substr($relativePath, -1) === '/') {
+        // Là thư mục
+        continue;
+    }
+    
+    // Map thư mục admin
+    $actualFilename = $relativePath;
+    if ($adminFolderName !== 'admin' && strpos($relativePath, 'admin/') === 0) {
+        $actualFilename = $adminFolderName . '/' . substr($relativePath, 6);
+    }
+    
+    // Các file/thư mục không được ghi đè
+    if ($actualFilename === 'config.json' || strpos($actualFilename, 'cache/') === 0 || strpos($actualFilename, 'config/') === 0) {
+        continue;
     }
     
     $targetPath = $rootDir . '/' . $actualFilename;
+    $targetDir = dirname($targetPath);
     
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $fileUrl);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    $fileContent = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
-    if ($fileContent === false || $httpCode !== 200) {
-        $failCount++;
-        addLog("Lỗi tải $filename", 'error');
-    } else {
-        $targetDir = dirname($targetPath);
-        if (!is_dir($targetDir)) @mkdir($targetDir, 0755, true);
-        
-        if (@file_put_contents($targetPath, $fileContent) !== false) {
-            $successCount++;
-        } else {
-            $failCount++;
-            addLog("Lỗi ghi $filename", 'error');
-        }
-    }
-}
-
-foreach ($removedFiles as $filename) {
-    $actualFilename = $filename;
-    $adminFolderName = ltrim($settings['adminPath'] ?? '/admin', '/');
-    if ($adminFolderName !== 'admin' && strpos($filename, 'admin/') === 0) {
-        $actualFilename = $adminFolderName . '/' . substr($filename, 6);
+    if (!is_dir($targetDir)) {
+        @mkdir($targetDir, 0755, true);
     }
     
-    $targetPath = $rootDir . '/' . $actualFilename;
-    if (file_exists($targetPath)) {
-        if (@unlink($targetPath)) {
-            $successCount++;
-            $parentDir = dirname($targetPath);
-            if (is_dir($parentDir) && count(scandir($parentDir)) == 2) @rmdir($parentDir);
-        } else {
-            addLog("Lỗi xoá $filename", 'warning');
-        }
-    } else {
+    $content = $zip->getFromIndex($i);
+    if (@file_put_contents($targetPath, $content) !== false) {
         $successCount++;
+    } else {
+        $failCount++;
+        addLog("Lỗi ghi $actualFilename", 'error');
     }
 }
 
-if ($successCount > 0 || $totalFiles == 0) {
-    $cleanLatest = ltrim($targetTag, 'v');
-    $newConfigContent = "<?php\nreturn [\n    'current_version' => '$cleanLatest'\n];\n";
-    @file_put_contents($configFile, $newConfigContent);
-    addLog("Đã cập nhật hệ thống lên v$cleanLatest.", 'success');
-    
-    require_once __DIR__ . '/../../app/Core/UpdateChecker.php';
-    $checker = new \App\Core\UpdateChecker();
-    $checker->clearCache();
-    
-    if (function_exists('opcache_reset')) @opcache_reset();
-    if (function_exists('apcu_clear_cache')) @apcu_clear_cache();
-}
+$zip->close();
+@unlink($tempZipFile);
+
+$cleanLatest = ltrim($targetTag, 'v');
+$newConfigContent = "<?php\nreturn [\n    'current_version' => '$cleanLatest'\n];\n";
+@file_put_contents($configFile, $newConfigContent);
+addLog("Đã cập nhật hệ thống lên v$cleanLatest.", 'success');
+
+require_once __DIR__ . '/../../app/Core/UpdateChecker.php';
+$checker = new \App\Core\UpdateChecker();
+$checker->clearCache();
+
+if (function_exists('opcache_reset')) @opcache_reset();
+if (function_exists('apcu_clear_cache')) @apcu_clear_cache();
 
 $status = $failCount === 0 ? 'success' : 'warning';
-$message = $failCount === 0 ? 'Cập nhật hệ thống thành công!' : 'Cập nhật hoàn tất nhưng có một số tệp tin bị lỗi.';
+$message = $failCount === 0 ? 'Cập nhật hệ thống thành công!' : 'Cập nhật hoàn tất nhưng có một số tệp tin bị lỗi ghi đè.';
 
 echo json_encode([
     'status' => $status,
