@@ -59,7 +59,6 @@ $siteName = $settings['siteName'] ?? 'PhimTop1';
         $totalPages = $apiResult['pagination']['totalPages'] ?? 1;
         $currentPage = $apiResult['pagination']['currentPage'] ?? $page;
     }
-}
 
 // Apply SEO Overrides if they exist
 $seoType = $originalType;
@@ -72,6 +71,7 @@ if ($seoOverride) {
     if (!empty($seoOverride['seo_title'])) $pageTitle = $seoOverride['seo_title'];
     if (!empty($seoOverride['seo_desc'])) $pageDesc = $seoOverride['seo_desc'];
     if (!empty($seoOverride['seo_keywords'])) $pageKeywords = $seoOverride['seo_keywords'];
+}
 $theme = $settings['theme'] ?? 'dark';
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);
 if (file_exists($themeFile)) {

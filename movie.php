@@ -44,7 +44,6 @@ $domain = 'https://phimimg.com/';
         
         $pageDesc = $contentDesc ?: ($apiResult['seoOnPage']['descriptionHead'] ?? null);
     }
-}
 
 // Apply SEO Overrides if they exist
 $seoOverride = getSeoMetadata('movie', $originalSlug);
@@ -103,6 +102,7 @@ if (!empty($episodes[0]['server_data'])) {
     $currentEp = $epToPlay;
     $videoUrl = $currentEp['link_m3u8'] ?? $currentEp['link_embed'] ?? '';
     $isM3U8 = strpos($videoUrl, '.m3u8') !== false;
+}
 $theme = $settings['theme'] ?? 'dark';
 
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);

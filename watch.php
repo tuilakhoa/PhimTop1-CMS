@@ -46,7 +46,6 @@ $domain = 'https://phimimg.com/';
         }
         $pageDesc = $contentDesc ?: ($apiResult['seoOnPage']['descriptionHead'] ?? null);
     }
-}
 
 if (!$movie) {
     die("Phim không tồn tại.");
@@ -126,6 +125,7 @@ if ($seoOverride) {
     if (!empty($seoOverride['seo_keywords'])) {
         $pageKeywords = str_replace('{ep}', htmlspecialchars($displayEp), $seoOverride['seo_keywords']);
     }
+}
 $theme = $settings['theme'] ?? 'dark';
 $themeFile = __DIR__ . "/themes/{$theme}/movie.php";
 if (file_exists($themeFile)) {
