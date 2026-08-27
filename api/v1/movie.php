@@ -32,20 +32,7 @@ if ($repo->isMovieBlocked($slug)) {
     exit;
 }
 
-$displayMode = $settings['displayMode'] ?? 'api';
-if ($displayMode === 'crawl') {
-    $repo = getMovieRepository();
-    $movie = $repo->getMovieBySlug($slug);
-    $data = null;
-    if ($movie) {
-        $data = [
-            'movie' => $movie,
-            'episodes' => [], // In DB only crawl mode, episodes are often not fully synced unless custom scraped
-            'domain' => '',
-            'seoOnPage' => []
-        ];
-    }
-} else {
+
     // Fetch data from CMS helper
     $data = fetchApiMovieDetail($slug);
 
@@ -163,7 +150,6 @@ if ($displayMode === 'crawl') {
             }
         } catch (Throwable $e) {}
     }
-}
 
 if (!$data || empty($data['movie'])) {
     http_response_code(404);

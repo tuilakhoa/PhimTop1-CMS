@@ -27,22 +27,7 @@ if (empty($keyword)) {
     exit;
 }
 
-$displayMode = $settings['displayMode'] ?? 'api';
-if ($displayMode === 'crawl') {
-    $repo = getMovieRepository();
-    $result = $repo->getMovies($page, 24, $keyword);
-    $data = [
-        'items' => $result['items'],
-        'titlePage' => 'Tìm kiếm: ' . htmlspecialchars($keyword),
-        'domain' => '',
-        'seoOnPage' => (object)[],
-        'params' => (object)[],
-        'pagination' => [
-            'totalPages' => $result['totalPages'],
-            'currentPage' => $page
-        ]
-    ];
-} else {
+
     // Fetch data from CMS helper
     $data = fetchApiFilms('search', '', $page, $keyword);
 
@@ -75,7 +60,6 @@ if ($displayMode === 'crawl') {
             // Ignore DB error and return empty result
         }
     }
-}
 
 if (!$data) {
     http_response_code(500);

@@ -26,21 +26,7 @@ $domain = 'https://phimimg.com/';
 global $pageTitle, $pageDesc, $pageKeywords;
 $siteName = $settings['siteName'] ?? 'PhimTop1';
 
-if (($settings['displayMode'] ?? 'api') === 'crawl') {
-    $repo = getMovieRepository();
-    $limit = 24;
-    
-    if ($originalType) {
-        $result = $repo->getMovies($page, $limit, '', $originalType);
-        $movies = $result['items'];
-        
-        $title = "Danh sách: " . htmlspecialchars($originalType);
-        $pageTitle = $title . ' - ' . $siteName;
-    } else {
-        $result = $repo->getMovies($page, $limit, '');
-        $movies = $result['items'];
-    }
-} else {
+
     $apiType = in_array($originalType, ['the-loai', 'quoc-gia', 'danh-sach', 'nam-phat-hanh']) ? $originalType : 'danh-sach';
     
     // Convert to NguonC list format if necessary (phim-le, phim-bo, vv)
@@ -86,9 +72,6 @@ if ($seoOverride) {
     if (!empty($seoOverride['seo_title'])) $pageTitle = $seoOverride['seo_title'];
     if (!empty($seoOverride['seo_desc'])) $pageDesc = $seoOverride['seo_desc'];
     if (!empty($seoOverride['seo_keywords'])) $pageKeywords = $seoOverride['seo_keywords'];
-}
-
-
 $theme = $settings['theme'] ?? 'dark';
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);
 if (file_exists($themeFile)) {

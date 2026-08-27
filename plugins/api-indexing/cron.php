@@ -2,27 +2,14 @@
 require_once __DIR__ . '/../../includes/db.php';
 $settings = getSettings();
 
-$displayMode = $settings['displayMode'] ?? 'api';
 $movies = [];
-
-if ($displayMode === 'api') {
-    $apiUrl = "https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1";
-    $json = @file_get_contents($apiUrl);
-    if ($json) {
-        $data = json_decode($json, true);
-        if (isset($data['items'])) {
-            foreach ($data['items'] as $item) {
-                $movies[] = $item['slug'] ?? '';
-            }
-        }
-    }
-} else {
-    $pdo = getPDO();
-    if ($pdo) {
-        $stmt = $pdo->query("SELECT slug FROM movies ORDER BY updated_at DESC LIMIT 20");
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        foreach ($rows as $row) {
-            $movies[] = $row['slug'];
+$apiUrl = "https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1";
+$json = @file_get_contents($apiUrl);
+if ($json) {
+    $data = json_decode($json, true);
+    if (isset($data['items'])) {
+        foreach ($data['items'] as $item) {
+            $movies[] = $item['slug'] ?? '';
         }
     }
 }

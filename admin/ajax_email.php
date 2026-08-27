@@ -104,9 +104,9 @@ if ($action === 'send_batch') {
     $moviesHtml = '';
     $movies = [];
     $settings = getSettings();
-    $displayMode = $settings['displayMode'] ?? 'api';
     
-    if ($displayMode === 'api') {
+    
+    if (true) {
         require_once __DIR__ . '/../includes/api_client.php';
         if ($movieSource === 'newest' || $movieSource === 'trending') {
             // API mode usually only supports "newest" via home endpoint

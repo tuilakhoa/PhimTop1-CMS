@@ -3,30 +3,19 @@
 
 <?php
 $movies = [];
-$displayMode = $settings['displayMode'] ?? 'api';
-
-if ($displayMode === 'api') {
-    // Lấy phim từ API
-    $apiUrl = "https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1";
-    $json = @file_get_contents($apiUrl);
-    if ($json) {
-        $data = json_decode($json, true);
-        if (isset($data['items'])) {
-            foreach ($data['items'] as $item) {
-                $movies[] = [
-                    'name' => $item['name'] ?? $item['title'] ?? '',
-                    'slug' => $item['slug'] ?? '',
-                    'updated_at' => $item['modified']['time'] ?? $item['updated_at'] ?? date('Y-m-d H:i:s')
-                ];
-            }
+// Lấy phim từ API
+$apiUrl = "https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1";
+$json = @file_get_contents($apiUrl);
+if ($json) {
+    $data = json_decode($json, true);
+    if (isset($data['items'])) {
+        foreach ($data['items'] as $item) {
+            $movies[] = [
+                'name' => $item['name'] ?? $item['title'] ?? '',
+                'slug' => $item['slug'] ?? '',
+                'updated_at' => $item['modified']['time'] ?? $item['updated_at'] ?? date('Y-m-d H:i:s')
+            ];
         }
-    }
-} else {
-    // Lấy phim từ DB cục bộ (Crawl)
-    $pdo = getPDO();
-    if ($pdo) {
-        $stmt = $pdo->query("SELECT id, name, slug, updated_at FROM movies ORDER BY updated_at DESC LIMIT 50");
-        $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 ?>

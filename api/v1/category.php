@@ -31,26 +31,7 @@ if (empty($type) || empty($slug)) {
     exit;
 }
 
-$displayMode = $settings['displayMode'] ?? 'api';
-if ($displayMode === 'crawl') {
-    $repo = getMovieRepository();
-    // In database, type could be mapped if needed, or we just use it directly
-    $result = $repo->getMovies($page, 24, ''); // Note: Filtering by category slug in crawl mode is more complex. Usually we need to check categories map or we just return all for now if no specific category DB search is implemented.
-    
-    // To properly support category filtering in crawl mode, we'd need a way to filter by slug.
-    // For now, let's just use getMovies. If the DB doesn't support category filtering well, it's a known limitation.
-    $data = [
-        'items' => $result['items'],
-        'titlePage' => 'Danh mục: ' . htmlspecialchars($slug),
-        'domain' => '',
-        'seoOnPage' => (object)[],
-        'params' => (object)[],
-        'pagination' => [
-            'totalPages' => $result['totalPages'],
-            'currentPage' => $page
-        ]
-    ];
-} else {
+
     // Fetch data from CMS helper
     $data = fetchApiFilms($type, $slug, $page, '', $category, $country, $year);
 
@@ -80,7 +61,6 @@ if ($displayMode === 'crawl') {
             }
         } catch (Throwable $e) {}
     }
-}
 
 if (!$data) {
     http_response_code(500);

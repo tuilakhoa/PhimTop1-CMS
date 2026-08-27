@@ -28,13 +28,9 @@ if ($featuredType === 'admin') {
     foreach ($slugs as $s) {
         $s = trim($s);
         if (!$s) continue;
-        if (($settings['displayMode'] ?? 'api') === 'crawl') {
-            $m = getMovieRepository()->getMovieBySlug($s);
-            if ($m) $featuredMovies[] = $m;
-        } else {
+        
             $res = fetchApiMovieDetail($s);
             if ($res && $res['movie']) $featuredMovies[] = $res['movie'];
-        }
     }
 } elseif ($featuredType === 'view') {
     $pdo = getPDO();

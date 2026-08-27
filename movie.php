@@ -22,22 +22,7 @@ $movie = null;
 $episodes = [];
 $domain = 'https://phimimg.com/';
 
-if (($settings['displayMode'] ?? 'api') === 'crawl') {
-    $repo = getMovieRepository();
-    $movie = $repo->getMovieBySlug($originalSlug);
-    if ($movie) {
-        $episodes = [['server_name' => 'VIP', 'server_data' => []]];
-        global $pageTitle, $pageDesc, $pageKeywords;
-        $siteName = $settings['siteName'] ?? 'PhimTop1';
-        $pageTitle = ($movie['name'] ?? '') . ' - ' . $siteName;
-        
-        $contentDesc = strip_tags(html_entity_decode($movie['content'] ?? ''));
-        if (mb_strlen($contentDesc) > 160) {
-            $contentDesc = mb_substr($contentDesc, 0, 157) . '...';
-        }
-        $pageDesc = $contentDesc;
-    }
-} else {
+
     $apiResult = fetchApiMovieDetail($originalSlug);
     if ($apiResult && $apiResult['movie']) {
         $movie = $apiResult['movie'];
@@ -114,8 +99,6 @@ if (!empty($episodes[0]['server_data'])) {
     $currentEp = $epToPlay;
     $videoUrl = $currentEp['link_m3u8'] ?? $currentEp['link_embed'] ?? '';
     $isM3U8 = strpos($videoUrl, '.m3u8') !== false;
-}
-
 $theme = $settings['theme'] ?? 'dark';
 
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);

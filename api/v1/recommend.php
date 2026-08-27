@@ -51,11 +51,11 @@ $limit = (int)($_GET['limit'] ?? 12);
 
 if ($action === 'personal') {
     $settings = getSettings();
-    $displayMode = $settings['displayMode'] ?? 'api';
+    
     
     if (!$user) {
         $items = [];
-        if ($displayMode === 'api') {
+        if (true) {
             // Fetch random page from external API to increase index chances
             $randomPage = mt_rand(1, 20); // API typically has many pages, 1-20 is a safe range
             $res = fetchApiFilms('home', '', $randomPage);
@@ -92,7 +92,7 @@ if ($action === 'personal') {
     if (empty($historySlugs)) {
         // No history, return trending/latest
         $items = [];
-        if ($displayMode === 'api') {
+        if (true) {
             $res = fetchApiFilms('home', '', 1);
             if ($res && !empty($res['items'])) {
                 $items = array_slice($res['items'], 0, $limit);
@@ -129,7 +129,7 @@ if ($action === 'personal') {
 
     $recommended = [];
 
-    if ($displayMode === 'api') {
+    if (true) {
         // In API mode, we try to fetch from the top type or just fallback to latest
         $apiType = 'home';
         $apiSlug = '';
@@ -175,7 +175,7 @@ if ($action === 'personal') {
     // If we didn't find enough, backfill
     if (count($recommended) < $limit) {
         $needed = $limit - count($recommended);
-        if ($displayMode === 'api') {
+        if (true) {
             $res = fetchApiFilms('home', '', 2); // get page 2 for backfill
             $backfill = $res['items'] ?? [];
         } else {

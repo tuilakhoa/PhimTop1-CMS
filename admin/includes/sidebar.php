@@ -21,7 +21,6 @@
                         'email_marketing' => ['icon' => 'mail', 'title' => 'Email Marketing'],
                         'notifications' => ['icon' => 'bell', 'title' => 'Push Notifications'],
                         'cast' => ['icon' => 'users', 'title' => 'Diễn Viên & Đạo Diễn'],
-                        'crawl' => ['icon' => 'download-cloud', 'title' => 'Cào Dữ Liệu'],
                         'database' => ['icon' => 'database', 'title' => 'Quản Lý Database'],
                         'theme_editor' => ['icon' => 'file-code', 'title' => 'Sửa Giao Diện'],
                         'system_status' => ['icon' => 'activity', 'title' => 'Kiểm Tra Hệ Thống'],

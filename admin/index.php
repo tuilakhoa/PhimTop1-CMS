@@ -9,7 +9,7 @@ $errorMsg = '';
 // Handle Settings Update (Shared across seo and settings pages)
 if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     $updates = [];
-    if (isset($_POST['displayMode'])) $updates['displayMode'] = $_POST['displayMode'];
+    $updates['displayMode'] = 'api';
     if (isset($_POST['apiSource'])) $updates['apiSource'] = $_POST['apiSource'];
     if (isset($_POST['enableComics'])) $updates['enableComics'] = (int)$_POST['enableComics'];
     if (isset($_POST['comicApiUrl'])) $updates['comicApiUrl'] = $_POST['comicApiUrl'];

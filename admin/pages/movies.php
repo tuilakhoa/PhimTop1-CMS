@@ -18,13 +18,6 @@ $totalMovies = 0;
 $totalPages = 0;
 $movies = [];
 
-if ($displayMode === 'crawl') {
-    $repo = getMovieRepository();
-    $result = $repo->getMovies($page, $limit, $q);
-    $totalMovies = $result['total'];
-    $totalPages = $result['totalPages'];
-    $movies = $result['items'];
-} else {
     // Chế độ API
     if ($q !== '') {
         $url = "https://phimapi.com/v1/api/tim-kiem?keyword=" . urlencode($q) . "&page=" . $page;
@@ -59,7 +52,6 @@ if ($displayMode === 'crawl') {
         }
         $movie['updated_at'] = $movie['modified']['time'] ?? date('c');
     }
-}
 } catch (\Throwable $e) {
     echo "<div class='text-red-500 bg-red-100 p-4 rounded mb-4'>Error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . "</div>";
 }
@@ -84,11 +76,7 @@ if ($displayMode === 'crawl') {
         </a>
         <?php endif; ?>
         
-        <?php if ($displayMode === 'crawl'): ?>
-        <button type="button" onclick="deleteAllMovies()" class="bg-red-900/50 hover:bg-red-800 text-red-200 font-bold py-3.5 px-6 rounded-xl transition-all border border-red-800/50 hover:border-red-600 flex items-center gap-2 transform hover:-translate-y-0.5 ml-auto shadow-[0_0_15px_rgba(220,38,38,0.2)] hover:shadow-[0_0_25px_rgba(220,38,38,0.4)]">
-            <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa Tất Cả Phim
-        </button>
-        <?php endif; ?>
+        
     </form>
 </div>
 
@@ -147,22 +135,12 @@ if ($displayMode === 'crawl') {
                                     <a href="/phim/<?= $movie['slug'] ?>" target="_blank" class="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 transition-colors p-2 rounded-lg" title="Xem trên web">
                                         <i data-lucide="external-link" class="w-4 h-4"></i>
                                     </a>
-                                    <?php if ($displayMode === 'crawl'): ?>
-                                    <a href="?page=edit_movie&slug=<?= $movie['slug'] ?>" class="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/10 transition-colors p-2 rounded-lg" title="Sửa phim">
-                                        <i data-lucide="edit" class="w-4 h-4"></i>
-                                    </a>
-                                    <button onclick="deleteMovie('<?= $movie['slug'] ?>')" class="text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors p-2 rounded-lg" title="Xóa phim">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                    </button>
-                                    <?php else: ?>
+                                    
                                     <button onclick="blockMovie('<?= $movie['slug'] ?>', '<?= htmlspecialchars($movie['name'] ?? '', ENT_QUOTES) ?>')" class="text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors p-2 rounded-lg" title="Gỡ bỏ/Chặn phim này">
                                         <i data-lucide="ban" class="w-4 h-4"></i>
                                     </button>
-                                    <a href="?page=crawl&action=crawl_movie&slug=<?= $movie['slug'] ?>" class="text-green-400 hover:text-green-300 hover:bg-green-400/10 transition-colors p-2 rounded-lg" title="Cào phim này về DB">
-                                        <i data-lucide="download" class="w-4 h-4"></i>
-                                    </a>
-                                    <?php endif; ?>
-                                </div>
+                                    
+                                    </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -228,59 +206,9 @@ if ($displayMode === 'crawl') {
 </div>
 
 <script>
-    async function deleteAllMovies() {
-        if (!confirm('CẢNH BÁO: Bạn có chắc chắn muốn XÓA TOÀN BỘ phim khỏi cơ sở dữ liệu? Hành động này không thể hoàn tác!')) {
-            return;
-        }
-        
-        try {
-            const res = await fetch('api/delete_all_movies.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            const data = await res.json();
-            
-            if (data.status === 'success') {
-                alert('Đã xóa tất cả phim thành công!');
-                window.location.reload();
-            } else {
-                alert('Lỗi: ' + (data.message || 'Không thể xóa tất cả phim'));
-            }
-        } catch (err) {
-            alert('Lỗi kết nối: ' + err.message);
-        }
-    }
+    
 
-    async function deleteMovie(slug) {
-        if (!confirm('Bạn có chắc chắn muốn xóa phim này khỏi cơ sở dữ liệu? Phim sẽ không thể hiển thị trên web nữa.')) {
-            return;
-        }
-        
-        try {
-            const res = await fetch('api/delete_movie.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ slug })
-            });
-            
-            const data = await res.json();
-            
-            if (data.status === 'success') {
-                const row = document.getElementById('movie-' + slug);
-                if (row) {
-                    row.style.opacity = '0';
-                    setTimeout(() => row.remove(), 300);
-                }
-            } else {
-                alert('Lỗi: ' + (data.message || 'Không thể xóa phim'));
-            }
-        } catch (err) {
-            alert('Lỗi kết nối: ' + err.message);
-        }
-    }
+    
 
     async function blockMovie(slug, name) {
         if (!confirm(`Bạn có chắc chắn muốn GỠ BỎ và CHẶN phim "${name}"?\nPhim sẽ biến mất hoàn toàn trên web và app (dù ở chế độ API hay Crawl).`)) {

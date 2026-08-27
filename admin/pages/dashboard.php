@@ -109,8 +109,6 @@ if ($gaConfigured) {
     <div class="bg-admin-panel backdrop-blur-xl p-6 rounded-2xl border border-admin-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-blue-500/30 group relative overflow-hidden">
         <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-[50px] -mr-16 -mt-16 transition-all duration-500 group-hover:bg-blue-500/20"></div>
         <div class="flex justify-between items-start relative z-10">
-            <div><p class="text-gray-400 mb-1 text-sm font-medium tracking-wide">Chế Độ Hiển Thị</p><h3 class="text-2xl font-bold text-white uppercase tracking-wider drop-shadow-md"><?= htmlspecialchars($settings['displayMode']) ?></h3></div>
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-blue-600/5 rounded-xl flex items-center justify-center text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)] group-hover:scale-110 transition-transform duration-300"><i data-lucide="monitor" class="w-6 h-6"></i></div>
         </div>
     </div>
     <div class="bg-admin-panel backdrop-blur-xl p-6 rounded-2xl border border-admin-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-purple-500/30 group relative overflow-hidden">

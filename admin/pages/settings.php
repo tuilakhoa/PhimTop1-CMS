@@ -25,14 +25,7 @@
     
     <!-- Tab 1: General -->
     <div id="tab-general" class="tab-content block animate-fade-in">
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-300 mb-2">Chế độ nguồn dữ liệu (Display Mode)</label>
-            <select name="displayMode" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
-                <option value="api" <?= $settings['displayMode'] === 'api' ? 'selected' : '' ?>>Gọi API Trực Tiếp (Khuyên dùng nếu lười cào)</option>
-                <option value="crawl" <?= $settings['displayMode'] === 'crawl' ? 'selected' : '' ?>>Đọc Từ Database MySQL (Yêu cầu phải cào phim)</option>
-            </select>
-            <p class="text-xs text-gray-500 mt-2">Chế độ "Database MySQL" giúp load cực nhanh và an toàn khi API gốc chết, nhưng bạn phải vào mục Cào Phim mỗi ngày.</p>
-        </div>
+
         
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn API (Áp dụng khi dùng "Gọi API Trực Tiếp")</label>

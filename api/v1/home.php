@@ -20,22 +20,6 @@ if (!empty($apiKey) && $clientApiKey !== $apiKey) {
 
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 
-$displayMode = $settings['displayMode'] ?? 'api';
-if ($displayMode === 'crawl') {
-    $repo = getMovieRepository();
-    $result = $repo->getMovies($page, 24, '');
-    $data = [
-        'items' => $result['items'],
-        'titlePage' => 'Phim Mới Cập Nhật',
-        'domain' => '',
-        'seoOnPage' => (object)[],
-        'params' => (object)[],
-        'pagination' => [
-            'totalPages' => $result['totalPages'],
-            'currentPage' => $page
-        ]
-    ];
-} else {
     // Fetch data from CMS helper
     $data = fetchApiFilms('home', '', $page);
 
@@ -65,7 +49,6 @@ if ($displayMode === 'crawl') {
             }
         } catch (Throwable $e) {}
     }
-}
 
 // Lấy danh sách phim nổi bật (Hero Banner)
 $featuredMovies = [];
@@ -78,13 +61,8 @@ if ($featuredType === 'admin') {
     foreach ($slugs as $s) {
         $s = trim($s);
         if (!$s) continue;
-        if ($displayMode === 'crawl') {
-            $m = getMovieRepository()->getMovieBySlug($s);
-            if ($m) $featuredMovies[] = $m;
-        } else {
             $res = fetchApiMovieDetail($s);
             if ($res && !empty($res['movie'])) $featuredMovies[] = $res['movie'];
-        }
     }
 } elseif ($featuredType === 'view') {
     $pdo = getPDO();
