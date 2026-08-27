@@ -29,6 +29,10 @@ $domain = 'https://phimimg.com/';
 
     $apiResult = fetchApiMovieDetail($originalSlug);
     if ($apiResult && $apiResult['movie']) {
+        $repo->saveMovie($apiResult['movie']);
+        $repo->incrementView($originalSlug);
+    }
+    if ($apiResult && $apiResult['movie']) {
         $movie = $apiResult['movie'];
         $episodes = $apiResult['episodes'];
         

@@ -25,6 +25,10 @@ $domain = 'https://phimimg.com/';
 
     $apiResult = fetchApiMovieDetail($originalSlug);
     if ($apiResult && $apiResult['movie']) {
+        $repo->saveMovie($apiResult['movie']);
+        // Optional: $repo->incrementView($originalSlug); // We will increment view only on watching
+    }
+    if ($apiResult && $apiResult['movie']) {
         $movie = $apiResult['movie'];
         $episodes = $apiResult['episodes'];
         $domain = $apiResult['domain'];

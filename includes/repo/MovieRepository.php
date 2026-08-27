@@ -140,7 +140,7 @@ class MovieRepository {
                 ON DUPLICATE KEY UPDATE 
                 name=VALUES(name), origin_name=VALUES(origin_name), thumb_url=VALUES(thumb_url), poster_url=VALUES(poster_url), 
                 year=VALUES(year), type=VALUES(type), status=VALUES(status), episode_current=VALUES(episode_current), 
-                quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap), content=VALUES(content), actor=VALUES(actor), director=VALUES(director), view=VALUES(view), updated_at=VALUES(updated_at)";
+                quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap), content=VALUES(content), actor=VALUES(actor), director=VALUES(director), updated_at=VALUES(updated_at)";
             $stmt = $this->pdo->prepare($sql);
             
             // Lọc các trường có trong SQL
@@ -303,4 +303,19 @@ class MovieRepository {
             }
         }
     }
+
+    public function incrementView($slug) {
+        if ($this->isFirestore()) {
+            $doc = $this->fs->getDocument('movies', $slug);
+            if ($doc) {
+                $doc['view'] = ($doc['view'] ?? 0) + 1;
+                $this->fs->setDocument('movies', $slug, $doc);
+            }
+        } else {
+            if (!$this->pdo) return;
+            $stmt = $this->pdo->prepare("UPDATE movies SET view = view + 1 WHERE slug = ?");
+            $stmt->execute([$slug]);
+        }
+    }
+
 }

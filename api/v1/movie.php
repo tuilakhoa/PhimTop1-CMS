@@ -35,6 +35,10 @@ if ($repo->isMovieBlocked($slug)) {
 
     // Fetch data from CMS helper
     $data = fetchApiMovieDetail($slug);
+    if ($data && !empty($data['movie'])) {
+        $repo->saveMovie($data['movie']);
+        $repo->incrementView($slug);
+    }
 
     if ($data && !empty($data['movie'])) {
         $repo = getMovieRepository();
