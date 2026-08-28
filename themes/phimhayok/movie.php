@@ -7,22 +7,39 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     $firstCatObj = reset($movie['category']);
     $firstCat = is_array($firstCatObj) ? ($firstCatObj['slug'] ?? '') : (is_string($firstCatObj) ? $firstCatObj : '');
     if ($firstCat) {
-        $cacheKey = 'suggestions_' . $firstCat;
-        $cachedSug = $cache->get($cacheKey, 3600); // 1 hour cache
-        if ($cachedSug) {
-            $sugData = json_decode($cachedSug, true);
-            $suggestions = $sugData['items'] ?? [];
-            $sugDomain = $sugData['domain'] ?? 'https://phimimg.com/';
-        } else {
-            $sugRes = @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12");
-            if ($sugRes) {
-                $sugData = json_decode($sugRes, true);
-                if (isset($sugData['data']['items'])) {
-                    $suggestions = $sugData['data']['items'];
-                    $sugDomain = $sugData['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
-                    $cache->set($cacheKey, json_encode(['items' => $suggestions, 'domain' => $sugDomain]));
-                }
+        $sugRes = @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12");
+        if ($sugRes) {
+            $sugData = json_decode($sugRes, true);
+            if (isset($sugData['data']['items'])) {
+                $suggestions = $sugData['data']['items'];
+                $sugDomain = $sugData['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
             }
+        }
+    }
+}
+
+// Fetch images gallery
+$movieImages = ['backdrops' => [], 'posters' => []];
+$tmdbId = $movie['tmdb']['id'] ?? null;
+$tmdbType = $movie['tmdb']['type'] ?? 'movie';
+$tmdbApiKey = $settings['tmdbApiKey'] ?? '';
+
+if ($tmdbId && $tmdbApiKey) {
+    // Fetch directly from TMDB using the provided API Key
+    $tmdbRes = @file_get_contents("https://api.themoviedb.org/3/{$tmdbType}/{$tmdbId}/images?api_key=" . urlencode($tmdbApiKey));
+    if ($tmdbRes) {
+        $tmdbData = json_decode($tmdbRes, true);
+        if (isset($tmdbData['backdrops'])) $movieImages['backdrops'] = $tmdbData['backdrops'];
+        if (isset($tmdbData['posters'])) $movieImages['posters'] = $tmdbData['posters'];
+    }
+} else {
+    // Fallback to PhimAPI
+    $imgRes = @file_get_contents("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images");
+    if ($imgRes) {
+        $imgData = json_decode($imgRes, true);
+        if (isset($imgData['data'])) {
+            $movieImages['backdrops'] = $imgData['data']['backdrops'] ?? [];
+            $movieImages['posters'] = $imgData['data']['posters'] ?? [];
         }
     }
 }
@@ -116,7 +133,7 @@ if (!empty($_GET['party'])) {
                 </div>
                 <div class="flex flex-col pb-1">
                     <span class="text-gray-500 mb-1">Diễn viên:</span>
-                    <span class="text-white line-clamp-3 hover:line-clamp-none "><?= htmlspecialchars(is_array($movie['actor'] ?? null) ? implode(', ', $movie['actor']) : ($movie['actor'] ?? 'Đang cập nhật')) ?></span>
+                    <span class="text-white line-clamp-3 hover:line-clamp-none transition-all"><?= htmlspecialchars(is_array($movie['actor'] ?? null) ? implode(', ', $movie['actor']) : ($movie['actor'] ?? 'Đang cập nhật')) ?></span>
                 </div>
             </div>
         </div>
@@ -134,7 +151,7 @@ if (!empty($_GET['party'])) {
                 foreach ($cats as $cat): 
                     $catName = is_array($cat) ? ($cat['name'] ?? '') : $cat;
                 ?>
-                    <a href="#" class="px-3 py-1 bg-[#202020] text-gray-300 text-xs rounded hover:bg-[#303030]  border border-gray-800"><?= htmlspecialchars($catName) ?></a>
+                    <a href="#" class="px-3 py-1 bg-[#202020] text-gray-300 text-xs rounded hover:bg-[#303030] transition-colors border border-gray-800"><?= htmlspecialchars($catName) ?></a>
                 <?php endforeach; ?>
             </div>
             
@@ -142,10 +159,10 @@ if (!empty($_GET['party'])) {
             <div class="flex flex-wrap items-center gap-3 mb-8 bg-[#141414]/50 p-4 rounded-2xl border border-gray-800/50 backdrop-blur-sm">
                 <?php if (!empty($episodes[0]['server_data'])): ?>
                     <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($episodes[0]['server_data'][0]['slug']) ?>" 
-                       class="px-8 py-2.5 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-full   flex items-center shadow-lg shadow-yellow-500/20">
+                       class="px-8 py-2.5 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-full transition-all hover:scale-105 flex items-center shadow-lg shadow-yellow-500/20">
                         Xem ngay
                     </a>
-                    <button onclick="openGlobalWatchParty()" class="px-6 py-2.5 bg-[#252525] hover:bg-[#333] text-phim-yellow font-bold rounded-full  flex items-center border border-[#fcc526]/30 shadow-lg shadow-yellow-500/5">
+                    <button onclick="openGlobalWatchParty()" class="px-6 py-2.5 bg-[#252525] hover:bg-[#333] text-phim-yellow font-bold rounded-full transition-all flex items-center border border-[#fcc526]/30 shadow-lg shadow-yellow-500/5">
                         <i data-lucide="users" class="w-5 h-5 mr-2"></i> Vào phòng xem
                     </button>
                 <?php else: ?>
@@ -154,7 +171,7 @@ if (!empty($_GET['party'])) {
                     </button>
                 <?php endif; ?>
                 
-                <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-6 py-2.5 bg-[#303030] hover:bg-[#404040] text-white text-sm font-medium rounded-full  flex items-center border border-gray-700">
+                <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-6 py-2.5 bg-[#303030] hover:bg-[#404040] text-white text-sm font-medium rounded-full transition-colors flex items-center border border-gray-700">
                     <i data-lucide="send" class="w-4 h-4 mr-2"></i> Chia sẻ
                 </button>
                 
@@ -167,7 +184,7 @@ if (!empty($_GET['party'])) {
             </div>
             
             <!-- Description -->
-<div class="mb-10">
+<div class="mb-10" id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
                 <h3 class="text-xl font-bold mb-4 flex items-center text-white">
                     <span class="w-1 h-5 bg-[#fcc526] mr-2 rounded"></span> Giới thiệu:
                 </h3>
@@ -180,7 +197,7 @@ if (!empty($_GET['party'])) {
             <?php include __DIR__ . '/components/actors.php'; ?>
             
             <!-- Episodes List -->
-<div class="mb-10">
+<div class="mb-10" id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
                     <h3 class="text-xl font-bold text-white">Danh sách tập</h3>
                     <div class="flex items-center gap-2">
@@ -188,7 +205,7 @@ if (!empty($_GET['party'])) {
                             <input type="text" id="search-episode" placeholder="Tìm tập phim..." class="bg-[#202020] text-sm text-white px-3 py-1.5 rounded-lg border border-gray-700 outline-none focus:border-[#fcc526] w-full md:w-48">
                             <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
                         </div>
-                        <button class="text-gray-400 hover:text-white text-sm flex items-center  shrink-0">
+                        <button class="text-gray-400 hover:text-white text-sm flex items-center transition-colors shrink-0">
                             <i data-lucide="arrow-down-up" class="w-4 h-4 mr-1"></i> Sắp xếp
                         </button>
                     </div>
@@ -204,7 +221,7 @@ if (!empty($_GET['party'])) {
                         foreach ($server['server_data'] as $ep): 
                         ?>
                             <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($ep['slug']) ?>" 
-                               class="px-2 py-2.5 bg-[#202020] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded  text-center truncate border border-gray-800"
+                               class="px-2 py-2.5 bg-[#202020] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded transition-all text-center truncate border border-gray-800"
                                title="<?= htmlspecialchars($ep['name']) ?>">
                                 <?= htmlspecialchars($ep['name']) ?>
                             </a>
@@ -246,10 +263,10 @@ if (!empty($_GET['party'])) {
                         <input type="text" id="comment-name" class="w-full bg-transparent text-white text-sm outline-none mb-2 pb-2 border-b border-gray-700 hidden" placeholder="Nhập tên của bạn...">
                         <textarea id="comment-content" rows="3" class="w-full bg-transparent text-white text-sm outline-none resize-none placeholder-gray-500" placeholder="Vui lòng nhập nội dung..."></textarea>
                         <div class="flex items-center justify-between mt-2 border-t border-gray-700 pt-3">
-                            <label class="flex items-center text-gray-400 text-sm cursor-pointer hover:text-white ">
+                            <label class="flex items-center text-gray-400 text-sm cursor-pointer hover:text-white transition-colors">
                                 <input type="checkbox" id="comment-anon" checked class="mr-2 rounded border-gray-600 bg-gray-700 text-[#fcc526] focus:ring-[#fcc526]"> Ẩn danh ?
                             </label>
-                            <button id="btn-submit-comment" class="bg-[#5c4a16] text-[#fcc526] font-bold px-4 py-1.5 rounded-lg text-sm flex items-center hover:bg-[#7a621c]  border border-[#7a621c]">
+                            <button id="btn-submit-comment" class="bg-[#5c4a16] text-[#fcc526] font-bold px-4 py-1.5 rounded-lg text-sm flex items-center hover:bg-[#7a621c] transition-colors border border-[#7a621c]">
                                 Gửi bình luận <i data-lucide="send" class="w-4 h-4 ml-1.5"></i>
                             </button>
                         </div>
@@ -270,8 +287,6 @@ if (!empty($_GET['party'])) {
                 const commentsList = document.getElementById('comments-list');
                 const countSpan = document.getElementById('comment-count');
                 const movieSlug = '<?= htmlspecialchars($slug) ?>';
-                const currentUser = <?= json_encode($_SESSION['user']['name'] ?? '') ?>;
-                const isAdmin = <?= isset($_SESSION['admin']) ? 'true' : 'false' ?>;
                 
                 anonCheckbox.addEventListener('change', function() {
                     if (this.checked) {
@@ -281,21 +296,6 @@ if (!empty($_GET['party'])) {
                         nameInput.focus();
                     }
                 });
-                
-                window.deleteComment = function(id) {
-                    if(confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
-                        fetch('/api/comments.php', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({action: 'delete', id: id})
-                        })
-                        .then(res => res.json())
-                        .then(res => {
-                            if(res.success) fetchComments();
-                            else alert(res.message);
-                        });
-                    }
-                };
                 
                 function fetchComments() {
                     fetch('/api/comments.php?slug=' + movieSlug)
@@ -310,21 +310,15 @@ if (!empty($_GET['party'])) {
                                 
                                 let html = '';
                                 res.data.forEach(c => {
-                                    let deleteBtn = '';
-                                    if (isAdmin || (currentUser && currentUser === c.user_name)) {
-                                        deleteBtn = `<button onclick="deleteComment(${c.id})" class="text-red-500 text-xs ml-3 hover:underline font-medium border border-red-500/30 px-2 py-0.5 rounded">Xóa</button>`;
-                                    }
-                                    
                                     html += `
                                         <div class="flex gap-3">
                                             <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center shrink-0 border border-gray-700">
                                                 <svg class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                             </div>
                                             <div class="flex-1">
-                                                <div class="flex items-baseline mb-1">
-                                                    <span class="font-bold text-gray-200 text-sm mr-2">${c.user_name}</span>
+                                                <div class="flex items-baseline gap-2 mb-1">
+                                                    <span class="font-bold text-gray-200 text-sm">${c.user_name}</span>
                                                     <span class="text-xs text-gray-500">${c.time_ago}</span>
-                                                    ${deleteBtn}
                                                 </div>
                                                 <p class="text-sm text-gray-300">${c.content}</p>
                                             </div>
@@ -382,10 +376,10 @@ if (!empty($_GET['party'])) {
     </h3>
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         <?php foreach ($suggestions as $item): ?>
-            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-xl bg-transparent  ">
+            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-xl bg-transparent transition-all duration-300">
                 <div class="aspect-[3/4] relative overflow-hidden rounded-xl border border-transparent group-hover:border-gray-700">
-                    <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover   ">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-black/20 to-transparent opacity-80 group-hover:opacity-100 "></div>
+                    <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
                     
                     <!-- Vietsub Badge (Yellow top right) -->
                     <div class="absolute top-2 right-2">
@@ -401,14 +395,14 @@ if (!empty($_GET['party'])) {
                         </span>
                     </div>
                     
-                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100  ">
-                        <div class="w-12 h-12 bg-black/60 rounded-full flex items-center justify-center border border-gray-500    backdrop-blur-sm">
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div class="w-12 h-12 bg-black/60 rounded-full flex items-center justify-center border border-gray-500 transform group-hover:scale-110 transition-transform backdrop-blur-sm">
                             <i data-lucide="play" class="w-5 h-5 text-white ml-1"></i>
                         </div>
                     </div>
                 </div>
                 <div class="pt-3 pb-2 px-1">
-                    <h3 class="text-white font-medium text-sm truncate group-hover:text-[#fcc526] "><?= htmlspecialchars($item['name']) ?></h3>
+                    <h3 class="text-white font-medium text-sm truncate group-hover:text-[#fcc526] transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
                     <p class="text-xs text-gray-500 truncate mt-0.5"><?= htmlspecialchars($item['origin_name']) ?> <span class="bg-[#202020] px-1.5 py-0.5 rounded ml-1"><?= htmlspecialchars($item['year'] ?? date('Y')) ?></span></p>
                 </div>
             </a>
