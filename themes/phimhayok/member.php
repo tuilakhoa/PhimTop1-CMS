@@ -23,7 +23,12 @@
             <?php if ($isLoggedIn): ?>
                 <div class="p-8">
                     <div class="flex items-center space-x-4 mb-8 border-b border-white/10 pb-6">
-                        <img loading="lazy" src="<?= htmlspecialchars($user['avatar'] ?? 'https://ui-avatars.com/api/?name='.urlencode($user['name'])) ?>" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-phim-yellow">
+                        <div class="relative group">
+                            <img loading="lazy" id="main-user-avatar" src="<?= htmlspecialchars(!empty($user['avatar']) ? $user['avatar'] : 'https://ui-avatars.com/api/?name='.urlencode($user['name'] ?? 'User').'&background=random') ?>" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-phim-yellow">
+                            <button onclick="generateRandomAvatar()" class="absolute inset-0 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" title="Tạo ngẫu nhiên">
+                                <i data-lucide="dices" class="w-6 h-6"></i>
+                            </button>
+                        </div>
                         <div>
                             <h2 class="text-2xl font-bold text-white"><?= htmlspecialchars($user['name']) ?></h2>
                             <p class="text-gray-400"><?= htmlspecialchars($user['email']) ?></p>
@@ -199,6 +204,26 @@
                 if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-gray-400 hover:text-white';
             }
             lucide.createIcons();
+        }
+
+        function generateRandomAvatar() {
+            const btnIcon = document.querySelector('button[title="Tạo ngẫu nhiên"] i');
+            if(btnIcon) btnIcon.classList.add('animate-spin');
+            
+            fetch('/api/auth.php?action=generate_avatar')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('main-user-avatar').src = data.avatar_url;
+                        const navAvatar = document.getElementById('nav-user-avatar');
+                        if(navAvatar) navAvatar.src = data.avatar_url;
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .finally(() => {
+                    if(btnIcon) btnIcon.classList.remove('animate-spin');
+                });
         }
     </script>
 </body>

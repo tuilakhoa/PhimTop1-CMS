@@ -77,7 +77,7 @@ function getSettings() {
         'adminPath' => '/admin',
         'displayMode' => 'api',
         'apiSource' => 'kkphim',
-        'theme' => 'dark',
+        'theme' => 'phimhayok',
         'cmsVersion' => '1.0.2',
         'githubRepo' => 'kkphim/cms-core',
         'githubBranch' => 'main',

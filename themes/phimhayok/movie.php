@@ -139,7 +139,7 @@ if (!empty($_GET['party'])) {
         </div>
         
         <!-- Right Content: Info & Episodes -->
-        <div class="flex-1 text-white pt-2 md:pt-4">
+        <div class="flex-1 min-w-0 text-white pt-2 md:pt-4">
             <!-- Title -->
             <h1 class="text-3xl md:text-5xl font-bold mb-2 text-white leading-tight drop-shadow-md"><?= htmlspecialchars($movie['name']) ?></h1>
             <h2 class="text-lg text-gray-400 mb-4 italic"><?= htmlspecialchars($movie['origin_name']) ?> (<?= htmlspecialchars($movie['year'] ?? date('Y')) ?>)</h2>
@@ -162,6 +162,9 @@ if (!empty($_GET['party'])) {
                        class="px-8 py-2.5 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-full transition-all hover:scale-105 flex items-center shadow-lg shadow-yellow-500/20">
                         Xem ngay
                     </a>
+                    <button onclick="openGlobalWatchParty()" class="px-6 py-2.5 bg-[#252525] hover:bg-[#333] text-phim-yellow font-bold rounded-full transition-all flex items-center border border-[#fcc526]/30 shadow-lg shadow-yellow-500/5">
+                        <i data-lucide="users" class="w-5 h-5 mr-2"></i> Vào phòng xem
+                    </button>
                 <?php else: ?>
                     <button class="px-8 py-2.5 bg-gray-700 text-gray-400 font-bold rounded-full cursor-not-allowed">
                         Đang Cập Nhật

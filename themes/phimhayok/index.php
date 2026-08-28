@@ -36,32 +36,32 @@ if (empty($featuredMovies) && !empty($movies)) {
     $featuredMovies = [$movies[0]];
 }
 
-// Fetch additional lists for Homepage
+// Fetch additional lists for Homepage (Optimized to use existing $movies array)
+$phimLeData = array_values(array_filter($movies, function($m) { return isset($m['type']) && ($m['type'] === 'single' || $m['type'] === 'phim-le'); }));
+$phimBoData = array_values(array_filter($movies, function($m) { return isset($m['type']) && ($m['type'] === 'series' || $m['type'] === 'phim-bo'); }));
+$hoatHinhData = array_values(array_filter($movies, function($m) { return isset($m['type']) && ($m['type'] === 'hoathinh' || $m['type'] === 'hoat-hinh'); }));
+
 $homeSliders = [
     [
         'title' => 'Phim Lẻ Mới',
         'url' => '/' . ($settings["slugList"] ?? "danh-sach") . '/phim-le',
-        'data' => fetchApiFilms('danh-sach', 'phim-le', 1)['items'] ?? []
+        'data' => $phimLeData
     ],
     [
         'title' => 'Phim Bộ Mới',
         'url' => '/' . ($settings["slugList"] ?? "danh-sach") . '/phim-bo',
-        'data' => fetchApiFilms('danh-sach', 'phim-bo', 1)['items'] ?? []
+        'data' => $phimBoData
     ],
     [
         'title' => 'Hoạt Hình',
         'url' => '/' . ($settings["slugList"] ?? "danh-sach") . '/hoat-hinh',
-        'data' => fetchApiFilms('danh-sach', 'hoat-hinh', 1)['items'] ?? []
+        'data' => $hoatHinhData
     ]
 ];
 
-$trungQuocData = fetchApiFilms('quoc-gia', 'trung-quoc', 1)['items'] ?? [];
-$hanQuocData = fetchApiFilms('quoc-gia', 'han-quoc', 1)['items'] ?? [];
-$auMyData = fetchApiFilms('quoc-gia', 'au-my', 1)['items'] ?? [];
-
-$trungQuocData = fetchApiFilms('quoc-gia', 'trung-quoc', 1)['items'] ?? [];
-$hanQuocData = fetchApiFilms('quoc-gia', 'han-quoc', 1)['items'] ?? [];
-$auMyData = fetchApiFilms('quoc-gia', 'au-my', 1)['items'] ?? [];
+$trungQuocData = array_values(array_filter($movies, function($m) { return stripos(json_encode($m['country'] ?? ''), 'Trung Quốc') !== false || stripos(json_encode($m['country'] ?? ''), 'trung-quoc') !== false; }));
+$hanQuocData = array_values(array_filter($movies, function($m) { return stripos(json_encode($m['country'] ?? ''), 'Hàn Quốc') !== false || stripos(json_encode($m['country'] ?? ''), 'han-quoc') !== false; }));
+$auMyData = array_values(array_filter($movies, function($m) { return stripos(json_encode($m['country'] ?? ''), 'Âu Mỹ') !== false || stripos(json_encode($m['country'] ?? ''), 'au-my') !== false; }));
 ?>
 
 <?php if (!empty($featuredMovies)): ?>

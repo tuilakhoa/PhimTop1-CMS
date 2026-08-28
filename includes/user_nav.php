@@ -42,7 +42,7 @@ if (isset($_SESSION['user'])) {
         <div class="relative group z-50">
             <button class="flex items-center focus:outline-none bg-gray-800/50 hover:bg-gray-700/50 px-2 py-1.5 md:px-3 md:py-2 rounded-full transition-all border border-gray-700/50">
                 <div class="relative w-6 h-6 md:w-8 md:h-8 mr-1 md:mr-2">
-                    <img src="<?= htmlspecialchars($_SESSION['user']['avatar'] ?: 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['user']['name']) . '&background=random') ?>" class="w-full h-full rounded-full shadow-sm" alt="Avatar">
+                    <img id="nav-user-avatar" src="<?= htmlspecialchars($_SESSION['user']['avatar'] ?: 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['user']['name']) . '&background=random') ?>" class="w-full h-full rounded-full shadow-sm" alt="Avatar">
                     <?php if (!empty($navFrameUrl)): ?>
                         <img src="<?= htmlspecialchars($navFrameUrl) ?>" class="absolute inset-0 w-full h-full scale-[1.3] object-contain z-10 pointer-events-none" alt="Frame">
                     <?php endif; ?>
