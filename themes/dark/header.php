@@ -94,13 +94,8 @@ if ($cachedCats) {
     <link rel="preconnect" href="https://phimimg.com" crossorigin>
     <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
     
-    <?php global $preloadImage; if (!empty($preloadImage)): ?>
-    <link rel="preload" as="image" href="<?= htmlspecialchars($preloadImage) ?>">
-    <?php endif; ?>
-
-    
-    <!-- Tailwind CSS (đã được compile vào style.css) -->
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script defer src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/themes/dark/assets/css/style.css?v=<?= filemtime(__DIR__ . '/assets/css/style.css') ?>">
@@ -296,7 +291,7 @@ if ($cachedCats) {
             </div>
         </div>
     </nav>
-    <script defer src="/assets/js/main.js?v=<?= filemtime(__DIR__ . '/../../assets/js/main.js') ?>"></script>
+    <script src="/assets/js/main.js?v=<?= filemtime(__DIR__ . '/../../assets/js/main.js') ?>"></script>
     <script>
     function openGlobalWatchParty() {
         const code = prompt("Nhập MÃ PHÒNG xem chung:");
