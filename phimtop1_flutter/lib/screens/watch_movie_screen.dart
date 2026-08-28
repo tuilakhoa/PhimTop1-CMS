@@ -203,26 +203,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
       if (mounted) {
         setState(() {
-          _chewieController = ChewieController(
-            videoPlayerController: _videoController!,
-            autoPlay: true,
-            looping: false,
-            startAt: startAt,
-            aspectRatio: _videoController!.value.aspectRatio,
-            allowPlaybackSpeedChanging: true,
-            playbackSpeeds: const [0.5, 0.75, 1, 1.25, 1.5, 2.0],
-            materialProgressColors: ChewieProgressColors(
-              playedColor: Theme.of(context).primaryColor,
-              handleColor: Colors.white,
-              backgroundColor: Colors.white24,
-              bufferedColor: Colors.white60,
-            ),
-            additionalOptions: (optionContext) {
-              return [
-                OptionItem(
-                  onTap: (menuContext) {
-                    Navigator.pop(optionContext);
-                    SimplePip().enterPipMode();
+                              SimplePip().enterPipMode();
                   },
                   iconData: Icons.picture_in_picture_alt,
                   title: 'Hình trong hình (PiP)',
@@ -283,7 +264,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
       }
     } catch (e) {
       debugPrint("WatchMovieScreen Init Error: $e");
-      if (mounted) setState(() {});
+      if (mounted) 
     }
   }
 
@@ -1144,9 +1125,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   Widget build(BuildContext context) {
     final isTv = _isTvMode(context);
     final playerWidget = Center(
-      child: _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized
-          ? Chewie(controller: _chewieController!)
-          : _videoController.player.state.error != null
+      child: _videoController.player.state.error != null
               ? const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

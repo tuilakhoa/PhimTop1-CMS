@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 class MiniPlayerService {
   static final MiniPlayerService _instance = MiniPlayerService._internal();
@@ -7,14 +8,14 @@ class MiniPlayerService {
   MiniPlayerService._internal();
 
   OverlayEntry? _overlayEntry;
-  VideoPlayerController? activeController;
+  VideoController? activeController;
   String? currentMovieSlug;
   String? currentEpisodeSlug;
   String? currentThumbUrl;
 
   void showMiniPlayer({
     required BuildContext context,
-    required VideoPlayerController controller,
+    required VideoController controller,
     required String movieSlug,
     required String episodeSlug,
     String? thumbUrl,
@@ -57,7 +58,7 @@ class MiniPlayerService {
 }
 
 class _MiniPlayerWidget extends StatefulWidget {
-  final VideoPlayerController controller;
+  final VideoController controller;
   final VoidCallback onExpand;
   final VoidCallback onClose;
 
@@ -99,10 +100,10 @@ class _MiniPlayerWidgetState extends State<_MiniPlayerWidget> {
         onDoubleTap: widget.onExpand,
         onTap: () {
           setState(() {
-            if (widget.controller.value.isPlaying) {
-              widget.controller.pause();
+            if (widget.controller.player.state.playing) {
+              widget.controller.player.pause();
             } else {
-              widget.controller.play();
+              widget.controller.player.play();
             }
           });
         },
@@ -126,7 +127,7 @@ class _MiniPlayerWidgetState extends State<_MiniPlayerWidget> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: VideoPlayer(widget.controller),
+                  child: Video(controller: widget.controller, controls: NoVideoControls),
                 ),
                 Positioned(
                   top: 0,
@@ -148,7 +149,7 @@ class _MiniPlayerWidgetState extends State<_MiniPlayerWidget> {
                   bottom: 5,
                   left: 5,
                   child: Icon(
-                    widget.controller.value.isPlaying ? Icons.play_arrow : Icons.pause,
+                    widget.controller.player.state.playing ? Icons.play_arrow : Icons.pause,
                     color: Colors.white70,
                     size: 20,
                   ),
