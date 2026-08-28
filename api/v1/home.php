@@ -26,7 +26,6 @@ $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
     if ($data && !empty($data['items'])) {
         $repo = getMovieRepository();
         foreach ($data['items'] as $item) {
-            $repo->saveMovie($item);
         }
     } else if (!$data) {
         $data = [

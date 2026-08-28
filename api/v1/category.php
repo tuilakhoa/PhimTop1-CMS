@@ -38,7 +38,6 @@ if (empty($type) || empty($slug)) {
     if ($data && !empty($data['items'])) {
         $repo = getMovieRepository();
         foreach ($data['items'] as $item) {
-            $repo->saveMovie($item);
         }
     } else if (!$data) {
         $data = [

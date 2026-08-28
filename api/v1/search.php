@@ -34,7 +34,6 @@ if (empty($keyword)) {
     if ($data && !empty($data['items'])) {
         $repo = getMovieRepository();
         foreach ($data['items'] as $item) {
-            $repo->saveMovie($item);
         }
     } else if (!$data) {
         // Fallback to local database cache if upstream API fails
