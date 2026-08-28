@@ -87,7 +87,7 @@ class UpdateChecker {
         
         if ($latestCommitSha) {
             $shortSha = substr($latestCommitSha, 0, 7);
-            if (strlen($currentClean) === 40 && $currentClean !== $latestCommitSha) {
+            if ($currentClean !== $latestCommitSha) {
                 $hasUpdate = true;
             }
             $releases[] = [
