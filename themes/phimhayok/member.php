@@ -25,7 +25,7 @@
                     <div class="flex items-center space-x-4 mb-8 border-b border-white/10 pb-6">
                         <div class="relative group">
                             <img loading="lazy" id="main-user-avatar" src="<?= htmlspecialchars(!empty($user['avatar']) ? $user['avatar'] : 'https://ui-avatars.com/api/?name='.urlencode($user['name'] ?? 'User').'&background=random') ?>" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-phim-yellow">
-                            <button onclick="generateRandomAvatar()" class="absolute inset-0 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" title="Tạo ngẫu nhiên">
+                            <button onclick="generateRandomAvatar()" class="absolute inset-0 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 " title="Tạo ngẫu nhiên">
                                 <i data-lucide="dices" class="w-6 h-6"></i>
                             </button>
                         </div>
@@ -34,7 +34,7 @@
                             <p class="text-gray-400"><?= htmlspecialchars($user['email']) ?></p>
                         </div>
                         <div class="ml-auto">
-                            <a href="/api/auth.php?action=logout" class="bg-red-500/10 text-red-500 hover:bg-red-500/20 px-4 py-2 rounded-lg font-medium transition-colors flex items-center border border-red-500/30">
+                            <a href="/api/auth.php?action=logout" class="bg-red-500/10 text-red-500 hover:bg-red-500/20 px-4 py-2 rounded-lg font-medium  flex items-center border border-red-500/30">
                                 <i data-lucide="log-out" class="w-4 h-4 mr-2"></i> Thoát
                             </a>
                         </div>
@@ -54,35 +54,35 @@
                             <?php foreach ($follows as $item): ?>
                                 <a href="<?= $item['item_type'] === 'comic' ? '/truyen-tranh/'.$item['item_slug'] : '/phim/'.$item['item_slug'] ?>" class="block group">
                                     <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-[#1a1a1a]">
-                                        <img loading="lazy" src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <img loading="lazy" src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>" class="w-full h-full object-cover   ">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 "></div>
                                         <div class="absolute top-2 right-2 bg-phim-yellow text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
                                             <?= $item['item_type'] === 'comic' ? 'Truyện' : 'Phim' ?>
                                         </div>
                                     </div>
-                                    <h4 class="text-white font-bold text-sm line-clamp-1 group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['item_name']) ?></h4>
+                                    <h4 class="text-white font-bold text-sm line-clamp-1 group-hover:text-phim-yellow "><?= htmlspecialchars($item['item_name']) ?></h4>
                                 </a>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
                 </div>
                 <div class="bg-[#1a1a1a] border-t border-white/5 p-6 text-center">
-                    <a href="/" class="text-gray-400 hover:text-white font-medium transition-colors inline-flex items-center">
+                    <a href="/" class="text-gray-400 hover:text-white font-medium  inline-flex items-center">
                         <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Trở về trang chủ
                     </a>
                 </div>
             <?php else: ?>
                 <div class="p-8">
                     <div class="text-center mb-8">
-                        <a href="/" class="inline-flex items-center justify-center w-14 h-14 bg-phim-yellow rounded-2xl shadow-lg shadow-phim-yellow/20 mb-4 transition-transform hover:scale-105">
+                        <a href="/" class="inline-flex items-center justify-center w-14 h-14 bg-phim-yellow rounded-2xl shadow-lg shadow-phim-yellow/20 mb-4  ">
                             <i data-lucide="play" class="w-8 h-8 text-black ml-1"></i>
                         </a>
                                             <div class="relative flex p-1.5 bg-black/40 backdrop-blur-md rounded-full mb-8 border border-white/10 shadow-inner">
-                        <div id="tab-indicator" class="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-gradient-to-r from-phim-yellow to-yellow-400 rounded-full shadow-lg shadow-phim-yellow/20 transition-transform duration-300 ease-out <?= $mode === 'register' ? 'translate-x-full' : 'translate-x-0' ?>"></div>
+                        <div id="tab-indicator" class="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-gradient-to-r from-phim-yellow to-yellow-400 rounded-full shadow-lg shadow-phim-yellow/20   ease-out <?= $mode === 'register' ? 'translate-x-full' : 'translate-x-0' ?>"></div>
                         
-                        <button type="button" onclick="setMode('login')" id="tab-login" class="relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 <?= $mode === 'register' ? 'text-gray-400 hover:text-white' : 'text-black' ?>">Đăng Nhập</button>
+                        <button type="button" onclick="setMode('login')" id="tab-login" class="relative flex-1 py-3 text-sm font-bold rounded-full   z-10 <?= $mode === 'register' ? 'text-gray-400 hover:text-white' : 'text-black' ?>">Đăng Nhập</button>
                         
-                        <button type="button" onclick="setMode('register')" id="tab-register" class="relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 <?= $mode === 'register' ? 'text-black' : 'text-gray-400 hover:text-white' ?>">Đăng Ký</button>
+                        <button type="button" onclick="setMode('register')" id="tab-register" class="relative flex-1 py-3 text-sm font-bold rounded-full   z-10 <?= $mode === 'register' ? 'text-black' : 'text-gray-400 hover:text-white' ?>">Đăng Ký</button>
                     </div>
                     </div>
 
@@ -107,7 +107,7 @@
                             <label class="block text-sm font-medium text-gray-300 mb-2">Tên hiển thị</label>
                             <div class="relative">
                                 <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-                                <input type="text" name="name" class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow transition-all placeholder-gray-600" placeholder="Nguyễn Văn A">
+                                <input type="text" name="name" class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow  placeholder-gray-600" placeholder="Nguyễn Văn A">
                             </div>
                         </div>
 
@@ -115,22 +115,22 @@
                             <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
                             <div class="relative">
                                 <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-                                <input type="email" name="email" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow transition-all placeholder-gray-600" placeholder="bạn@domain.com">
+                                <input type="email" name="email" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow  placeholder-gray-600" placeholder="bạn@domain.com">
                             </div>
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2 flex justify-between">
                                 <span>Mật khẩu</span>
-                                <a href="/forgot_password.php" id="forgot-link" class="text-xs text-phim-yellow hover:text-white transition-colors <?= $mode === 'register' ? 'hidden' : 'block' ?>">Quên mật khẩu?</a>
+                                <a href="/forgot_password.php" id="forgot-link" class="text-xs text-phim-yellow hover:text-white  <?= $mode === 'register' ? 'hidden' : 'block' ?>">Quên mật khẩu?</a>
                             </label>
                             <div class="relative">
                                 <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-                                <input type="password" name="password" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow transition-all placeholder-gray-600" placeholder="••••••••">
+                                <input type="password" name="password" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow  placeholder-gray-600" placeholder="••••••••">
                             </div>
                         </div>
 
-                        <button type="submit" id="submit-btn" class="w-full bg-phim-yellow hover:bg-yellow-400 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(234,179,8,0.3)] flex items-center justify-center">
+                        <button type="submit" id="submit-btn" class="w-full bg-phim-yellow hover:bg-yellow-400 text-black font-bold py-3 px-4 rounded-xl  shadow-[0_0_15px_rgba(234,179,8,0.3)] flex items-center justify-center">
                             <i data-lucide="log-in" class="w-5 h-5 mr-2" id="submit-icon"></i> 
                             <span id="submit-text"><?= $mode === 'register' ? 'Đăng Ký Tài Khoản' : 'Đăng Nhập' ?></span>
                         </button>
@@ -179,9 +179,9 @@
                     indicator.classList.add('translate-x-full');
                 }
                 const tabLogin = document.getElementById('tab-login');
-                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-gray-400 hover:text-white';
+                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full   z-10 text-gray-400 hover:text-white';
                 const tabRegister = document.getElementById('tab-register');
-                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-black';
+                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full   z-10 text-black';
             } else {
                 document.getElementById('action-input').value = 'login';
                 document.getElementById('name-field').classList.add('hidden');
@@ -199,16 +199,16 @@
                     indicator.classList.add('translate-x-0');
                 }
                 const tabLogin = document.getElementById('tab-login');
-                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-black';
+                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full   z-10 text-black';
                 const tabRegister = document.getElementById('tab-register');
-                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-gray-400 hover:text-white';
+                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full   z-10 text-gray-400 hover:text-white';
             }
             lucide.createIcons();
         }
 
         function generateRandomAvatar() {
             const btnIcon = document.querySelector('button[title="Tạo ngẫu nhiên"] i');
-            if(btnIcon) btnIcon.classList.add('animate-spin');
+            if(btnIcon) btnIcon.classList.add('');
             
             fetch('/api/auth.php?action=generate_avatar')
                 .then(res => res.json())
@@ -222,7 +222,7 @@
                     }
                 })
                 .finally(() => {
-                    if(btnIcon) btnIcon.classList.remove('animate-spin');
+                    if(btnIcon) btnIcon.classList.remove('');
                 });
         }
     </script>

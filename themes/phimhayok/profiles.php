@@ -57,13 +57,13 @@ $themePath = __DIR__ . '/themes/' . $themeName;
         
         <div id="profiles-container" class="flex flex-wrap justify-center gap-4 md:gap-8 mb-12">
             <!-- Loaded via JS -->
-            <div class="animate-pulse flex space-x-4">
+            <div class=" flex space-x-4">
                 <div class="rounded-md bg-gray-700 h-24 w-24 md:h-32 md:w-32"></div>
                 <div class="rounded-md bg-gray-700 h-24 w-24 md:h-32 md:w-32"></div>
             </div>
         </div>
 
-        <button id="manage-btn" class="border border-gray-500 text-gray-500 hover:text-white hover:border-white px-6 py-2 text-lg uppercase tracking-widest transition-colors">
+        <button id="manage-btn" class="border border-gray-500 text-gray-500 hover:text-white hover:border-white px-6 py-2 text-lg uppercase tracking-widest ">
             Quản lý hồ sơ
         </button>
     </div>
@@ -76,7 +76,7 @@ $themePath = __DIR__ . '/themes/' . $themeName;
             <div class="flex items-center gap-6 mb-8 border-t border-b border-gray-700 py-6">
                 <div class="relative group cursor-pointer" onclick="rollAvatar()" title="Tạo avatar ngẫu nhiên">
                     <img id="new-avatar-img" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=200" class="w-24 h-24 md:w-28 md:h-28 rounded-md bg-blackbg" alt="">
-                    <div class="absolute inset-0 bg-black/60 text-white rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="absolute inset-0 bg-black/60 text-white rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 ">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                     </div>
                 </div>
@@ -89,8 +89,8 @@ $themePath = __DIR__ . '/themes/' . $themeName;
                 </div>
             </div>
             <div class="flex gap-4">
-                <button onclick="createProfile()" class="bg-white text-black hover:bg-gray-200 px-8 py-2 text-lg font-medium transition-colors">Tiếp tục</button>
-                <button onclick="document.getElementById('create-modal').classList.replace('flex', 'hidden')" class="border border-gray-500 text-gray-500 hover:text-white hover:border-white px-8 py-2 text-lg font-medium transition-colors">Hủy</button>
+                <button onclick="createProfile()" class="bg-white text-black hover:bg-gray-200 px-8 py-2 text-lg font-medium ">Tiếp tục</button>
+                <button onclick="document.getElementById('create-modal').classList.replace('flex', 'hidden')" class="border border-gray-500 text-gray-500 hover:text-white hover:border-white px-8 py-2 text-lg font-medium ">Hủy</button>
             </div>
         </div>
     </div>
@@ -116,11 +116,11 @@ $themePath = __DIR__ . '/themes/' . $themeName;
                 html += `
                     <div class="profile-card group cursor-pointer relative w-24 md:w-36 flex flex-col items-center" onclick="handleProfileClick(${p.id})">
                         <div class="relative">
-                            <img src="${p.avatar_url}" class="avatar-img w-24 h-24 md:w-36 md:h-36 rounded-md border-2 border-transparent transition-colors object-cover shadow-lg" alt="">
+                            <img src="${p.avatar_url}" class="avatar-img w-24 h-24 md:w-36 md:h-36 rounded-md border-2 border-transparent  object-cover shadow-lg" alt="">
                             ${kidBadge}
                             ${isManageMode ? '<div class="absolute inset-0 bg-black/50 flex items-center justify-center rounded-md border-2 border-white"><svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></div>' : ''}
                         </div>
-                        <span class="profile-name text-gray-400 mt-4 text-sm md:text-lg transition-colors truncate w-full text-center">${p.profile_name}</span>
+                        <span class="profile-name text-gray-400 mt-4 text-sm md:text-lg  truncate w-full text-center">${p.profile_name}</span>
                     </div>
                 `;
             });
@@ -128,10 +128,10 @@ $themePath = __DIR__ . '/themes/' . $themeName;
             if (profiles.length < 5 && !isManageMode) {
                 html += `
                     <div class="profile-card cursor-pointer w-24 md:w-36 flex flex-col items-center" onclick="showCreateModal()">
-                        <div class="w-24 h-24 md:w-36 md:h-36 rounded-md border-2 border-transparent hover:border-white transition-colors hover:bg-gray-200 flex items-center justify-center group bg-blackbg">
-                            <svg class="w-16 h-16 text-gray-500 group-hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        <div class="w-24 h-24 md:w-36 md:h-36 rounded-md border-2 border-transparent hover:border-white  hover:bg-gray-200 flex items-center justify-center group bg-blackbg">
+                            <svg class="w-16 h-16 text-gray-500 group-hover:text-black " fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                         </div>
-                        <span class="profile-name text-gray-400 mt-4 text-sm md:text-lg transition-colors">Thêm hồ sơ</span>
+                        <span class="profile-name text-gray-400 mt-4 text-sm md:text-lg ">Thêm hồ sơ</span>
                     </div>
                 `;
             }

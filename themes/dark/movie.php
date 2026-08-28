@@ -24,12 +24,21 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     $firstCatObj = reset($movie['category']);
     $firstCat = is_array($firstCatObj) ? ($firstCatObj['slug'] ?? '') : (is_string($firstCatObj) ? $firstCatObj : '');
     if ($firstCat) {
-        $sugRes = @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12");
-        if ($sugRes) {
-            $sugData = json_decode($sugRes, true);
-            if (isset($sugData['data']['items'])) {
-                $suggestions = $sugData['data']['items'];
-                $sugDomain = $sugData['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+        $cacheKey = 'suggestions_' . $firstCat;
+        $cachedSug = $cache->get($cacheKey, 3600); // 1 hour cache
+        if ($cachedSug) {
+            $sugData = json_decode($cachedSug, true);
+            $suggestions = $sugData['items'] ?? [];
+            $sugDomain = $sugData['domain'] ?? 'https://phimimg.com/';
+        } else {
+            $sugRes = @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12");
+            if ($sugRes) {
+                $sugData = json_decode($sugRes, true);
+                if (isset($sugData['data']['items'])) {
+                    $suggestions = $sugData['data']['items'];
+                    $sugDomain = $sugData['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+                    $cache->set($cacheKey, json_encode(['items' => $suggestions, 'domain' => $sugDomain]));
+                }
             }
         }
     }

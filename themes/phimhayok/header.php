@@ -38,14 +38,40 @@ $finalOgType = $ogType ?? ($settings['ogType'] ?? 'website');
 $finalOgLocale = $settings['ogLocale'] ?? 'vi_VN';
 $themeColor = $settings['themeColor'] ?? '#0f0f0f';
 
-$pdo = getPDO();
+require_once __DIR__ . '/../../includes/cache_manager.php';
+$cache = new CacheManager();
+$cachedCats = $cache->get('site_categories_api_full', 86400); // 1 day cache
 $genres = [];
 $countries = [];
-if ($pdo) {
-    $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        if ($row['type'] === 'genre') $genres[] = $row;
-        else if ($row['type'] === 'country') $countries[] = $row;
+
+if ($cachedCats) {
+    $cats = json_decode($cachedCats, true);
+    $genres = $cats['genres'] ?? [];
+    $countries = $cats['countries'] ?? [];
+} else {
+    // Fetch directly from API
+    $genresData = @json_decode(@file_get_contents('https://phimapi.com/the-loai'), true);
+    $countriesData = @json_decode(@file_get_contents('https://phimapi.com/quoc-gia'), true);
+    
+    if (!empty($genresData['data']['items'])) {
+        $genres = $genresData['data']['items'];
+    }
+    if (!empty($countriesData['data']['items'])) {
+        $countries = $countriesData['data']['items'];
+    }
+    
+    // Fallback to local DB if API fails
+    if (empty($genres) && empty($countries)) {
+        $pdo = getPDO();
+        if ($pdo) {
+            $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                if ($row['type'] === 'genre') $genres[] = $row;
+                else if ($row['type'] === 'country') $countries[] = $row;
+            }
+        }
+    } else {
+        $cache->set('site_categories_api_full', json_encode(['genres' => $genres, 'countries' => $countries]));
     }
 }
 ?>
@@ -153,7 +179,7 @@ if ($pdo) {
 </head>
 <body class="<?= $bodyClass ?> min-h-screen flex flex-col">
     <!-- Header -->
-    <nav class="header-solid fixed w-full top-0 z-50 transition-all duration-300 h-[72px]">
+    <nav class="header-solid fixed w-full top-0 z-50   h-[72px]">
         <div class="px-4 md:px-6 lg:px-12 w-full h-full flex items-center justify-between">
             
             <!-- Left: Logo & Nav -->
@@ -173,47 +199,47 @@ if ($pdo) {
                 
                 <!-- Desktop Nav -->
                 <div class="hidden xl:flex items-center space-x-6 text-sm font-semibold text-gray-300">
-                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white flex items-center transition-colors">
+                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white flex items-center ">
                         <i data-lucide="tv" class="w-4 h-4 mr-1.5"></i> Phim bộ
                     </a>
-                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white flex items-center transition-colors">
+                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white flex items-center ">
                         <i data-lucide="film" class="w-4 h-4 mr-1.5"></i> Phim lẻ
                     </a>
-                    <button onclick="openGlobalWatchParty()" class="text-phim-yellow hover:text-yellow-400 flex items-center transition-colors font-bold">
+                    <button onclick="openGlobalWatchParty()" class="text-phim-yellow hover:text-yellow-400 flex items-center  font-bold">
                         <i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Xem Chung
                     </button>
                     <?php do_action('theme_header_menu'); ?>
                     
                     <!-- Dropdowns -->
                     <div class="relative group">
-                        <button class="hover:text-white flex items-center transition-colors py-6">
+                        <button class="hover:text-white flex items-center  py-6">
                             Thể loại <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                         </button>
-                        <div class="absolute top-[100%] left-0 w-[500px] bg-[#141414] border border-gray-800 rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-5 grid grid-cols-3 gap-3">
+                        <div class="absolute top-[100%] left-0 w-[500px] bg-[#141414] border border-gray-800 rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible  z-50 p-5 grid grid-cols-3 gap-3">
                             <?php foreach ($genres as $g): ?>
-                                <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded transition-colors truncate"><?= htmlspecialchars($g['name']) ?></a>
+                                <a href="/<?= $settings["slugGenre"] ?? "the-loai" ?>/<?= htmlspecialchars($g['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded  truncate"><?= htmlspecialchars($g['name']) ?></a>
                             <?php endforeach; ?>
                         </div>
                     </div>
                     
                     <div class="relative group">
-                        <button class="hover:text-white flex items-center transition-colors py-6">
+                        <button class="hover:text-white flex items-center  py-6">
                             Quốc gia <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                         </button>
-                        <div class="absolute top-[100%] left-0 w-[500px] bg-[#141414] border border-gray-800 rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-5 grid grid-cols-3 gap-3">
+                        <div class="absolute top-[100%] left-0 w-[500px] bg-[#141414] border border-gray-800 rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible  z-50 p-5 grid grid-cols-3 gap-3">
                             <?php foreach ($countries as $c): ?>
-                                <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded transition-colors truncate"><?= htmlspecialchars($c['name']) ?></a>
+                                <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/<?= htmlspecialchars($c['slug']) ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded  truncate"><?= htmlspecialchars($c['name']) ?></a>
                             <?php endforeach; ?>
                         </div>
                     </div>
                     
                     <div class="relative group">
-                        <button class="hover:text-white flex items-center transition-colors py-6">
+                        <button class="hover:text-white flex items-center  py-6">
                             Năm <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
                         </button>
-                        <div class="absolute top-[100%] left-0 w-[300px] bg-[#141414] border border-gray-800 rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-4 grid grid-cols-4 gap-2">
+                        <div class="absolute top-[100%] left-0 w-[300px] bg-[#141414] border border-gray-800 rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible  z-50 p-4 grid grid-cols-4 gap-2">
                             <?php for($y = date('Y'); $y >= 2010; $y--): ?>
-                                <a href="/nam/<?= $y ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded text-center transition-colors"><?= $y ?></a>
+                                <a href="/nam/<?= $y ?>" class="text-sm text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded text-center "><?= $y ?></a>
                             <?php endfor; ?>
                         </div>
                     </div>
@@ -231,7 +257,7 @@ if ($pdo) {
                 </form>
 
                 <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv'])): ?>
-                <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="hidden md:flex items-center bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold py-2 px-4 rounded-full transition-colors shadow-[0_0_15px_rgba(234,179,8,0.3)] border border-yellow-400/50 mr-2">
+                <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="hidden md:flex items-center bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold py-2 px-4 rounded-full  shadow-[0_0_15px_rgba(234,179,8,0.3)] border border-yellow-400/50 mr-2">
                     <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Tải App
                 </button>
                 <?php endif; ?>
@@ -256,7 +282,7 @@ if ($pdo) {
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
                             <span>Thể loại</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                            <i data-lucide="chevron-down" class="w-4 h-4  group-open:rotate-180"></i>
                         </summary>
                         <div class="grid grid-cols-2 gap-2 mt-2 mb-2 pl-4 border-l border-gray-800">
                             <?php foreach ($genres as $g): ?>
@@ -268,7 +294,7 @@ if ($pdo) {
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
                             <span>Quốc gia</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                            <i data-lucide="chevron-down" class="w-4 h-4  group-open:rotate-180"></i>
                         </summary>
                         <div class="grid grid-cols-2 gap-2 mt-2 mb-2 pl-4 border-l border-gray-800">
                             <?php foreach ($countries as $c): ?>
@@ -280,7 +306,7 @@ if ($pdo) {
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
                             <span>Năm</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                            <i data-lucide="chevron-down" class="w-4 h-4  group-open:rotate-180"></i>
                         </summary>
                         <div class="grid grid-cols-3 gap-2 mt-2 mb-2 pl-4 border-l border-gray-800">
                             <?php for($y = date('Y'); $y >= 2010; $y--): ?>
@@ -292,7 +318,7 @@ if ($pdo) {
                     <?php do_action('theme_mobile_menu'); ?>
                     
                     <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv'])): ?>
-                    <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="flex w-full items-center justify-center bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-yellow-500/30 mt-2">
+                    <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="flex w-full items-center justify-center bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 px-4 rounded-lg  shadow-lg shadow-yellow-500/30 mt-2">
                         <i data-lucide="download" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng
                     </button>
                     <?php endif; ?>
@@ -303,9 +329,9 @@ if ($pdo) {
     </nav>
 
         <!-- Download App Modal -->
-        <div id="downloadAppModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity">
+        <div id="downloadAppModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 ">
             <div class="bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative">
-                <button onclick="document.getElementById('downloadAppModal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full p-1.5 transition-colors z-10">
+                <button onclick="document.getElementById('downloadAppModal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full p-1.5  z-10">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
                 <div class="p-6 text-center">
@@ -317,7 +343,7 @@ if ($pdo) {
                     
                     <div class="flex flex-col gap-2.5">
                         <?php if (!empty($settings['appDownloadUrl'])): ?>
-                        <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-between bg-phim-yellow hover:bg-yellow-400 text-black font-semibold py-2.5 px-4 rounded-xl transition-all">
+                        <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-between bg-phim-yellow hover:bg-yellow-400 text-black font-semibold py-2.5 px-4 rounded-xl ">
                             <div class="flex items-center text-sm">
                                 <i data-lucide="apple" class="w-4 h-4 mr-1.5"></i>
                                 <i data-lucide="android" class="w-4 h-4 mr-2"></i>
@@ -328,7 +354,7 @@ if ($pdo) {
                         <?php endif; ?>
                         
                         <?php if (!empty($settings['appDownloadUrlTv'])): ?>
-                        <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-between bg-white/5 hover:bg-white/10 text-gray-200 font-medium py-2.5 px-4 rounded-xl transition-all border border-white/10">
+                        <a href="<?= htmlspecialchars($settings['appDownloadUrlTv']) ?>" target="_blank" class="flex items-center justify-between bg-white/5 hover:bg-white/10 text-gray-200 font-medium py-2.5 px-4 rounded-xl  border border-white/10">
                             <div class="flex items-center text-sm">
                                 <i data-lucide="tv" class="w-4 h-4 mr-2"></i> TV / Android Box
                             </div>
@@ -386,7 +412,7 @@ if ($pdo) {
                 }
                 
                 // Show loading
-                container.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang tìm...</div>`;
+                container.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 "></i> Đang tìm...</div>`;
                 container.classList.remove('hidden');
                 lucide.createIcons();
                 
@@ -404,19 +430,19 @@ if ($pdo) {
                                         thumb = domain.replace(/\/$/, '') + '/' + thumb.replace(/^\//, '');
                                     }
                                     html += `
-                                        <a href="/phim/${item.slug}" class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors gap-3 group">
+                                        <a href="/phim/${item.slug}" class="flex items-center px-4 py-2 hover:bg-gray-800  gap-3 group">
                                             <div class="w-10 h-14 bg-gray-800 rounded overflow-hidden flex-shrink-0 shadow">
                                                 <img src="${thumb}" alt="${item.name.replace(/"/g, '&quot;')}" class="w-full h-full object-cover">
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <div class="text-gray-200 text-sm font-medium truncate group-hover:text-phim-yellow transition-colors">${item.name}</div>
+                                                <div class="text-gray-200 text-sm font-medium truncate group-hover:text-phim-yellow ">${item.name}</div>
                                                 <div class="text-gray-500 text-[11px] truncate">${item.origin_name || ''}</div>
                                             </div>
                                         </a>
                                     `;
                                 });
                                 html += `
-                                    <a href="/search?keyword=${encodeURIComponent(q)}" class="block px-4 py-3 text-center text-sm text-phim-yellow hover:bg-gray-800 transition-colors font-medium border-t border-gray-800 mt-2">
+                                    <a href="/search?keyword=${encodeURIComponent(q)}" class="block px-4 py-3 text-center text-sm text-phim-yellow hover:bg-gray-800  font-medium border-t border-gray-800 mt-2">
                                         Xem tất cả kết quả <i data-lucide="arrow-right" class="w-3 h-3 inline-block ml-1"></i>
                                     </a>
                                 </div>`;

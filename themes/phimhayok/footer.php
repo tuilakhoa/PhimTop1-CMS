@@ -8,7 +8,7 @@
                 <div class="col-span-1 md:col-span-2">
                     <a href="/" class="flex items-center space-x-2 mb-4">
                         <?php if (!empty($settings['logoUrl'])): ?>
-                            <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" class="h-8 object-contain opacity-80 hover:opacity-100 transition-opacity">
+                            <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" class="h-8 object-contain opacity-80 hover:opacity-100 ">
                         <?php else: ?>
                             <div class="text-2xl font-black tracking-tighter text-red-600 uppercase">
                                 <?= htmlspecialchars($siteName ?? "PhimTop1") ?>
@@ -19,10 +19,10 @@
                         <?= nl2br(htmlspecialchars($settings['footerText'] ?: 'Hệ thống xem phim online miễn phí chất lượng cao 4K/Full HD. Kho phim khổng lồ đa dạng thể loại, cập nhật nhanh nhất các bộ phim hot, phim chiếu rạp. Trải nghiệm mượt mà, không chứa quảng cáo.')) ?>
                     </p>
                     <div class="flex items-center space-x-4 mb-4">
-                        <?php if (!empty($settings['socialFacebook'])): ?><a href="<?= htmlspecialchars($settings['socialFacebook']) ?>" target="_blank" class="text-gray-500 hover:text-blue-500 transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a><?php endif; ?>
-                        <?php if (!empty($settings['socialYoutube'])): ?><a href="<?= htmlspecialchars($settings['socialYoutube']) ?>" target="_blank" class="text-gray-500 hover:text-red-500 transition-colors"><i data-lucide="youtube" class="w-5 h-5"></i></a><?php endif; ?>
-                        <?php if (!empty($settings['socialTwitter'])): ?><a href="<?= htmlspecialchars($settings['socialTwitter']) ?>" target="_blank" class="text-gray-500 hover:text-blue-400 transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a><?php endif; ?>
-                        <?php if (!empty($settings['socialTelegram'])): ?><a href="<?= htmlspecialchars($settings['socialTelegram']) ?>" target="_blank" class="text-gray-500 hover:text-blue-400 transition-colors"><i data-lucide="send" class="w-5 h-5"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['socialFacebook'])): ?><a href="<?= htmlspecialchars($settings['socialFacebook']) ?>" target="_blank" class="text-gray-500 hover:text-blue-500 "><i data-lucide="facebook" class="w-5 h-5"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['socialYoutube'])): ?><a href="<?= htmlspecialchars($settings['socialYoutube']) ?>" target="_blank" class="text-gray-500 hover:text-red-500 "><i data-lucide="youtube" class="w-5 h-5"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['socialTwitter'])): ?><a href="<?= htmlspecialchars($settings['socialTwitter']) ?>" target="_blank" class="text-gray-500 hover:text-blue-400 "><i data-lucide="twitter" class="w-5 h-5"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['socialTelegram'])): ?><a href="<?= htmlspecialchars($settings['socialTelegram']) ?>" target="_blank" class="text-gray-500 hover:text-blue-400 "><i data-lucide="send" class="w-5 h-5"></i></a><?php endif; ?>
                     </div>
                     <?php if (!empty($settings['customFooter'])): ?>
                         <div class="mt-4 text-gray-500 text-sm">
@@ -33,20 +33,20 @@
                 <div>
                     <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Khám Phá</h3>
                     <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-moi" class="hover:text-red-500 transition-colors">Phim Mới</a></li>
-                        <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-red-500 transition-colors">Phim Lẻ</a></li>
-                        <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-red-500 transition-colors">Phim Bộ</a></li>
-                        <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-chieu-rap" class="hover:text-red-500 transition-colors">Phim Chiếu Rạp</a></li>
+                        <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-moi" class="hover:text-red-500 ">Phim Mới</a></li>
+                        <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-red-500 ">Phim Lẻ</a></li>
+                        <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-red-500 ">Phim Bộ</a></li>
+                        <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-chieu-rap" class="hover:text-red-500 ">Phim Chiếu Rạp</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Hỗ Trợ</h3>
                     <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-white transition-colors">Giới thiệu</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Liên hệ</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Điều khoản dịch vụ</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Chính sách bảo mật</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Khiếu nại bản quyền</a></li>
+                        <li><a href="#" class="hover:text-white ">Giới thiệu</a></li>
+                        <li><a href="#" class="hover:text-white ">Liên hệ</a></li>
+                        <li><a href="#" class="hover:text-white ">Điều khoản dịch vụ</a></li>
+                        <li><a href="#" class="hover:text-white ">Chính sách bảo mật</a></li>
+                        <li><a href="#" class="hover:text-white ">Khiếu nại bản quyền</a></li>
                     </ul>
                 </div>
             </div>
@@ -90,8 +90,8 @@
     <!-- Mobile Floating Download Button -->
     <?php if (!empty($settings['appDownloadUrl'])): ?>
     <div class="md:hidden fixed bottom-6 right-5 z-[90]">
-        <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center w-12 h-12 bg-yellow-500/90 backdrop-blur-md text-black rounded-full shadow-lg shadow-yellow-500/20 border border-yellow-400/50 hover:bg-yellow-400 hover:scale-110 active:scale-95 transition-all duration-300 group" aria-label="Tải Ứng Dụng">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center w-12 h-12 bg-yellow-500/90 backdrop-blur-md text-black rounded-full shadow-lg shadow-yellow-500/20 border border-yellow-400/50 hover:bg-yellow-400  active:   group" aria-label="Tải Ứng Dụng">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5  " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
                 <line x1="12" x2="12" y1="15" y2="3"/>

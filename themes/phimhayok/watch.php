@@ -123,7 +123,7 @@ if (isset($_SESSION['user'])) {
         <div class="p-4 md:p-6 bg-[#0f0f0f] border-t border-gray-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($slug) ?>" class="hover:text-red-500 transition-colors"><?= htmlspecialchars($movie['name']) ?></a>
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($slug) ?>" class="hover:text-red-500 "><?= htmlspecialchars($movie['name']) ?></a>
                 </h1>
                 <div class="flex items-center text-gray-400 text-sm">
                     <span class="mr-4 flex items-center">
@@ -138,10 +138,10 @@ if (isset($_SESSION['user'])) {
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
-                <button onclick="toggleWatchPartyDialog()" class="flex items-center px-4 py-2 bg-phim-yellow hover:bg-yellow-400 text-black text-sm font-bold rounded transition-colors shadow-[0_0_10px_rgba(234,179,8,0.3)]">
+                <button onclick="toggleWatchPartyDialog()" class="flex items-center px-4 py-2 bg-phim-yellow hover:bg-yellow-400 text-black text-sm font-bold rounded  shadow-[0_0_10px_rgba(234,179,8,0.3)]">
                     <i data-lucide="users" class="w-4 h-4 mr-2"></i> Xem Chung
                 </button>
-                <button class="flex items-center px-4 py-2 bg-[#1a1a1a] hover:bg-[#252525] text-gray-300 hover:text-white text-sm font-medium rounded transition-colors border border-gray-800">
+                <button class="flex items-center px-4 py-2 bg-[#1a1a1a] hover:bg-[#252525] text-gray-300 hover:text-white text-sm font-medium rounded  border border-gray-800">
                     <i data-lucide="flag" class="w-4 h-4 mr-2 text-red-500"></i> Báo lỗi
                 </button>
                 <div class="px-4 py-2 bg-red-600/10 border border-red-600/30 text-red-500 rounded text-sm font-medium flex items-center">
@@ -175,7 +175,7 @@ if (isset($_SESSION['user'])) {
                                 : "bg-[#1a1a1a] text-gray-400 hover:bg-[#2a2a2a] hover:text-white border border-gray-800";
                         ?>
                             <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>" 
-                               class="flex items-center justify-center py-2.5 rounded-md transition-all text-sm <?= $classes ?>">
+                               class="flex items-center justify-center py-2.5 rounded-md  text-sm <?= $classes ?>">
                                 <?= htmlspecialchars($e['name']) ?>
                             </a>
                         <?php endforeach; ?>
@@ -224,7 +224,7 @@ if (isset($_SESSION['user'])) {
                     <?= htmlspecialchars(strip_tags($movie['content'] ?? '')) ?>
                 </p>
                 
-                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($slug) ?>" class="block w-full mt-4 text-center py-2 bg-[#1a1a1a] hover:bg-[#252525] text-white text-sm font-medium rounded transition-colors">
+                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($slug) ?>" class="block w-full mt-4 text-center py-2 bg-[#1a1a1a] hover:bg-[#252525] text-white text-sm font-medium rounded ">
                     Xem chi tiết
                 </a>
             </div>
@@ -239,11 +239,11 @@ if (isset($_SESSION['user'])) {
                     <?php foreach ($suggestions as $item): ?>
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex gap-4 group">
                             <div class="w-20 shrink-0 relative rounded overflow-hidden aspect-[3/4]">
-                                <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
-                                <div class="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors"></div>
+                                <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover  ">
+                                <div class="absolute inset-0 bg-black/40 group-hover:bg-transparent "></div>
                             </div>
                             <div class="flex-1 py-1">
-                                <h4 class="text-white text-sm font-medium leading-snug group-hover:text-red-500 transition-colors line-clamp-2 mb-1"><?= htmlspecialchars($item['name']) ?></h4>
+                                <h4 class="text-white text-sm font-medium leading-snug group-hover:text-red-500  line-clamp-2 mb-1"><?= htmlspecialchars($item['name']) ?></h4>
                                 <p class="text-gray-500 text-xs mb-1"><?= htmlspecialchars($item['year'] ?? '') ?></p>
                                 <span class="inline-block px-1.5 py-0.5 bg-red-600/20 text-red-500 text-[10px] rounded border border-red-600/30">
                                     <?= htmlspecialchars($item['quality'] ?? 'HD') ?>
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Watch Party Dialog -->
 <div id="watch-party-dialog" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center backdrop-blur-sm">
     <div class="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-        <button onclick="toggleWatchPartyDialog()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+        <button onclick="toggleWatchPartyDialog()" class="absolute top-4 right-4 text-gray-400 hover:text-white ">
             <i data-lucide="x" class="w-5 h-5"></i>
         </button>
         <h3 class="text-xl font-bold text-white mb-4 flex items-center">
@@ -406,12 +406,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <div id="wp-setup-view">
             <div class="space-y-4">
                 <div>
-                    <button onclick="createWatchParty()" class="w-full bg-phim-yellow hover:bg-yellow-400 text-black py-3 rounded-xl font-bold transition-colors flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+                    <button onclick="createWatchParty()" class="w-full bg-phim-yellow hover:bg-yellow-400 text-black py-3 rounded-xl font-bold  flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.2)]">
                         <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i> Tạo phòng mới
                     </button>
                     <label class="flex items-center justify-center text-sm text-gray-400 mt-3 cursor-pointer group">
-                        <input type="checkbox" id="wp-is-public" class="mr-2 rounded border-gray-700 bg-gray-800 text-phim-yellow focus:ring-phim-yellow focus:ring-offset-[#111] transition-colors w-4 h-4"> 
-                        <span class="group-hover:text-gray-300 transition-colors">Công khai phòng này để mọi người cùng xem</span>
+                        <input type="checkbox" id="wp-is-public" class="mr-2 rounded border-gray-700 bg-gray-800 text-phim-yellow focus:ring-phim-yellow focus:ring-offset-[#111]  w-4 h-4"> 
+                        <span class="group-hover:text-gray-300 ">Công khai phòng này để mọi người cùng xem</span>
                     </label>
                 </div>
                 
@@ -424,8 +424,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Nhập mã phòng</label>
                     <div class="flex space-x-2">
-                        <input type="text" id="wp-room-input" placeholder="Ví dụ: A1B2C3" class="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-phim-yellow uppercase transition-colors">
-                        <button onclick="joinWatchPartyBtn()" class="bg-[#222] hover:bg-[#333] text-white px-4 py-2 rounded-xl font-medium transition-colors border border-white/5">
+                        <input type="text" id="wp-room-input" placeholder="Ví dụ: A1B2C3" class="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-phim-yellow uppercase ">
+                        <button onclick="joinWatchPartyBtn()" class="bg-[#222] hover:bg-[#333] text-white px-4 py-2 rounded-xl font-medium  border border-white/5">
                             Vào
                         </button>
                     </div>
@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="bg-[#1a1a1a] rounded-xl p-3 mb-4 text-left border border-white/5">
                 <div class="text-sm text-gray-300 flex items-center justify-between mb-1">
                     <span>Trạng thái:</span>
-                    <span id="wp-status-text" class="text-green-400 font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-green-400 mr-1.5 animate-pulse"></span> Đã kết nối</span>
+                    <span id="wp-status-text" class="text-green-400 font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-green-400 mr-1.5 "></span> Đã kết nối</span>
                 </div>
                 <div class="text-sm text-gray-300 flex items-center justify-between">
                     <span>Vai trò:</span>
@@ -461,10 +461,10 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             
             <div class="flex space-x-2">
-                <button onclick="copyWatchPartyLink()" class="flex-1 bg-[#222] hover:bg-[#333] text-white py-2 rounded-xl font-medium transition-colors flex items-center justify-center text-sm border border-white/5">
+                <button onclick="copyWatchPartyLink()" class="flex-1 bg-[#222] hover:bg-[#333] text-white py-2 rounded-xl font-medium  flex items-center justify-center text-sm border border-white/5">
                     <i data-lucide="copy" class="w-4 h-4 mr-1.5"></i> Copy Link
                 </button>
-                <button onclick="leaveWatchParty()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl font-bold transition-colors flex items-center justify-center text-sm shadow-[0_0_10px_rgba(220,38,38,0.3)]">
+                <button onclick="leaveWatchParty()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl font-bold  flex items-center justify-center text-sm shadow-[0_0_10px_rgba(220,38,38,0.3)]">
                     <i data-lucide="log-out" class="w-4 h-4 mr-1.5"></i> Rời Phòng
                 </button>
             </div>
@@ -515,7 +515,7 @@ function fetchPublicRooms() {
                         <div class="text-phim-yellow font-mono font-bold text-sm">${room.room_code}</div>
                         <div class="text-xs text-gray-400">Host: ${room.creator_name} - Tập ${room.episode_name}</div>
                     </div>
-                    <button onclick="joinWatchParty('${room.room_code}')" class="px-3 py-1.5 bg-[#222] hover:bg-[#333] text-white text-xs font-bold rounded-lg transition-colors border border-white/5">
+                    <button onclick="joinWatchParty('${room.room_code}')" class="px-3 py-1.5 bg-[#222] hover:bg-[#333] text-white text-xs font-bold rounded-lg  border border-white/5">
                         Tham gia
                     </button>
                 </div>`;
@@ -543,8 +543,8 @@ function showWpActiveView(code, isHost) {
     if (!badge) {
         badge = document.createElement('div');
         badge.id = 'wp-player-badge';
-        badge.className = 'absolute top-4 left-4 z-20 bg-black/60 backdrop-blur border border-[#eab308]/30 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center cursor-pointer hover:bg-black/80 transition-colors shadow-lg shadow-[#eab308]/10';
-        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span> Watch Party: <span class="text-[#eab308] ml-1">' + code + '</span>';
+        badge.className = 'absolute top-4 left-4 z-20 bg-black/60 backdrop-blur border border-[#eab308]/30 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center cursor-pointer hover:bg-black/80  shadow-lg shadow-[#eab308]/10';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 mr-2 "></span> Watch Party: <span class="text-[#eab308] ml-1">' + code + '</span>';
         badge.onclick = toggleWatchPartyDialog;
         document.getElementById('player-container').appendChild(badge);
     }

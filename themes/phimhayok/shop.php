@@ -27,7 +27,7 @@ try {
             <p class="text-gray-400 mt-2">Mua sắm khung ảnh đại diện và vật phẩm trang trí</p>
         </div>
         <div class="flex items-center space-x-4">
-            <button id="checkinBtn" onclick="doCheckin()" class="hidden bg-phim-yellow text-black hover:bg-yellow-500 border-none rounded-xl px-4 py-3 flex items-center shadow-lg shadow-yellow-500/20 transition-all hover:scale-105 font-medium">
+            <button id="checkinBtn" onclick="doCheckin()" class="hidden bg-phim-yellow text-black hover:bg-yellow-500 border-none rounded-xl px-4 py-3 flex items-center shadow-lg shadow-yellow-500/20   font-medium">
                 <i data-lucide="calendar-check" class="w-5 h-5 mr-2"></i>
                 <span>Điểm Danh Nhận Xu</span>
             </button>
@@ -46,7 +46,7 @@ try {
     </div>
     
     <div id="loading" class="flex justify-center items-center py-12">
-        <i data-lucide="loader-2" class="w-8 h-8 text-phim-yellow animate-spin"></i>
+        <i data-lucide="loader-2" class="w-8 h-8 text-phim-yellow "></i>
     </div>
 </div>
 
@@ -123,22 +123,22 @@ function renderShop(items) {
     items.forEach(item => {
         let actionBtn = '';
         if (item.is_active) {
-            actionBtn = `<button onclick="equipItem(${item.id}, false)" class="w-full bg-gray-700 hover:bg-gray-600 text-black py-2 rounded-lg font-medium transition-colors text-sm">Bỏ trang bị</button>`;
+            actionBtn = `<button onclick="equipItem(${item.id}, false)" class="w-full bg-gray-700 hover:bg-gray-600 text-black py-2 rounded-lg font-medium  text-sm">Bỏ trang bị</button>`;
         } else if (item.is_owned) {
-            actionBtn = `<button onclick="equipItem(${item.id}, true)" class="w-full bg-green-600 hover:bg-green-700 text-black py-2 rounded-lg font-medium transition-colors text-sm">Trang bị</button>`;
+            actionBtn = `<button onclick="equipItem(${item.id}, true)" class="w-full bg-green-600 hover:bg-green-700 text-black py-2 rounded-lg font-medium  text-sm">Trang bị</button>`;
         } else {
-            actionBtn = `<button onclick="buyItem(${item.id}, ${item.price}, '${item.name}')" class="w-full bg-phim-yellow text-black hover:bg-yellow-500 text-black py-2 rounded-lg font-medium transition-colors text-sm flex justify-center items-center">
+            actionBtn = `<button onclick="buyItem(${item.id}, ${item.price}, '${item.name}')" class="w-full bg-phim-yellow text-black hover:bg-yellow-500 text-black py-2 rounded-lg font-medium  text-sm flex justify-center items-center">
                 <i data-lucide="shopping-cart" class="w-4 h-4 mr-1.5"></i> Mua ngay
             </button>`;
         }
 
         const card = document.createElement('div');
-        card.className = `bg-gray-900 border ${item.is_active ? 'border-phim-yellow shadow-yellow-500/20 shadow-lg' : 'border-gray-800'} rounded-xl p-4 flex flex-col items-center transition-all hover:scale-[1.02]`;
+        card.className = `bg-gray-900 border ${item.is_active ? 'border-phim-yellow shadow-yellow-500/20 shadow-lg' : 'border-gray-800'} rounded-xl p-4 flex flex-col items-center  hover:scale-[1.02]`;
         card.innerHTML = `
             <div class="relative w-24 h-24 mb-4 flex items-center justify-center">
                 <!-- Avatar placeholder to show how frame looks -->
                 <img src="https://ui-avatars.com/api/?name=U&background=random" class="w-16 h-16 rounded-full absolute z-0" />
-                <img src="${item.image_url}" class="w-24 h-24 absolute z-10 scale-125 object-contain" alt="${item.name}" />
+                <img src="${item.image_url}" class="w-24 h-24 absolute z-10  object-contain" alt="${item.name}" />
             </div>
             <h3 class="text-white font-bold text-center mb-1 line-clamp-1" title="${item.name}">${item.name}</h3>
             

@@ -42,7 +42,7 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
 
             <div class="flex-1 min-w-[150px]">
                 <label class="block text-gray-400 text-xs font-medium mb-2 uppercase">Sắp xếp</label>
-                <select name="sort" class="w-full bg-gray-900 border border-gray-800 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-600 transition-colors">
+                <select name="sort" class="w-full bg-gray-900 border border-gray-800 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-600 ">
                     <?php foreach ($filterSorts as $k => $v): ?>
                         <option value="<?= $k ?>" <?= $currentSort === $k ? 'selected' : '' ?>><?= $v ?></option>
                     <?php endforeach; ?>
@@ -51,7 +51,7 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
             
             <div class="flex-1 min-w-[150px]">
                 <label class="block text-gray-400 text-xs font-medium mb-2 uppercase">Thể loại</label>
-                <select name="category" class="w-full bg-gray-900 border border-gray-800 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-600 transition-colors">
+                <select name="category" class="w-full bg-gray-900 border border-gray-800 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-600 ">
                     <?php foreach ($filterCategories as $k => $v): ?>
                         <option value="<?= $k ?>" <?= $currentCategory === $k ? 'selected' : '' ?>><?= $v ?></option>
                     <?php endforeach; ?>
@@ -60,7 +60,7 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
 
             <div class="flex-1 min-w-[150px]">
                 <label class="block text-gray-400 text-xs font-medium mb-2 uppercase">Quốc gia</label>
-                <select name="country" class="w-full bg-gray-900 border border-gray-800 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-600 transition-colors">
+                <select name="country" class="w-full bg-gray-900 border border-gray-800 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-600 ">
                     <?php foreach ($filterCountries as $k => $v): ?>
                         <option value="<?= $k ?>" <?= $currentCountry === $k ? 'selected' : '' ?>><?= $v ?></option>
                     <?php endforeach; ?>
@@ -69,7 +69,7 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
 
             <div class="flex-1 min-w-[120px]">
                 <label class="block text-gray-400 text-xs font-medium mb-2 uppercase">Năm</label>
-                <select name="year" class="w-full bg-gray-900 border border-gray-800 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-600 transition-colors">
+                <select name="year" class="w-full bg-gray-900 border border-gray-800 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-600 ">
                     <?php foreach ($filterYears as $k => $v): ?>
                         <option value="<?= $k ?>" <?= $currentYearVal == $k ? 'selected' : '' ?>><?= $v ?></option>
                     <?php endforeach; ?>
@@ -77,7 +77,7 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
             </div>
 
             <div class="flex-none w-full md:w-auto">
-                <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center border border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.3)]">
+                <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg  flex items-center justify-center border border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.3)]">
                     <i data-lucide="filter" class="w-4 h-4 mr-2"></i> Lọc Phim
                 </button>
             </div>
@@ -95,11 +95,11 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
     <?php else: ?>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
             <?php foreach ($movies as $item): ?>
-                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-lg bg-[#141414] border border-gray-800/50 hover:border-gray-600 transition-all duration-300">
+                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-lg bg-[#141414] border border-gray-800/50 hover:border-gray-600  ">
                     <div class="aspect-[3/4] relative overflow-hidden">
                         <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy"
-                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                             class="w-full h-full object-cover   ">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 "></div>
                         
                         <!-- Top Labels -->
                         <div class="absolute top-2 left-2 right-2 flex justify-between">
@@ -114,8 +114,8 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
                         </div>
                         
                         <!-- Play Icon Hover -->
-                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-12 h-12 bg-red-600/90 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.5)] transform group-hover:scale-110 transition-transform">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100  ">
+                            <div class="w-12 h-12 bg-red-600/90 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.5)]   ">
                                 <i data-lucide="play" class="w-5 h-5 text-white ml-1"></i>
                             </div>
                         </div>
@@ -130,7 +130,7 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
                         <?php endif; ?>
                     </div>
                     <div class="p-3">
-                        <h3 class="text-white font-medium text-sm truncate group-hover:text-red-500 transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
+                        <h3 class="text-white font-medium text-sm truncate group-hover:text-red-500 "><?= htmlspecialchars($item['name']) ?></h3>
                         <p class="text-gray-500 text-xs truncate mt-1"><?= htmlspecialchars($item['origin_name']) ?></p>
                     </div>
                 </a>
@@ -141,7 +141,7 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
             <div class="mt-12 flex justify-center">
                 <div class="flex items-center space-x-2 bg-[#141414] p-2 rounded-xl border border-gray-800">
                     <?php if ($currentPage > 1): ?>
-                        <a href="?page=<?= $currentPage - 1 ?>" class="px-4 py-2 bg-gray-900 hover:bg-red-600 text-white rounded-lg transition-colors border border-gray-800 hover:border-red-600">
+                        <a href="?page=<?= $currentPage - 1 ?>" class="px-4 py-2 bg-gray-900 hover:bg-red-600 text-white rounded-lg  border border-gray-800 hover:border-red-600">
                             <i data-lucide="chevron-left" class="w-4 h-4"></i>
                         </a>
                     <?php endif; ?>
@@ -149,7 +149,7 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
                     <span class="px-4 py-2 text-gray-400 font-medium">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
                     
                     <?php if ($currentPage < $totalPages): ?>
-                        <a href="?page=<?= $currentPage + 1 ?>" class="px-4 py-2 bg-gray-900 hover:bg-red-600 text-white rounded-lg transition-colors border border-gray-800 hover:border-red-600">
+                        <a href="?page=<?= $currentPage + 1 ?>" class="px-4 py-2 bg-gray-900 hover:bg-red-600 text-white rounded-lg  border border-gray-800 hover:border-red-600">
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </a>
                     <?php endif; ?>

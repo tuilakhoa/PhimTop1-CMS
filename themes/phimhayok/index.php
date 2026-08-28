@@ -86,13 +86,13 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                                 </p>
                             <?php endif; ?>
                             <div class="flex items-center space-x-4">
-                                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center transition-transform hover:scale-105 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
+                                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center   shadow-[0_0_20px_rgba(234,179,8,0.4)]">
                                     <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 text-black ml-2"></i>
                                 </a>
-                                <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
+                                <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 ">
                                     <i data-lucide="heart" class="w-5 h-5 text-white"></i>
                                 </button>
-                                <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
+                                <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 ">
                                     <i data-lucide="info" class="w-5 h-5 text-white"></i>
                                 </button>
                             </div>
@@ -103,11 +103,11 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             </div>
             <!-- Navigation & Pagination -->
             <div class="absolute bottom-0 left-0 w-full h-1 bg-white/20 z-50">
-                <div class="hero-progress-line h-full bg-phim-yellow w-0 transition-all duration-75 ease-linear"></div>
+                <div class="hero-progress-line h-full bg-phim-yellow w-0   ease-linear"></div>
             </div>
             <div class="swiper-pagination !bottom-8"></div>
-            <div class="swiper-button-prev hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors"></div>
-            <div class="swiper-button-next hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors"></div>
+            <div class="swiper-button-prev hidden md:flex !text-white/50 hover:!text-white after:!text-2xl "></div>
+            <div class="swiper-button-next hidden md:flex !text-white/50 hover:!text-white after:!text-2xl "></div>
         </div>
     <?php else: $featured = $featuredMovies[0]; ?>
         <div class="absolute inset-0">
@@ -132,15 +132,15 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 
                 <div class="flex items-center space-x-4">
                     <!-- Big Yellow Play Button -->
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center transition-transform hover:scale-105 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center   shadow-[0_0_20px_rgba(234,179,8,0.4)]">
                         <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 text-black ml-2"></i>
                     </a>
                     
-                    <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
+                    <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 ">
                         <i data-lucide="heart" class="w-5 h-5 text-white"></i>
                     </button>
                     
-                    <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
+                    <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 ">
                         <i data-lucide="info" class="w-5 h-5 text-white"></i>
                     </button>
                 </div>
@@ -149,7 +149,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <!-- Small thumbnails at bottom right (Only for single image mode) -->
             <div class="absolute right-8 md:right-12 bottom-12 hidden lg:flex space-x-2">
                 <?php foreach (array_slice($movies, 1, 4) as $m): ?>
-                    <div class="w-24 h-14 rounded-md overflow-hidden border border-white/30 cursor-pointer hover:border-white transition-colors opacity-70 hover:opacity-100">
+                    <div class="w-24 h-14 rounded-md overflow-hidden border border-white/30 cursor-pointer hover:border-white  opacity-70 hover:opacity-100">
                         <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($m['poster_url']) ? $m['poster_url'] : ($m['thumb_url'] ?? ''))) ?>" class="w-full h-full object-cover">
                     </div>
                 <?php endforeach; ?>
@@ -159,7 +159,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
     
     <!-- Right side controls (Volume - shared) -->
     <div class="absolute right-8 md:right-12 bottom-32 md:bottom-40 flex items-center space-x-4 z-20">
-        <button class="w-12 h-12 rounded-full border border-gray-400 flex items-center justify-center hover:bg-white/10 transition-colors bg-black/40 backdrop-blur-sm">
+        <button class="w-12 h-12 rounded-full border border-gray-400 flex items-center justify-center hover:bg-white/10  bg-black/40 backdrop-blur-sm">
             <i data-lucide="volume-x" class="w-5 h-5 text-white"></i>
         </button>
     </div>
@@ -201,9 +201,9 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <!-- Skeleton Loader to prevent layout shift -->
                 <?php for($i=0; $i<8; $i++): ?>
                 <div class="swiper-slide w-48 md:w-52">
-                    <div class="aspect-[2/3] bg-[#1a1a1a] rounded-lg animate-pulse mb-3 border border-gray-800"></div>
-                    <div class="h-4 bg-[#1a1a1a] rounded animate-pulse w-3/4 mb-2"></div>
-                    <div class="h-3 bg-[#1a1a1a] rounded animate-pulse w-1/2"></div>
+                    <div class="aspect-[2/3] bg-[#1a1a1a] rounded-lg  mb-3 border border-gray-800"></div>
+                    <div class="h-4 bg-[#1a1a1a] rounded  w-3/4 mb-2"></div>
+                    <div class="h-3 bg-[#1a1a1a] rounded  w-1/2"></div>
                 </div>
                 <?php endfor; ?>
             </div>
@@ -216,7 +216,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
     <section>
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-white">Mới Nhất Trên <?= htmlspecialchars($siteName) ?></h2>
-            <button class="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:text-white hover:border-white transition-colors">
+            <button class="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:text-white hover:border-white ">
                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
             </button>
         </div>
@@ -225,11 +225,11 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="swiper-wrapper pb-4">
                 <?php foreach (array_slice($movies, 0, 8) as $item): ?>
                     <div class="swiper-slide w-72 md:w-80">
-                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
+                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer   ">
                             <!-- 16:9 Aspect Ratio Image -->
                             <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
                                 <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
-                                     class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                                     class="w-full h-full object-cover group-hover:opacity-80 ">
                                 
                                 <!-- Top Left Yellow Tag -->
                                 <?php if (!empty($item['episode_current'])): ?>
@@ -242,7 +242,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                             </div>
                             
                             <div class="mt-3">
-                                <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                                <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow "><?= htmlspecialchars($item['name'] ?? '') ?></h3>
                                 <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
                             </div>
                         </a>
@@ -260,20 +260,20 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         <h2 class="text-2xl font-bold text-white mb-6">Bạn đang quan tâm gì?</h2>
         
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] transition-transform">
+            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] ">
                 Hành Động
-                <div class="absolute -bottom-6 w-full h-12 bg-white/10 blur-xl group-hover:h-20 transition-all"></div>
+                <div class="absolute -bottom-6 w-full h-12 bg-white/10 blur-xl group-hover:h-20 "></div>
             </a>
-            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] transition-transform">
+            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] ">
                 Tâm Lý
             </a>
-            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] transition-transform">
+            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] ">
                 Hài Hước
             </a>
-            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] transition-transform">
+            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] ">
                 Kinh Dị
             </a>
-            <a href="#" class="h-28 rounded-xl bg-[#2a2a2a] hover:bg-[#333] flex items-center justify-center text-white font-bold text-lg border border-gray-800 transition-colors">
+            <a href="#" class="h-28 rounded-xl bg-[#2a2a2a] hover:bg-[#333] flex items-center justify-center text-white font-bold text-lg border border-gray-800 ">
                 +35 thể loại
             </a>
         </div>
@@ -295,9 +295,9 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         <!-- Grid -->
         <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <?php foreach (array_slice($movies, 0, 4) as $item): ?>
-                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1">
+                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer   ">
                     <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
-                        <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                        <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy" class="w-full h-full object-cover group-hover:opacity-80 ">
                         <?php if (!empty($item['episode_current'])): ?>
                             <div class="absolute top-2 left-2">
                                 <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm"><?= htmlspecialchars($item['episode_current'] ?? '') ?></span>
@@ -320,7 +320,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
     <section class="flex flex-col md:flex-row gap-4 md:gap-8 items-start border-t border-gray-900 pt-8 mt-8">
         <div class="md:w-32 lg:w-48 shrink-0 flex flex-col justify-center h-full pt-4 md:pt-[10%]">
             <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight">Phim <br><span class="text-cyan-400 uppercase">ÂU MỸ</span></h2>
-            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/au-my" class="text-gray-500 hover:text-white text-sm mt-4 flex items-center transition-colors">Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
+            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/au-my" class="text-gray-500 hover:text-white text-sm mt-4 flex items-center ">Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
         </div>
         
         <div class="flex-1 min-w-0 w-full relative">
@@ -328,11 +328,11 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <div class="swiper-wrapper pb-4">
                     <?php foreach (array_slice($auMyData, 0, 10) as $item): ?>
                         <div class="swiper-slide w-72 md:w-80">
-                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
+                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer   ">
                                 <!-- 16:9 Aspect Ratio Image -->
                                 <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
                                     <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>"
-                                         class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                                         class="w-full h-full object-cover group-hover:opacity-80 ">
                                     
                                     <!-- Top Left Yellow Tag -->
                                     <?php if (!empty($item['episode_current'])): ?>
@@ -345,7 +345,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                                 </div>
                                 
                                 <div class="mt-3">
-                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow "><?= htmlspecialchars($item['name'] ?? '') ?></h3>
                                     <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
                                 </div>
                             </a>
@@ -362,7 +362,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
     <section class="flex flex-col md:flex-row gap-4 md:gap-8 items-start border-t border-gray-900 pt-8 mt-8">
         <div class="md:w-32 lg:w-48 shrink-0 flex flex-col justify-center h-full pt-4 md:pt-[10%]">
             <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight">Phim <br><span class="text-red-500 uppercase">TRUNG QUỐC</span></h2>
-            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/trung-quoc" class="text-gray-500 hover:text-white text-sm mt-4 flex items-center transition-colors">Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
+            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/trung-quoc" class="text-gray-500 hover:text-white text-sm mt-4 flex items-center ">Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
         </div>
         
         <div class="flex-1 min-w-0 w-full relative">
@@ -370,11 +370,11 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <div class="swiper-wrapper pb-4">
                     <?php foreach (array_slice($trungQuocData, 0, 10) as $item): ?>
                         <div class="swiper-slide w-72 md:w-80">
-                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
+                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer   ">
                                 <!-- 16:9 Aspect Ratio Image -->
                                 <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
                                     <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>"
-                                         class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                                         class="w-full h-full object-cover group-hover:opacity-80 ">
                                     
                                     <!-- Top Left Yellow Tag -->
                                     <?php if (!empty($item['episode_current'])): ?>
@@ -387,7 +387,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                                 </div>
                                 
                                 <div class="mt-3">
-                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow "><?= htmlspecialchars($item['name'] ?? '') ?></h3>
                                     <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
                                 </div>
                             </a>
@@ -408,7 +408,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
     <section class="flex flex-col md:flex-row gap-4 md:gap-8 items-start border-t border-gray-900 pt-8 mt-8">
         <div class="md:w-32 lg:w-48 shrink-0 flex flex-col justify-center h-full pt-4 md:pt-[10%]">
             <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight">Phim <br><span class="text-cyan-400 uppercase">HÀN QUỐC</span></h2>
-            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/han-quoc" class="text-gray-500 hover:text-white text-sm mt-4 flex items-center transition-colors">Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
+            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/han-quoc" class="text-gray-500 hover:text-white text-sm mt-4 flex items-center ">Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
         </div>
         
         <div class="flex-1 min-w-0 w-full relative">
@@ -416,11 +416,11 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <div class="swiper-wrapper pb-4">
                     <?php foreach (array_slice($hanQuocData, 0, 10) as $item): ?>
                         <div class="swiper-slide w-72 md:w-80">
-                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
+                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer   ">
                                 <!-- 16:9 Aspect Ratio Image -->
                                 <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
                                     <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>"
-                                         class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                                         class="w-full h-full object-cover group-hover:opacity-80 ">
                                     
                                     <!-- Top Left Yellow Tag -->
                                     <?php if (!empty($item['episode_current'])): ?>
@@ -433,7 +433,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                                 </div>
                                 
                                 <div class="mt-3">
-                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow "><?= htmlspecialchars($item['name'] ?? '') ?></h3>
                                     <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
                                 </div>
                             </a>
@@ -461,9 +461,9 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             
             <!-- Tabs -->
             <div class="flex bg-[#141414] p-1.5 rounded-xl border border-gray-800 shadow-inner">
-                <button class="px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors">Ngày</button>
-                <button class="px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm">Tuần</button>
-                <button class="px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm">Tháng</button>
+                <button class="px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm ">Ngày</button>
+                <button class="px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium  text-sm">Tuần</button>
+                <button class="px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium  text-sm">Tháng</button>
             </div>
         </div>
         
@@ -490,16 +490,16 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                                     ($rank === 2 ? 'text-gray-300 [text-shadow:0_0_12px_rgba(209,213,219,0.7)]' : 
                                     ($rank === 3 ? 'text-amber-600 [text-shadow:0_0_12px_rgba(217,119,6,0.8)]' : 'text-gray-700'));
                     ?>
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex items-center group p-3 -mx-3 rounded-2xl hover:bg-[#1a1a1a] transition-colors duration-300">
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex items-center group p-3 -mx-3 rounded-2xl hover:bg-[#1a1a1a]  ">
                         <div class="w-12 text-center shrink-0">
-                            <span class="text-4xl font-black italic <?= $rankColor ?> transition-transform group-hover:scale-110 inline-block"><?= $rank ?></span>
+                            <span class="text-4xl font-black italic <?= $rankColor ?>   inline-block"><?= $rank ?></span>
                         </div>
                         <div class="w-20 h-28 shrink-0 mx-5 rounded-xl overflow-hidden relative shadow-lg shadow-black/50">
-                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                            <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover   ">
+                            <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent "></div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="text-white text-base md:text-lg font-bold truncate group-hover:text-phim-yellow transition-colors leading-tight mb-1.5"><?= htmlspecialchars($item['name']) ?></h4>
+                            <h4 class="text-white text-base md:text-lg font-bold truncate group-hover:text-phim-yellow  leading-tight mb-1.5"><?= htmlspecialchars($item['name']) ?></h4>
                             <p class="text-gray-500 text-sm truncate"><?= htmlspecialchars($item['origin_name']) ?></p>
                             <div class="flex items-center mt-3">
                                 <span class="bg-gray-800 text-gray-300 text-xs font-medium px-2 py-1 rounded mr-3 border border-gray-700"><?= htmlspecialchars($item['year'] ?? date('Y')) ?></span>
@@ -520,7 +520,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
     <section>
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl md:text-3xl font-bold text-white">Danh Sách Phim Chiếu Rạp Hôm Nay</h2>
-            <button class="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:text-white hover:border-white transition-colors">
+            <button class="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:text-white hover:border-white ">
                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
             </button>
         </div>
@@ -534,8 +534,8 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">
                             <div class="aspect-[2/3] relative overflow-hidden rounded-lg">
                                 <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
-                                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                                     class="w-full h-full object-cover   ">
+                                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent "></div>
                                 
                                 <!-- Top Right Vietsub -->
                                 <div class="absolute top-2 right-2">
@@ -555,7 +555,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                             
                             <div class="mt-3 flex justify-between items-start">
                                 <div class="flex-1 min-w-0 pr-2">
-                                    <h3 class="text-white font-bold text-sm truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                                    <h3 class="text-white font-bold text-sm truncate group-hover:text-phim-yellow "><?= htmlspecialchars($item['name'] ?? '') ?></h3>
                                     <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
                                 </div>
                                 <div class="shrink-0 bg-gray-800 text-gray-400 text-[10px] px-1.5 py-0.5 rounded mt-0.5">
@@ -591,8 +591,8 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                             <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">
                                 <div class="aspect-[2/3] relative overflow-hidden rounded-lg">
                                     <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
-                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                                         class="w-full h-full object-cover   ">
+                                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent "></div>
                                     
                                     <!-- Top Right Vietsub -->
                                     <div class="absolute top-2 right-2">
@@ -611,7 +611,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                                 
                                 <div class="mt-3 flex justify-between items-start">
                                     <div class="flex-1 min-w-0 pr-2">
-                                        <h3 class="text-white font-bold text-sm truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                                        <h3 class="text-white font-bold text-sm truncate group-hover:text-phim-yellow "><?= htmlspecialchars($item['name'] ?? '') ?></h3>
                                         <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
                                     </div>
                                     <div class="shrink-0 bg-gray-800 text-gray-400 text-[10px] px-1.5 py-0.5 rounded mt-0.5">
