@@ -179,9 +179,6 @@ if ($pdo) {
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white flex items-center transition-colors">
                         <i data-lucide="film" class="w-4 h-4 mr-1.5"></i> Phim lẻ
                     </a>
-                    <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-ngan" class="hover:text-white flex items-center transition-colors">
-                        <i data-lucide="smartphone" class="w-4 h-4 mr-1.5"></i> Phim ngắn
-                    </a>
                     <button onclick="openGlobalWatchParty()" class="text-phim-yellow hover:text-yellow-400 flex items-center transition-colors font-bold">
                         <i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Xem Chung
                     </button>
