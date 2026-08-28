@@ -233,13 +233,13 @@ if (!empty($_GET['party'])) {
                 </div>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        const searchEp = document.getElementById('search-episode');
+                        var searchEp = document.getElementById('search-episode');
                         if (searchEp) {
                             searchEp.addEventListener('input', function(e) {
-                                const keyword = e.target.value.toLowerCase().trim();
-                                const eps = document.querySelectorAll('#episode-list a');
+                                var keyword = e.target.value.toLowerCase().trim();
+                                var eps = document.querySelectorAll('#episode-list a');
                                 eps.forEach(ep => {
-                                    const text = ep.textContent.toLowerCase().trim();
+                                    var text = ep.textContent.toLowerCase().trim();
                                     if (text.includes(keyword)) {
                                         ep.style.display = '';
                                     } else {
@@ -280,15 +280,15 @@ if (!empty($_GET['party'])) {
             
             <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const anonCheckbox = document.getElementById('comment-anon');
-                const nameInput = document.getElementById('comment-name');
-                const contentInput = document.getElementById('comment-content');
-                const submitBtn = document.getElementById('btn-submit-comment');
-                const commentsList = document.getElementById('comments-list');
-                const countSpan = document.getElementById('comment-count');
-                const movieSlug = '<?= htmlspecialchars($slug) ?>';
-                const currentUser = <?= json_encode($_SESSION['user']['name'] ?? '') ?>;
-                const isAdmin = <?= isset($_SESSION['admin']) ? 'true' : 'false' ?>;
+                var anonCheckbox = document.getElementById('comment-anon');
+                var nameInput = document.getElementById('comment-name');
+                var contentInput = document.getElementById('comment-content');
+                var submitBtn = document.getElementById('btn-submit-comment');
+                var commentsList = document.getElementById('comments-list');
+                var countSpan = document.getElementById('comment-count');
+                var movieSlug = '<?= htmlspecialchars($slug) ?>';
+                var currentUser = <?= json_encode($_SESSION['user']['name'] ?? '') ?>;
+                var isAdmin = <?= isset($_SESSION['admin']) ? 'true' : 'false' ?>;
                 
                 anonCheckbox.addEventListener('change', function() {
                     if (this.checked) {
@@ -325,9 +325,9 @@ if (!empty($_GET['party'])) {
                                     return;
                                 }
                                 
-                                let html = '';
+                                var html = '';
                                 res.data.forEach(c => {
-                                    let deleteBtn = '';
+                                    var deleteBtn = '';
                                     if (isAdmin || (currentUser && currentUser === c.user_name)) {
                                         deleteBtn = `<button onclick="deleteComment(${c.id})" class="text-red-500 text-xs ml-3 hover:underline font-medium border border-red-500/30 px-2 py-0.5 rounded">Xóa</button>`;
                                     }
@@ -354,9 +354,9 @@ if (!empty($_GET['party'])) {
                 }
                 
                 submitBtn.addEventListener('click', function() {
-                    const content = contentInput.value.trim();
-                    const isAnon = anonCheckbox.checked;
-                    const name = isAnon ? '' : nameInput.value.trim();
+                    var content = contentInput.value.trim();
+                    var isAnon = anonCheckbox.checked;
+                    var name = isAnon ? '' : nameInput.value.trim();
                     
                     if (!content) return alert('Vui lòng nhập nội dung bình luận!');
                     if (!isAnon && !name) return alert('Vui lòng nhập tên của bạn!');

@@ -49,18 +49,18 @@ if (isset($_SESSION['user'])) {
                 <script src="https://cdn.plyr.io/3.8.4/plyr.polyfilled.js"></script>
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {
-                        const video = document.getElementById('video-player');
-                        const source = "<?= addslashes($videoUrl) ?>";
-                        let startTime = <?= $startTime ?>;
+                        var video = document.getElementById('video-player');
+                        var source = "<?= addslashes($videoUrl) ?>";
+                        var startTime = <?= $startTime ?>;
                         
                         if (Hls.isSupported()) {
-                            const hls = new Hls();
+                            var hls = new Hls();
                             hls.loadSource(source);
                             hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
                                 // Lấy các mức chất lượng
-                                const availableQualities = hls.levels.map((l) => l.height);
+                                var availableQualities = hls.levels.map((l) => l.height);
                                 // Chỉ thêm tính năng chọn độ phân giải nếu có nhiều hơn 1 luồng
-                                let plyrOptions = {
+                                var plyrOptions = {
                                     i18n: { quality: 'Chất lượng', speed: 'Tốc độ', normal: 'Bình thường' }
                                 };
                                 
@@ -85,7 +85,7 @@ if (isset($_SESSION['user'])) {
                                     plyrOptions.i18n.qualityLabel = { 0: 'Tự động' };
                                 }
                                 
-                                const player = new Plyr(video, plyrOptions);
+                                var player = new Plyr(video, plyrOptions);
                                 window.hls = hls;
                                 
                                 if (startTime > 0) {
@@ -96,7 +96,7 @@ if (isset($_SESSION['user'])) {
                         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                             // Safari
                             video.src = source;
-                            const player = new Plyr(video);
+                            var player = new Plyr(video);
                             if (startTime > 0) {
                                 player.once('canplay', () => { player.currentTime = startTime; });
                             }
@@ -182,13 +182,13 @@ if (isset($_SESSION['user'])) {
                     </div>
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
-                            const searchEp = document.getElementById('search-episode');
+                            var searchEp = document.getElementById('search-episode');
                             if (searchEp) {
                                 searchEp.addEventListener('input', function(e) {
-                                    const keyword = e.target.value.toLowerCase().trim();
-                                    const eps = document.querySelectorAll('#episode-list a');
+                                    var keyword = e.target.value.toLowerCase().trim();
+                                    var eps = document.querySelectorAll('#episode-list a');
                                     eps.forEach(ep => {
-                                        const text = ep.textContent.toLowerCase().trim();
+                                        var text = ep.textContent.toLowerCase().trim();
                                         if (text.includes(keyword)) {
                                             ep.style.display = '';
                                         } else {
@@ -261,16 +261,16 @@ if (isset($_SESSION['user'])) {
 <!-- History Logging Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const appApiKey = <?= json_encode($settings['appApiKey'] ?? '') ?>;
-    const movieSlug = <?= json_encode($movie['slug']) ?>;
-    const movieName = <?= json_encode($movie['name']) ?>;
-    const episodeName = <?= json_encode($currentEp['name']) ?>;
-    const thumbUrl = <?= json_encode($movie['thumb_url'] ?? '') ?>;
+    var appApiKey = <?= json_encode($settings['appApiKey'] ?? '') ?>;
+    var movieSlug = <?= json_encode($movie['slug']) ?>;
+    var movieName = <?= json_encode($movie['name']) ?>;
+    var episodeName = <?= json_encode($currentEp['name']) ?>;
+    var thumbUrl = <?= json_encode($movie['thumb_url'] ?? '') ?>;
     // Function to log history
     function logHistory() {
-        let currentTime = 0;
-        let duration = 0;
-        const video = document.getElementById('video-player');
+        var currentTime = 0;
+        var duration = 0;
+        var video = document.getElementById('video-player');
         if (video) {
             currentTime = Math.floor(video.currentTime || 0);
             duration = Math.floor(video.duration || 0);
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Lưu lịch sử xem vào LocalStorage (cho khách và thành viên)
         try {
-            let history = JSON.parse(localStorage.getItem('phimhayok_watch_history')) || [];
+            var history = JSON.parse(localStorage.getItem('phimhayok_watch_history')) || [];
             // Loại bỏ phim này nếu đã có trong lịch sử để đưa lên đầu
             history = history.filter(h => h.slug !== movieSlug);
             history.unshift({
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Log every 15 seconds if playing
     setInterval(() => {
-        const video = document.getElementById('video-player');
+        var video = document.getElementById('video-player');
         if (video && !video.paused) {
             logHistory();
         }
@@ -340,21 +340,21 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Realtime Watching Session Heartbeat -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let deviceId = localStorage.getItem('phimtop1_device_id');
+    var deviceId = localStorage.getItem('phimtop1_device_id');
     if (!deviceId) {
         deviceId = 'web-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
         localStorage.setItem('phimtop1_device_id', deviceId);
     }
     
-    const isLogged = <?= isset($_SESSION['user']) ? 1 : 0 ?>;
-    const userName = <?= json_encode($_SESSION['user']['name'] ?? 'Guest') ?>;
-    const movieSlug = <?= json_encode($movie['slug']) ?>;
-    const movieName = <?= json_encode($movie['name']) ?>;
-    const episodeName = <?= json_encode($currentEp['name']) ?>;
+    var isLogged = <?= isset($_SESSION['user']) ? 1 : 0 ?>;
+    var userName = <?= json_encode($_SESSION['user']['name'] ?? 'Guest') ?>;
+    var movieSlug = <?= json_encode($movie['slug']) ?>;
+    var movieName = <?= json_encode($movie['name']) ?>;
+    var episodeName = <?= json_encode($currentEp['name']) ?>;
 
     function sendHeartbeat() {
-        let progress = 0;
-        const video = document.getElementById('video-player');
+        var progress = 0;
+        var video = document.getElementById('video-player');
         if (video) progress = Math.floor(video.currentTime);
 
         fetch('/api/v1/watching_session.php?action=heartbeat', {
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function executeCommand(cmd) {
-        const video = document.getElementById('video-player');
+        var video = document.getElementById('video-player');
         if (!video) return; // Cannot control iframe easily
         if (cmd === 'play') video.play();
         else if (cmd === 'pause' || cmd === 'stop') video.pause();
@@ -473,15 +473,15 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <script>
-let wpRoomCode = null;
-let wpIsHost = false;
-let wpSyncInterval = null;
-let wpVideo = document.getElementById('video-player');
+var wpRoomCode = null;
+var wpIsHost = false;
+var wpSyncInterval = null;
+var wpVideo = document.getElementById('video-player');
 
 // Check URL for party code
 document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const partyCode = urlParams.get('party');
+    var urlParams = new URLSearchParams(window.location.search);
+    var partyCode = urlParams.get('party');
     if (partyCode) {
         document.getElementById('wp-room-input').value = partyCode;
         joinWatchParty(partyCode);
@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function toggleWatchPartyDialog() {
-    const dialog = document.getElementById('watch-party-dialog');
+    var dialog = document.getElementById('watch-party-dialog');
     dialog.classList.toggle('hidden');
     if (!dialog.classList.contains('hidden')) {
         lucide.createIcons();
@@ -500,14 +500,14 @@ function toggleWatchPartyDialog() {
 }
 
 function fetchPublicRooms() {
-    const movieSlug = '<?= addslashes($movie['slug']) ?>';
+    var movieSlug = '<?= addslashes($movie['slug']) ?>';
     fetch('/api/v1/watch_party.php?action=list_public&movie_slug=' + movieSlug)
     .then(res => res.json())
     .then(data => {
-        const container = document.getElementById('wp-public-rooms-container');
-        const list = document.getElementById('wp-public-rooms-list');
+        var container = document.getElementById('wp-public-rooms-container');
+        var list = document.getElementById('wp-public-rooms-list');
         if (data.status === 'success' && data.data.length > 0) {
-            let html = '';
+            var html = '';
             data.data.forEach(room => {
                 html += `
                 <div class="flex items-center justify-between bg-[#1a1a1a] rounded-lg p-3 border border-white/5">
@@ -539,7 +539,7 @@ function showWpActiveView(code, isHost) {
     wpIsHost = isHost;
     
     // Create subtle badge on player
-    let badge = document.getElementById('wp-player-badge');
+    var badge = document.getElementById('wp-player-badge');
     if (!badge) {
         badge = document.createElement('div');
         badge.id = 'wp-player-badge';
@@ -555,15 +555,15 @@ function showWpActiveView(code, isHost) {
 function showWpSetupView() {
     document.getElementById('wp-setup-view').classList.remove('hidden');
     document.getElementById('wp-active-view').classList.add('hidden');
-    let badge = document.getElementById('wp-player-badge');
+    var badge = document.getElementById('wp-player-badge');
     if (badge) badge.remove();
 }
 
 function createWatchParty() {
-    const movieSlug = '<?= addslashes($movie['slug']) ?>';
-    const episodeName = '<?= addslashes($currentEp['name']) ?>';
-    const userName = '<?= addslashes($_SESSION['user']['name'] ?? 'Guest') ?>';
-    const isPublic = document.getElementById('wp-is-public').checked ? 1 : 0;
+    var movieSlug = '<?= addslashes($movie['slug']) ?>';
+    var episodeName = '<?= addslashes($currentEp['name']) ?>';
+    var userName = '<?= addslashes($_SESSION['user']['name'] ?? 'Guest') ?>';
+    var isPublic = document.getElementById('wp-is-public').checked ? 1 : 0;
     
     fetch('/api/v1/watch_party.php?action=create', {
         method: 'POST',
@@ -581,12 +581,12 @@ function createWatchParty() {
 }
 
 function joinWatchPartyBtn() {
-    const code = document.getElementById('wp-room-input').value.trim().toUpperCase();
+    var code = document.getElementById('wp-room-input').value.trim().toUpperCase();
     if (code) joinWatchParty(code);
 }
 
 function joinWatchParty(code) {
-    const movieSlug = '<?= addslashes($movie['slug']) ?>';
+    var movieSlug = '<?= addslashes($movie['slug']) ?>';
     
     fetch('/api/v1/watch_party.php?action=join&room_code=' + code)
     .then(res => res.json())
@@ -604,7 +604,7 @@ function joinWatchParty(code) {
 }
 
 function copyWatchPartyLink() {
-    const url = new URL(window.location.href);
+    var url = new URL(window.location.href);
     url.searchParams.set('party', wpRoomCode);
     navigator.clipboard.writeText(url.toString()).then(() => {
         alert('Đã copy link phòng xem chung!');
@@ -619,7 +619,7 @@ function leaveWatchParty() {
     toggleWatchPartyDialog();
 }
 
-let isSyncing = false;
+var isSyncing = false;
 function startWpSync() {
     if (wpSyncInterval) clearInterval(wpSyncInterval);
     if (!wpVideo) return; // Cannot sync if iframe
@@ -645,14 +645,14 @@ function startWpSync() {
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    const r = data.data;
+                    var r = data.data;
                     if (r.status !== 'active') {
                         alert('Phòng xem chung đã bị khóa hoặc kết thúc.');
                         leaveWatchParty();
                         return;
                     }
                     
-                    const timeDiff = Math.abs(wpVideo.currentTime - r.current_time);
+                    var timeDiff = Math.abs(wpVideo.currentTime - r.current_time);
                     if (timeDiff > 2) {
                         wpVideo.currentTime = r.current_time;
                     }

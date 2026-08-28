@@ -150,6 +150,31 @@ if ($pdo) {
     }
     </script>
     <?php endif; ?>
+
+    <!-- Turbo for SPA feel -->
+    <script type="module" src="https://cdn.skypack.dev/@hotwired/turbo"></script>
+    <script>
+        document.addEventListener("turbo:load", function() {
+            // Re-trigger DOMContentLoaded for existing scripts to work
+            window.document.dispatchEvent(new Event("DOMContentLoaded", {
+              bubbles: true,
+              cancelable: true
+            }));
+            // Re-init lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+
+
+    <style>
+        .turbo-progress-bar {
+            height: 3px;
+            background-color: #fcc526;
+        }
+    </style>
+
 </head>
 <body class="<?= $bodyClass ?> min-h-screen flex flex-col">
     <!-- Header -->
@@ -341,7 +366,7 @@ if ($pdo) {
         </div>
     <script>
     function openGlobalWatchParty() {
-        const code = prompt("Nhập MÃ PHÒNG xem chung:");
+        var code = prompt("Nhập MÃ PHÒNG xem chung:");
         if (code && code.trim() !== "") {
             fetch('/api/v1/watch_party.php?action=join&room_code=' + code.trim().toUpperCase())
             .then(res => res.json())
@@ -357,14 +382,14 @@ if ($pdo) {
     </script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const searchForms = document.querySelectorAll('form[action="/search"]');
+        var searchForms = document.querySelectorAll('form[action="/search"]');
         searchForms.forEach(form => {
-            const input = form.querySelector('input[name="keyword"]');
+            var input = form.querySelector('input[name="keyword"]');
             if (!input) return;
             
             input.setAttribute('autocomplete', 'off');
             
-            let container = document.createElement('div');
+            var container = document.createElement('div');
             container.className = 'absolute top-full left-0 mt-2 w-full bg-[#141414] border border-gray-800 rounded-xl shadow-2xl z-[100] overflow-hidden hidden';
             container.style.maxHeight = '400px';
             container.style.overflowY = 'auto';
@@ -375,11 +400,11 @@ if ($pdo) {
             form.style.position = 'relative';
             form.appendChild(container);
             
-            let timeout = null;
+            var timeout = null;
             
             input.addEventListener('input', function() {
                 clearTimeout(timeout);
-                const q = this.value.trim();
+                var q = this.value.trim();
                 if (q.length < 2) {
                     container.classList.add('hidden');
                     return;
@@ -395,11 +420,11 @@ if ($pdo) {
                         .then(res => res.json())
                         .then(data => {
                             if (data.status === 'success' && data.data && data.data.items && data.data.items.length > 0) {
-                                let html = '<div class="py-2">';
-                                const domain = data.data.APP_DOMAIN_CDN_IMAGE || data.data.domain || 'https://phimimg.com/';
+                                var html = '<div class="py-2">';
+                                var domain = data.data.APP_DOMAIN_CDN_IMAGE || data.data.domain || 'https://phimimg.com/';
                                 
                                 data.data.items.slice(0, 5).forEach(item => {
-                                    let thumb = item.thumb_url || item.poster_url || '';
+                                    var thumb = item.thumb_url || item.poster_url || '';
                                     if (!thumb.startsWith('http')) {
                                         thumb = domain.replace(/\/$/, '') + '/' + thumb.replace(/^\//, '');
                                     }
