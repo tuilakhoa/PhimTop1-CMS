@@ -22,10 +22,10 @@ if (!function_exists('getPhimImgUrl')) {
 $bodyClass = 'bg-[#0f0f0f] text-gray-200 antialiased font-sans'; // Changed to match Netflix/PhimhayOK dark gray
 
 global $pageTitle, $pageDesc, $pageKeywords;
-$seoTitle = $pageTitle ?? ($settings['seoTitle'] ?? 'PhimHayOK - Xem Phim Online');
+$seoTitle = $pageTitle ?? ($settings['seoTitle'] ?? 'PhimTop1 - Xem Phim Online');
 $seoDesc = $pageDesc ?? ($settings['seoDesc'] ?? 'Hệ thống xem phim trực tuyến chất lượng cao');
 $seoKeywords = $pageKeywords ?? ($settings['seoKeywords'] ?? 'xem phim, phim online');
-$siteName = $settings['siteName'] ?? 'PhimHayOK';
+$siteName = $settings['siteName'] ?? 'PhimTop1';
 
 $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 $canonicalUrl = !empty($settings['canonicalBaseUrl']) ? rtrim($settings['canonicalBaseUrl'], '/') . $_SERVER['REQUEST_URI'] : $currentUrl;

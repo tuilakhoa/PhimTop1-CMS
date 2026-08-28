@@ -11,12 +11,12 @@
                             <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" class="h-8 object-contain opacity-80 hover:opacity-100 transition-opacity">
                         <?php else: ?>
                             <div class="text-2xl font-black tracking-tighter text-red-600 uppercase">
-                                PhimHayOK
+                                <?= htmlspecialchars($siteName ?? "PhimTop1") ?>
                             </div>
                         <?php endif; ?>
                     </a>
                     <p class="text-gray-500 text-sm leading-relaxed max-w-md mb-4">
-                        <?= nl2br(htmlspecialchars($settings['footerText'] ?: 'PhimHayOK - Nền tảng xem phim online miễn phí chất lượng cao 4K/Full HD. Kho phim khổng lồ đa dạng thể loại, cập nhật nhanh nhất các bộ phim hot, phim chiếu rạp. Trải nghiệm mượt mà, không chứa quảng cáo.')) ?>
+                        <?= nl2br(htmlspecialchars($settings['footerText'] ?: 'Hệ thống xem phim online miễn phí chất lượng cao 4K/Full HD. Kho phim khổng lồ đa dạng thể loại, cập nhật nhanh nhất các bộ phim hot, phim chiếu rạp. Trải nghiệm mượt mà, không chứa quảng cáo.')) ?>
                     </p>
                     <div class="flex items-center space-x-4 mb-4">
                         <?php if (!empty($settings['socialFacebook'])): ?><a href="<?= htmlspecialchars($settings['socialFacebook']) ?>" target="_blank" class="text-gray-500 hover:text-blue-500 transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a><?php endif; ?>
@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="border-t border-gray-900 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-gray-600">
-                <p>&copy; <?= date('Y') ?> PhimHayOK. All rights reserved.</p>
+                <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($siteName ?? "PhimTop1") ?>. All rights reserved.</p>
                 <div class="mt-4 md:mt-0 flex space-x-4">
                     <span class="hover:text-gray-300 cursor-pointer">Hoàng Sa & Trường Sa là của Việt Nam!</span>
                 </div>
