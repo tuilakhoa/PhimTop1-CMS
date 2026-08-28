@@ -94,8 +94,13 @@ if ($cachedCats) {
     <link rel="preconnect" href="https://phimimg.com" crossorigin>
     <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <?php global $preloadImage; if (!empty($preloadImage)): ?>
+    <link rel="preload" as="image" href="<?= htmlspecialchars($preloadImage) ?>">
+    <?php endif; ?>
+
+    
+    <!-- Tailwind CSS (đã được compile vào style.css) -->
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <!-- Lucide Icons -->
     <script defer src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/themes/dark/assets/css/style.css?v=<?= filemtime(__DIR__ . '/assets/css/style.css') ?>">
@@ -222,7 +227,7 @@ if ($cachedCats) {
         </div>
 
         <!-- Mobile Menu (Hidden by default) -->
-        <div id="mobileMenu" class="lg:hidden hidden bg-gray-900 border-t border-gray-800 absolute w-full left-0 top-16 shadow-2xl">
+        <div id="mobileMenu" class="lg:hidden hidden bg-gray-900 border-t border-gray-800 absolute w-full left-0 top-16 shadow-2xl max-h-[calc(100vh-64px)] overflow-y-auto">
             <div class="px-4 py-4 space-y-4">
                 <form action="/search" method="GET" class="relative">
                     <input type="text" name="keyword" placeholder="Tìm kiếm phim..." 
@@ -291,7 +296,7 @@ if ($cachedCats) {
             </div>
         </div>
     </nav>
-    <script src="/assets/js/main.js?v=<?= filemtime(__DIR__ . '/../../assets/js/main.js') ?>"></script>
+    <script defer src="/assets/js/main.js?v=<?= filemtime(__DIR__ . '/../../assets/js/main.js') ?>"></script>
     <script>
     function openGlobalWatchParty() {
         const code = prompt("Nhập MÃ PHÒNG xem chung:");

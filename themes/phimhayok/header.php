@@ -260,7 +260,7 @@ if ($pdo) {
         </div>
         
         <!-- Mobile Menu (Hidden) -->
-        <div id="mobileMenu" class="hidden bg-[#0a0a0a] border-t border-gray-900 absolute w-full left-0 top-[72px] shadow-2xl pb-4">
+        <div id="mobileMenu" class="hidden bg-[#0a0a0a] border-t border-gray-900 absolute w-full left-0 top-[72px] shadow-2xl pb-4 max-h-[calc(100vh-72px)] overflow-y-auto">
             <!-- (Mobile menu implementation kept simple) -->
             <div class="px-4 py-4 space-y-4">
                 <div class="flex flex-col space-y-3 font-medium text-gray-300">
