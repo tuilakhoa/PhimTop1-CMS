@@ -38,7 +38,7 @@ if (isset($_SESSION['user'])) {
 }
 ?>
             <?php if ($isM3U8): ?>
-                <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+                <link rel="stylesheet" href="https://cdn.plyr.io/3.8.4/plyr.css" />
                 <style>
                     :root { --plyr-color-main: #eab308; } /* Phim-yellow */
                     .plyr { border-radius: 0.5rem; overflow: hidden; height: 100%; width: 100%; }
@@ -46,7 +46,7 @@ if (isset($_SESSION['user'])) {
                 <video id="video-player" class="w-full h-full outline-none" playsinline></video>
                 <!-- Thư viện Hls.js và Plyr -->
                 <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
-                <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+                <script src="https://cdn.plyr.io/3.8.4/plyr.polyfilled.js"></script>
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {
                         const video = document.getElementById('video-player');

@@ -116,7 +116,7 @@ if ($pdo) {
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.css" />
     <script src="/assets/js/main.js?v=<?= time() ?>"></script>
     
     <link rel="stylesheet" href="/themes/phimhayok/assets/css/style.css?v=<?= time() ?>">

@@ -1,4 +1,20 @@
 <?php 
+// Meta for movie
+$year = $movie['year'] ?? '';
+$country = (!empty($movie['country']) && is_array($movie['country'])) ? $movie['country'][0]['name'] : '';
+$episodes_total = $movie['episode_total'] ?? '';
+$quality = $movie['quality'] ?? '';
+$categories = [];
+if (!empty($movie['category']) && is_array($movie['category'])) {
+    foreach ($movie['category'] as $c) {
+        $categories[] = is_array($c) ? ($c['name'] ?? '') : $c;
+    }
+}
+$categories_str = implode(' - ', array_filter($categories));
+$meta_tags = array_filter([$quality, $year, $country, $episodes_total, $categories_str]);
+
+$preloadImage = !empty($movie['poster_url']) ? $movie['poster_url'] : (!empty($movie['thumb_url']) ? $movie['thumb_url'] : '');
+
 include __DIR__ . '/header.php'; 
 
 // Fetch suggestions
@@ -18,20 +34,6 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
         }
     }
 }
-
-// Meta for movie
-$year = $movie['year'] ?? '';
-$country = (!empty($movie['country']) && is_array($movie['country'])) ? $movie['country'][0]['name'] : '';
-$episodes_total = $movie['episode_total'] ?? '';
-$quality = $movie['quality'] ?? '';
-$categories = [];
-if (!empty($movie['category']) && is_array($movie['category'])) {
-    foreach ($movie['category'] as $c) {
-        $categories[] = is_array($c) ? ($c['name'] ?? '') : $c;
-    }
-}
-$categories_str = implode(' - ', array_filter($categories));
-$meta_tags = array_filter([$quality, $year, $country, $episodes_total, $categories_str]);
 
 
 // Get the first episode link for the Play button
@@ -66,15 +68,15 @@ if (isset($currentEp) && $currentEp && isset($_SESSION['user'])) {
         <div class="w-full bg-black rounded-xl overflow-hidden shadow-2xl border border-[#2d2f36]">
                     <div class="aspect-video w-full relative flex items-center justify-center group" id="player-container">
                         <?php if ($isM3U8): ?>
-                            <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+                            <link rel="stylesheet" href="https://cdn.plyr.io/3.8.4/plyr.css" />
                             <style>
                                 :root { --plyr-color-main: #ff8f00; } /* Dark theme yellow */
                                 .plyr { border-radius: 0.75rem; overflow: hidden; height: 100%; width: 100%; }
                             </style>
-                            <video id="video-player" class="w-full h-full outline-none bg-black" playsinline></video>
+                            <video id="video-player" class="w-full h-full outline-none bg-black" playsinline poster="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : ($movie['thumb_url'] ?? '')) ?>"></video>
                             <!-- Thư viện Hls.js và Plyr -->
-                            <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
-                            <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+                            <script defer src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+                            <script defer src="https://cdn.plyr.io/3.8.4/plyr.polyfilled.js"></script>
                             <script>
                                 document.addEventListener('DOMContentLoaded', () => {
                                     const video = document.getElementById('video-player');

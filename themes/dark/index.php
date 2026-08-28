@@ -1,10 +1,4 @@
 <?php
-include __DIR__ . '/header.php';
-?>
-
-<div class="bg-[#000000] min-h-screen text-gray-200 font-sans pb-20">
-    <!-- Hero Section / Featured (Edge-to-Edge Minimalist) -->
-<?php
 if (!function_exists('getPhimImgUrl')) {
     function getPhimImgUrl($url) {
         global $data, $settings;
@@ -49,12 +43,24 @@ if ($featuredStyle === 'single' && count($featuredMovies) > 0) {
 if (empty($featuredMovies) && !empty($movies)) {
     $featuredMovies = [$movies[0]];
 }
+
+// Set preload image for LCP
+if (!empty($featuredMovies)) {
+    $featured = $featuredMovies[0];
+    $preloadImage = getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''));
+}
+
+include __DIR__ . '/header.php';
 ?>
+
+<div class="bg-[#000000] min-h-screen text-gray-200 font-sans pb-20">
+    <!-- Hero Section / Featured (Edge-to-Edge Minimalist) -->
+
 
 <?php if (!empty($featuredMovies)): ?>
     <div class="relative w-full h-[60vh] md:h-[75vh] mb-12 lg:mb-20">
         <?php if ($featuredStyle === 'slider' && count($featuredMovies) > 1): ?>
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.css" />
             <div class="swiper swiper-hero w-full h-full">
                 <div class="swiper-wrapper">
                     <?php $slideIndex = 0; foreach($featuredMovies as $featured): ?>
@@ -96,7 +102,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                 <div class="swiper-pagination !bottom-8 opacity-70"></div>
             </div>
             
-            <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+            <script defer src="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.js"></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     if (typeof Swiper !== 'undefined') {
@@ -170,7 +176,8 @@ if (empty($featuredMovies) && !empty($movies)) {
                         <i data-lucide="clock" class="w-6 h-6 mr-2 text-red-500"></i> Tiếp tục xem
                     </h2>
                 </div>
-                <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-4">
+                <div class="swiper swiper-list w-full pb-4" >
+<div class="swiper-wrapper">
                     <?php foreach ($historyItems as $item): 
                         $progress = $item['duration'] > 0 ? min(1, max(0, $item['current_time'] / $item['duration'])) * 100 : 0;
                         // Build direct watch link using episode_slug if available, fallback to movie page
@@ -178,7 +185,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                             ? '/' . ($settings["slugWatch"] ?? "xem-phim") . '/' . urlencode($item['movie_slug']) . '/' . urlencode($item['episode_slug'])
                             : '/' . ($settings["slugMovie"] ?? "phim") . '/' . urlencode($item['movie_slug']);
                     ?>
-                        <a href="<?= $historyLink ?>" class="group shrink-0 w-64 block">
+                        <a href="<?= $historyLink ?>" class="swiper-slide group shrink-0 w-64 block">
                             <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#111] mb-3">
                                 <img src="<?= htmlspecialchars(getPhimImgUrl($item['thumb_url'])) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -195,6 +202,9 @@ if (empty($featuredMovies) && !empty($movies)) {
                         </a>
                     <?php endforeach; ?>
                 </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-prev"></div><div class="swiper-button-next"></div>
+            </div>
             </div>
             <?php endif; ?>
 
@@ -205,16 +215,19 @@ if (empty($featuredMovies) && !empty($movies)) {
                         <i data-lucide="sparkles" class="w-6 h-6 mr-2 text-cyan-400"></i> Dành Riêng Cho Bạn
                     </h2>
                 </div>
-                <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-4" id="ai-recommend-list">
+                <div class="swiper swiper-list w-full pb-4" id="ai-recommend-container-swiper">
+<div class="swiper-wrapper" id="ai-recommend-list">
                     <!-- Skeleton Loader to prevent layout shift -->
                     <?php for($i=0; $i<6; $i++): ?>
-                        <div class="group shrink-0 w-40 sm:w-48 block">
+                        <div class="swiper-slide group shrink-0 w-40 sm:w-48 block">
                             <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] animate-pulse mb-3 border border-gray-800"></div>
                             <div class="h-4 bg-[#111] animate-pulse rounded w-3/4 mb-1"></div>
                             <div class="h-3 bg-[#111] animate-pulse rounded w-1/2"></div>
                         </div>
                     <?php endfor; ?>
                 </div>
+                <div class="swiper-button-prev"></div><div class="swiper-button-next"></div>
+            </div>
             </div>
             <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -231,7 +244,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                                 thumb = 'https://phimimg.com/' + thumb;
                             }
                             html += `
-                                <a href="/phim/${item.slug}" class="group shrink-0 w-40 sm:w-48 block">
+                                <a href="/phim/${item.slug}" class="swiper-slide group shrink-0 w-40 sm:w-48 block">
                                     <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
                                         <img src="${thumb}" alt="${item.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -246,6 +259,19 @@ if (empty($featuredMovies) && !empty($movies)) {
                         list.innerHTML = html;
                         container.classList.remove('hidden');
                         if (typeof lucide !== 'undefined') lucide.createIcons();
+                        if (typeof Swiper !== 'undefined') {
+                            new Swiper('#ai-recommend-container-swiper', {
+                                slidesPerView: 'auto',
+                                spaceBetween: 16,
+                                freeMode: true,
+                                observer: true,
+                                observeParents: true,
+                                navigation: {
+                                    nextEl: '#ai-recommend-container-swiper .swiper-button-next',
+                                    prevEl: '#ai-recommend-container-swiper .swiper-button-prev',
+                                },
+                            });
+                        }
                     }
                 })
                 .catch(err => console.error(err));
@@ -330,7 +356,8 @@ if (empty($featuredMovies) && !empty($movies)) {
             foreach ($rankData as $type => $list): 
             ?>
             <div id="rank-<?= $type ?>" class="<?= $type === 'day' ? 'block' : 'hidden' ?>">
-                <div class="flex overflow-x-auto gap-4 custom-scrollbar pb-6">
+                <div class="swiper swiper-list w-full pb-6" >
+<div class="swiper-wrapper">
                     <?php 
                     $rank = 1;
                     foreach ($list as $item): 
@@ -338,7 +365,7 @@ if (empty($featuredMovies) && !empty($movies)) {
                         $rankColor = $rank <= 3 ? 'text-red-500' : 'text-gray-500';
                         $views = !empty($item['view']) ? $item['view'] : rand(1000, 50000);
                     ?>
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group shrink-0 w-36 sm:w-44 block relative">
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="swiper-slide group shrink-0 w-36 sm:w-44 block relative">
                         <div class="absolute -left-3 -bottom-4 text-6xl md:text-8xl font-black <?= $rankColor ?> opacity-80 z-20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8); -webkit-text-stroke: 1px #fff;"><?= $rank ?></div>
                         <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-2 z-10 ml-4">
                             <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
@@ -353,6 +380,8 @@ if (empty($featuredMovies) && !empty($movies)) {
                     </a>
                     <?php $rank++; endforeach; ?>
                 </div>
+                <div class="swiper-button-prev"></div><div class="swiper-button-next"></div>
+            </div>
             </div>
             <?php endforeach; ?>
             
@@ -379,5 +408,25 @@ if (empty($featuredMovies) && !empty($movies)) {
         
     </div>
 </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (typeof Swiper !== 'undefined') {
+                        document.querySelectorAll('.swiper-list').forEach(function(el) {
+                            new Swiper(el, {
+                                slidesPerView: 'auto',
+                                spaceBetween: 16,
+                                freeMode: true,
+                                observer: true,
+                                observeParents: true,
+                                navigation: {
+                                    nextEl: el.querySelector('.swiper-button-next'),
+                                    prevEl: el.querySelector('.swiper-button-prev'),
+                                },
+                            });
+                        });
+                    }
+                });
+            </script>
 
 <?php include __DIR__ . '/footer.php'; ?>
