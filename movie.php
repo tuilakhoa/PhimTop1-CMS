@@ -46,12 +46,7 @@ $domain = 'https://phimimg.com/';
     }
 
 // Apply SEO Overrides if they exist
-$seoOverride = getSeoMetadata('movie', $originalSlug);
-if ($seoOverride) {
-    if (!empty($seoOverride['seo_title'])) $pageTitle = $seoOverride['seo_title'];
-    if (!empty($seoOverride['seo_desc'])) $pageDesc = $seoOverride['seo_desc'];
-    if (!empty($seoOverride['seo_keywords'])) $pageKeywords = $seoOverride['seo_keywords'];
-}
+// Moved to bottom to apply after dynamic episode SEO
 
 
 // Auto-select episode for inline playing on the detail page
@@ -102,7 +97,30 @@ if (!empty($episodes[0]['server_data'])) {
     $currentEp = $epToPlay;
     $videoUrl = $currentEp['link_m3u8'] ?? $currentEp['link_embed'] ?? '';
     $isM3U8 = strpos($videoUrl, '.m3u8') !== false;
+    
+    // Update SEO for watch page (since it's merged)
+    if (isset($currentEp) && $currentEp) {
+        $epName = $currentEp['name'] ?? '';
+        $isFull = (strtolower($epName) === 'full' || strtolower($epName) === 'tập full');
+        
+        if (!$isFull && !empty($epName)) {
+             $pageTitle = 'Xem phim ' . ($movie['name'] ?? $movie['title'] ?? '') . ' Tập ' . $epName . ' - ' . ($settings['siteName'] ?? 'PhimTop1');
+             $pageDesc = 'Xem phim ' . ($movie['name'] ?? '') . ' Tập ' . $epName . ' Vietsub, Thuyết minh chất lượng cao. ' . $pageDesc;
+        } else {
+             $pageTitle = 'Xem phim ' . ($movie['name'] ?? $movie['title'] ?? '') . ' Full HD - ' . ($settings['siteName'] ?? 'PhimTop1');
+             $pageDesc = 'Xem phim ' . ($movie['name'] ?? '') . ' Full HD Vietsub, Thuyết minh chất lượng cao. ' . $pageDesc;
+        }
+    }
 }
+
+// Apply SEO Overrides if they exist (highest priority)
+$seoOverride = getSeoMetadata('movie', $originalSlug);
+if ($seoOverride) {
+    if (!empty($seoOverride['seo_title'])) $pageTitle = $seoOverride['seo_title'];
+    if (!empty($seoOverride['seo_desc'])) $pageDesc = $seoOverride['seo_desc'];
+    if (!empty($seoOverride['seo_keywords'])) $pageKeywords = $seoOverride['seo_keywords'];
+}
+
 $theme = $settings['theme'] ?? 'dark';
 
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);
