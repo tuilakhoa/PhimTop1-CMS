@@ -1,7 +1,7 @@
 <?php
 $pdo = getPDO();
 $settings = getSettings();
-$currentTheme = $settings['theme'] ?? 'dark';
+$currentTheme = $settings['theme'] ?? 'phimhayok';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'activate_theme') {
     $themeSlug = $_POST['theme_slug'] ?? '';

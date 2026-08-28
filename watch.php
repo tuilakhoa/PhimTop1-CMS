@@ -126,7 +126,7 @@ if ($seoOverride) {
         $pageKeywords = str_replace('{ep}', htmlspecialchars($displayEp), $seoOverride['seo_keywords']);
     }
 }
-$theme = $settings['theme'] ?? 'dark';
+$theme = $settings['theme'] ?? 'phimhayok';
 $themeFile = __DIR__ . "/themes/{$theme}/watch.php";
 if (file_exists($themeFile)) {
     require $themeFile;
@@ -135,6 +135,6 @@ if (file_exists($themeFile)) {
     if (file_exists($themeMovieFile)) {
         require $themeMovieFile;
     } else {
-        require __DIR__ . "/themes/dark/movie.php";
+        require __DIR__ . "/themes/phimhayok/movie.php";
     }
 }

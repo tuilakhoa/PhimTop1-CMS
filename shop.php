@@ -9,11 +9,11 @@ if (!isset($_SESSION['user'])) {
 
 $settings = getSettings();
 $pageTitle = "Cửa hàng - " . ($settings['siteName'] ?? 'PhimTop1');
-$theme = $settings['theme'] ?? 'dark';
+$theme = $settings['theme'] ?? 'phimhayok';
 
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);
 if (file_exists($themeFile)) {
     require $themeFile;
 } else {
-    require __DIR__ . "/themes/dark/" . basename(__FILE__);
+    require __DIR__ . "/themes/phimhayok/" . basename(__FILE__);
 }

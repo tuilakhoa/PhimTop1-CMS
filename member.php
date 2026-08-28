@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
 $settings = getSettings();
-$theme = $settings['theme'] ?? 'dark';
+$theme = $settings['theme'] ?? 'phimhayok';
 
 $isLoggedIn = isset($_SESSION['user']);
 $user = $isLoggedIn ? $_SESSION['user'] : null;
@@ -42,7 +42,7 @@ if (file_exists($themeMemberFile)) {
     require_once $themeMemberFile;
 } else {
     // Fallback to dark theme if the theme doesn't have a member.php
-    $fallbackFile = __DIR__ . "/themes/dark/member.php";
+    $fallbackFile = __DIR__ . "/themes/phimhayok/member.php";
     if (file_exists($fallbackFile)) {
         require_once $fallbackFile;
     } else {

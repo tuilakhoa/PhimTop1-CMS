@@ -52,10 +52,10 @@ if ($pdo) {
 $totalPages = max(1, ceil($total / $limit));
 $currentPage = $page;
 
-$theme = $settings['theme'] ?? 'dark';
+$theme = $settings['theme'] ?? 'phimhayok';
 $themeFile = __DIR__ . "/themes/{$theme}/trending.php";
 if (file_exists($themeFile)) {
     require $themeFile;
 } else {
-    require __DIR__ . "/themes/dark/trending.php";
+    require __DIR__ . "/themes/phimhayok/trending.php";
 }

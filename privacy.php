@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/db.php';
 $settings = getSettings();
-$theme = $settings['theme'] ?? 'dark';
+$theme = $settings['theme'] ?? 'phimhayok';
 
 $themePrivacyFile = __DIR__ . "/themes/{$theme}/privacy.php";
 if (file_exists($themePrivacyFile)) {

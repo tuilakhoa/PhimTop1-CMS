@@ -16,11 +16,11 @@ $domain = 'https://phimimg.com/';
             $domain = $apiResult['domain'];
         }
     }
-$theme = $settings['theme'] ?? 'dark';
+$theme = $settings['theme'] ?? 'phimhayok';
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);
 if (file_exists($themeFile)) {
     require $themeFile;
 } else {
-    require __DIR__ . "/themes/dark/" . basename(__FILE__);
+    require __DIR__ . "/themes/phimhayok/" . basename(__FILE__);
 }
 ?>

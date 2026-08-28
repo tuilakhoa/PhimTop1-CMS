@@ -72,10 +72,10 @@ if ($seoOverride) {
     if (!empty($seoOverride['seo_desc'])) $pageDesc = $seoOverride['seo_desc'];
     if (!empty($seoOverride['seo_keywords'])) $pageKeywords = $seoOverride['seo_keywords'];
 }
-$theme = $settings['theme'] ?? 'dark';
+$theme = $settings['theme'] ?? 'phimhayok';
 $themeFile = __DIR__ . "/themes/{$theme}/" . basename(__FILE__);
 if (file_exists($themeFile)) {
     require $themeFile;
 } else {
-    require __DIR__ . "/themes/dark/" . basename(__FILE__);
+    require __DIR__ . "/themes/phimhayok/" . basename(__FILE__);
 }
