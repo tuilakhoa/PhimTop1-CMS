@@ -60,7 +60,30 @@ include __DIR__ . '/header.php';
 <?php if (!empty($featuredMovies)): ?>
     <div class="relative w-full h-[60vh] md:h-[75vh] mb-12 lg:mb-20">
         <?php if ($featuredStyle === 'slider' && count($featuredMovies) > 1): ?>
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.css" />
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<style>
+.swiper-button-next, .swiper-button-prev {
+    color: white !important;
+    background: rgba(0,0,0,0.6);
+    border-radius: 50%;
+    width: 36px !important;
+    height: 36px !important;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+.swiper-button-next:after, .swiper-button-prev:after {
+    font-size: 16px !important;
+    font-weight: 800;
+}
+.swiper-button-next:hover, .swiper-button-prev:hover {
+    background: rgba(220, 38, 38, 0.9);
+    transform: scale(1.1);
+}
+.swiper-button-disabled {
+    opacity: 0 !important;
+}
+</style>
+
             <div class="swiper swiper-hero w-full h-full">
                 <div class="swiper-wrapper">
                     <?php $slideIndex = 0; foreach($featuredMovies as $featured): ?>
@@ -102,7 +125,7 @@ include __DIR__ . '/header.php';
                 <div class="swiper-pagination !bottom-8 opacity-70"></div>
             </div>
             
-            <script defer src="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.js"></script>
+            <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     if (typeof Swiper !== 'undefined') {
@@ -185,7 +208,7 @@ include __DIR__ . '/header.php';
                             ? '/' . ($settings["slugWatch"] ?? "xem-phim") . '/' . urlencode($item['movie_slug']) . '/' . urlencode($item['episode_slug'])
                             : '/' . ($settings["slugMovie"] ?? "phim") . '/' . urlencode($item['movie_slug']);
                     ?>
-                        <a href="<?= $historyLink ?>" class="swiper-slide group shrink-0 w-64 block">
+                        <a href="<?= $historyLink ?>" class="swiper-slide group shrink-0 w-[200px] sm:w-[240px] md:w-[280px] block">
                             <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#111] mb-3">
                                 <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($item['thumb_url'])) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -219,7 +242,7 @@ include __DIR__ . '/header.php';
 <div class="swiper-wrapper" id="ai-recommend-list">
                     <!-- Skeleton Loader to prevent layout shift -->
                     <?php for($i=0; $i<6; $i++): ?>
-                        <div class="swiper-slide group shrink-0 w-40 sm:w-48 block">
+                        <div class="swiper-slide group shrink-0 w-[130px] sm:w-[150px] md:w-[180px] block">
                             <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] animate-pulse mb-3 border border-gray-800"></div>
                             <div class="h-4 bg-[#111] animate-pulse rounded w-3/4 mb-1"></div>
                             <div class="h-3 bg-[#111] animate-pulse rounded w-1/2"></div>
@@ -244,7 +267,7 @@ include __DIR__ . '/header.php';
                                 thumb = 'https://phimimg.com/' + thumb;
                             }
                             html += `
-                                <a href="/phim/${item.slug}" class="swiper-slide group shrink-0 w-40 sm:w-48 block">
+                                <a href="/phim/${item.slug}" class="swiper-slide group shrink-0 w-[130px] sm:w-[150px] md:w-[180px] block">
                                     <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
                                         <img loading="lazy" src="${thumb}" alt="${item.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -365,7 +388,7 @@ include __DIR__ . '/header.php';
                         $rankColor = $rank <= 3 ? 'text-red-500' : 'text-gray-500';
                         $views = !empty($item['view']) ? $item['view'] : rand(1000, 50000);
                     ?>
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="swiper-slide group shrink-0 w-36 sm:w-44 block relative">
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="swiper-slide group shrink-0 w-[130px] sm:w-[150px] md:w-[180px] block relative">
                         <div class="absolute -left-3 -bottom-4 text-6xl md:text-8xl font-black <?= $rankColor ?> opacity-80 z-20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8); -webkit-text-stroke: 1px #fff;"><?= $rank ?></div>
                         <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-2 z-10 ml-4">
                             <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
