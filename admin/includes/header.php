@@ -4,34 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - PhimTop1</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        admin: {
-                            bg: '#0B0F19',
-                            panel: 'rgba(17, 24, 39, 0.7)',
-                            border: 'rgba(255, 255, 255, 0.08)',
-                            primary: '#f43f5e', // Rose 500
-                            primaryGlow: 'rgba(244, 63, 94, 0.4)'
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.3s ease-out',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="/assets/css/style.min.css">
+    
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= htmlspecialchars($settings['adminPath'] ?? '/admin') ?>/assets/css/admin.css?v=<?= time() ?>">

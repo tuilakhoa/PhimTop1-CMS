@@ -99,20 +99,8 @@ if ($pdo) {
     <?php endif; ?>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'phim-yellow': '#eab308', // Yellow matching the logo
-                        'phim-bg': '#0f0f0f',
-                        'phim-card': '#1a1a1a'
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="/assets/css/style.min.css">
+    
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Swiper CSS -->

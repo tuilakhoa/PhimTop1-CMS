@@ -63,7 +63,7 @@ $homeSliders = [
             <div class="swiper-wrapper">
                 <?php foreach($featuredMovies as $featured): ?>
                 <div class="swiper-slide relative w-full h-full">
-                    <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+                    <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
                     
@@ -103,7 +103,7 @@ $homeSliders = [
         </div>
     <?php else: $featured = $featuredMovies[0]; ?>
         <div class="absolute inset-0">
-            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
             <!-- Overlay gradients to make text readable -->
             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
@@ -142,7 +142,7 @@ $homeSliders = [
             <div class="absolute right-8 md:right-12 bottom-12 hidden lg:flex space-x-2">
                 <?php foreach (array_slice($movies, 1, 4) as $m): ?>
                     <div class="w-24 h-14 rounded-md overflow-hidden border border-white/30 cursor-pointer hover:border-white transition-colors opacity-70 hover:opacity-100">
-                        <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($m['poster_url']) ? $m['poster_url'] : ($m['thumb_url'] ?? ''))) ?>" class="w-full h-full object-cover">
+                        <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($m['poster_url']) ? $m['poster_url'] : ($m['thumb_url'] ?? ''))) ?>" class="w-full h-full object-cover">
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -220,7 +220,7 @@ $homeSliders = [
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
                             <!-- 16:9 Aspect Ratio Image -->
                             <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
-                                <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
+                                <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
                                      class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
                                 
                                 <!-- Top Left Yellow Tag -->
@@ -289,7 +289,7 @@ $homeSliders = [
             <?php foreach (array_slice($movies, 0, 4) as $item): ?>
                 <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1">
                     <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
-                        <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                        <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
                         <?php if (!empty($item['episode_current'])): ?>
                             <div class="absolute top-2 left-2">
                                 <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm"><?= htmlspecialchars($item['episode_current'] ?? '') ?></span>
@@ -352,7 +352,7 @@ $homeSliders = [
                             <span class="text-4xl font-black italic <?= $rankColor ?> transition-transform group-hover:scale-110 inline-block"><?= $rank ?></span>
                         </div>
                         <div class="w-20 h-28 shrink-0 mx-5 rounded-xl overflow-hidden relative shadow-lg shadow-black/50">
-                            <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -390,7 +390,7 @@ $homeSliders = [
                     <div class="swiper-slide w-[180px] md:w-[200px]">
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">
                             <div class="aspect-[2/3] relative overflow-hidden rounded-lg">
-                                <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
+                                <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
                                      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                                 
@@ -447,7 +447,7 @@ $homeSliders = [
                         <div class="swiper-slide w-[180px] md:w-[200px]">
                             <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">
                                 <div class="aspect-[2/3] relative overflow-hidden rounded-lg">
-                                    <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
+                                    <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
                                          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                     <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                                     
@@ -489,7 +489,7 @@ $homeSliders = [
 </div>
 
 <!-- Swiper JS -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.js"></script>
 <script src="/themes/phimhayok/assets/js/home.js?v=<?= time() ?>"></script>
 
 <?php include __DIR__ . '/footer.php'; ?>

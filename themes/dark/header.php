@@ -95,7 +95,7 @@ if ($cachedCats) {
     <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/style.min.css">
     <!-- Lucide Icons -->
     <script defer src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/themes/dark/assets/css/style.css?v=<?= filemtime(__DIR__ . '/assets/css/style.css') ?>">

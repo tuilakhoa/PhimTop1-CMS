@@ -4,19 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thành Viên - <?= htmlspecialchars($settings['siteName']) ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/style.min.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'phim-yellow': '#eab308',
-                    }
-                }
-            }
-        }
-    </script>
+    
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -33,7 +23,7 @@
             <?php if ($isLoggedIn): ?>
                 <div class="p-8">
                     <div class="flex items-center space-x-4 mb-8 border-b border-white/10 pb-6">
-                        <img src="<?= htmlspecialchars($user['avatar'] ?? 'https://ui-avatars.com/api/?name='.urlencode($user['name'])) ?>" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-phim-yellow">
+                        <img loading="lazy" src="<?= htmlspecialchars($user['avatar'] ?? 'https://ui-avatars.com/api/?name='.urlencode($user['name'])) ?>" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-phim-yellow">
                         <div>
                             <h2 class="text-2xl font-bold text-white"><?= htmlspecialchars($user['name']) ?></h2>
                             <p class="text-gray-400"><?= htmlspecialchars($user['email']) ?></p>
@@ -59,7 +49,7 @@
                             <?php foreach ($follows as $item): ?>
                                 <a href="<?= $item['item_type'] === 'comic' ? '/truyen-tranh/'.$item['item_slug'] : '/phim/'.$item['item_slug'] ?>" class="block group">
                                     <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-[#1a1a1a]">
-                                        <img src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                        <img loading="lazy" src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                         <div class="absolute top-2 right-2 bg-phim-yellow text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
                                             <?= $item['item_type'] === 'comic' ? 'Truyện' : 'Phim' ?>

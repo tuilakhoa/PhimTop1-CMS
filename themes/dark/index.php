@@ -67,7 +67,7 @@ include __DIR__ . '/header.php';
                         <div class="swiper-slide relative w-full h-full">
                             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10"></div>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-                            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" <?= $slideIndex === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?> decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-90">
+                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" <?= $slideIndex === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?> decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-90">
                             
                             <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto w-full">
                                 <div class="max-w-2xl">
@@ -124,7 +124,7 @@ include __DIR__ . '/header.php';
         <?php else: $featured = $featuredMovies[0]; ?>
             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-            <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-90">
+            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-90">
             
             <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto w-full">
                 <div class="max-w-2xl">
@@ -187,7 +187,7 @@ include __DIR__ . '/header.php';
                     ?>
                         <a href="<?= $historyLink ?>" class="swiper-slide group shrink-0 w-64 block">
                             <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                                <img src="<?= htmlspecialchars(getPhimImgUrl($item['thumb_url'])) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($item['thumb_url'])) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <i data-lucide="play-circle" class="w-12 h-12 text-white"></i>
                                 </div>
@@ -246,7 +246,7 @@ include __DIR__ . '/header.php';
                             html += `
                                 <a href="/phim/${item.slug}" class="swiper-slide group shrink-0 w-40 sm:w-48 block">
                                     <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                                        <img src="${thumb}" alt="${item.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                        <img loading="lazy" src="${thumb}" alt="${item.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <i data-lucide="play-circle" class="w-10 h-10 text-white"></i>
                                         </div>
@@ -299,7 +299,7 @@ include __DIR__ . '/header.php';
                 ?>
                     <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= htmlspecialchars($movie['slug']) ?>" class="group flex flex-col">
                         <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-3">
-                            <img src="<?= htmlspecialchars($thumb) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <img loading="lazy" src="<?= htmlspecialchars($thumb) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                             
                             <!-- Minimal Overlays -->
                             <div class="absolute top-2 left-2 flex gap-1.5">
@@ -368,7 +368,7 @@ include __DIR__ . '/header.php';
                     <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="swiper-slide group shrink-0 w-36 sm:w-44 block relative">
                         <div class="absolute -left-3 -bottom-4 text-6xl md:text-8xl font-black <?= $rankColor ?> opacity-80 z-20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8); -webkit-text-stroke: 1px #fff;"><?= $rank ?></div>
                         <div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-[#111] mb-2 z-10 ml-4">
-                            <img src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <i data-lucide="play-circle" class="w-10 h-10 text-white"></i>
                             </div>

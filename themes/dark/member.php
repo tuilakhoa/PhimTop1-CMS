@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thành Viên - <?= htmlspecialchars($settings['siteName']) ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/style.min.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -24,7 +24,7 @@
                 <div class="p-8">
                     <div class="flex items-center space-x-4 mb-8 border-b border-zinc-800/50 pb-6">
                         <div class="relative group">
-                            <img id="main-user-avatar" src="<?= htmlspecialchars($user['avatar'] ?? 'https://ui-avatars.com/api/?name='.urlencode($user['name'])) ?>" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-red-500 bg-zinc-800">
+                            <img loading="lazy" id="main-user-avatar" src="<?= htmlspecialchars($user['avatar'] ?? 'https://ui-avatars.com/api/?name='.urlencode($user['name'])) ?>" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-red-500 bg-zinc-800">
                             <button onclick="generateRandomAvatar()" class="absolute inset-0 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" title="Tạo ngẫu nhiên">
                                 <i data-lucide="dices" class="w-6 h-6"></i>
                             </button>
@@ -63,7 +63,7 @@
                                 <?php foreach ($follows as $item): ?>
                                     <a href="<?= $item['item_type'] === 'comic' ? '/truyen-tranh/'.$item['item_slug'] : '/phim/'.$item['item_slug'] ?>" class="block group">
                                         <div class="relative aspect-[2/3] rounded-xl overflow-hidden mb-2 bg-zinc-800">
-                                            <img src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                            <img loading="lazy" src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                             <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-xs px-2 py-1 rounded text-white font-medium">
                                                 <?= $item['item_type'] === 'comic' ? 'Truyện' : 'Phim' ?>
@@ -101,7 +101,7 @@
                                                 <div class="shrink-0 w-[120px] relative group">
                                                     <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($item['movie_slug']) ?>" class="block">
                                                         <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-zinc-800 border border-zinc-700">
-                                                            <img src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" class="w-full h-full object-cover">
+                                                            <img loading="lazy" src="<?= htmlspecialchars($item['thumb_url']) ?>" alt="<?= htmlspecialchars($item['movie_name']) ?>" class="w-full h-full object-cover">
                                                         </div>
                                                         <h5 class="text-zinc-300 font-medium text-xs line-clamp-1 group-hover:text-white transition-colors"><?= htmlspecialchars($item['movie_name']) ?></h5>
                                                     </a>
