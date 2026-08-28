@@ -53,12 +53,12 @@ if (!empty($featuredMovies)) {
 include __DIR__ . '/header.php';
 ?>
 
-<div class="bg-[#000000] min-h-screen text-gray-200 font-sans pb-20">
+<div class="bg-black min-h-screen text-gray-200 font-sans pb-20">
     <!-- Hero Section / Featured (Edge-to-Edge Minimalist) -->
 
 
 <?php if (!empty($featuredMovies)): ?>
-    <div class="relative w-full h-[60vh] md:h-[75vh] mb-12 lg:mb-20">
+    <div class="relative w-full h-[75vh] lg:h-[90vh] mb-12 lg:mb-20">
         <?php if ($featuredStyle === 'slider' && count($featuredMovies) > 1): ?>
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <style>
@@ -88,17 +88,17 @@ include __DIR__ . '/header.php';
                 <div class="swiper-wrapper">
                     <?php $slideIndex = 0; foreach($featuredMovies as $featured): ?>
                         <div class="swiper-slide relative w-full h-full">
-                            <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10"></div>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent z-10"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent z-10"></div>
                             <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" <?= $slideIndex === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?> decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-90">
                             
-                            <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto w-full">
+                            <div class="absolute inset-0 z-20 flex flex-col justify-center w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto">
                                 <div class="max-w-2xl">
                                     <div class="flex items-center space-x-3 mb-4">
                                         <span class="text-white text-xs font-medium tracking-widest uppercase opacity-70">Nổi Bật</span>
                                         <div class="h-[1px] w-12 bg-white/30"></div>
                                     </div>
-                                    <h1 class="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
+                                    <h1 class="text-5xl md:text-6xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tighter drop-shadow-2xl">
                                         <?= htmlspecialchars($featured['name'] ?? '') ?>
                                     </h1>
                                     <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
@@ -107,11 +107,11 @@ include __DIR__ . '/header.php';
                                     </p>
                                     <?php endif; ?>
                                     <div class="flex flex-wrap items-center gap-4">
-                                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center justify-center bg-white text-black hover:bg-gray-200 px-8 py-3.5 rounded-lg font-medium transition-colors">
+                                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center justify-center bg-white text-black hover:bg-gray-200 hover:scale-105 transform duration-300 shadow-xl shadow-white/10 px-8 py-3.5 rounded-lg font-medium transition-colors">
                                             <i data-lucide="play" class="w-5 h-5 mr-2 fill-current"></i>
                                             Phát ngay
                                         </a>
-                                        <button class="flex items-center justify-center bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-lg font-medium transition-colors">
+                                        <button class="flex items-center justify-center bg-white/20 hover:bg-white/30 backdrop-blur-md text-white hover:scale-105 transform duration-300 border border-white/10 px-6 py-3.5 rounded-lg font-medium transition-colors">
                                             <i data-lucide="info" class="w-5 h-5 mr-2"></i>
                                             Chi tiết
                                         </button>
@@ -145,17 +145,17 @@ include __DIR__ . '/header.php';
                 });
             </script>
         <?php else: $featured = $featuredMovies[0]; ?>
-            <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent z-10"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent z-10"></div>
             <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? '') ?>" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-90">
             
-            <div class="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto w-full">
+            <div class="absolute inset-0 z-20 flex flex-col justify-center w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto">
                 <div class="max-w-2xl">
                     <div class="flex items-center space-x-3 mb-4">
                         <span class="text-white text-xs font-medium tracking-widest uppercase opacity-70">Nổi Bật</span>
                         <div class="h-[1px] w-12 bg-white/30"></div>
                     </div>
-                    <h1 class="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
+                    <h1 class="text-5xl md:text-6xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tighter drop-shadow-2xl">
                         <?= htmlspecialchars($featured['name'] ?? '') ?>
                     </h1>
                     <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
@@ -164,7 +164,7 @@ include __DIR__ . '/header.php';
                     </p>
                     <?php endif; ?>
                     <div class="flex flex-wrap items-center gap-4">
-                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center justify-center bg-white text-black hover:bg-gray-200 px-8 py-3.5 rounded-lg font-medium transition-colors">
+                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="flex items-center justify-center bg-white text-black hover:bg-gray-200 hover:scale-105 transform duration-300 shadow-xl shadow-white/10 px-8 py-3.5 rounded-lg font-medium transition-colors">
                             <i data-lucide="play" class="w-5 h-5 mr-2 fill-current"></i>
                             Phát ngay
                         </a>

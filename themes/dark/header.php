@@ -2,7 +2,7 @@
 $settings = getSettings();
 $theme = $settings['theme'] ?? 'dark';
 $themeClasses = [
-    'dark' => 'bg-gray-950 text-gray-100',
+    'dark' => 'bg-black text-gray-200 selection:bg-red-600 selection:text-white',
     'netflix' => 'bg-black text-gray-200',
     'light' => 'bg-gray-900 text-white',
     'cyberpunk' => 'bg-[#0a0a0a] text-yellow-400',
@@ -132,7 +132,7 @@ if ($cachedCats) {
     <?php do_action('cms_head'); ?>
 </head>
 <body class="<?= $bodyClass ?> min-h-screen">
-    <nav class="glass-nav fixed w-full top-0 z-50">
+    <nav id="mainNav" class="fixed w-full top-0 z-50 transition-all duration-500 bg-gradient-to-b from-black/80 to-transparent">
         <div class="w-full px-4 md:px-8 lg:px-12 2xl:px-20 mx-auto">
             <div class="flex items-center justify-between h-16">
                 <!-- Left Section: Logo & Nav -->
@@ -401,4 +401,18 @@ if ($cachedCats) {
         });
     });
     </script>
-    <div class="pt-20 pb-12">
+    
+    <script>
+    document.addEventListener('scroll', () => {
+        const nav = document.getElementById('mainNav');
+        if (window.scrollY > 50) {
+            nav.classList.remove('bg-gradient-to-b', 'from-black/80', 'to-transparent');
+            nav.classList.add('bg-black/70', 'backdrop-blur-md', 'shadow-lg');
+        } else {
+            nav.classList.add('bg-gradient-to-b', 'from-black/80', 'to-transparent');
+            nav.classList.remove('bg-black/70', 'backdrop-blur-md', 'shadow-lg');
+        }
+    });
+    </script>
+    <div class="pt-0 pb-12">
+    
