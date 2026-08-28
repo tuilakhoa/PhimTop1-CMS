@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
-import 'package:chewie/chewie.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
+
 import 'package:simple_pip_mode/simple_pip.dart';
 import 'package:simple_pip_mode/pip_widget.dart';
 import 'package:provider/provider.dart';
@@ -44,8 +45,9 @@ class WatchMovieScreen extends StatefulWidget {
 }
 
 class _WatchMovieScreenState extends State<WatchMovieScreen> {
-  VideoPlayerController? _videoController;
-  ChewieController? _chewieController;
+  final Player _player = Player();
+  late final VideoController _videoController = VideoController(_player);
+  
   bool _showSuggestions = false;
   bool _isMinimizing = false;
   final FocusNode _suggestionsFocusNode = FocusNode();
@@ -76,21 +78,21 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
     // Listen for remote control commands
     _remoteSubscription = TvRemoteService().onPlayerAction.listen((data) {
-      if (!mounted || _videoController == null) return;
+      if (!mounted) return;
       final command = data['command'];
       if (command == 'play') {
-        _videoController!.play();
+        _player.play();
       } else if (command == 'pause') {
-        _videoController!.pause();
+        _player.pause();
       } else if (command == 'seek') {
         final value = data['value'] as int;
-        _videoController!.seekTo(Duration(seconds: value));
+        _player.seek(Duration(seconds: value));
       } else if (command == 'rewind') {
-        final current = _videoController!.value.position;
-        _videoController!.seekTo(current - const Duration(seconds: 15));
+        final current = _player.state.position;
+        _player.seek(current - const Duration(seconds: 15));
       } else if (command == 'forward') {
-        final current = _videoController!.value.position;
-        _videoController!.seekTo(current + const Duration(seconds: 15));
+        final current = _player.state.position;
+        _player.seek(current + const Duration(seconds: 15));
       } else if (command == 'stop') {
         if (Navigator.canPop(context)) {
           Navigator.pop(context);
@@ -111,7 +113,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
         episodeName: widget.episodeName,
         userName: auth.user?.name ?? 'Guest',
         isLoggedIn: auth.user != null,
-        getProgress: () => _videoController?.value.position.inSeconds ?? 0,
+        getProgress: () => _player.state.position.inSeconds ?? 0,
       );
 
       // Setup History Sync
@@ -127,7 +129,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
         );
 
         _historySyncTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
-          if (!mounted || _videoController == null || !_videoController!.value.isPlaying) return;
+          if (!mounted || _videoController == null || !_player.state.playing) return;
           cmsApi.addHistory(
             auth.token!,
             widget.movieSlug,
@@ -135,8 +137,8 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
             widget.episodeName,
             episodeSlug: widget.episodeSlug,
             thumbUrl: widget.thumbUrl,
-            currentTime: _videoController!.value.position.inSeconds,
-            duration: _videoController!.value.duration.inSeconds,
+            currentTime: _player.state.position.inSeconds,
+            duration: _player.state.duration.inSeconds,
           );
         });
       }
@@ -144,11 +146,11 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
     // Listen to admin commands
     _watchingSessionSubscription = WatchingSessionService().onCommand.listen((command) {
-      if (!mounted || _videoController == null) return;
+      if (!mounted) return;
       if (command == 'play') {
-        _videoController!.play();
+        _player.play();
       } else if (command == 'pause') {
-        _videoController!.pause();
+        _player.pause();
       } else if (command == 'stop') {
         if (Navigator.canPop(context)) {
           Navigator.pop(context);
@@ -167,8 +169,8 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
       _videoController!.addListener(() {
         if (!mounted) return;
         if (_videoController!.value.isInitialized) {
-          final pos = _videoController!.value.position.inSeconds;
-          final dur = _videoController!.value.duration.inSeconds;
+          final pos = _player.state.position.inSeconds;
+          final dur = _player.state.duration.inSeconds;
           if (dur > 0 && pos > 0 && (pos / dur >= 0.95)) {
             if (!autoPlayFired) {
                autoPlayFired = true;
@@ -193,7 +195,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
             );
             if (match.id != 0 && match.currentTime > 0) {
               startAt = Duration(seconds: match.currentTime);
-              await _videoController!.seekTo(startAt); // fallback explicitly just in case
+              await _player.seek(startAt); // fallback explicitly just in case
             }
           }
         } catch (_) {}
@@ -238,11 +240,11 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
                         movieSlug: widget.movieSlug,
                         episodeSlug: widget.episodeSlug,
                         onExpand: () {
-                          _videoController?.dispose();
+                          
                           Navigator.pushNamed(context, '/detail', arguments: widget.movieSlug);
                         },
                         onClose: () {
-                          _videoController?.dispose();
+                          
                         },
                       );
                       Navigator.pop(context);
@@ -294,7 +296,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     WatchingSessionService().stopSession();
     
     // Final save of the exact time before disposing
-    if (_token != null && _videoController != null && widget.movieSlug.isNotEmpty) {
+    if (_token != null && widget.movieSlug.isNotEmpty) {
       cmsApi.addHistory(
         _token!,
         widget.movieSlug,
@@ -302,8 +304,8 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
         widget.episodeName,
         episodeSlug: widget.episodeSlug,
         thumbUrl: widget.thumbUrl,
-        currentTime: _videoController!.value.position.inSeconds,
-        duration: _videoController!.value.duration.inSeconds,
+        currentTime: _player.state.position.inSeconds,
+        duration: _player.state.duration.inSeconds,
       ).then((_) {
         cmsApi.getHistory(_token!).then((res) {
           if (res.data != null) {
@@ -319,8 +321,8 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     ]);
     _wpSyncTimer?.cancel();
     if (!_isMinimizing && _videoController != null) {
-      _videoController?.dispose();
-      _chewieController?.dispose();
+      
+      
     }
     _suggestionsFocusNode.dispose();
     super.dispose();
@@ -434,16 +436,16 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
   void _startWatchPartySync() {
     _wpSyncTimer?.cancel();
-    if (_wpRoomCode == null || _videoController == null) return;
+    if (_wpRoomCode == null) return;
     
     _wpSyncTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
-      if (_videoController == null) return;
+      
       
       if (_wpIsHost) {
         await WatchPartyService.syncState(
           _wpRoomCode!, 
-          _videoController!.value.isPlaying, 
-          _videoController!.value.position.inSeconds
+          _player.state.playing, 
+          _player.state.position.inSeconds
         );
       } else {
         final res = await WatchPartyService.getState(_wpRoomCode!);
@@ -459,15 +461,15 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
           final targetTime = data['current_time'] as int;
           final isPlaying = data['is_playing'] == 1;
           
-          final currentSec = _videoController!.value.position.inSeconds;
+          final currentSec = _player.state.position.inSeconds;
           if ((currentSec - targetTime).abs() > 2) {
-            _videoController!.seekTo(Duration(seconds: targetTime));
+            _player.seek(Duration(seconds: targetTime));
           }
           
-          if (isPlaying && !_videoController!.value.isPlaying) {
-            _videoController!.play();
-          } else if (!isPlaying && _videoController!.value.isPlaying) {
-            _videoController!.pause();
+          if (isPlaying && !_player.state.playing) {
+            _player.play();
+          } else if (!isPlaying && _player.state.playing) {
+            _player.pause();
           }
         }
       }
@@ -1144,7 +1146,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     final playerWidget = Center(
       child: _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized
           ? Chewie(controller: _chewieController!)
-          : (_videoController != null && _videoController!.value.hasError)
+          : _videoController.player.state.error != null
               ? const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

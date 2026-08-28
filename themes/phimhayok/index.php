@@ -192,7 +192,7 @@ $homeSliders = [
             <div class="swiper-wrapper pb-4" id="ai-recommend-list">
                 <!-- Skeleton Loader to prevent layout shift -->
                 <?php for($i=0; $i<8; $i++): ?>
-                <div class="swiper-slide w-[180px] md:w-[200px]">
+                <div class="swiper-slide w-[110px] sm:w-[130px] md:w-[150px]">
                     <div class="aspect-[2/3] bg-[#1a1a1a] rounded-lg animate-pulse mb-3 border border-gray-800"></div>
                     <div class="h-4 bg-[#1a1a1a] rounded animate-pulse w-3/4 mb-2"></div>
                     <div class="h-3 bg-[#1a1a1a] rounded animate-pulse w-1/2"></div>
@@ -216,7 +216,7 @@ $homeSliders = [
         <div class="swiper swiper-horizontal">
             <div class="swiper-wrapper pb-4">
                 <?php foreach (array_slice($movies, 0, 8) as $item): ?>
-                    <div class="swiper-slide w-[280px] md:w-[320px]">
+                    <div class="swiper-slide w-[180px] sm:w-[220px] md:w-[260px]">
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
                             <!-- 16:9 Aspect Ratio Image -->
                             <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
@@ -387,7 +387,7 @@ $homeSliders = [
                 <?php foreach (array_slice($movies, 0, 8) as $item): 
                     $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
                 ?>
-                    <div class="swiper-slide w-[180px] md:w-[200px]">
+                    <div class="swiper-slide w-[110px] sm:w-[130px] md:w-[150px]">
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">
                             <div class="aspect-[2/3] relative overflow-hidden rounded-lg">
                                 <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
@@ -444,7 +444,7 @@ $homeSliders = [
                     <?php foreach ($slider['data'] as $item): 
                         $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
                     ?>
-                        <div class="swiper-slide w-[180px] md:w-[200px]">
+                        <div class="swiper-slide w-[110px] sm:w-[130px] md:w-[150px]">
                             <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">
                                 <div class="aspect-[2/3] relative overflow-hidden rounded-lg">
                                     <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
