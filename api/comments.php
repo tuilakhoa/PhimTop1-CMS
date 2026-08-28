@@ -51,8 +51,50 @@ if ($method === 'GET') {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
 } elseif ($method === 'POST') {
-    // Submit comment
+    // Submit or delete comment
     $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+    $action = $data['action'] ?? 'add';
+    
+    if ($action === 'delete') {
+        session_start();
+        $id = $data['id'] ?? 0;
+        if (empty($id)) {
+            echo json_encode(['success' => false, 'message' => 'Comment ID is required.']);
+            exit;
+        }
+        
+        // Simple authorization check: allow if admin, or we just rely on JS hiding the button for others
+        // In a real app we'd verify the comment owner's ID, but here we just check if it's logged in or admin
+        // We'll allow it if the user is logged in and their name matches the comment's user_name, or if admin.
+        
+        // Let's get the comment first
+        $pdo = getPDO();
+        $stmt = $pdo->prepare("SELECT user_name FROM comments WHERE id = ?");
+        $stmt->execute([$id]);
+        $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$comment) {
+            echo json_encode(['success' => false, 'message' => 'Bình luận không tồn tại.']);
+            exit;
+        }
+        
+        $isAdmin = isset($_SESSION['admin']);
+        $currentUser = $_SESSION['user']['name'] ?? '';
+        
+        if (!$isAdmin && $currentUser !== $comment['user_name']) {
+            echo json_encode(['success' => false, 'message' => 'Bạn không có quyền xóa bình luận này.']);
+            exit;
+        }
+        
+        try {
+            $repo->deleteComment($id);
+            echo json_encode(['success' => true, 'message' => 'Đã xóa bình luận.']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Lỗi máy chủ khi xóa bình luận.']);
+        }
+        exit;
+    }
+    
     $slug = $data['slug'] ?? '';
     $name = trim($data['name'] ?? '');
     $content = trim($data['content'] ?? '');
