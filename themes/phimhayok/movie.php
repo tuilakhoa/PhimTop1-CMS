@@ -167,7 +167,7 @@ if (!empty($_GET['party'])) {
             </div>
             
             <!-- Description -->
-<div class="mb-10" id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
+<div class="mb-10">
                 <h3 class="text-xl font-bold mb-4 flex items-center text-white">
                     <span class="w-1 h-5 bg-[#fcc526] mr-2 rounded"></span> Giới thiệu:
                 </h3>
@@ -180,7 +180,7 @@ if (!empty($_GET['party'])) {
             <?php include __DIR__ . '/components/actors.php'; ?>
             
             <!-- Episodes List -->
-<div class="mb-10" id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
+<div class="mb-10">
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
                     <h3 class="text-xl font-bold text-white">Danh sách tập</h3>
                     <div class="flex items-center gap-2">
@@ -270,6 +270,8 @@ if (!empty($_GET['party'])) {
                 const commentsList = document.getElementById('comments-list');
                 const countSpan = document.getElementById('comment-count');
                 const movieSlug = '<?= htmlspecialchars($slug) ?>';
+                const currentUser = <?= json_encode($_SESSION['user']['name'] ?? '') ?>;
+                const isAdmin = <?= isset($_SESSION['admin']) ? 'true' : 'false' ?>;
                 
                 anonCheckbox.addEventListener('change', function() {
                     if (this.checked) {
@@ -279,6 +281,21 @@ if (!empty($_GET['party'])) {
                         nameInput.focus();
                     }
                 });
+                
+                window.deleteComment = function(id) {
+                    if(confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
+                        fetch('/api/comments.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({action: 'delete', id: id})
+                        })
+                        .then(res => res.json())
+                        .then(res => {
+                            if(res.success) fetchComments();
+                            else alert(res.message);
+                        });
+                    }
+                };
                 
                 function fetchComments() {
                     fetch('/api/comments.php?slug=' + movieSlug)
@@ -293,15 +310,21 @@ if (!empty($_GET['party'])) {
                                 
                                 let html = '';
                                 res.data.forEach(c => {
+                                    let deleteBtn = '';
+                                    if (isAdmin || (currentUser && currentUser === c.user_name)) {
+                                        deleteBtn = `<button onclick="deleteComment(${c.id})" class="text-red-500 text-xs ml-3 hover:underline font-medium border border-red-500/30 px-2 py-0.5 rounded">Xóa</button>`;
+                                    }
+                                    
                                     html += `
                                         <div class="flex gap-3">
                                             <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center shrink-0 border border-gray-700">
                                                 <svg class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                             </div>
                                             <div class="flex-1">
-                                                <div class="flex items-baseline gap-2 mb-1">
-                                                    <span class="font-bold text-gray-200 text-sm">${c.user_name}</span>
+                                                <div class="flex items-baseline mb-1">
+                                                    <span class="font-bold text-gray-200 text-sm mr-2">${c.user_name}</span>
                                                     <span class="text-xs text-gray-500">${c.time_ago}</span>
+                                                    ${deleteBtn}
                                                 </div>
                                                 <p class="text-sm text-gray-300">${c.content}</p>
                                             </div>
