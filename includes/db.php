@@ -28,10 +28,14 @@ $dbConfigPath = __DIR__ . '/../config.json';
 $jwtSecret = "super-secret-key-for-movie-app";
 
 function getDbConfig() {
+    static $cachedConfig = null;
+    if ($cachedConfig !== null) {
+        return $cachedConfig;
+    }
     global $dbConfigPath;
-    clearstatcache(true, $dbConfigPath);
     if (file_exists($dbConfigPath)) {
-        return json_decode(file_get_contents($dbConfigPath), true);
+        $cachedConfig = json_decode(file_get_contents($dbConfigPath), true);
+        return $cachedConfig;
     }
     return null;
 }
@@ -42,6 +46,11 @@ function saveDbConfig($newConfig) {
 }
 
 function getPDO() {
+    static $pdoInstance = null;
+    if ($pdoInstance !== null) {
+        return $pdoInstance;
+    }
+    
     $config = getDbConfig();
     if (!$config) return null;
     
@@ -54,7 +63,8 @@ function getPDO() {
         $dsn = "mysql:host={$config['host']};dbname={$config['database']};charset=utf8mb4";
         $pdo = new PDO($dsn, $config['user'], $config['password'] ?? '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        return $pdo;
+        $pdoInstance = $pdo;
+        return $pdoInstance;
     } catch (PDOException $e) {
         return null;
     }
@@ -70,6 +80,11 @@ function getFirestore() {
 }
 
 function getSettings() {
+    static $cachedSettings = null;
+    if ($cachedSettings !== null) {
+        return $cachedSettings;
+    }
+    
     $pdo = getPDO();
     $defaultSettings = [
         'initialized' => false,
@@ -208,11 +223,13 @@ function getSettings() {
                 $row['db_version'] = 19;
             }
             
-            return array_merge($defaultSettings, $row);
+            $cachedSettings = array_merge($defaultSettings, $row);
+            return $cachedSettings;
         }
     } catch (PDOException $e) {
         // Handle case where table doesn't exist
     }
+    $cachedSettings = $defaultSettings;
     return $defaultSettings;
 }
 

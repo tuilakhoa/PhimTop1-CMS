@@ -226,10 +226,13 @@ class MovieRepository {
     }
 
     public function getBlockedSlugs() {
+        static $cached = null;
+        if ($cached !== null) return $cached;
         if (!$this->pdo) return [];
         try {
             $stmt = $this->pdo->query("SELECT slug FROM blocked_movies");
-            return $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
+            $cached = $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
+            return $cached;
         } catch (PDOException $e) {
             return [];
         }

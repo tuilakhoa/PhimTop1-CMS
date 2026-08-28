@@ -6,26 +6,46 @@ require_once __DIR__ . '/repo/CommentRepository.php';
 require_once __DIR__ . '/repo/SeoRepository.php';
 
 function getFirestoreInstance() {
+    static $instance = null;
+    if ($instance !== null) return $instance;
+    
     $config = getDbConfig();
     if ($config && isset($config['type']) && $config['type'] === 'firestore') {
         require_once __DIR__ . '/firestore_helper.php';
-        return new FirestoreClient($config['projectId'], $config['serviceAccount']);
+        $instance = new FirestoreClient($config['projectId'], $config['serviceAccount']);
+        return $instance;
     }
     return null;
 }
 
 function getMovieRepository() {
-    return new MovieRepository(getPDO(), getFirestoreInstance());
+    static $instance = null;
+    if ($instance === null) {
+        $instance = new MovieRepository(getPDO(), getFirestoreInstance());
+    }
+    return $instance;
 }
 
 function getCategoryRepository() {
-    return new CategoryRepository(getPDO(), getFirestoreInstance());
+    static $instance = null;
+    if ($instance === null) {
+        $instance = new CategoryRepository(getPDO(), getFirestoreInstance());
+    }
+    return $instance;
 }
 
 function getCommentRepository() {
-    return new CommentRepository(getPDO(), getFirestoreInstance());
+    static $instance = null;
+    if ($instance === null) {
+        $instance = new CommentRepository(getPDO(), getFirestoreInstance());
+    }
+    return $instance;
 }
 
 function getSeoRepository() {
-    return new SeoRepository(getPDO(), getFirestoreInstance());
+    static $instance = null;
+    if ($instance === null) {
+        $instance = new SeoRepository(getPDO(), getFirestoreInstance());
+    }
+    return $instance;
 }
