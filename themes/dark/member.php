@@ -128,12 +128,12 @@
                         <a href="/" class="inline-flex items-center justify-center w-14 h-14 bg-red-600 rounded-2xl shadow-lg shadow-red-600/30 mb-4 transition-transform hover:scale-105">
                             <i data-lucide="play" class="w-8 h-8 text-white ml-1"></i>
                         </a>
-                    <div class="flex p-1 bg-zinc-800/50 rounded-xl mb-8 relative border border-white/5">
-                        <div id="tab-indicator" class="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-red-600 rounded-lg shadow-md transition-transform duration-300 ease-out <?= $mode === 'register' ? 'translate-x-[100%]' : 'translate-x-0' ?>"></div>
+                    <div class="relative flex p-1.5 bg-zinc-900/80 backdrop-blur-md rounded-full mb-8 border border-zinc-700/50 shadow-inner">
+                        <div id="tab-indicator" class="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-gradient-to-r from-red-600 to-red-500 rounded-full shadow-lg shadow-red-500/20 transition-transform duration-300 ease-out <?= $mode === 'register' ? 'translate-x-full' : 'translate-x-0' ?>"></div>
                         
-                        <button type="button" onclick="setMode('login')" id="tab-login" class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-colors duration-300 z-10 <?= $mode === 'register' ? 'text-zinc-400 hover:text-white' : 'text-white' ?>">Đăng Nhập</button>
+                        <button type="button" onclick="setMode('login')" id="tab-login" class="relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 <?= $mode === 'register' ? 'text-zinc-400 hover:text-white' : 'text-white' ?>">Đăng Nhập</button>
                         
-                        <button type="button" onclick="setMode('register')" id="tab-register" class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-colors duration-300 z-10 <?= $mode === 'register' ? 'text-white' : 'text-zinc-400 hover:text-white' ?>">Đăng Ký</button>
+                        <button type="button" onclick="setMode('register')" id="tab-register" class="relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 <?= $mode === 'register' ? 'text-white' : 'text-zinc-400 hover:text-white' ?>">Đăng Ký</button>
                     </div>
                     </div>
 
@@ -359,12 +359,12 @@
                 const indicator = document.getElementById('tab-indicator');
                 if(indicator) {
                     indicator.classList.remove('translate-x-0');
-                    indicator.classList.add('translate-x-[100%]');
+                    indicator.classList.add('translate-x-full');
                 }
                 const tabLogin = document.getElementById('tab-login');
-                if(tabLogin) tabLogin.className = 'flex-1 py-2.5 text-sm font-bold rounded-lg transition-colors duration-300 z-10 text-zinc-400 hover:text-white';
+                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-zinc-400 hover:text-white';
                 const tabRegister = document.getElementById('tab-register');
-                if(tabRegister) tabRegister.className = 'flex-1 py-2.5 text-sm font-bold rounded-lg transition-colors duration-300 z-10 text-white';
+                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-white';
             } else if (currentMode === 'login') {
                 document.getElementById('action-input').value = 'login';
                 document.getElementById('name-field').classList.add('hidden');
@@ -381,13 +381,13 @@
                 
                 const indicator = document.getElementById('tab-indicator');
                 if(indicator) {
-                    indicator.classList.remove('translate-x-[100%]');
+                    indicator.classList.remove('translate-x-full');
                     indicator.classList.add('translate-x-0');
                 }
                 const tabLogin = document.getElementById('tab-login');
-                if(tabLogin) tabLogin.className = 'flex-1 py-2.5 text-sm font-bold rounded-lg transition-colors duration-300 z-10 text-white';
+                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-white';
                 const tabRegister = document.getElementById('tab-register');
-                if(tabRegister) tabRegister.className = 'flex-1 py-2.5 text-sm font-bold rounded-lg transition-colors duration-300 z-10 text-zinc-400 hover:text-white';
+                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-zinc-400 hover:text-white';
             }
             const statusMsg = document.getElementById('status-message');
             if(statusMsg) statusMsg.classList.add('hidden');
