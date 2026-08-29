@@ -279,174 +279,144 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         </div>
     </section>
     
-    <!-- 4. Phim Nổi Bật (Mixed layout) -->
-    <section class="flex flex-col lg:flex-row gap-8">
-        <!-- Title area -->
-        <div class="w-full lg:w-48 shrink-0 flex lg:flex-col justify-between lg:justify-center lg:-mt-12">
-            <div>
-                <h2 class="text-3xl font-bold text-white leading-none">Phim</h2>
-                <h3 class="text-2xl font-black text-phim-yellow uppercase mt-1">Nổi Bật</h3>
-            </div>
-            <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-moi" class="text-sm text-gray-500 hover:text-white flex items-center mt-4">
-                Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
-            </a>
-        </div>
-        
-        <!-- Grid -->
-        <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <?php foreach (array_slice($movies, 0, 4) as $item): ?>
-                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1">
-                    <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
-                        <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
-                        <?php if (!empty($item['episode_current'])): ?>
-                            <div class="absolute top-2 left-2">
-                                <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm"><?= htmlspecialchars($item['episode_current'] ?? '') ?></span>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="mt-2">
-                        <h3 class="text-white font-medium text-sm truncate"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
-                        <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
-                    </div>
+    <!-- KHỐI PHIM QUỐC GIA (NỔI BẬT, ÂU MỸ, TRUNG QUỐC, HÀN QUỐC) - Gom lại cho gần nhau -->
+    <div class="space-y-12 lg:space-y-16">
+    
+        <!-- 4. Phim Nổi Bật -->
+        <section class="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
+            <div class="w-full lg:w-48 shrink-0 flex lg:flex-col justify-between lg:justify-center pt-2 lg:pt-8">
+                <div>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-white leading-none">Phim</h2>
+                    <h3 class="text-2xl lg:text-3xl font-black text-phim-yellow uppercase mt-1">Nổi Bật</h3>
+                </div>
+                <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-moi" class="text-sm lg:text-base text-gray-500 hover:text-white flex items-center mt-2 lg:mt-6 transition-colors">
+                    Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
                 </a>
-            <?php endforeach; ?>
-        </div>
-    </section>
-
-    
-    
-    <!-- Phim ÂU MỸ Section -->
-    <?php if (!empty($auMyData)): ?>
-    <section class="flex flex-col md:flex-row gap-4 md:gap-8 items-start border-t border-gray-900 pt-8 mt-8">
-        <div class="md:w-32 lg:w-48 shrink-0 flex flex-col justify-center h-full pt-4 md:pt-[10%]">
-            <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight">Phim <br><span class="text-cyan-400 uppercase">ÂU MỸ</span></h2>
-            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/au-my" class="text-gray-500 hover:text-white text-sm mt-4 flex items-center transition-colors">Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
-        </div>
-        
-        <div class="flex-1 min-w-0 w-full relative">
-            <div class="swiper swiper-horizontal">
-                <div class="swiper-wrapper pb-4">
-                    <?php foreach (array_slice($auMyData, 0, 10) as $item): ?>
-                        <div class="swiper-slide w-72 md:w-80">
-                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
-                                <!-- 16:9 Aspect Ratio Image -->
-                                <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
-                                    <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>"
-                                         class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
-                                    
-                                    <!-- Top Left Yellow Tag -->
-                                    <?php if (!empty($item['episode_current'])): ?>
-                                        <div class="absolute top-2 left-2">
-                                            <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm shadow-md">
-                                                <?= htmlspecialchars($item['episode_current'] ?? '') ?>
-                                            </span>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
-                                    <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
-                                </div>
-                            </a>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
             </div>
-        </div>
-    </section>
-    <?php endif; ?>
-
-    <!-- Phim TRUNG QUỐC Section -->
-    <?php if (!empty($trungQuocData)): ?>
-    <section class="flex flex-col md:flex-row gap-4 md:gap-8 items-start border-t border-gray-900 pt-8 mt-8">
-        <div class="md:w-32 lg:w-48 shrink-0 flex flex-col justify-center h-full pt-4 md:pt-[10%]">
-            <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight">Phim <br><span class="text-red-500 uppercase">TRUNG QUỐC</span></h2>
-            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/trung-quoc" class="text-gray-500 hover:text-white text-sm mt-4 flex items-center transition-colors">Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
-        </div>
-        
-        <div class="flex-1 min-w-0 w-full relative">
-            <div class="swiper swiper-horizontal">
-                <div class="swiper-wrapper pb-4">
-                    <?php foreach (array_slice($trungQuocData, 0, 10) as $item): ?>
-                        <div class="swiper-slide w-72 md:w-80">
-                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
-                                <!-- 16:9 Aspect Ratio Image -->
-                                <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
-                                    <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>"
-                                         class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
-                                    
-                                    <!-- Top Left Yellow Tag -->
-                                    <?php if (!empty($item['episode_current'])): ?>
-                                        <div class="absolute top-2 left-2">
-                                            <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm shadow-md">
-                                                <?= htmlspecialchars($item['episode_current'] ?? '') ?>
-                                            </span>
-                                        </div>
-                                    <?php endif; ?>
+            
+            <div class="flex-1 min-w-0 w-full grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <?php foreach (array_slice($movies, 0, 4) as $item): ?>
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1">
+                        <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
+                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                            <?php if (!empty($item['episode_current'])): ?>
+                                <div class="absolute top-2 left-2">
+                                    <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm"><?= htmlspecialchars($item['episode_current'] ?? '') ?></span>
                                 </div>
-                                
-                                <div class="mt-3">
-                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
-                                    <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
-                                </div>
-                            </a>
+                            <?php endif; ?>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-                <!-- Controls -->
-                <div class="swiper-button-prev !w-8 !h-8 !bg-black/50 !rounded-full !text-white after:!text-sm hidden md:flex"></div>
-                <div class="swiper-button-next !w-8 !h-8 !bg-black/50 !rounded-full !text-white after:!text-sm hidden md:flex"></div>
-            </div>
-        </div>
-    </section>
-    <?php endif; ?>
-
-
-    <!-- Phim HÀN QUỐC Section -->
-    <?php if (!empty($hanQuocData)): ?>
-    <section class="flex flex-col md:flex-row gap-4 md:gap-8 items-start border-t border-gray-900 pt-8 mt-8">
-        <div class="md:w-32 lg:w-48 shrink-0 flex flex-col justify-center h-full pt-4 md:pt-[10%]">
-            <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight">Phim <br><span class="text-cyan-400 uppercase">HÀN QUỐC</span></h2>
-            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/han-quoc" class="text-gray-500 hover:text-white text-sm mt-4 flex items-center transition-colors">Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
-        </div>
-        
-        <div class="flex-1 min-w-0 w-full relative">
-            <div class="swiper swiper-horizontal">
-                <div class="swiper-wrapper pb-4">
-                    <?php foreach (array_slice($hanQuocData, 0, 10) as $item): ?>
-                        <div class="swiper-slide w-72 md:w-80">
-                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
-                                <!-- 16:9 Aspect Ratio Image -->
-                                <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
-                                    <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>"
-                                         class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
-                                    
-                                    <!-- Top Left Yellow Tag -->
-                                    <?php if (!empty($item['episode_current'])): ?>
-                                        <div class="absolute top-2 left-2">
-                                            <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm shadow-md">
-                                                <?= htmlspecialchars($item['episode_current'] ?? '') ?>
-                                            </span>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <h3 class="text-white font-medium text-sm md:text-base truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
-                                    <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
-                                </div>
-                            </a>
+                        <div class="mt-2">
+                            <h3 class="text-white font-medium text-sm lg:text-base truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                            <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-                <!-- Controls -->
-                <div class="swiper-button-prev !w-8 !h-8 !bg-black/50 !rounded-full !text-white after:!text-sm hidden md:flex"></div>
-                <div class="swiper-button-next !w-8 !h-8 !bg-black/50 !rounded-full !text-white after:!text-sm hidden md:flex"></div>
+                    </a>
+                <?php endforeach; ?>
             </div>
-        </div>
-    </section>
-    <?php endif; ?>
+        </section>
+
+        <!-- Phim ÂU MỸ Section -->
+        <?php if (!empty($auMyData)): ?>
+        <section class="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
+            <div class="w-full lg:w-48 shrink-0 flex lg:flex-col justify-between lg:justify-center pt-2 lg:pt-8">
+                <div>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-white leading-none">Phim</h2>
+                    <h3 class="text-2xl lg:text-3xl font-black text-cyan-400 uppercase mt-1">ÂU MỸ</h3>
+                </div>
+                <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/au-my" class="text-sm lg:text-base text-gray-500 hover:text-white flex items-center mt-2 lg:mt-6 transition-colors">
+                    Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="flex-1 min-w-0 w-full grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <?php foreach (array_slice($auMyData, 0, 4) as $item): ?>
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1">
+                        <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
+                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                            <?php if (!empty($item['episode_current'])): ?>
+                                <div class="absolute top-2 left-2">
+                                    <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm shadow-md"><?= htmlspecialchars($item['episode_current'] ?? '') ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="mt-2">
+                            <h3 class="text-white font-medium text-sm lg:text-base truncate group-hover:text-cyan-400 transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                            <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+        <?php endif; ?>
+
+        <!-- Phim TRUNG QUỐC Section -->
+        <?php if (!empty($trungQuocData)): ?>
+        <section class="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
+            <div class="w-full lg:w-48 shrink-0 flex lg:flex-col justify-between lg:justify-center pt-2 lg:pt-8">
+                <div>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-white leading-none">Phim</h2>
+                    <h3 class="text-2xl lg:text-3xl font-black text-red-500 uppercase mt-1">TRUNG QUỐC</h3>
+                </div>
+                <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/trung-quoc" class="text-sm lg:text-base text-gray-500 hover:text-white flex items-center mt-2 lg:mt-6 transition-colors">
+                    Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="flex-1 min-w-0 w-full grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <?php foreach (array_slice($trungQuocData, 0, 4) as $item): ?>
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1">
+                        <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
+                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                            <?php if (!empty($item['episode_current'])): ?>
+                                <div class="absolute top-2 left-2">
+                                    <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm shadow-md"><?= htmlspecialchars($item['episode_current'] ?? '') ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="mt-2">
+                            <h3 class="text-white font-medium text-sm lg:text-base truncate group-hover:text-red-500 transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                            <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+        <?php endif; ?>
+
+        <!-- Phim HÀN QUỐC Section -->
+        <?php if (!empty($hanQuocData)): ?>
+        <section class="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
+            <div class="w-full lg:w-48 shrink-0 flex lg:flex-col justify-between lg:justify-center pt-2 lg:pt-8">
+                <div>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-white leading-none">Phim</h2>
+                    <h3 class="text-2xl lg:text-3xl font-black text-[#5b61f4] uppercase mt-1">HÀN QUỐC</h3>
+                </div>
+                <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/han-quoc" class="text-sm lg:text-base text-gray-500 hover:text-white flex items-center mt-2 lg:mt-6 transition-colors">
+                    Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="flex-1 min-w-0 w-full grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <?php foreach (array_slice($hanQuocData, 0, 4) as $item): ?>
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1">
+                        <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-lg">
+                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                            <?php if (!empty($item['episode_current'])): ?>
+                                <div class="absolute top-2 left-2">
+                                    <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm shadow-md"><?= htmlspecialchars($item['episode_current'] ?? '') ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="mt-2">
+                            <h3 class="text-white font-medium text-sm lg:text-base truncate group-hover:text-[#5b61f4] transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h3>
+                            <p class="text-gray-500 text-xs truncate mt-0.5"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+        <?php endif; ?>
+        
+    </div>
 
     <!-- 5. Bảng Xếp Hạng (Leaderboard) -->
     <section class="bg-gradient-to-b from-[#0a0a0a] to-[#000000] rounded-3xl p-6 md:p-10 lg:p-12 border border-gray-900 shadow-2xl relative overflow-hidden">
