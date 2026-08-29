@@ -32,8 +32,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _buildNumber = 0;
   bool _hasAppLock = false;
   bool _bioAppLock = false;
+  bool _bioLogin = false;
   String _cacheSize = "Đang tính...";
   int _autoClearDays = 0;
+  String _biometricLabel = "Sinh trắc học";
 
   @override
   void initState() {
@@ -84,13 +86,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadVersion() async {
     final info = await PackageInfo.fromPlatform();
     final prefs = await SharedPreferences.getInstance();
+    
+    final auth = LocalAuthentication();
+    String bioType = "Vân tay / Khuôn mặt";
+    try {
+      final biometrics = await auth.getAvailableBiometrics();
+      if (biometrics.contains(BiometricType.face)) {
+        bioType = "Khuôn mặt";
+      } else if (biometrics.contains(BiometricType.fingerprint)) {
+        bioType = "Vân tay";
+      }
+    } catch(e) {}
+
     if (mounted) {
       setState(() {
         _version = info.version;
         _buildNumber = int.tryParse(info.buildNumber) ?? 0;
         _hasAppLock = prefs.getString('app_lock_pin') != null;
         _bioAppLock = prefs.getBool('app_lock_biometric') ?? false;
+        _bioLogin = prefs.getBool('bio_login_enabled') ?? false;
         _autoClearDays = prefs.getInt('auto_clear_cache_days') ?? 0;
+        _biometricLabel = bioType;
       });
     }
   }
@@ -110,7 +126,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    if (targetBuild > _buildNumber) {
+    if (targetVersion.isEmpty || _version == targetVersion) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bạn đang dùng phiên bản mới nhất')));
+      }
+      return;
+    }
+
+    bool needsUpdate = false;
+    final cParts = _version.split('.');
+    final tParts = targetVersion.split('.');
+    bool versionIsGreater = false;
+    for (int i = 0; i < cParts.length && i < tParts.length; i++) {
+      final c = int.tryParse(cParts[i]) ?? 0;
+      final t = int.tryParse(tParts[i]) ?? 0;
+      if (t > c) {
+        versionIsGreater = true;
+        break;
+      } else if (t < c) {
+        break;
+      }
+    }
+    if (!versionIsGreater && tParts.length > cParts.length) {
+      for (int i = cParts.length; i < tParts.length; i++) {
+        if ((int.tryParse(tParts[i]) ?? 0) > 0) {
+          versionIsGreater = true;
+          break;
+        }
+      }
+    }
+
+    if (versionIsGreater) {
+      needsUpdate = true;
+    } else if (_version == targetVersion) {
+      if (targetBuild > 0 && targetBuild > _buildNumber) {
+        needsUpdate = true;
+      }
+    }
+
+    if (needsUpdate) {
       if (mounted) {
         showDialog(
           context: context,
@@ -131,6 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     }
   }
+
 
   bool _isTvMode(BuildContext context) {
     if (appFlavor == 'mobile') return false;
@@ -472,11 +527,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: _showFeedbackDialog,
             ),
             MenuRowTile(
+              icon: Icons.download_for_offline_outlined,
+              iconColor: Colors.indigo,
+              textColor: textColor,
+              title: "Cài đặt tải xuống",
+              onTap: () {
+                context.push('/download_settings');
+              },
+            ),
+          ]),
+          const SizedBox(height: 12),
+          _buildSectionHeader("Bảo mật"),
+          _buildMenuGroup(context, [
+            MenuRowTile(
               icon: Icons.lock_outline,
               iconColor: Colors.brown,
               textColor: textColor,
               title: "Khóa ứng dụng bằng PIN",
               subtitle: "Mã PIN 4 số",
+              onTap: () => _toggleAppLock(),
               trailing: Switch(
                 value: _hasAppLock,
                 activeColor: Theme.of(context).primaryColor,
@@ -488,7 +557,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
               iconColor: Colors.purple,
               textColor: textColor,
               title: "Khóa Sinh trắc học",
-              subtitle: "Vân tay / Khuôn mặt",
+              subtitle: _biometricLabel,
+              onTap: () async {
+                bool val = !_bioAppLock;
+                if (val) {
+                  try {
+                    final auth = LocalAuthentication();
+                    final canCheck = await auth.canCheckBiometrics;
+                    final isDeviceSupported = await auth.isDeviceSupported();
+                    if (canCheck || isDeviceSupported) {
+                      final authenticated = await auth.authenticate(localizedReason: 'Xác thực để bật khóa ứng dụng bằng $_biometricLabel');
+                      if (authenticated) {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('app_lock_biometric', true);
+                        setState(() => _bioAppLock = true);
+                      }
+                    } else {
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thiết bị không hỗ trợ Sinh trắc học')));
+                    }
+                  } catch (e) {
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng REBUILD app (thay đổi native code): $e')));
+                  }
+                } else {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('app_lock_biometric');
+                  setState(() => _bioAppLock = false);
+                }
+              },
               trailing: Switch(
                 value: _bioAppLock,
                 activeColor: Theme.of(context).primaryColor,
@@ -499,7 +594,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       final canCheck = await auth.canCheckBiometrics;
                       final isDeviceSupported = await auth.isDeviceSupported();
                       if (canCheck || isDeviceSupported) {
-                        final authenticated = await auth.authenticate(localizedReason: 'Xác thực để bật khóa sinh trắc học');
+                        final authenticated = await auth.authenticate(localizedReason: 'Xác thực để bật khóa ứng dụng bằng $_biometricLabel');
                         if (authenticated) {
                           final prefs = await SharedPreferences.getInstance();
                           await prefs.setBool('app_lock_biometric', true);
@@ -509,7 +604,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thiết bị không hỗ trợ Sinh trắc học')));
                       }
                     } catch (e) {
-                      // Ignore
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng REBUILD app (thay đổi native code): $e')));
                     }
                   } else {
                     final prefs = await SharedPreferences.getInstance();
@@ -520,13 +615,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             MenuRowTile(
-              icon: Icons.download_for_offline_outlined,
-              iconColor: Colors.indigo,
+              icon: Icons.face,
+              iconColor: Colors.pink,
               textColor: textColor,
-              title: "Cài đặt tải xuống",
-              onTap: () {
-                context.push('/download_settings');
+              title: "Đăng nhập Sinh trắc học",
+              subtitle: _biometricLabel,
+              onTap: () async {
+                bool val = !_bioLogin;
+                if (val) {
+                  try {
+                    final auth = LocalAuthentication();
+                    final canCheck = await auth.canCheckBiometrics;
+                    final isDeviceSupported = await auth.isDeviceSupported();
+                    if (canCheck || isDeviceSupported) {
+                      final authenticated = await auth.authenticate(localizedReason: 'Xác thực để bật đăng nhập bằng $_biometricLabel');
+                      if (authenticated) {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('bio_login_enabled', true);
+                        setState(() => _bioLogin = true);
+                      }
+                    } else {
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thiết bị không hỗ trợ Sinh trắc học')));
+                    }
+                  } catch (e) {
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng REBUILD app (thay đổi native code): $e')));
+                  }
+                } else {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('bio_login_enabled');
+                  setState(() => _bioLogin = false);
+                }
               },
+              trailing: Switch(
+                value: _bioLogin,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (val) async {
+                  if (val) {
+                    try {
+                      final auth = LocalAuthentication();
+                      final canCheck = await auth.canCheckBiometrics;
+                      final isDeviceSupported = await auth.isDeviceSupported();
+                      if (canCheck || isDeviceSupported) {
+                        final authenticated = await auth.authenticate(localizedReason: 'Xác thực để bật đăng nhập bằng $_biometricLabel');
+                        if (authenticated) {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('bio_login_enabled', true);
+                          setState(() => _bioLogin = true);
+                        }
+                      } else {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thiết bị không hỗ trợ Sinh trắc học')));
+                      }
+                    } catch (e) {
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng REBUILD app (thay đổi native code): $e')));
+                    }
+                  } else {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('bio_login_enabled');
+                    setState(() => _bioLogin = false);
+                  }
+                },
+              ),
             ),
           ]),
           const SizedBox(height: 12),
@@ -551,13 +699,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onPressed: () async {
                           Navigator.pop(ctx);
                           try {
-                             final tempDir = await getTemporaryDirectory();
-                             if (await tempDir.exists()) {
-                               for (var entity in tempDir.listSync()) {
-                                 if (entity is File) await entity.delete();
-                                 else if (entity is Directory) await entity.delete(recursive: true);
-                               }
-                             }
                              await DefaultCacheManager().emptyCache();
                              
                              // Update last clear time

@@ -57,8 +57,45 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
       final currentBuildNumber = int.tryParse(packageInfo.buildNumber) ?? 0;
+      final currentVersion = packageInfo.version;
+
+      if (targetVersion.isEmpty) return;
+
+      bool needsUpdate = false;
       
-      if (targetBuild > currentBuildNumber) {
+      // So sánh Semantic Version (vd: 1.0.3 vs 1.0.2)
+      final cParts = currentVersion.split('.');
+      final tParts = targetVersion.split('.');
+      bool versionIsGreater = false;
+      for (int i = 0; i < cParts.length && i < tParts.length; i++) {
+        final c = int.tryParse(cParts[i]) ?? 0;
+        final t = int.tryParse(tParts[i]) ?? 0;
+        if (t > c) {
+          versionIsGreater = true;
+          break;
+        } else if (t < c) {
+          break;
+        }
+      }
+      if (!versionIsGreater && tParts.length > cParts.length) {
+        for (int i = cParts.length; i < tParts.length; i++) {
+          if ((int.tryParse(tParts[i]) ?? 0) > 0) {
+            versionIsGreater = true;
+            break;
+          }
+        }
+      }
+
+      if (versionIsGreater) {
+        needsUpdate = true;
+      } else if (currentVersion == targetVersion) {
+        // Nếu version bằng nhau, chỉ check buildNumber nếu CMS có cấu hình buildNumber (>0)
+        if (targetBuild > 0 && targetBuild > currentBuildNumber) {
+          needsUpdate = true;
+        }
+      }
+
+      if (needsUpdate) {
         if (!mounted) return;
         
         showDialog(

@@ -44,7 +44,7 @@ class WatchMovieScreen extends StatefulWidget {
   State<WatchMovieScreen> createState() => _WatchMovieScreenState();
 }
 
-class _WatchMovieScreenState extends State<WatchMovieScreen> {
+class _WatchMovieScreenState extends State<WatchMovieScreen> with WidgetsBindingObserver {
   final Player _player = Player();
   late final VideoController _videoController = VideoController(_player);
   
@@ -65,6 +65,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _token = context.read<AuthProvider>().token;
     
     // Allow landscape orientation when playing movie
@@ -210,6 +211,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _remoteSubscription?.cancel();
     _watchingSessionSubscription?.cancel();
     _wpSyncTimer?.cancel();
@@ -242,11 +244,21 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
     ]);
     _wpSyncTimer?.cancel();
     if (!_isMinimizing && _videoController != null) {
-      
-      
+      _player.dispose();
     }
     _suggestionsFocusNode.dispose();
     super.dispose();
+  }
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.hidden) {
+      final isPip = await SimplePip.isPipActivated;
+      if (!isPip && _player.state.playing) {
+        _player.pause();
+      }
+    }
   }
 
   bool _isTvMode(BuildContext context) {
@@ -1065,7 +1077,52 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   Widget build(BuildContext context) {
     final isTv = _isTvMode(context);
     final playerWidget = Center(
-      child: Video(controller: _videoController),
+      child: MaterialVideoControlsTheme(
+        normal: MaterialVideoControlsThemeData(
+          seekBarThumbColor: Theme.of(context).primaryColor,
+          seekBarPositionColor: Theme.of(context).primaryColor,
+          topButtonBar: [
+            const Spacer(),
+            MaterialCustomButton(
+              onPressed: () { SimplePip().enterPipMode(); },
+              icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
+            ),
+            MaterialCustomButton(
+              onPressed: () {
+                setState(() { _isMinimizing = true; });
+                MiniPlayerService().showMiniPlayer(
+                  context: context,
+                  controller: _videoController,
+                  movieSlug: widget.movieSlug,
+                  episodeSlug: widget.episodeSlug,
+                  onExpand: () {
+                    Navigator.pushNamed(context, '/detail', arguments: widget.movieSlug);
+                  },
+                  onClose: () {},
+                );
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.fit_screen_rounded, color: Colors.white),
+            ),
+            MaterialCustomButton(
+              onPressed: () { _showWatchPartyDialog(); },
+              icon: Icon(_wpRoomCode != null ? Icons.group : Icons.group_add, color: Colors.white),
+            ),
+          ],
+        ),
+        fullscreen: MaterialVideoControlsThemeData(
+          seekBarThumbColor: Theme.of(context).primaryColor,
+          seekBarPositionColor: Theme.of(context).primaryColor,
+          topButtonBar: [
+            const Spacer(),
+            MaterialCustomButton(
+              onPressed: () { SimplePip().enterPipMode(); },
+              icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
+            ),
+          ],
+        ),
+        child: Video(controller: _videoController),
+      ),
     );
 
     final tvLayout = Focus(

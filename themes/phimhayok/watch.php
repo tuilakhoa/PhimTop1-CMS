@@ -504,31 +504,76 @@ function reportMovieError() {
     Swal.fire({
         title: 'Báo lỗi phim',
         html: `
-            <div class="text-left space-y-3 mt-4 px-2">
-                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
-                    <input type="radio" name="report_error" value="Phim không phát được / Đứng hình" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
-                    <span class="text-sm font-medium">Phim không phát được / Đứng hình</span>
+            <style>
+                .report-option input:checked + div {
+                    border-color: #eab308;
+                    background-color: rgba(234, 179, 8, 0.1);
+                }
+                .report-option input:checked + div span {
+                    color: #eab308;
+                    font-weight: 600;
+                }
+                .report-option input:checked + div .radio-circle {
+                    border-color: #eab308;
+                    background-color: #eab308;
+                    box-shadow: inset 0 0 0 3px rgba(234, 179, 8, 0.2);
+                }
+            </style>
+            <div class="text-left space-y-2.5 mt-2" onchange="
+                var sel = document.querySelector('input[name=report_error]:checked');
+                var ta = document.getElementById('other-detail-container');
+                if (sel && sel.value === 'Khác') {
+                    ta.classList.remove('hidden');
+                    document.getElementById('report-detail-text').focus();
+                } else {
+                    ta.classList.add('hidden');
+                }
+            ">
+                <label class="report-option block cursor-pointer">
+                    <input type="radio" name="report_error" value="Phim không phát được / Đứng hình" class="hidden">
+                    <div class="px-4 py-3 rounded-xl border border-gray-800 bg-[#141414] hover:bg-[#1a1a1a] transition-colors flex items-center">
+                        <div class="radio-circle w-4 h-4 rounded-full border border-gray-600 mr-3 flex-shrink-0 transition-colors"></div>
+                        <span class="text-gray-300 text-sm flex-1">Phim không phát được / Đứng hình</span>
+                    </div>
                 </label>
-                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
-                    <input type="radio" name="report_error" value="Lỗi phụ đề / Thuyết minh" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
-                    <span class="text-sm font-medium">Lỗi phụ đề / Thuyết minh</span>
+                <label class="report-option block cursor-pointer">
+                    <input type="radio" name="report_error" value="Lỗi phụ đề / Thuyết minh" class="hidden">
+                    <div class="px-4 py-3 rounded-xl border border-gray-800 bg-[#141414] hover:bg-[#1a1a1a] transition-colors flex items-center">
+                        <div class="radio-circle w-4 h-4 rounded-full border border-gray-600 mr-3 flex-shrink-0 transition-colors"></div>
+                        <span class="text-gray-300 text-sm flex-1">Lỗi phụ đề / Thuyết minh</span>
+                    </div>
                 </label>
-                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
-                    <input type="radio" name="report_error" value="Âm thanh bị lệch / Không có tiếng" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
-                    <span class="text-sm font-medium">Âm thanh bị lệch / Không có tiếng</span>
+                <label class="report-option block cursor-pointer">
+                    <input type="radio" name="report_error" value="Âm thanh bị lệch / Không có tiếng" class="hidden">
+                    <div class="px-4 py-3 rounded-xl border border-gray-800 bg-[#141414] hover:bg-[#1a1a1a] transition-colors flex items-center">
+                        <div class="radio-circle w-4 h-4 rounded-full border border-gray-600 mr-3 flex-shrink-0 transition-colors"></div>
+                        <span class="text-gray-300 text-sm flex-1">Âm thanh bị lệch / Không có tiếng</span>
+                    </div>
                 </label>
-                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
-                    <input type="radio" name="report_error" value="Chất lượng hình ảnh kém" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
-                    <span class="text-sm font-medium">Chất lượng hình ảnh kém</span>
+                <label class="report-option block cursor-pointer">
+                    <input type="radio" name="report_error" value="Chất lượng hình ảnh kém" class="hidden">
+                    <div class="px-4 py-3 rounded-xl border border-gray-800 bg-[#141414] hover:bg-[#1a1a1a] transition-colors flex items-center">
+                        <div class="radio-circle w-4 h-4 rounded-full border border-gray-600 mr-3 flex-shrink-0 transition-colors"></div>
+                        <span class="text-gray-300 text-sm flex-1">Chất lượng hình ảnh kém</span>
+                    </div>
                 </label>
-                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
-                    <input type="radio" name="report_error" value="Tập phim bị trùng / Thiếu tập" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
-                    <span class="text-sm font-medium">Tập phim bị trùng / Thiếu tập</span>
+                <label class="report-option block cursor-pointer">
+                    <input type="radio" name="report_error" value="Tập phim bị trùng / Thiếu tập" class="hidden">
+                    <div class="px-4 py-3 rounded-xl border border-gray-800 bg-[#141414] hover:bg-[#1a1a1a] transition-colors flex items-center">
+                        <div class="radio-circle w-4 h-4 rounded-full border border-gray-600 mr-3 flex-shrink-0 transition-colors"></div>
+                        <span class="text-gray-300 text-sm flex-1">Tập phim bị trùng / Thiếu tập</span>
+                    </div>
                 </label>
-                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
-                    <input type="radio" name="report_error" value="Khác" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
-                    <span class="text-sm font-medium">Lỗi khác (Nhập chi tiết)</span>
+                <label class="report-option block cursor-pointer">
+                    <input type="radio" name="report_error" value="Khác" class="hidden">
+                    <div class="px-4 py-3 rounded-xl border border-gray-800 bg-[#141414] hover:bg-[#1a1a1a] transition-colors flex items-center">
+                        <div class="radio-circle w-4 h-4 rounded-full border border-gray-600 mr-3 flex-shrink-0 transition-colors"></div>
+                        <span class="text-gray-300 text-sm flex-1">Lỗi khác (Nhập chi tiết)</span>
+                    </div>
                 </label>
+                <div id="other-detail-container" class="hidden mt-2">
+                    <textarea id="report-detail-text" class="w-full bg-[#141414] border border-gray-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-[#eab308] h-24 resize-none transition-colors" placeholder="Nhập nội dung báo lỗi chi tiết..."></textarea>
+                </div>
             </div>
         `,
         preConfirm: () => {
@@ -537,67 +582,55 @@ function reportMovieError() {
                 Swal.showValidationMessage('Vui lòng chọn một loại lỗi!');
                 return false;
             }
-            return selected.value;
+            let detail = '';
+            if (selected.value === 'Khác') {
+                detail = document.getElementById('report-detail-text').value.trim();
+                if (!detail) {
+                    Swal.showValidationMessage('Vui lòng nhập chi tiết lỗi!');
+                    return false;
+                }
+            }
+            return { type: selected.value, detail: detail };
         },
         background: '#111',
         color: '#fff',
         showCancelButton: true,
-        confirmButtonText: 'Tiếp tục',
+        confirmButtonText: 'Gửi báo cáo',
         cancelButtonText: 'Hủy',
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#374151'
+        confirmButtonColor: '#eab308',
+        cancelButtonColor: '#333',
+        customClass: {
+            confirmButton: 'text-black font-bold'
+        }
     }).then((result) => {
         if (result.isConfirmed) {
-            let errorType = result.value;
-            let processReport = (detail) => {
-                var msg = "Phim: <?= addslashes(htmlspecialchars($movie['name'])) ?> (<?= addslashes(htmlspecialchars($movie['slug'])) ?>) - Tập: <?= addslashes(htmlspecialchars($currentEp['name'])) ?> - Lỗi: " + errorType + (detail ? " - Chi tiết: " + detail : "");
-                fetch('/api/v1/feedback.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire({
-                            title: 'Thành công',
-                            text: 'Cảm ơn bạn đã báo lỗi. Admin sẽ kiểm tra và khắc phục sớm nhất!',
-                            icon: 'success',
-                            background: '#111',
-                            color: '#fff',
-                            confirmButtonColor: '#eab308'
-                        });
-                    } else {
-                        Swal.fire('Lỗi!', data.message, 'error');
-                    }
-                })
-                .catch(err => {
-                    Swal.fire('Lỗi!', 'Có sự cố xảy ra, vui lòng thử lại sau.', 'error');
-                });
-            };
-
-            if (errorType === 'Khác') {
-                Swal.fire({
-                    title: 'Mô tả chi tiết',
-                    input: 'textarea',
-                    inputPlaceholder: 'Nhập nội dung báo lỗi chi tiết...',
-                    background: '#111',
-                    color: '#fff',
-                    showCancelButton: true,
-                    confirmButtonText: 'Gửi',
-                    cancelButtonText: 'Hủy',
-                    confirmButtonColor: '#ef4444',
-                    inputValidator: (val) => {
-                        if (!val) return 'Vui lòng nhập chi tiết lỗi!';
-                    }
-                }).then((res2) => {
-                    if (res2.isConfirmed) {
-                        processReport(res2.value);
-                    }
-                });
-            } else {
-                processReport('');
-            }
+            let errorType = result.value.type;
+            let detail = result.value.detail;
+            var msg = "Phim: <?= addslashes(htmlspecialchars($movie['name'])) ?> (<?= addslashes(htmlspecialchars($movie['slug'])) ?>) - Tập: <?= addslashes(htmlspecialchars($currentEp['name'])) ?> - Lỗi: " + errorType + (detail ? " - Chi tiết: " + detail : "");
+            fetch('/api/v1/feedback.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        title: 'Thành công',
+                        text: 'Cảm ơn bạn đã báo lỗi. Admin sẽ kiểm tra và khắc phục sớm nhất!',
+                        icon: 'success',
+                        background: '#111',
+                        color: '#fff',
+                        confirmButtonColor: '#eab308',
+                        customClass: { confirmButton: 'text-black font-bold' }
+                    });
+                } else {
+                    Swal.fire('Lỗi!', data.message, 'error');
+                }
+            })
+            .catch(err => {
+                Swal.fire('Lỗi!', 'Có sự cố xảy ra, vui lòng thử lại sau.', 'error');
+            });
         }
     });
 }

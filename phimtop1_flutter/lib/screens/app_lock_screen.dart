@@ -33,6 +33,9 @@ class _AppLockScreenState extends State<AppLockScreen> {
 
   Future<void> _checkBiometrics() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool('app_lock_biometric') != true) return;
+      
       final canCheck = await _auth.canCheckBiometrics;
       final isDeviceSupported = await _auth.isDeviceSupported();
       setState(() {
@@ -48,8 +51,15 @@ class _AppLockScreenState extends State<AppLockScreen> {
 
   Future<void> _authenticateBiometric() async {
     try {
+      String bioLabel = "Sinh trắc học";
+      final biometrics = await _auth.getAvailableBiometrics();
+      if (biometrics.contains(BiometricType.face)) {
+        bioLabel = "Khuôn mặt";
+      } else if (biometrics.contains(BiometricType.fingerprint)) {
+        bioLabel = "Vân tay";
+      }
       final authenticated = await _auth.authenticate(
-        localizedReason: 'Xác thực để mở khóa ứng dụng',
+        localizedReason: 'Xác thực $bioLabel để mở khóa ứng dụng',
       );
       if (authenticated && mounted) {
         context.go('/');

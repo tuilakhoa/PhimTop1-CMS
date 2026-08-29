@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/watch_party_provider.dart';
 import '../providers/auth_provider.dart';
-import 'package:chewie/chewie.dart';
-import 'package:video_player/video_player.dart';
+
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:go_router/go_router.dart';
 
 class WatchPartyScreen extends StatefulWidget {
@@ -16,8 +17,8 @@ class WatchPartyScreen extends StatefulWidget {
 
 class _WatchPartyScreenState extends State<WatchPartyScreen> {
   final TextEditingController _chatCtrl = TextEditingController();
-  VideoPlayerController? _videoCtrl;
-  ChewieController? _chewieCtrl;
+  late final Player _player = Player();
+  late final VideoController _videoCtrl = VideoController(_player);
   bool _isLoading = true;
   String _lastState = 'paused';
 
@@ -42,20 +43,15 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
     }
 
     // Dummy video URL for now, you would fetch the real m3u8 based on movie_slug
-    _videoCtrl = VideoPlayerController.networkUrl(Uri.parse('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'));
-    await _videoCtrl!.initialize();
-    
-    _chewieCtrl = ChewieController(
-      videoPlayerController: _videoCtrl!,
-      autoPlay: false,
-      looping: false,
-    );
+    await _player.open(Media('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'), play: false);
     
     // Add listener for sync if not host
     if (!partyProvider.isHost) {
-      _videoCtrl!.addListener(_guestVideoListener);
+      _player.stream.position.listen((_) => _guestVideoListener());
+      _player.stream.playing.listen((_) => _guestVideoListener());
     } else {
-      _videoCtrl!.addListener(_hostVideoListener);
+      _player.stream.position.listen((_) => _hostVideoListener());
+      _player.stream.playing.listen((_) => _hostVideoListener());
     }
 
     setState(() {
@@ -64,10 +60,11 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
   }
 
   void _hostVideoListener() {
+    if (!mounted) return;
     final partyProvider = context.read<WatchPartyProvider>();
-    final isPlaying = _videoCtrl!.value.isPlaying;
+    final isPlaying = _player.state.playing;
     final state = isPlaying ? 'playing' : 'paused';
-    final pos = _videoCtrl!.value.position.inSeconds;
+    final pos = _player.state.position.inSeconds;
     
     // Only update if state changes significantly to avoid spam
     if (state != _lastState) {
@@ -77,24 +74,25 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
   }
 
   void _guestVideoListener() {
+    if (!mounted) return;
     final partyProvider = context.read<WatchPartyProvider>();
     final partyData = partyProvider.partyData;
     if (partyData != null) {
       final hostState = partyData['state'];
       final hostPos = partyData['position'] ?? 0;
       
-      final currentPos = _videoCtrl!.value.position.inSeconds;
-      final isPlaying = _videoCtrl!.value.isPlaying;
+      final currentPos = _player.state.position.inSeconds;
+      final isPlaying = _player.state.playing;
       
       if (hostState == 'playing' && !isPlaying) {
-        _videoCtrl!.play();
+        _player.play();
       } else if (hostState == 'paused' && isPlaying) {
-        _videoCtrl!.pause();
+        _player.pause();
       }
       
       // Sync position if out of sync by more than 3 seconds
       if ((currentPos - hostPos).abs() > 3) {
-        _videoCtrl!.seekTo(Duration(seconds: hostPos as int));
+        _player.seek(Duration(seconds: hostPos as int));
       }
     }
   }
@@ -102,10 +100,7 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
   @override
   void dispose() {
     context.read<WatchPartyProvider>().leaveParty();
-    _videoCtrl?.removeListener(_guestVideoListener);
-    _videoCtrl?.removeListener(_hostVideoListener);
-    _videoCtrl?.dispose();
-    _chewieCtrl?.dispose();
+    _player.dispose();
     super.dispose();
   }
 
@@ -124,9 +119,7 @@ class _WatchPartyScreenState extends State<WatchPartyScreen> {
           // Video Player
           AspectRatio(
             aspectRatio: 16 / 9,
-            child: _chewieCtrl != null 
-              ? Chewie(controller: _chewieCtrl!)
-              : const Center(child: CircularProgressIndicator()),
+            child: Video(controller: _videoCtrl),
           ),
           
           // Chat & Members section

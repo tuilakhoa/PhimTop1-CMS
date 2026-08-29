@@ -64,10 +64,10 @@ class DetailProvider with ChangeNotifier {
       if (e.response?.statusCode == 404) {
         error = "Nội dung này không tồn tại hoặc đã bị gỡ bỏ.";
       } else {
-        error = "Lỗi kết nối: \${e.message}";
+        error = "Lỗi kết nối: ${e.message}";
       }
     } catch (e) {
-      error = "Đã xảy ra lỗi: \${e.toString()}";
+      error = "Đã xảy ra lỗi: ${e.toString()}";
     } finally {
       isLoading = false;
       notifyListeners();

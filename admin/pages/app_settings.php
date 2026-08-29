@@ -31,11 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'appSchemaCategory' => $appSchemaCategory,
         'appSchemaPrice' => $appSchemaPrice,
         'appLatestVersion' => trim($_POST['appLatestVersion'] ?? '1.0.0'),
-        'appBuildNumber' => (int)($_POST['appBuildNumber'] ?? 1),
+        'appBuildNumber' => !empty($_POST['appBuildNumber']) ? (int)$_POST['appBuildNumber'] : 0,
         'appForceUpdate' => isset($_POST['appForceUpdate']) ? 1 : 0,
         
         'appLatestVersionIos' => trim($_POST['appLatestVersionIos'] ?? '1.0.0'),
-        'appBuildNumberIos' => (int)($_POST['appBuildNumberIos'] ?? 1),
+        'appBuildNumberIos' => !empty($_POST['appBuildNumberIos']) ? (int)$_POST['appBuildNumberIos'] : 0,
         'appForceUpdateIos' => isset($_POST['appForceUpdateIos']) ? 1 : 0,
         'appDownloadUrlIos' => trim($_POST['appDownloadUrlIos'] ?? ''),
 
@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1">Build Number Mới (VD: 2)</label>
-                                <input type="number" name="appBuildNumber" value="<?= htmlspecialchars($settings['appBuildNumber'] ?? '1') ?>" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:ring-1 focus:ring-green-500 outline-none">
+                                <input type="number" name="appBuildNumber" value="<?= htmlspecialchars($settings['appBuildNumber'] ?? '') ?>" placeholder="Tùy chọn" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:ring-1 focus:ring-green-500 outline-none">
                             </div>
                         </div>
                         <label class="flex items-center cursor-pointer mb-2">
@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1">Build Number Mới (VD: 2)</label>
-                                <input type="number" name="appBuildNumberIos" value="<?= htmlspecialchars($settings['appBuildNumberIos'] ?? '1') ?>" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:ring-1 focus:ring-blue-500 outline-none">
+                                <input type="number" name="appBuildNumberIos" value="<?= htmlspecialchars($settings['appBuildNumberIos'] ?? '') ?>" placeholder="Tùy chọn" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:ring-1 focus:ring-blue-500 outline-none">
                             </div>
                         </div>
                         <div class="mb-4">

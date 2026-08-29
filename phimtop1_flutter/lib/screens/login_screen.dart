@@ -34,12 +34,13 @@ class _LoginScreenState extends State<LoginScreen> {
       final canCheck = await _localAuth.canCheckBiometrics;
       final isDeviceSupported = await _localAuth.isDeviceSupported();
       final prefs = await SharedPreferences.getInstance();
+      final bioLoginEnabled = prefs.getBool('bio_login_enabled') ?? false;
       final bioEmail = prefs.getString('bio_email');
       final bioPass = prefs.getString('bio_password');
       
       if (mounted) {
         setState(() {
-          _canCheckBiometrics = canCheck || isDeviceSupported;
+          _canCheckBiometrics = (canCheck || isDeviceSupported) && bioLoginEnabled;
           _hasSavedCredentials = bioEmail != null && bioEmail.isNotEmpty && bioPass != null && bioPass.isNotEmpty;
         });
       }
@@ -50,8 +51,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _loginWithBiometrics() async {
     try {
+      String bioLabel = "vân tay / khuôn mặt";
+      final biometrics = await _localAuth.getAvailableBiometrics();
+      if (biometrics.contains(BiometricType.face)) {
+        bioLabel = "khuôn mặt";
+      } else if (biometrics.contains(BiometricType.fingerprint)) {
+        bioLabel = "vân tay";
+      }
       final authenticated = await _localAuth.authenticate(
-        localizedReason: 'Xác thực vân tay / khuôn mặt để đăng nhập',
+        localizedReason: 'Xác thực $bioLabel để đăng nhập',
       );
       if (authenticated) {
         final prefs = await SharedPreferences.getInstance();

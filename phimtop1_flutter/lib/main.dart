@@ -70,13 +70,6 @@ void main() async {
     final msInDay = 86400000; // 24 * 60 * 60 * 1000
     if (now - lastClear >= autoClearDays * msInDay) {
       try {
-        final tempDir = await getTemporaryDirectory();
-        if (await tempDir.exists()) {
-          for (var entity in tempDir.listSync()) {
-            if (entity is File) await entity.delete();
-            else if (entity is Directory) await entity.delete(recursive: true);
-          }
-        }
         await DefaultCacheManager().emptyCache();
         await prefs.setInt('last_cache_clear_time', now);
         print("Auto cleared cache after $autoClearDays days.");

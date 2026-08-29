@@ -56,6 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: const Text("Đăng nhập", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
+                  const SizedBox(height: 32),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: _buildMenuGroup([

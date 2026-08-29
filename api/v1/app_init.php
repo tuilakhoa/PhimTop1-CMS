@@ -34,10 +34,10 @@ echo json_encode([
         'isComicPluginActive' => in_array('comics', getActivePlugins()),
         'version' => '1.0',
         'appLatestVersion' => $settings['appLatestVersion'] ?? '1.0.0',
-        'appBuildNumber' => (int)($settings['appBuildNumber'] ?? 1),
+        'appBuildNumber' => (int)($settings['appBuildNumber'] ?? 0),
         'appForceUpdate' => !empty($settings['appForceUpdate']),
         'appLatestVersionIos' => $settings['appLatestVersionIos'] ?? '1.0.0',
-        'appBuildNumberIos' => (int)($settings['appBuildNumberIos'] ?? 1),
+        'appBuildNumberIos' => (int)($settings['appBuildNumberIos'] ?? 0),
         'appForceUpdateIos' => !empty($settings['appForceUpdateIos']),
         'appDownloadUrlIos' => $settings['appDownloadUrlIos'] ?? '',
         'appUpdateMessage' => $settings['appUpdateMessage'] ?? 'Đã có phiên bản mới, vui lòng cập nhật!'
