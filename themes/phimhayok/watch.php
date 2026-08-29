@@ -503,19 +503,41 @@ function reportMovieError() {
 
     Swal.fire({
         title: 'Báo lỗi phim',
-        input: 'radio',
-        inputOptions: {
-            'Phim không phát được / Đứng hình': 'Phim không phát được / Đứng hình',
-            'Lỗi phụ đề / Thuyết minh': 'Lỗi phụ đề / Thuyết minh',
-            'Âm thanh bị lệch / Không có tiếng': 'Âm thanh bị lệch / Không có tiếng',
-            'Chất lượng hình ảnh kém': 'Chất lượng hình ảnh kém',
-            'Tập phim bị trùng / Thiếu tập': 'Tập phim bị trùng / Thiếu tập',
-            'Khác': 'Lỗi khác (Nhập chi tiết)'
-        },
-        inputValidator: (value) => {
-            if (!value) {
-                return 'Vui lòng chọn một loại lỗi!';
+        html: `
+            <div class="text-left space-y-3 mt-4 px-2">
+                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
+                    <input type="radio" name="report_error" value="Phim không phát được / Đứng hình" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
+                    <span class="text-sm font-medium">Phim không phát được / Đứng hình</span>
+                </label>
+                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
+                    <input type="radio" name="report_error" value="Lỗi phụ đề / Thuyết minh" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
+                    <span class="text-sm font-medium">Lỗi phụ đề / Thuyết minh</span>
+                </label>
+                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
+                    <input type="radio" name="report_error" value="Âm thanh bị lệch / Không có tiếng" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
+                    <span class="text-sm font-medium">Âm thanh bị lệch / Không có tiếng</span>
+                </label>
+                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
+                    <input type="radio" name="report_error" value="Chất lượng hình ảnh kém" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
+                    <span class="text-sm font-medium">Chất lượng hình ảnh kém</span>
+                </label>
+                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
+                    <input type="radio" name="report_error" value="Tập phim bị trùng / Thiếu tập" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
+                    <span class="text-sm font-medium">Tập phim bị trùng / Thiếu tập</span>
+                </label>
+                <label class="flex items-center space-x-3 text-gray-300 hover:text-white cursor-pointer">
+                    <input type="radio" name="report_error" value="Khác" class="w-4 h-4 text-phim-yellow bg-[#1a1a1a] border-gray-600 focus:ring-phim-yellow focus:ring-offset-[#111]">
+                    <span class="text-sm font-medium">Lỗi khác (Nhập chi tiết)</span>
+                </label>
+            </div>
+        `,
+        preConfirm: () => {
+            const selected = document.querySelector('input[name="report_error"]:checked');
+            if (!selected) {
+                Swal.showValidationMessage('Vui lòng chọn một loại lỗi!');
+                return false;
             }
+            return selected.value;
         },
         background: '#111',
         color: '#fff',
@@ -528,7 +550,7 @@ function reportMovieError() {
         if (result.isConfirmed) {
             let errorType = result.value;
             let processReport = (detail) => {
-                var msg = "Phim: <?= htmlspecialchars($movie['name']) ?> (<?= htmlspecialchars($movie['slug']) ?>) - Tập: <?= htmlspecialchars($currentEpName) ?> - Lỗi: " + errorType + (detail ? " - Chi tiết: " + detail : "");
+                var msg = "Phim: <?= addslashes(htmlspecialchars($movie['name'])) ?> (<?= addslashes(htmlspecialchars($movie['slug'])) ?>) - Tập: <?= addslashes(htmlspecialchars($currentEp['name'])) ?> - Lỗi: " + errorType + (detail ? " - Chi tiết: " + detail : "");
                 fetch('/api/v1/feedback.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
