@@ -80,7 +80,7 @@ if (!empty($_GET['party'])) {
 <!-- Backdrop Header -->
 <div class="relative w-full h-[50vh] overflow-hidden -mt-20">
     <div class="absolute inset-0">
-        <img src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : $movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-full object-cover">
+        <img fetchpriority="high" src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : $movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent"></div>
     </div>
@@ -162,9 +162,7 @@ if (!empty($_GET['party'])) {
                        class="px-8 py-2.5 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-full transition-all hover:scale-105 flex items-center shadow-lg shadow-yellow-500/20">
                         Xem ngay
                     </a>
-                    <button onclick="openGlobalWatchParty()" class="px-6 py-2.5 bg-[#252525] hover:bg-[#333] text-phim-yellow font-bold rounded-full transition-all flex items-center border border-[#fcc526]/30 shadow-lg shadow-yellow-500/5">
-                        <i data-lucide="users" class="w-5 h-5 mr-2"></i> Vào phòng xem
-                    </button>
+
                 <?php else: ?>
                     <button class="px-8 py-2.5 bg-gray-700 text-gray-400 font-bold rounded-full cursor-not-allowed">
                         Đang Cập Nhật

@@ -113,7 +113,7 @@ function loadShop() {
 }
 
 function renderShop(items) {
-    const container = document.getElementById('shopContainer');
+    var container = document.getElementById('shopContainer');
     
     if (items.length === 0) {
         container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">Chưa có vật phẩm nào trong cửa hàng.</div>';
@@ -121,7 +121,7 @@ function renderShop(items) {
     }
     
     items.forEach(item => {
-        let actionBtn = '';
+        var actionBtn = '';
         if (item.is_active) {
             actionBtn = `<button onclick="equipItem(${item.id}, false)" class="w-full bg-gray-700 hover:bg-gray-600 text-black py-2 rounded-lg font-medium  text-sm">Bỏ trang bị</button>`;
         } else if (item.is_owned) {
@@ -132,7 +132,7 @@ function renderShop(items) {
             </button>`;
         }
 
-        const card = document.createElement('div');
+        var card = document.createElement('div');
         card.className = `bg-gray-900 border ${item.is_active ? 'border-phim-yellow shadow-yellow-500/20 shadow-lg' : 'border-gray-800'} rounded-xl p-4 flex flex-col items-center  hover:scale-[1.02]`;
         card.innerHTML = `
             <div class="relative w-24 h-24 mb-4 flex items-center justify-center">
@@ -183,8 +183,8 @@ function buyItem(id, price, name) {
             .then(data => {
                 if (data.status === 'success') {
                     // Update coins visually
-                    let coinsEl = document.getElementById('userCoins');
-                    let currentCoins = parseInt(coinsEl.innerText.replace(/,/g, ''));
+                    var coinsEl = document.getElementById('userCoins');
+                    var currentCoins = parseInt(coinsEl.innerText.replace(/,/g, ''));
                     coinsEl.innerText = (currentCoins - price).toLocaleString();
                     
                     Swal.fire('Thành công', data.message, 'success');

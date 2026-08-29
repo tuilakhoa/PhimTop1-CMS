@@ -71,20 +71,20 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="swiper-wrapper">
                 <?php foreach($featuredMovies as $featured): ?>
                 <div class="swiper-slide relative w-full h-full">
-                    <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+                    <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
                     
-                    <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-10 pt-20">
-                        <div class="max-w-2xl">
-                            <h1 class="text-4xl md:text-7xl font-serif text-white mb-6 leading-tight drop-shadow-xl" style="font-family: 'Playfair Display', serif;">
-                                <?= htmlspecialchars($featured['name'] ?? '') ?>
-                            </h1>
-                            <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
-                                <p class="text-gray-300 text-base md:text-lg mb-8 line-clamp-3 leading-relaxed max-w-xl">
-                                    <?= htmlspecialchars(strip_tags($featured['content'])) ?>
-                                </p>
-                            <?php endif; ?>
+            <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-10 pt-20">
+                <div class="max-w-2xl">
+                    <h1 class="text-3xl sm:text-4xl md:text-7xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl" style="font-family: 'Playfair Display', serif;">
+                        <?= htmlspecialchars($featured['name'] ?? '') ?>
+                    </h1>
+                    <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
+                        <p class="text-gray-300 text-sm md:text-lg mb-6 md:mb-8 line-clamp-3 leading-relaxed max-w-xl">
+                            <?= htmlspecialchars(strip_tags($featured['content'])) ?>
+                        </p>
+                    <?php endif; ?>
                             <div class="flex items-center space-x-4">
                                 <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center transition-transform hover:scale-105 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
                                     <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 text-black ml-2"></i>
@@ -111,7 +111,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         </div>
     <?php else: $featured = $featuredMovies[0]; ?>
         <div class="absolute inset-0">
-            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+            <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
             <!-- Overlay gradients to make text readable -->
             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
@@ -120,12 +120,12 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-10 pt-20">
             <div class="max-w-2xl">
                 <!-- Title with custom elegant styling based on screenshot -->
-                <h1 class="text-4xl md:text-7xl font-serif text-white mb-6 leading-tight drop-shadow-xl" style="font-family: 'Playfair Display', serif;">
+                <h1 class="text-3xl sm:text-4xl md:text-7xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl" style="font-family: 'Playfair Display', serif;">
                     <?= htmlspecialchars($featured['name'] ?? '') ?>
                 </h1>
                 
                 <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
-                    <p class="text-gray-300 text-base md:text-lg mb-8 line-clamp-3 leading-relaxed max-w-xl">
+                    <p class="text-gray-300 text-sm md:text-lg mb-6 md:mb-8 line-clamp-3 leading-relaxed max-w-xl">
                         <?= htmlspecialchars(strip_tags($featured['content'])) ?>
                     </p>
                 <?php endif; ?>
@@ -166,7 +166,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
 </div>
 <?php endif; ?>
 
-<div class="px-4 md:px-12 lg:px-20 max-w-[1920px] mx-auto py-12 bg-black relative z-20 space-y-24">
+<div class="px-3 sm:px-4 md:px-12 lg:px-20 max-w-[1920px] mx-auto py-8 md:py-12 bg-black relative z-20 space-y-16 md:space-y-24">
 
     <!-- Section: Tiếp Tục Xem (Local History) -->
     <?php $enableContinueWatching = isset($settings['enableContinueWatching']) ? (int)$settings['enableContinueWatching'] : 1; ?>
@@ -632,8 +632,8 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
 </div>
 
 <!-- Swiper JS -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script src="/themes/phimhayok/assets/js/home.js?v=<?= time() ?>"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script defer src="/themes/phimhayok/assets/js/home.js?v=<?= time() ?>"></script>
 
 <?php include __DIR__ . '/footer.php'; ?>
 

@@ -60,10 +60,10 @@
     </footer>
     <script>
       function shareMovie(movieName) {
-          const movieUrl = window.location.href;
-          const appUrl = '<?= !empty($settings['appDownloadUrl']) ? addslashes($settings['appDownloadUrl']) : 'https://phimtop1.com' ?>';
-          const shareText = `Đang xem phim: ${movieName}\nTải app Android để xem phim mượt mà, không quảng cáo: ${appUrl}`;
-          const fallbackText = `Đang xem phim: ${movieName}\nXem ngay tại: ${movieUrl}\n\nTải app Android để xem phim mượt mà, không quảng cáo: ${appUrl}`;
+          var movieUrl = window.location.href;
+          var appUrl = '<?= !empty($settings['appDownloadUrl']) ? addslashes($settings['appDownloadUrl']) : 'https://phimtop1.com' ?>';
+          var shareText = `Đang xem phim: ${movieName}\nTải app Android để xem phim mượt mà, không quảng cáo: ${appUrl}`;
+          var fallbackText = `Đang xem phim: ${movieName}\nXem ngay tại: ${movieUrl}\n\nTải app Android để xem phim mượt mà, không quảng cáo: ${appUrl}`;
           
           if (navigator.share) {
               navigator.share({
@@ -83,7 +83,11 @@
               }
           }
       }
-      lucide.createIcons();
+      if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+      } else {
+          document.addEventListener('DOMContentLoaded', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+      }
     </script>
     <?php do_action('cms_footer'); ?>
 

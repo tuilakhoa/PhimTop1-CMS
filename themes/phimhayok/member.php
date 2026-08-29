@@ -78,11 +78,11 @@
                             <i data-lucide="play" class="w-8 h-8 text-black ml-1"></i>
                         </a>
                                             <div class="relative flex p-1.5 bg-black/40 backdrop-blur-md rounded-full mb-8 border border-white/10 shadow-inner">
-                        <div id="tab-indicator" class="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-gradient-to-r from-phim-yellow to-yellow-400 rounded-full shadow-lg shadow-phim-yellow/20   ease-out <?= $mode === 'register' ? 'translate-x-full' : 'translate-x-0' ?>"></div>
+                        <div id="tab-indicator" class="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-gradient-to-r from-phim-yellow to-yellow-400 rounded-full shadow-lg shadow-phim-yellow/20 transition-transform duration-300 ease-out <?= $mode === 'register' ? 'translate-x-full' : 'translate-x-0' ?>"></div>
                         
-                        <button type="button" onclick="setMode('login')" id="tab-login" class="relative flex-1 py-3 text-sm font-bold rounded-full   z-10 <?= $mode === 'register' ? 'text-gray-400 hover:text-white' : 'text-black' ?>">Đăng Nhập</button>
+                        <button type="button" onclick="setMode('login')" id="tab-login" class="relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 <?= $mode === 'register' ? 'text-gray-400 hover:text-white' : 'text-black' ?>">Đăng Nhập</button>
                         
-                        <button type="button" onclick="setMode('register')" id="tab-register" class="relative flex-1 py-3 text-sm font-bold rounded-full   z-10 <?= $mode === 'register' ? 'text-black' : 'text-gray-400 hover:text-white' ?>">Đăng Ký</button>
+                        <button type="button" onclick="setMode('register')" id="tab-register" class="relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 <?= $mode === 'register' ? 'text-black' : 'text-gray-400 hover:text-white' ?>">Đăng Ký</button>
                     </div>
                     </div>
 
@@ -147,14 +147,15 @@
     </div>
 
     <script>
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        else document.addEventListener('DOMContentLoaded', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
         
-        let currentMode = '<?= $mode ?>';
+        var currentMode = '<?= $mode ?>';
         
         function setMode(newMode) {
             currentMode = newMode;
             
-            const url = new URL(window.location);
+            var url = new URL(window.location);
             url.searchParams.set('mode', currentMode);
             url.searchParams.delete('error');
             url.searchParams.delete('success');
@@ -167,47 +168,47 @@
                 document.getElementById('name-field').classList.remove('hidden');
                 document.getElementById('name-field').classList.add('block');
                 document.getElementById('name-field').querySelector('input').setAttribute('required', 'required');
-                const forgotLink = document.getElementById('forgot-link');
+                var forgotLink = document.getElementById('forgot-link');
                 if(forgotLink) forgotLink.style.display = 'none';
                 
                 document.getElementById('submit-text').innerText = 'Đăng Ký Tài Khoản';
                 document.getElementById('submit-icon').setAttribute('data-lucide', 'user-plus');
                 
-                const indicator = document.getElementById('tab-indicator');
+                var indicator = document.getElementById('tab-indicator');
                 if(indicator) {
                     indicator.classList.remove('translate-x-0');
                     indicator.classList.add('translate-x-full');
                 }
-                const tabLogin = document.getElementById('tab-login');
-                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full   z-10 text-gray-400 hover:text-white';
-                const tabRegister = document.getElementById('tab-register');
-                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full   z-10 text-black';
+                var tabLogin = document.getElementById('tab-login');
+                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-gray-400 hover:text-white';
+                var tabRegister = document.getElementById('tab-register');
+                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-black';
             } else {
                 document.getElementById('action-input').value = 'login';
                 document.getElementById('name-field').classList.add('hidden');
                 document.getElementById('name-field').classList.remove('block');
                 document.getElementById('name-field').querySelector('input').removeAttribute('required');
-                const forgotLink = document.getElementById('forgot-link');
+                var forgotLink = document.getElementById('forgot-link');
                 if(forgotLink) forgotLink.style.display = 'block';
                 
                 document.getElementById('submit-text').innerText = 'Đăng Nhập';
                 document.getElementById('submit-icon').setAttribute('data-lucide', 'log-in');
                 
-                const indicator = document.getElementById('tab-indicator');
+                var indicator = document.getElementById('tab-indicator');
                 if(indicator) {
                     indicator.classList.remove('translate-x-full');
                     indicator.classList.add('translate-x-0');
                 }
-                const tabLogin = document.getElementById('tab-login');
-                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full   z-10 text-black';
-                const tabRegister = document.getElementById('tab-register');
-                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full   z-10 text-gray-400 hover:text-white';
+                var tabLogin = document.getElementById('tab-login');
+                if(tabLogin) tabLogin.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-black';
+                var tabRegister = document.getElementById('tab-register');
+                if(tabRegister) tabRegister.className = 'relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-300 z-10 text-gray-400 hover:text-white';
             }
             lucide.createIcons();
         }
 
         function generateRandomAvatar() {
-            const btnIcon = document.querySelector('button[title="Tạo ngẫu nhiên"] i');
+            var btnIcon = document.querySelector('button[title="Tạo ngẫu nhiên"] i');
             if(btnIcon) btnIcon.classList.add('');
             
             fetch('/api/auth.php?action=generate_avatar')
@@ -215,7 +216,7 @@
                 .then(data => {
                     if (data.status === 'success') {
                         document.getElementById('main-user-avatar').src = data.avatar_url;
-                        const navAvatar = document.getElementById('nav-user-avatar');
+                        var navAvatar = document.getElementById('nav-user-avatar');
                         if(navAvatar) navAvatar.src = data.avatar_url;
                     } else {
                         alert(data.message);

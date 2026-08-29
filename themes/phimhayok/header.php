@@ -102,12 +102,14 @@ if ($pdo) {
     <link rel="stylesheet" href="/assets/css/style.min.css">
     
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://unpkg.com/lucide@latest"></script>
     <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script src="/assets/js/main.js?v=<?= time() ?>"></script>
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"></noscript>
+    <script defer src="/assets/js/main.js?v=<?= time() ?>"></script>
     
-    <link rel="stylesheet" href="/themes/phimhayok/assets/css/style.css?v=<?= time() ?>">
+    <link rel="preload" href="/themes/phimhayok/assets/css/style.css?v=<?= time() ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/themes/phimhayok/assets/css/style.css?v=<?= time() ?>"></noscript>
     <!-- Cấu hình Đo lường & Bảo mật (Cloudflare/GA4) -->
     <?php if (!empty($settings['cfAnalyticsToken'])): ?>
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "<?= htmlspecialchars($settings['cfAnalyticsToken']) ?>"}'></script>

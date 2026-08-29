@@ -96,22 +96,22 @@ $themePath = __DIR__ . '/themes/' . $themeName;
     </div>
 
     <script>
-        let isManageMode = false;
+        var isManageMode = false;
         
         async function fetchProfiles() {
-            const res = await fetch('/api/v1/profiles.php?action=list');
-            const data = await res.json();
+            var res = await fetch('/api/v1/profiles.php?action=list');
+            var data = await res.json();
             if (data.status === 'success') {
                 renderProfiles(data.data);
             }
         }
 
         function renderProfiles(profiles) {
-            const container = document.getElementById('profiles-container');
-            let html = '';
+            var container = document.getElementById('profiles-container');
+            var html = '';
             
             profiles.forEach(p => {
-                const kidBadge = p.is_kids_mode == 1 ? '<span class="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded shadow">KIDS</span>' : '';
+                var kidBadge = p.is_kids_mode == 1 ? '<span class="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded shadow">KIDS</span>' : '';
                 
                 html += `
                     <div class="profile-card group cursor-pointer relative w-24 md:w-36 flex flex-col items-center" onclick="handleProfileClick(${p.id})">
@@ -142,22 +142,22 @@ $themePath = __DIR__ . '/themes/' . $themeName;
         async function handleProfileClick(id) {
             if (isManageMode) {
                 if (confirm('Bạn có muốn xóa hồ sơ này không?')) {
-                    const res = await fetch('/api/v1/profiles.php?action=delete', {
+                    var res = await fetch('/api/v1/profiles.php?action=delete', {
                         method: 'POST',
                         body: JSON.stringify({profile_id: id}),
                         headers: {'Content-Type': 'application/json'}
                     });
-                    const data = await res.json();
+                    var data = await res.json();
                     if(data.status === 'success') fetchProfiles();
                     else alert(data.message);
                 }
             } else {
-                const res = await fetch('/api/v1/profiles.php?action=select', {
+                var res = await fetch('/api/v1/profiles.php?action=select', {
                     method: 'POST',
                     body: JSON.stringify({profile_id: id}),
                     headers: {'Content-Type': 'application/json'}
                 });
-                const data = await res.json();
+                var data = await res.json();
                 if(data.status === 'success') {
                     window.location.href = '/';
                 }
@@ -168,26 +168,26 @@ $themePath = __DIR__ . '/themes/' . $themeName;
             document.getElementById('create-modal').classList.replace('hidden', 'flex');
         }
 
-        let currentTempAvatar = '';
+        var currentTempAvatar = '';
         function rollAvatar() {
-            const styles = ['identicon', 'monsterid', 'wavatar', 'retro', 'robohash'];
-            const randomStyle = styles[Math.floor(Math.random() * styles.length)];
-            const hash = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
+            var styles = ['identicon', 'monsterid', 'wavatar', 'retro', 'robohash'];
+            var randomStyle = styles[Math.floor(Math.random() * styles.length)];
+            var hash = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
             currentTempAvatar = `https://www.gravatar.com/avatar/${hash}?d=${randomStyle}&s=200`;
             document.getElementById('new-avatar-img').src = currentTempAvatar;
         }
 
         async function createProfile() {
-            const name = document.getElementById('new-name').value;
-            const kids = document.getElementById('kids-mode').checked ? 1 : 0;
+            var name = document.getElementById('new-name').value;
+            var kids = document.getElementById('kids-mode').checked ? 1 : 0;
             if(!name) return alert('Vui lòng nhập tên');
             
-            const res = await fetch('/api/v1/profiles.php?action=create', {
+            var res = await fetch('/api/v1/profiles.php?action=create', {
                 method: 'POST',
                 body: JSON.stringify({profile_name: name, is_kids_mode: kids, avatar_url: currentTempAvatar}),
                 headers: {'Content-Type': 'application/json'}
             });
-            const data = await res.json();
+            var data = await res.json();
             if(data.status === 'success') {
                 document.getElementById('create-modal').classList.replace('flex', 'hidden');
                 document.getElementById('new-name').value = '';
