@@ -99,7 +99,7 @@ if ($pdo) {
     <?php endif; ?>
     
     <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="/assets/css/style.min.css">
+    <link rel="stylesheet" href="/assets/css/style.min.css?v=<?= time() ?>">
     
     <!-- Lucide Icons -->
     <script defer src="https://unpkg.com/lucide@latest"></script>
