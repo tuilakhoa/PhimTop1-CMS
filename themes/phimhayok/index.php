@@ -279,15 +279,15 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         </div>
     </section>
     
-    <!-- 4. Phim Âu Mỹ (Mixed layout) -->
+    <!-- 4. Phim Nổi Bật (Mixed layout) -->
     <section class="flex flex-col lg:flex-row gap-8">
         <!-- Title area -->
         <div class="w-full lg:w-48 shrink-0 flex lg:flex-col justify-between lg:justify-center lg:-mt-12">
             <div>
                 <h2 class="text-3xl font-bold text-white leading-none">Phim</h2>
-                <h3 class="text-2xl font-black text-cyan-400 uppercase mt-1">Âu Mỹ</h3>
+                <h3 class="text-2xl font-black text-phim-yellow uppercase mt-1">Nổi Bật</h3>
             </div>
-            <a href="/<?= $settings["slugCountry"] ?? "quoc-gia" ?>/au-my" class="text-sm text-gray-500 hover:text-white flex items-center mt-4">
+            <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-moi" class="text-sm text-gray-500 hover:text-white flex items-center mt-4">
                 Xem toàn bộ <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
             </a>
         </div>
