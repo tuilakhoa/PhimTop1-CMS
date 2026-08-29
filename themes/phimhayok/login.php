@@ -77,11 +77,8 @@
                         <a href="/" class="inline-flex items-center justify-center w-14 h-14 bg-phim-yellow rounded-2xl shadow-lg shadow-phim-yellow/20 mb-4  ">
                             <i data-lucide="play" class="w-8 h-8 text-black ml-1"></i>
                         </a>
-                                            <div class="flex gap-2 mb-8">
-                        <button type="button" onclick="setMode('login')" id="tab-login" class="flex-1 py-3 text-sm font-bold rounded-xl transition-colors duration-300 <?= $mode === 'register' ? 'bg-[#1a1a1a] text-gray-400 hover:text-white border border-white/10' : 'bg-gradient-to-r from-phim-yellow to-yellow-400 text-black shadow-lg shadow-phim-yellow/20' ?>">Đăng Nhập</button>
-                        
-                        <button type="button" onclick="setMode('register')" id="tab-register" class="flex-1 py-3 text-sm font-bold rounded-xl transition-colors duration-300 <?= $mode === 'register' ? 'bg-gradient-to-r from-phim-yellow to-yellow-400 text-black shadow-lg shadow-phim-yellow/20' : 'bg-[#1a1a1a] text-gray-400 hover:text-white border border-white/10' ?>">Đăng Ký</button>
-                    </div>
+                        <h2 class="text-3xl font-bold text-white mb-2">Đăng Nhập</h2>
+                        <p class="text-gray-400">Chào mừng bạn quay lại với hệ thống</p>
                     </div>
 
                     <?php if ($error): ?>
@@ -97,86 +94,6 @@
                             <p class="text-sm font-medium"><?= htmlspecialchars($success) ?></p>
                         </div>
                     <?php endif; ?>
-
-                    <form method="POST" action="/api/auth.php" id="auth-form" class="space-y-5">
-                        <input type="hidden" name="action" id="action-input" value="<?= $mode === 'register' ? 'register' : 'login' ?>">
-                        
-                        <div id="name-field" class="<?= $mode === 'register' ? 'block' : 'hidden' ?>">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Tên hiển thị</label>
-                            <div class="relative">
-                                <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-                                <input type="text" name="name" class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow  placeholder-gray-600" placeholder="Nguyễn Văn A">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                            <div class="relative">
-                                <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-                                <input type="email" name="email" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow  placeholder-gray-600" placeholder="bạn@domain.com">
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2 flex justify-between">
-                                <span>Mật khẩu</span>
-                                <a href="/forgot_password.php" id="forgot-link" class="text-xs text-phim-yellow hover:text-white  <?= $mode === 'register' ? 'hidden' : 'block' ?>">Quên mật khẩu?</a>
-                            </label>
-                            <div class="relative">
-                                <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-                                <input type="password" name="password" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow  placeholder-gray-600" placeholder="••••••••">
-                            </div>
-                        </div>
-
-                        <button type="submit" id="submit-btn" class="w-full bg-phim-yellow hover:bg-yellow-400 text-black font-bold py-3 px-4 rounded-xl  shadow-[0_0_15px_rgba(234,179,8,0.3)] flex items-center justify-center">
-                            <i data-lucide="log-in" class="w-5 h-5 mr-2" id="submit-icon"></i> 
-                            <span id="submit-text"><?= $mode === 'register' ? 'Đăng Ký Tài Khoản' : 'Đăng Nhập' ?></span>
-                        </button>
-                    </form>
-
-                    <?php do_action('social_login_buttons'); ?>
-
-                </div>
-
-                
-            <?php endif; ?>
-            
-        </div>
-    </div>
-
-    <script>
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-        else document.addEventListener('DOMContentLoaded', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
-        
-        
-
-        function generateRandomAvatar() {
-            var btnIcon = document.querySelector('button[title="Tạo ngẫu nhiên"] i');
-            if(btnIcon) btnIcon.classList.add('');
-            
-            fetch('/api/auth.php?action=generate_avatar')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        document.getElementById('main-user-avatar').src = data.avatar_url;
-                        var navAvatar = document.getElementById('nav-user-avatar');
-                        if(navAvatar) navAvatar.src = data.avatar_url;
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .finally(() => {
-                    if(btnIcon) btnIcon.classList.remove('');
-                });
-        }
-    </script>
-</body>
-</html>
-
-                    <div class="mb-8 text-center">
-                        <h2 class="text-3xl font-bold text-white mb-2">Đăng Nhập</h2>
-                        <p class="text-gray-400">Chào mừng bạn quay lại với hệ thống</p>
-                    </div>
 
                     <form method="POST" action="/api/auth.php" id="auth-form" class="space-y-5">
                         <input type="hidden" name="action" id="action-input" value="login">
@@ -211,7 +128,8 @@
                     <div class="mt-6 text-center text-gray-400 text-sm">
                         Chưa có tài khoản? <a href="/register.php" class="text-phim-yellow hover:text-white font-bold transition-colors">Đăng ký ngay</a>
                     </div>
-</div>
+                </div>
+            <?php endif; ?>
             
         </div>
     </div>
@@ -220,8 +138,6 @@
         if (typeof lucide !== 'undefined') lucide.createIcons();
         else document.addEventListener('DOMContentLoaded', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
         
-        
-
         function generateRandomAvatar() {
             var btnIcon = document.querySelector('button[title="Tạo ngẫu nhiên"] i');
             if(btnIcon) btnIcon.classList.add('');
