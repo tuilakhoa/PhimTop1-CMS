@@ -8,40 +8,54 @@ $settings = getSettings();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quên mật khẩu - <?= htmlspecialchars($settings['siteName']) ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/style.min.css?v=<?= time() ?>">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #333; border-radius: 20px; }
+    </style>
 </head>
-<body class="bg-gray-950 flex items-center justify-center min-h-screen p-4 text-white font-sans">
-    <div class="bg-gray-900 border border-gray-800 p-8 rounded-2xl max-w-md w-full shadow-2xl relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-50"></div>
-        <div class="relative z-10">
-            <div class="flex justify-center mb-6">
-                <a href="/">
-                    <?php if (!empty($settings['logoUrl'])): ?>
-                        <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="Logo" class="h-10 object-contain">
-                    <?php else: ?>
-                        <div class="text-3xl font-black tracking-tighter text-red-600 uppercase">PhimTop1</div>
-                    <?php endif; ?>
+<body class="bg-black min-h-screen relative overflow-x-hidden custom-scrollbar">
+    <!-- Hiệu ứng Background (Phimhayok Theme: Yellow & Black) -->
+    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-phim-yellow/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="flex items-center justify-center min-h-screen w-full p-4 relative z-10">
+        
+        <div class="max-w-md w-full bg-[#111] backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-8">
+            <div class="text-center mb-8">
+                <a href="/" class="inline-flex items-center justify-center w-14 h-14 bg-phim-yellow rounded-2xl shadow-lg shadow-phim-yellow/20 mb-4">
+                    <i data-lucide="key" class="w-8 h-8 text-black"></i>
                 </a>
+                <h2 class="text-2xl font-bold mb-2 text-white">Khôi phục mật khẩu</h2>
+                <p class="text-gray-400 text-sm">Nhập email của bạn, chúng tôi sẽ gửi liên kết đổi mật khẩu.</p>
             </div>
-            <h2 class="text-2xl font-bold mb-2 text-center">Quên mật khẩu?</h2>
-            <p class="text-gray-400 text-center mb-6 text-sm">Nhập email của bạn và chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.</p>
             
-            <div id="message" class="hidden mb-4 p-3 rounded-lg text-sm text-center"></div>
+            <div id="message" class="hidden mb-6 p-4 rounded-xl flex items-start space-x-3 text-sm font-medium"></div>
             
             <form id="forgotForm" class="space-y-5">
                 <div>
-                    <label class="block mb-1.5 text-sm font-medium text-gray-300">Địa chỉ Email</label>
-                    <input type="email" id="email" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:ring-1 focus:ring-red-500 outline-none transition-all" required placeholder="Nhập email đã đăng ký">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Địa chỉ Email</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                        <input type="email" id="email" class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow placeholder-gray-600 transition-colors" required placeholder="bạn@domain.com">
+                    </div>
                 </div>
-                <button type="submit" id="submitBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-lg transition-all shadow-lg shadow-red-600/25">Gửi email khôi phục</button>
+                <button type="submit" id="submitBtn" class="w-full bg-phim-yellow hover:bg-yellow-400 text-black font-bold py-3 px-4 rounded-xl shadow-[0_0_15px_rgba(234,179,8,0.3)] flex items-center justify-center transition-all">
+                    <i data-lucide="send" class="w-5 h-5 mr-2"></i> Gửi liên kết
+                </button>
             </form>
-            <div class="mt-6 text-center">
-                <a href="/" class="text-gray-500 hover:text-white text-sm transition-colors">Quay lại trang chủ</a>
+            
+            <div class="mt-8 pt-6 border-t border-white/5 text-center">
+                <a href="/?mode=login" class="text-gray-400 hover:text-white font-medium inline-flex items-center transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Trở về đăng nhập
+                </a>
             </div>
         </div>
     </div>
     
     <script>
+        lucide.createIcons();
         document.getElementById('forgotForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -49,7 +63,8 @@ $settings = getSettings();
             const msg = document.getElementById('message');
             
             btn.disabled = true;
-            btn.innerHTML = '<span class="opacity-70">Đang gửi...</span>';
+            btn.innerHTML = '<span class="opacity-70 flex items-center"><i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Đang gửi...</span>';
+            lucide.createIcons();
             
             try {
                 const res = await fetch('/api/v1/auth.php?action=forgot_password', {
@@ -58,23 +73,25 @@ $settings = getSettings();
                     body: JSON.stringify({ email })
                 });
                 const data = await res.json();
-                msg.classList.remove('hidden', 'bg-red-500/10', 'border', 'border-red-500/50', 'text-red-400', 'bg-green-500/10', 'border-green-500/50', 'text-green-400');
+                msg.className = 'mb-6 p-4 rounded-xl flex items-start space-x-3 text-sm font-medium border';
                 if (data.status === 'success') {
-                    msg.classList.add('bg-green-500/10', 'border', 'border-green-500/50', 'text-green-400');
-                    msg.textContent = data.message;
+                    msg.classList.add('bg-green-500/10', 'border-green-500/30', 'text-green-400');
+                    msg.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5 flex-shrink-0 mt-0.5"></i><p>' + data.message + '</p>';
                     document.getElementById('forgotForm').reset();
                 } else {
-                    msg.classList.add('bg-red-500/10', 'border', 'border-red-500/50', 'text-red-400');
-                    msg.textContent = data.message;
+                    msg.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+                    msg.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i><p>' + data.message + '</p>';
                 }
+                msg.classList.remove('hidden');
             } catch (err) {
-                msg.classList.remove('hidden', 'bg-green-500/10', 'border-green-500/50', 'text-green-400');
-                msg.classList.add('bg-red-500/10', 'border', 'border-red-500/50', 'text-red-400');
-                msg.textContent = 'Có lỗi xảy ra, vui lòng thử lại sau.';
+                msg.className = 'mb-6 p-4 rounded-xl flex items-start space-x-3 text-sm font-medium border bg-red-500/10 border-red-500/30 text-red-400';
+                msg.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i><p>Có lỗi xảy ra, vui lòng thử lại sau.</p>';
+                msg.classList.remove('hidden');
             }
             
             btn.disabled = false;
-            btn.textContent = 'Gửi email khôi phục';
+            btn.innerHTML = '<i data-lucide="send" class="w-5 h-5 mr-2"></i> Gửi liên kết';
+            lucide.createIcons();
         });
     </script>
 </body>

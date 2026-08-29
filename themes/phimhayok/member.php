@@ -159,7 +159,7 @@
             url.searchParams.delete('success');
             window.history.pushState({}, '', url);
             
-            document.querySelectorAll('.bg-red-500\/10, .bg-green-500\/10').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.bg-red-500\\\\/10, .bg-green-500\\\\/10').forEach(el => el.style.display = 'none');
             
             if (currentMode === 'register') {
                 document.getElementById('action-input').value = 'register';
