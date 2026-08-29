@@ -91,17 +91,6 @@
     </script>
     <?php do_action('cms_footer'); ?>
 
-    <!-- Mobile Floating Download Button -->
-    <?php if (!empty($settings['appDownloadUrl'])): ?>
-    <div class="md:hidden fixed bottom-6 right-5 z-[90]">
-        <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="flex items-center justify-center w-12 h-12 bg-yellow-500/90 backdrop-blur-md text-black rounded-full shadow-lg shadow-yellow-500/20 border border-yellow-400/50 hover:bg-yellow-400  active:   group" aria-label="Tải Ứng Dụng">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5  " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" x2="12" y1="15" y2="3"/>
-            </svg>
-        </a>
-    </div>
-    <?php endif; ?>
+
 </body>
 </html>
