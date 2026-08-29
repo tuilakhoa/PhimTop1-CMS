@@ -4,7 +4,7 @@ require_once __DIR__ . '/includes/db.php';
 $settings = getSettings();
 
 if (!isset($_SESSION['user'])) {
-    header('Location: /member.php');
+    header('Location: /login.php');
     exit;
 }
 

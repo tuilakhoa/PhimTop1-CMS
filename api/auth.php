@@ -23,7 +23,7 @@ if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     
     if (!$name || !$email || !$password) {
-        header("Location: /member.php?mode=register&error=" . urlencode("Vui lòng điền đầy đủ thông tin."));
+        header("Location: /register.php?error=" . urlencode("Vui lòng điền đầy đủ thông tin."));
         exit;
     }
     
@@ -31,7 +31,7 @@ if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("SELECT id FROM members WHERE email = ?");
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
-            header("Location: /member.php?mode=register&error=" . urlencode("Email này đã được sử dụng."));
+            header("Location: /register.php?error=" . urlencode("Email này đã được sử dụng."));
             exit;
         }
         
@@ -48,7 +48,7 @@ if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: /");
             exit;
         } else {
-            header("Location: /member.php?mode=register&error=" . urlencode("Có lỗi xảy ra khi tạo tài khoản."));
+            header("Location: /register.php?error=" . urlencode("Có lỗi xảy ra khi tạo tài khoản."));
             exit;
         }
     } else {
@@ -58,7 +58,7 @@ if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $fs = new FirestoreClient($config['projectId'], $config['serviceAccount']);
             $memberId = md5($email);
             if ($fs->getDocument('members', $memberId)) {
-                header("Location: /member.php?mode=register&error=" . urlencode("Email này đã được sử dụng."));
+                header("Location: /register.php?error=" . urlencode("Email này đã được sử dụng."));
                 exit;
             }
             $hashed = password_hash($password, PASSWORD_BCRYPT);
@@ -77,7 +77,7 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     
     if (!$email || !$password) {
-        header("Location: /member.php?mode=login&error=" . urlencode("Vui lòng nhập email và mật khẩu."));
+        header("Location: /login.php?error=" . urlencode("Vui lòng nhập email và mật khẩu."));
         exit;
     }
     
@@ -98,10 +98,10 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: /");
             exit;
         } else if ($user && empty($user['password'])) {
-            header("Location: /member.php?mode=login&error=" . urlencode("Tài khoản này được đăng ký bằng Google. Vui lòng sử dụng Đăng nhập bằng Google."));
+            header("Location: /login.php?error=" . urlencode("Tài khoản này được đăng ký bằng Google. Vui lòng sử dụng Đăng nhập bằng Google."));
             exit;
         } else {
-            header("Location: /member.php?mode=login&error=" . urlencode("Sai email hoặc mật khẩu."));
+            header("Location: /login.php?error=" . urlencode("Sai email hoặc mật khẩu."));
             exit;
         }
     } else {
@@ -116,10 +116,10 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: /");
                 exit;
             } else if ($user && empty($user['password'])) {
-                header("Location: /member.php?mode=login&error=" . urlencode("Tài khoản này được đăng ký bằng Google. Vui lòng sử dụng Đăng nhập bằng Google."));
+                header("Location: /login.php?error=" . urlencode("Tài khoản này được đăng ký bằng Google. Vui lòng sử dụng Đăng nhập bằng Google."));
                 exit;
             } else {
-                header("Location: /member.php?mode=login&error=" . urlencode("Sai email hoặc mật khẩu."));
+                header("Location: /login.php?error=" . urlencode("Sai email hoặc mật khẩu."));
                 exit;
             }
         }

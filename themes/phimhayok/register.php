@@ -148,52 +148,86 @@
         if (typeof lucide !== 'undefined') lucide.createIcons();
         else document.addEventListener('DOMContentLoaded', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
         
-        var currentMode = '<?= $mode ?>';
         
-        function setMode(newMode) {
-            currentMode = newMode;
+
+        function generateRandomAvatar() {
+            var btnIcon = document.querySelector('button[title="Tạo ngẫu nhiên"] i');
+            if(btnIcon) btnIcon.classList.add('');
             
-            var url = new URL(window.location);
-            url.searchParams.set('mode', currentMode);
-            url.searchParams.delete('error');
-            url.searchParams.delete('success');
-            window.history.pushState({}, '', url);
-            
-            document.querySelectorAll('.bg-red-500\\\\/10, .bg-green-500\\\\/10').forEach(el => el.style.display = 'none');
-            
-            if (currentMode === 'register') {
-                document.getElementById('action-input').value = 'register';
-                document.getElementById('name-field').classList.remove('hidden');
-                document.getElementById('name-field').classList.add('block');
-                document.getElementById('name-field').querySelector('input').setAttribute('required', 'required');
-                var forgotLink = document.getElementById('forgot-link');
-                if(forgotLink) forgotLink.style.display = 'none';
-                
-                document.getElementById('submit-text').innerText = 'Đăng Ký Tài Khoản';
-                document.getElementById('submit-icon').setAttribute('data-lucide', 'user-plus');
-                
-                var tabLogin = document.getElementById('tab-login');
-                if(tabLogin) tabLogin.className = 'flex-1 py-3 text-sm font-bold rounded-xl transition-colors duration-300 bg-[#1a1a1a] text-gray-400 hover:text-white border border-white/10';
-                var tabRegister = document.getElementById('tab-register');
-                if(tabRegister) tabRegister.className = 'flex-1 py-3 text-sm font-bold rounded-xl transition-colors duration-300 bg-gradient-to-r from-phim-yellow to-yellow-400 text-black shadow-lg shadow-phim-yellow/20';
-            } else {
-                document.getElementById('action-input').value = 'login';
-                document.getElementById('name-field').classList.add('hidden');
-                document.getElementById('name-field').classList.remove('block');
-                document.getElementById('name-field').querySelector('input').removeAttribute('required');
-                var forgotLink = document.getElementById('forgot-link');
-                if(forgotLink) forgotLink.style.display = 'block';
-                
-                document.getElementById('submit-text').innerText = 'Đăng Nhập';
-                document.getElementById('submit-icon').setAttribute('data-lucide', 'log-in');
-                
-                var tabLogin = document.getElementById('tab-login');
-                if(tabLogin) tabLogin.className = 'flex-1 py-3 text-sm font-bold rounded-xl transition-colors duration-300 bg-gradient-to-r from-phim-yellow to-yellow-400 text-black shadow-lg shadow-phim-yellow/20';
-                var tabRegister = document.getElementById('tab-register');
-                if(tabRegister) tabRegister.className = 'flex-1 py-3 text-sm font-bold rounded-xl transition-colors duration-300 bg-[#1a1a1a] text-gray-400 hover:text-white border border-white/10';
-            }
-            lucide.createIcons();
+            fetch('/api/auth.php?action=generate_avatar')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('main-user-avatar').src = data.avatar_url;
+                        var navAvatar = document.getElementById('nav-user-avatar');
+                        if(navAvatar) navAvatar.src = data.avatar_url;
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .finally(() => {
+                    if(btnIcon) btnIcon.classList.remove('');
+                });
         }
+    </script>
+</body>
+</html>
+
+                    <div class="mb-8 text-center">
+                        <h2 class="text-3xl font-bold text-white mb-2">Đăng Ký</h2>
+                        <p class="text-gray-400">Tạo tài khoản để xem phim không giới hạn</p>
+                    </div>
+
+                    <form method="POST" action="/api/auth.php" id="auth-form" class="space-y-5">
+                        <input type="hidden" name="action" id="action-input" value="register">
+                        
+                        <div id="name-field" class="block">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Tên hiển thị</label>
+                            <div class="relative">
+                                <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                                <input type="text" name="name" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow  placeholder-gray-600" placeholder="Nguyễn Văn A">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                            <div class="relative">
+                                <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                                <input type="email" name="email" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow  placeholder-gray-600" placeholder="bạn@domain.com">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2 flex justify-between">
+                                <span>Mật khẩu</span>
+                            </label>
+                            <div class="relative">
+                                <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                                <input type="password" name="password" required class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-phim-yellow  placeholder-gray-600" placeholder="••••••••">
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submit-btn" class="w-full bg-phim-yellow hover:bg-yellow-400 text-black font-bold py-3 px-4 rounded-xl  shadow-[0_0_15px_rgba(234,179,8,0.3)] flex items-center justify-center">
+                            <i data-lucide="user-plus" class="w-5 h-5 mr-2" id="submit-icon"></i> 
+                            <span id="submit-text">Đăng Ký Tài Khoản</span>
+                        </button>
+                    </form>
+
+                    <?php do_action('social_login_buttons'); ?>
+                    
+                    <div class="mt-6 text-center text-gray-400 text-sm">
+                        Đã có tài khoản? <a href="/login.php" class="text-phim-yellow hover:text-white font-bold transition-colors">Đăng nhập</a>
+                    </div>
+</div>
+            
+        </div>
+    </div>
+
+    <script>
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        else document.addEventListener('DOMContentLoaded', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+        
+        
 
         function generateRandomAvatar() {
             var btnIcon = document.querySelector('button[title="Tạo ngẫu nhiên"] i');

@@ -4,7 +4,7 @@ require_once 'includes/db.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user'])) {
-    header('Location: /member.php');
+    header('Location: /login.php');
     exit;
 }
 

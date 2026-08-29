@@ -80,7 +80,7 @@ if (isset($_SESSION['user'])) {
             </div>
         </div>
     <?php else: ?>
-        <a href="/member.php" class="flex items-center space-x-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+        <a href="/login.php" class="flex items-center space-x-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
             <i data-lucide="user-circle" class="w-4 h-4 md:w-5 md:h-5 text-gray-200"></i>
             <span class="hidden md:inline">Đăng nhập</span>
         </a>

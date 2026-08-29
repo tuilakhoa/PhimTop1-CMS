@@ -13,13 +13,10 @@ if (isset($_SESSION['user'])) {
 $error = $_GET['error'] ?? '';
 $success = $_GET['success'] ?? '';
 
-// Support social login plugin callback
-do_action('admin_login_auth', $_GET['action'] ?? '');
-
 $theme = $settings['theme'] ?? 'phimhayok';
-$themeFile = __DIR__ . "/themes/{$theme}/login.php";
+$themeFile = __DIR__ . "/themes/{$theme}/register.php";
 if (file_exists($themeFile)) {
     require $themeFile;
 } else {
-    require __DIR__ . "/themes/phimhayok/login.php";
+    require __DIR__ . "/themes/phimhayok/register.php";
 }

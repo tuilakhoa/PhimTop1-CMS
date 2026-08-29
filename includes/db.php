@@ -286,7 +286,7 @@ function requireAdmin() {
         session_start();
     }
     if (!isset($_SESSION['admin'])) {
-        header("Location: /login.php");
+        header("Location: /admin_login.php");
         exit;
     }
 }

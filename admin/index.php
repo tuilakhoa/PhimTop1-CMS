@@ -289,7 +289,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     session_start();
     session_destroy();
-    header("Location: /login.php");
+    header("Location: /admin_login.php");
     exit;
 }
 
