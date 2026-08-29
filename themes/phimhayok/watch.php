@@ -153,8 +153,9 @@ if (isset($_SESSION['user'])) {
     </div>
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Episodes List -->
+        <!-- Main Column (Left) -->
         <div class="lg:col-span-2 space-y-6">
+            <!-- Episodes List -->
             <?php if (!empty($episodes[0]['server_data'])): ?>
                 <div class="bg-[#141414] rounded-xl p-5 md:p-6 border border-gray-900">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-5 border-b border-gray-800 pb-3 gap-3">
@@ -162,7 +163,7 @@ if (isset($_SESSION['user'])) {
                             <i data-lucide="list-video" class="w-5 h-5 mr-2 text-red-600"></i> Danh sách tập
                         </h3>
                         <div class="relative">
-                            <input type="text" id="search-episode" placeholder="Tìm tập phim..." class="bg-[#202020] text-sm text-white px-3 py-1.5 rounded-lg border border-gray-700 outline-none focus:border-red-600 w-full md:w-48">
+                            <input type="text" id="search-episode" placeholder="Tìm tập phim..." class="bg-[#202020] text-sm text-white px-3 py-1.5 rounded-lg border border-gray-700 outline-none focus:border-red-600 w-full md:w-48 transition-colors">
                             <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
                         </div>
                     </div>
@@ -172,10 +173,10 @@ if (isset($_SESSION['user'])) {
                             $isActive = $currentEp['slug'] === $e['slug'];
                             $classes = $isActive 
                                 ? "bg-red-600 text-white font-bold pointer-events-none ring-2 ring-red-600 ring-offset-2 ring-offset-[#141414]" 
-                                : "bg-[#1a1a1a] text-gray-400 hover:bg-[#2a2a2a] hover:text-white border border-gray-800";
+                                : "bg-[#1a1a1a] text-gray-400 hover:bg-[#2a2a2a] hover:text-white border border-gray-800 transition-colors";
                         ?>
                             <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>" 
-                               class="flex items-center justify-center py-2.5 rounded-md  text-sm <?= $classes ?>">
+                               class="flex items-center justify-center py-2.5 rounded-md text-sm <?= $classes ?>">
                                 <?= htmlspecialchars($e['name']) ?>
                             </a>
                         <?php endforeach; ?>
@@ -201,37 +202,49 @@ if (isset($_SESSION['user'])) {
                     </script>
                 </div>
             <?php endif; ?>
-        </div>
-        
-        <!-- Sidebar (Related or Next Episodes placeholder) -->
-        <div class="lg:col-span-1">
+
+            <!-- Movie Info (Moved to Main Column) -->
             <div class="bg-[#141414] rounded-xl p-5 md:p-6 border border-gray-900">
                 <h3 class="text-lg font-bold text-white flex items-center uppercase tracking-wider mb-5 border-b border-gray-800 pb-3">
                     <i data-lucide="info" class="w-5 h-5 mr-2 text-red-600"></i> Thông tin phim
                 </h3>
                 
-                <div class="flex space-x-4 mb-4">
-                    <img src="<?= htmlspecialchars($movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-24 h-auto rounded border border-gray-800 object-cover aspect-[3/4]">
-                    <div>
-                        <h4 class="text-white font-bold text-base leading-snug mb-1"><?= htmlspecialchars($movie['name']) ?></h4>
-                        <p class="text-gray-500 text-xs mb-2"><?= htmlspecialchars($movie['origin_name']) ?></p>
-                        <div class="text-red-500 text-sm font-semibold mb-1"><?= htmlspecialchars($movie['episode_current'] ?? '') ?></div>
-                        <div class="text-gray-400 text-xs"><?= htmlspecialchars($movie['year'] ?? '') ?></div>
+                <div class="flex flex-col sm:flex-row gap-5">
+                    <div class="w-32 shrink-0 mx-auto sm:mx-0">
+                        <img src="<?= htmlspecialchars($movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-auto rounded border border-gray-800 object-cover aspect-[3/4] shadow-lg">
+                    </div>
+                    <div class="flex-1 flex flex-col">
+                        <h4 class="text-white font-bold text-xl leading-snug mb-1 text-center sm:text-left"><?= htmlspecialchars($movie['name']) ?></h4>
+                        <p class="text-gray-400 text-sm mb-3 text-center sm:text-left"><?= htmlspecialchars($movie['origin_name']) ?></p>
+                        
+                        <div class="flex flex-wrap items-center gap-3 mb-4 justify-center sm:justify-start">
+                            <span class="inline-block px-2.5 py-1 bg-red-600/20 text-red-500 text-xs font-semibold rounded border border-red-600/30">
+                                <?= htmlspecialchars($movie['episode_current'] ?? 'Full') ?>
+                            </span>
+                            <span class="inline-block px-2.5 py-1 bg-[#252525] text-gray-300 text-xs font-medium rounded border border-gray-700">
+                                <?= htmlspecialchars($movie['year'] ?? '') ?>
+                            </span>
+                        </div>
+                        
+                        <p class="text-gray-400 text-sm leading-relaxed mb-4 text-justify sm:text-left">
+                            <?= htmlspecialchars(strip_tags($movie['content'] ?? '')) ?>
+                        </p>
+                        
+                        <div class="mt-auto">
+                            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($slug) ?>" class="inline-flex items-center justify-center px-6 py-2 bg-[#1a1a1a] hover:bg-[#252525] text-white text-sm font-medium rounded border border-gray-800 transition-colors w-full sm:w-auto">
+                                <i data-lucide="external-link" class="w-4 h-4 mr-2 text-gray-400"></i> Xem chi tiết
+                            </a>
+                        </div>
                     </div>
                 </div>
-                
-                <p class="text-gray-400 text-sm line-clamp-4 leading-relaxed">
-                    <?= htmlspecialchars(strip_tags($movie['content'] ?? '')) ?>
-                </p>
-                
-                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($slug) ?>" class="block w-full mt-4 text-center py-2 bg-[#1a1a1a] hover:bg-[#252525] text-white text-sm font-medium rounded ">
-                    Xem chi tiết
-                </a>
             </div>
-
+        </div>
+        
+        <!-- Sidebar Column (Right) -->
+        <div class="lg:col-span-1 space-y-6">
             <!-- Phim Đề Xuất -->
             <?php if (!empty($suggestions)): ?>
-            <div class="bg-[#141414] rounded-xl p-5 md:p-6 border border-gray-900 mt-6">
+            <div class="bg-[#141414] rounded-xl p-5 md:p-6 border border-gray-900">
                 <h3 class="text-lg font-bold text-white flex items-center uppercase tracking-wider mb-5 border-b border-gray-800 pb-3">
                     <i data-lucide="sparkles" class="w-5 h-5 mr-2 text-red-600"></i> Phim Đề Xuất
                 </h3>
@@ -239,13 +252,13 @@ if (isset($_SESSION['user'])) {
                     <?php foreach ($suggestions as $item): ?>
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex gap-4 group">
                             <div class="w-20 shrink-0 relative rounded overflow-hidden aspect-[3/4]">
-                                <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover  ">
-                                <div class="absolute inset-0 bg-black/40 group-hover:bg-transparent "></div>
+                                <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors"></div>
                             </div>
                             <div class="flex-1 py-1">
-                                <h4 class="text-white text-sm font-medium leading-snug group-hover:text-red-500  line-clamp-2 mb-1"><?= htmlspecialchars($item['name']) ?></h4>
-                                <p class="text-gray-500 text-xs mb-1"><?= htmlspecialchars($item['year'] ?? '') ?></p>
-                                <span class="inline-block px-1.5 py-0.5 bg-red-600/20 text-red-500 text-[10px] rounded border border-red-600/30">
+                                <h4 class="text-white text-sm font-medium leading-snug group-hover:text-red-500 transition-colors line-clamp-2 mb-1"><?= htmlspecialchars($item['name']) ?></h4>
+                                <p class="text-gray-500 text-xs mb-1.5"><?= htmlspecialchars($item['year'] ?? '') ?></p>
+                                <span class="inline-block px-1.5 py-0.5 bg-[#1a1a1a] text-gray-400 text-[10px] font-medium rounded border border-gray-800">
                                     <?= htmlspecialchars($item['quality'] ?? 'HD') ?>
                                 </span>
                             </div>
