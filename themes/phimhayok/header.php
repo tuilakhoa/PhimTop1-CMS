@@ -184,9 +184,9 @@ if ($pdo) {
         <div class="px-4 md:px-6 lg:px-12 w-full h-full flex items-center justify-between">
             
             <!-- Left: Logo & Nav -->
-            <div class="flex items-center xl:space-x-8">
+            <div class="flex items-center gap-4 xl:gap-8">
                 <!-- Logo -->
-                <a href="/" class="flex items-center shrink-0 mr-4 xl:mr-0">
+                <a href="/" class="flex items-center shrink-0">
                     <?php if (!empty($settings['logoUrl'])): ?>
                         <img src="<?= htmlspecialchars($settings['logoUrl']) ?>" alt="<?= htmlspecialchars($settings['siteName'] ?? 'Logo') ?>" class="h-8 md:h-10 object-contain">
                     <?php else: ?>
@@ -248,7 +248,7 @@ if ($pdo) {
             </div>
             
             <!-- Right: Search & Login -->
-            <div class="flex items-center space-x-4 shrink-0">
+            <div class="flex items-center gap-4 shrink-0">
                 <form action="/search" method="GET" class="relative hidden md:block">
                     <input type="text" name="keyword" placeholder="Tìm kiếm phim, tác giả..." 
                         class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-transparent w-[300px] placeholder-gray-500 font-medium">
@@ -258,14 +258,14 @@ if ($pdo) {
                 </form>
 
                 <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv'])): ?>
-                <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="hidden md:flex items-center bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold py-2 px-4 rounded-full transition-colors shadow-[0_0_15px_rgba(234,179,8,0.3)] border border-yellow-400/50 mr-2">
+                <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="hidden md:flex items-center bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold py-2 px-4 rounded-full transition-colors shadow-[0_0_15px_rgba(234,179,8,0.3)] border border-yellow-400/50">
                     <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Tải App
                 </button>
                 <?php endif; ?>
 
                 <?php include __DIR__ . '/../../includes/user_nav.php'; ?>
 
-                <button id="mobileMenuBtn" class="xl:hidden text-white focus:outline-none ml-2">
+                <button id="mobileMenuBtn" class="xl:hidden text-white focus:outline-none">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
