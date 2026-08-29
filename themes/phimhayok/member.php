@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thành Viên - <?= htmlspecialchars($settings['siteName']) ?></title>
-    <link rel="stylesheet" href="/assets/css/style.min.css">
+    <link rel="stylesheet" href="/assets/css/style.min.css?v=<?= time() ?>">
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
