@@ -308,6 +308,15 @@ if ($pdo) {
         <div id="mobileMenu" class="hidden bg-[#0a0a0a] border-t border-gray-900 absolute w-full left-0 top-[72px] shadow-2xl pb-4 max-h-[calc(100vh-72px)] overflow-y-auto">
             <!-- (Mobile menu implementation kept simple) -->
             <div class="px-4 py-4 space-y-4">
+                <!-- Mobile Search Form -->
+                <form action="/search" method="GET" class="relative w-full">
+                    <input type="text" name="keyword" placeholder="Tìm kiếm phim, tác giả..." 
+                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-gray-800 w-full placeholder-gray-500 font-medium">
+                    <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-white">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </button>
+                </form>
+
                 <div class="flex flex-col space-y-3 font-medium text-gray-300">
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white block py-1">Phim Lẻ</a>
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white block py-1">Phim Bộ</a>
