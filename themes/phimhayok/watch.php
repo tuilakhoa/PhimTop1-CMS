@@ -141,7 +141,7 @@ if (isset($_SESSION['user'])) {
                 <button onclick="toggleWatchPartyDialog()" class="flex items-center px-4 py-2 bg-phim-yellow hover:bg-yellow-400 text-black text-sm font-bold rounded  shadow-[0_0_10px_rgba(234,179,8,0.3)]">
                     <i data-lucide="users" class="w-4 h-4 mr-2"></i> Xem Chung
                 </button>
-                <button class="flex items-center px-4 py-2 bg-[#1a1a1a] hover:bg-[#252525] text-gray-300 hover:text-white text-sm font-medium rounded  border border-gray-800">
+                <button onclick="reportMovieError()" class="flex items-center px-4 py-2 bg-[#1a1a1a] hover:bg-[#252525] text-gray-300 hover:text-white text-sm font-medium rounded  border border-gray-800">
                     <i data-lucide="flag" class="w-4 h-4 mr-2 text-red-500"></i> Báo lỗi
                 </button>
                 <div class="px-4 py-2 bg-red-600/10 border border-red-600/30 text-red-500 rounded text-sm font-medium flex items-center">
@@ -487,6 +487,66 @@ document.addEventListener('DOMContentLoaded', function() {
         joinWatchParty(partyCode);
     }
 });
+
+function reportMovieError() {
+    <?php if (!isset($_SESSION['user']) && !isset($_SESSION['admin'])): ?>
+        Swal.fire({
+            title: 'Yêu cầu đăng nhập',
+            text: 'Bạn cần đăng nhập để gửi báo lỗi!',
+            icon: 'warning',
+            background: '#111',
+            color: '#fff',
+            confirmButtonColor: '#eab308'
+        });
+        return;
+    <?php endif; ?>
+
+    Swal.fire({
+        title: 'Báo lỗi phim',
+        input: 'textarea',
+        inputLabel: 'Hãy mô tả lỗi bạn gặp phải (mất tiếng, sai sub, video hỏng...)',
+        inputPlaceholder: 'Nhập nội dung báo lỗi...',
+        background: '#111',
+        color: '#fff',
+        showCancelButton: true,
+        confirmButtonText: 'Gửi báo lỗi',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#374151',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Nội dung không được để trống!';
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var msg = "Phim: <?= htmlspecialchars($movie['name']) ?> (<?= htmlspecialchars($movie['slug']) ?>) - Tập: <?= htmlspecialchars($currentEpName) ?> - Lỗi: " + result.value;
+            fetch('/api/v1/feedback.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        title: 'Thành công',
+                        text: 'Cảm ơn bạn đã báo lỗi. Admin sẽ kiểm tra và khắc phục sớm nhất!',
+                        icon: 'success',
+                        background: '#111',
+                        color: '#fff',
+                        confirmButtonColor: '#eab308'
+                    });
+                } else {
+                    Swal.fire('Lỗi!', data.message, 'error');
+                }
+            })
+            .catch(err => {
+                Swal.fire('Lỗi!', 'Có sự cố xảy ra, vui lòng thử lại sau.', 'error');
+            });
+        }
+    });
+}
 
 function toggleWatchPartyDialog() {
     var dialog = document.getElementById('watch-party-dialog');
