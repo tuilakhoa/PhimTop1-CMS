@@ -187,29 +187,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         </div>
     </section>
 
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
-
     <?php endif; ?>
 
     <!-- Section: Phim Dành Riêng Cho Bạn (AI Gợi Ý) -->
@@ -235,29 +212,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="swiper-button-next hidden md:flex"></div>
         </div>
     </section>
-
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
 
 
     <!-- 2. Mới Nhất Trên <?= htmlspecialchars($siteName) ?> (16:9 Swiper) -->
@@ -303,29 +257,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         </div>
     </section>
 
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
-
 
     <!-- 3. Bạn đang quan tâm gì? (Genre Blocks) -->
     <section>
@@ -350,29 +281,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             </a>
         </div>
     </section>
-
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
 
     
     <!-- KHỐI PHIM QUỐC GIA (NỔI BẬT, ÂU MỸ, TRUNG QUỐC, HÀN QUỐC) - Gom lại cho gần nhau -->
@@ -410,29 +318,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             </div>
         </section>
 
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
-
 
         <!-- Phim ÂU MỸ Section -->
         <?php if (!empty($auMyData)): ?>
@@ -466,29 +351,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <?php endforeach; ?>
             </div>
         </section>
-
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
 
         <?php endif; ?>
 
@@ -525,29 +387,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             </div>
         </section>
 
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
-
         <?php endif; ?>
 
         <!-- Phim HÀN QUỐC Section -->
@@ -582,29 +421,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <?php endforeach; ?>
             </div>
         </section>
-
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
 
         <?php endif; ?>
         
@@ -699,29 +515,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         </div>
     </section>
 
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
-
 
     <!-- 6. Danh Sách Phim Chiếu Rạp (3:4 Posters + Bottom tags) -->
     <section>
@@ -777,29 +570,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="swiper-button-next hidden md:flex"></div>
         </div>
     </section>
-
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
 
 
     <!-- 7. Dynamic Sliders from Settings/API -->
@@ -858,29 +628,6 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             </div>
         </section>
 
-    <script>
-        function switchRankTab(tab) {
-            // Update buttons
-            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
-                if (btn.dataset.tab === tab) {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
-                } else {
-                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
-                }
-            });
-            // Update content
-            document.querySelectorAll('.rank-content-box').forEach(box => {
-                if (box.id === 'rank-' + tab) {
-                    box.classList.remove('hidden');
-                    box.classList.add('block');
-                } else {
-                    box.classList.remove('block');
-                    box.classList.add('hidden');
-                }
-            });
-        }
-    </script>
-
         <?php endif; ?>
     <?php endforeach; ?>
 
@@ -892,3 +639,26 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
 
 <?php include __DIR__ . '/footer.php'; ?>
 
+
+<script>
+    function switchRankTab(tab) {
+        // Update buttons
+        document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+            if (btn.dataset.tab === tab) {
+                btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+            } else {
+                btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+            }
+        });
+        // Update content
+        document.querySelectorAll('.rank-content-box').forEach(box => {
+            if (box.id === 'rank-' + tab) {
+                box.classList.remove('hidden');
+                box.classList.add('block');
+            } else {
+                box.classList.remove('block');
+                box.classList.add('hidden');
+            }
+        });
+    }
+</script>

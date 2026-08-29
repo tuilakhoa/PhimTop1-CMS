@@ -7,7 +7,7 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     $firstCatObj = reset($movie['category']);
     $firstCat = is_array($firstCatObj) ? ($firstCatObj['slug'] ?? '') : (is_string($firstCatObj) ? $firstCatObj : '');
     if ($firstCat) {
-        $sugRes = @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=6");
+        $sugRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=6", 3600) : @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=6");
         if ($sugRes) {
             $sugData = json_decode($sugRes, true);
             if (isset($sugData['data']['items'])) {

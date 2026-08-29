@@ -7,7 +7,7 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     $firstCatObj = reset($movie['category']);
     $firstCat = is_array($firstCatObj) ? ($firstCatObj['slug'] ?? '') : (is_string($firstCatObj) ? $firstCatObj : '');
     if ($firstCat) {
-        $sugRes = @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12");
+        $sugRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12", 3600) : @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12");
         if ($sugRes) {
             $sugData = json_decode($sugRes, true);
             if (isset($sugData['data']['items'])) {
@@ -26,7 +26,7 @@ $tmdbApiKey = $settings['tmdbApiKey'] ?? '';
 
 if ($tmdbId && $tmdbApiKey) {
     // Fetch directly from TMDB using the provided API Key
-    $tmdbRes = @file_get_contents("https://api.themoviedb.org/3/{$tmdbType}/{$tmdbId}/images?api_key=" . urlencode($tmdbApiKey));
+    $tmdbRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://api.themoviedb.org/3/{$tmdbType}/{$tmdbId}/images?api_key=" . urlencode($tmdbApiKey), 86400) : @file_get_contents("https://api.themoviedb.org/3/{$tmdbType}/{$tmdbId}/images?api_key=" . urlencode($tmdbApiKey));
     if ($tmdbRes) {
         $tmdbData = json_decode($tmdbRes, true);
         if (isset($tmdbData['backdrops'])) $movieImages['backdrops'] = $tmdbData['backdrops'];
@@ -34,7 +34,7 @@ if ($tmdbId && $tmdbApiKey) {
     }
 } else {
     // Fallback to PhimAPI
-    $imgRes = @file_get_contents("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images");
+    $imgRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images", 86400) : @file_get_contents("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images");
     if ($imgRes) {
         $imgData = json_decode($imgRes, true);
         if (isset($imgData['data'])) {
