@@ -503,47 +503,79 @@ function reportMovieError() {
 
     Swal.fire({
         title: 'Báo lỗi phim',
-        input: 'textarea',
-        inputLabel: 'Hãy mô tả lỗi bạn gặp phải (mất tiếng, sai sub, video hỏng...)',
-        inputPlaceholder: 'Nhập nội dung báo lỗi...',
+        input: 'radio',
+        inputOptions: {
+            'Phim không phát được / Đứng hình': 'Phim không phát được / Đứng hình',
+            'Lỗi phụ đề / Thuyết minh': 'Lỗi phụ đề / Thuyết minh',
+            'Âm thanh bị lệch / Không có tiếng': 'Âm thanh bị lệch / Không có tiếng',
+            'Chất lượng hình ảnh kém': 'Chất lượng hình ảnh kém',
+            'Tập phim bị trùng / Thiếu tập': 'Tập phim bị trùng / Thiếu tập',
+            'Khác': 'Lỗi khác (Nhập chi tiết)'
+        },
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Vui lòng chọn một loại lỗi!';
+            }
+        },
         background: '#111',
         color: '#fff',
         showCancelButton: true,
-        confirmButtonText: 'Gửi báo lỗi',
+        confirmButtonText: 'Tiếp tục',
         cancelButtonText: 'Hủy',
         confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#374151',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'Nội dung không được để trống!';
-            }
-        }
+        cancelButtonColor: '#374151'
     }).then((result) => {
         if (result.isConfirmed) {
-            var msg = "Phim: <?= htmlspecialchars($movie['name']) ?> (<?= htmlspecialchars($movie['slug']) ?>) - Tập: <?= htmlspecialchars($currentEpName) ?> - Lỗi: " + result.value;
-            fetch('/api/v1/feedback.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire({
-                        title: 'Thành công',
-                        text: 'Cảm ơn bạn đã báo lỗi. Admin sẽ kiểm tra và khắc phục sớm nhất!',
-                        icon: 'success',
-                        background: '#111',
-                        color: '#fff',
-                        confirmButtonColor: '#eab308'
-                    });
-                } else {
-                    Swal.fire('Lỗi!', data.message, 'error');
-                }
-            })
-            .catch(err => {
-                Swal.fire('Lỗi!', 'Có sự cố xảy ra, vui lòng thử lại sau.', 'error');
-            });
+            let errorType = result.value;
+            let processReport = (detail) => {
+                var msg = "Phim: <?= htmlspecialchars($movie['name']) ?> (<?= htmlspecialchars($movie['slug']) ?>) - Tập: <?= htmlspecialchars($currentEpName) ?> - Lỗi: " + errorType + (detail ? " - Chi tiết: " + detail : "");
+                fetch('/api/v1/feedback.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: 'Thành công',
+                            text: 'Cảm ơn bạn đã báo lỗi. Admin sẽ kiểm tra và khắc phục sớm nhất!',
+                            icon: 'success',
+                            background: '#111',
+                            color: '#fff',
+                            confirmButtonColor: '#eab308'
+                        });
+                    } else {
+                        Swal.fire('Lỗi!', data.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    Swal.fire('Lỗi!', 'Có sự cố xảy ra, vui lòng thử lại sau.', 'error');
+                });
+            };
+
+            if (errorType === 'Khác') {
+                Swal.fire({
+                    title: 'Mô tả chi tiết',
+                    input: 'textarea',
+                    inputPlaceholder: 'Nhập nội dung báo lỗi chi tiết...',
+                    background: '#111',
+                    color: '#fff',
+                    showCancelButton: true,
+                    confirmButtonText: 'Gửi',
+                    cancelButtonText: 'Hủy',
+                    confirmButtonColor: '#ef4444',
+                    inputValidator: (val) => {
+                        if (!val) return 'Vui lòng nhập chi tiết lỗi!';
+                    }
+                }).then((res2) => {
+                    if (res2.isConfirmed) {
+                        processReport(res2.value);
+                    }
+                });
+            } else {
+                processReport('');
+            }
         }
     });
 }

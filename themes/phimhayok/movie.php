@@ -172,6 +172,9 @@ if (!empty($_GET['party'])) {
                 <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-6 py-2.5 bg-[#303030] hover:bg-[#404040] text-white text-sm font-medium rounded-full transition-colors flex items-center border border-gray-700">
                     <i data-lucide="send" class="w-4 h-4 mr-2"></i> Chia sẻ
                 </button>
+                <button onclick="toggleFollowMovie()" id="follow-btn" class="px-6 py-2.5 bg-[#303030] hover:bg-[#404040] text-white text-sm font-medium rounded-full transition-colors flex items-center border border-gray-700">
+                    <i data-lucide="bookmark" id="follow-icon" class="w-4 h-4 mr-2"></i> <span id="follow-text">Lưu phim</span>
+                </button>
                 
                 <?php if ($tmdbVote > 0): ?>
                 <div class="ml-auto bg-[#1e293b] text-white px-4 py-2 rounded-lg flex items-center font-bold text-sm border border-blue-900/50 shadow-inner">

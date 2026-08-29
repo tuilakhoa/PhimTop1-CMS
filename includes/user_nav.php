@@ -67,6 +67,9 @@ if (isset($_SESSION['user'])) {
                     <a href="/history.php" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors mb-1">
                         <i data-lucide="history" class="w-4 h-4 mr-2"></i> Lịch sử xem phim
                     </a>
+                    <a href="/follows.php" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors mb-1">
+                        <i data-lucide="bookmark" class="w-4 h-4 mr-2 text-phim-yellow"></i> Phim đang theo dõi
+                    </a>
                     <a href="/shop.php" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors mb-1">
                         <i data-lucide="store" class="w-4 h-4 mr-2 text-red-400"></i> Cửa hàng vật phẩm
                     </a>
@@ -80,10 +83,11 @@ if (isset($_SESSION['user'])) {
             </div>
         </div>
     <?php else: ?>
-        <a href="/login.php" class="flex items-center space-x-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
-            <i data-lucide="user-circle" class="w-4 h-4 md:w-5 md:h-5 text-gray-200"></i>
-            <span class="hidden md:inline">Đăng nhập</span>
-        </a>
+        <div class="flex items-center space-x-3 text-sm font-medium">
+            <a href="/login.php" class="text-phim-yellow hover:text-yellow-400 transition-colors">Đăng nhập</a>
+            <span class="text-gray-600">|</span>
+            <a href="/register.php" class="text-gray-300 hover:text-white transition-colors">Đăng ký</a>
+        </div>
     <?php endif; ?>
 </div>
 

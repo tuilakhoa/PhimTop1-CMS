@@ -51,6 +51,16 @@ $authHeader = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_S
 $token = str_replace('Bearer ', '', $authHeader);
 $user = verifyToken($token);
 
+// Fallback to PHP Session for Web Users
+if (!$user) {
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        session_start();
+    }
+    if (isset($_SESSION['user'])) {
+        $user = $_SESSION['user'];
+    }
+}
+
 if (!$user) {
     http_response_code(401);
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);

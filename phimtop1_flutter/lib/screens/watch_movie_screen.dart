@@ -160,15 +160,13 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   }
 
   void _initPlayer() async {
-    _videoController = VideoPlayerController.networkUrl(Uri.parse(widget.m3u8Link));
-    
     try {
-      await _videoController!.initialize();
+      await _player.open(Media(widget.m3u8Link));
       
       bool autoPlayFired = false;
-      _videoController!.addListener(() {
+      _player.stream.position.listen((pos) {
         if (!mounted) return;
-        if (_videoController!.value.isInitialized) {
+        if (true) {
           final pos = _player.state.position.inSeconds;
           final dur = _player.state.duration.inSeconds;
           if (dur > 0 && pos > 0 && (pos / dur >= 0.95)) {
@@ -201,70 +199,12 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
         } catch (_) {}
       }
 
-      if (mounted) {
-        setState(() {
-                              SimplePip().enterPipMode();
-                  },
-                  iconData: Icons.picture_in_picture_alt,
-                  title: 'Hình trong hình (PiP)',
-                ),
-                OptionItem(
-                  onTap: (menuContext) {
-                    Navigator.pop(optionContext);
-                    if (_videoController != null) {
-                      setState(() {
-                        _isMinimizing = true;
-                      });
-                      MiniPlayerService().showMiniPlayer(
-                        context: context,
-                        controller: _videoController!,
-                        movieSlug: widget.movieSlug,
-                        episodeSlug: widget.episodeSlug,
-                        onExpand: () {
-                          
-                          Navigator.pushNamed(context, '/detail', arguments: widget.movieSlug);
-                        },
-                        onClose: () {
-                          
-                        },
-                      );
-                      Navigator.pop(context);
-                    }
-                  },
-                  iconData: Icons.fit_screen_rounded,
-                  title: 'Trình phát Mini',
-                ),
-                OptionItem(
-                  onTap: (menuContext) {
-                    Navigator.pop(optionContext);
-                    _showWatchPartyDialog();
-                  },
-                  iconData: _wpRoomCode != null ? Icons.group : Icons.group_add,
-                  title: _wpRoomCode != null ? 'Quản lý Xem Chung' : 'Phòng Xem Chung',
-                ),
-              ];
-            },
-            errorBuilder: (context, errorMessage) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline_rounded, color: Colors.white54, size: 48),
-                    const SizedBox(height: 16),
-                    Text(
-                      errorMessage,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        });
+            if (mounted) {
+        setState(() {});
       }
     } catch (e) {
       debugPrint("WatchMovieScreen Init Error: $e");
-      if (mounted) 
+      if (mounted) {} 
     }
   }
 
@@ -1125,16 +1065,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   Widget build(BuildContext context) {
     final isTv = _isTvMode(context);
     final playerWidget = Center(
-      child: _videoController.player.state.error != null
-              ? const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, color: Colors.red, size: 64),
-                    SizedBox(height: 16),
-                    Text("Lỗi tải video. Vui lòng thử lại sau.", style: TextStyle(color: Colors.white)),
-                  ],
-                )
-              : CircularProgressIndicator(color: Theme.of(context).primaryColor),
+      child: Video(controller: _videoController),
     );
 
     final tvLayout = Focus(
