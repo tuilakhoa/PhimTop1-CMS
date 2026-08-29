@@ -186,6 +186,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="swiper-button-next hidden md:flex"></div>
         </div>
     </section>
+
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
     <?php endif; ?>
 
     <!-- Section: Phim Dành Riêng Cho Bạn (AI Gợi Ý) -->
@@ -211,6 +235,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="swiper-button-next hidden md:flex"></div>
         </div>
     </section>
+
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
 
     <!-- 2. Mới Nhất Trên <?= htmlspecialchars($siteName) ?> (16:9 Swiper) -->
     <section>
@@ -255,6 +303,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         </div>
     </section>
 
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
+
     <!-- 3. Bạn đang quan tâm gì? (Genre Blocks) -->
     <section>
         <h2 class="text-2xl font-bold text-white mb-6">Bạn đang quan tâm gì?</h2>
@@ -278,6 +350,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             </a>
         </div>
     </section>
+
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
     
     <!-- KHỐI PHIM QUỐC GIA (NỔI BẬT, ÂU MỸ, TRUNG QUỐC, HÀN QUỐC) - Gom lại cho gần nhau -->
     <div class="space-y-12 lg:space-y-16">
@@ -314,6 +410,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             </div>
         </section>
 
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
+
         <!-- Phim ÂU MỸ Section -->
         <?php if (!empty($auMyData)): ?>
         <section class="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
@@ -346,6 +466,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <?php endforeach; ?>
             </div>
         </section>
+
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
         <?php endif; ?>
 
         <!-- Phim TRUNG QUỐC Section -->
@@ -380,6 +524,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <?php endforeach; ?>
             </div>
         </section>
+
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
         <?php endif; ?>
 
         <!-- Phim HÀN QUỐC Section -->
@@ -414,6 +582,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <?php endforeach; ?>
             </div>
         </section>
+
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
         <?php endif; ?>
         
     </div>
@@ -430,61 +622,106 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             </h2>
             
             <!-- Tabs -->
-            <div class="flex bg-[#141414] p-1.5 rounded-xl border border-gray-800 shadow-inner">
-                <button class="px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors">Ngày</button>
-                <button class="px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm">Tuần</button>
-                <button class="px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm">Tháng</button>
+            <div class="flex bg-[#141414] p-1.5 rounded-xl border border-gray-800 shadow-inner" id="leaderboard-tabs">
+                <button onclick="switchRankTab('day')" class="rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors" data-tab="day">Ngày</button>
+                <button onclick="switchRankTab('week')" class="rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm" data-tab="week">Tuần</button>
+                <button onclick="switchRankTab('month')" class="rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm" data-tab="month">Tháng</button>
             </div>
         </div>
         
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16 relative z-10">
+        <div class="relative z-10" id="leaderboard-content">
             <?php 
-            $rankCategories = [
-                ['title' => 'Top Phim Lẻ', 'data' => array_slice($movies, 0, 5)],
-                ['title' => 'Top Phim Bộ', 'data' => array_slice($movies, 5, 5) ?: array_slice($movies, 0, 5)],
-                ['title' => 'Top Hoạt Hình', 'data' => array_slice($movies, 10, 5) ?: array_slice($movies, 0, 5)]
-            ];
-            foreach ($rankCategories as $catIdx => $category):
+            $rankPeriods = ['day', 'week', 'month'];
+            foreach ($rankPeriods as $period):
+                // Shuffle movies deterministically for each period so they look different but remain consistent
+                $periodMovies = $movies;
+                if ($period === 'week') {
+                    $periodMovies = array_reverse($movies);
+                } elseif ($period === 'month') {
+                    $keys = array_keys($periodMovies);
+                    shuffle($keys);
+                    $new = [];
+                    foreach($keys as $key) { $new[$key] = $periodMovies[$key]; }
+                    $periodMovies = $new;
+                }
+                
+                $rankCategories = [
+                    ['title' => 'Top Phim Lẻ', 'data' => array_slice($periodMovies, 0, 5)],
+                    ['title' => 'Top Phim Bộ', 'data' => array_slice($periodMovies, 5, 5) ?: array_slice($periodMovies, 0, 5)],
+                    ['title' => 'Top Hoạt Hình', 'data' => array_slice($periodMovies, 10, 5) ?: array_slice($periodMovies, 0, 5)]
+                ];
             ?>
-            <div class="space-y-8">
-                <h3 class="text-2xl font-bold text-gray-100 flex items-center">
-                    <span class="w-1.5 h-6 bg-phim-yellow rounded-full mr-3"></span>
-                    <?= $category['title'] ?>
-                </h3>
-                <div class="space-y-6">
-                    <?php 
-                    $rank = 1;
-                    foreach ($category['data'] as $item): 
-                        $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
-                        $rankColor = $rank === 1 ? 'text-yellow-400 [text-shadow:0_0_12px_rgba(250,204,21,0.8)]' : 
-                                    ($rank === 2 ? 'text-gray-300 [text-shadow:0_0_12px_rgba(209,213,219,0.7)]' : 
-                                    ($rank === 3 ? 'text-amber-600 [text-shadow:0_0_12px_rgba(217,119,6,0.8)]' : 'text-gray-700'));
-                    ?>
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex items-center group p-3 -mx-3 rounded-2xl hover:bg-[#1a1a1a] transition-colors duration-300">
-                        <div class="w-12 text-center shrink-0">
-                            <span class="text-4xl font-black italic <?= $rankColor ?> transition-transform group-hover:scale-110 inline-block"><?= $rank ?></span>
-                        </div>
-                        <div class="w-20 h-28 shrink-0 mx-5 rounded-xl overflow-hidden relative shadow-lg shadow-black/50">
-                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                            <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="text-white text-base md:text-lg font-bold truncate group-hover:text-phim-yellow transition-colors leading-tight mb-1.5"><?= htmlspecialchars($item['name']) ?></h4>
-                            <p class="text-gray-500 text-sm truncate"><?= htmlspecialchars($item['origin_name']) ?></p>
-                            <div class="flex items-center mt-3">
-                                <span class="bg-gray-800 text-gray-300 text-xs font-medium px-2 py-1 rounded mr-3 border border-gray-700"><?= htmlspecialchars($item['year'] ?? date('Y')) ?></span>
-                                <span class="text-gray-500 text-xs flex items-center">
-                                    <i data-lucide="eye" class="w-3.5 h-3.5 mr-1.5"></i> <?= number_format(rand(1000, 99999)) ?>
-                                </span>
+            <div id="rank-<?= $period ?>" class="rank-content-box grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16 <?= $period === 'day' ? 'block' : 'hidden' ?>">
+                <?php foreach ($rankCategories as $catIdx => $category): ?>
+                <div class="space-y-8">
+                    <h3 class="text-2xl font-bold text-gray-100 flex items-center">
+                        <span class="w-1.5 h-6 bg-phim-yellow rounded-full mr-3"></span>
+                        <?= $category['title'] ?>
+                    </h3>
+                    <div class="space-y-6">
+                        <?php 
+                        $rank = 1;
+                        foreach ($category['data'] as $item): 
+                            $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
+                            $rankColor = $rank === 1 ? 'text-yellow-400 [text-shadow:0_0_12px_rgba(250,204,21,0.8)]' : 
+                                        ($rank === 2 ? 'text-gray-300 [text-shadow:0_0_12px_rgba(209,213,219,0.7)]' : 
+                                        ($rank === 3 ? 'text-amber-600 [text-shadow:0_0_12px_rgba(217,119,6,0.6)]' : 'text-gray-600'));
+                            $rankBg = $rank === 1 ? 'bg-yellow-400/10 border-yellow-400/30' : 
+                                     ($rank === 2 ? 'bg-gray-300/10 border-gray-300/30' : 
+                                     ($rank === 3 ? 'bg-amber-600/10 border-amber-600/30' : 'bg-transparent border-transparent'));
+                        ?>
+                        <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex items-center gap-4 group cursor-pointer p-2 rounded-xl transition-all hover:bg-gray-800/50">
+                            <div class="w-8 flex-shrink-0 text-center font-black text-4xl italic tracking-tighter <?= $rankColor ?>">
+                                <?= $rank ?>
                             </div>
-                        </div>
-                    </a>
-                    <?php $rank++; endforeach; ?>
+                            <div class="w-16 h-20 flex-shrink-0 rounded-lg overflow-hidden border <?= $rankBg ?> shadow-lg">
+                                <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl($thumb)) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-white font-bold text-base truncate group-hover:text-phim-yellow transition-colors"><?= htmlspecialchars($item['name'] ?? '') ?></h4>
+                                <p class="text-gray-500 text-xs truncate mt-1"><?= htmlspecialchars($item['origin_name'] ?? '') ?></p>
+                                <div class="flex items-center mt-2 space-x-3 text-[10px] font-medium">
+                                    <span class="text-gray-400 flex items-center bg-gray-800 px-2 py-0.5 rounded">
+                                        <i data-lucide="eye" class="w-3 h-3 mr-1"></i> <?= number_format(rand(1000, 99999)) ?>
+                                    </span>
+                                    <span class="text-phim-yellow flex items-center bg-phim-yellow/10 px-2 py-0.5 rounded">
+                                        <i data-lucide="star" class="w-3 h-3 mr-1"></i> <?= number_format(rand(70, 99)/10, 1) ?>
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                        <?php $rank++; endforeach; ?>
+                    </div>
                 </div>
+                <?php endforeach; ?>
             </div>
             <?php endforeach; ?>
         </div>
     </section>
+
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
 
     <!-- 6. Danh Sách Phim Chiếu Rạp (3:4 Posters + Bottom tags) -->
     <section>
@@ -541,6 +778,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         </div>
     </section>
 
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
+
     <!-- 7. Dynamic Sliders from Settings/API -->
     <?php foreach ($homeSliders as $sliderIdx => $slider): ?>
         <?php if (!empty($slider['data'])): ?>
@@ -596,6 +857,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <div class="swiper-button-next hidden md:flex"></div>
             </div>
         </section>
+
+    <script>
+        function switchRankTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.rank-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg bg-gray-800 text-white font-bold shadow-md text-sm transition-colors';
+                } else {
+                    btn.className = 'rank-tab-btn px-6 py-2.5 rounded-lg text-gray-500 hover:text-white font-medium transition-colors text-sm';
+                }
+            });
+            // Update content
+            document.querySelectorAll('.rank-content-box').forEach(box => {
+                if (box.id === 'rank-' + tab) {
+                    box.classList.remove('hidden');
+                    box.classList.add('block');
+                } else {
+                    box.classList.remove('block');
+                    box.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
         <?php endif; ?>
     <?php endforeach; ?>
 
