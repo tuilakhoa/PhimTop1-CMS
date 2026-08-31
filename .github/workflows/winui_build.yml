@@ -10,22 +10,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.1
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
 
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.2.0
+    - name: Restore dependencies
+      run: dotnet restore PhimTop1WinUI/PhimTop1WinUI.csproj -r win-x64
 
-    - name: Restore NuGet Packages
-      run: nuget restore PhimTop1WinUI/PhimTop1WinUI.csproj
-
-    - name: Build the WinUI app
-      run: msbuild PhimTop1WinUI/PhimTop1WinUI.csproj /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=SideloadOnly /p:AppxBundle=Never /p:GenerateAppxPackageOnBuild=true /restore
+    - name: Build and Publish MSIX
+      run: dotnet publish PhimTop1WinUI/PhimTop1WinUI.csproj -c Release -r win-x64 --no-restore -p:UapAppxPackageBuildMode=SideloadOnly -p:AppxBundle=Never -p:GenerateAppxPackageOnBuild=true
 
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: PhimTop1WinUI-Release
         path: PhimTop1WinUI/bin/x64/Release/net8.0-windows10.0.19041.0/win-x64/AppPackages/
