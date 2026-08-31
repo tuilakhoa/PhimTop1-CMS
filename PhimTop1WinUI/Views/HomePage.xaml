@@ -7,16 +7,39 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-        <GridView ItemsSource="{x:Bind ViewModel.Movies, Mode=OneWay}" Margin="20">
-            <GridView.ItemTemplate>
-                <DataTemplate x:DataType="models:Movie">
-                    <StackPanel Width="150" Margin="10">
-                        <Image Source="{x:Bind ThumbUrl}" Width="150" Height="225" Stretch="UniformToFill" />
-                        <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" FontWeight="Bold" Margin="0,5,0,0"/>
-                    </StackPanel>
-                </DataTemplate>
-            </GridView.ItemTemplate>
-        </GridView>
+        <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50" Canvas.ZIndex="10"/>
+        
+        <ScrollViewer>
+            <StackPanel Padding="20">
+                <TextBlock Text="Phim Nổi Bật" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
+                <GridView ItemsSource="{x:Bind ViewModel.FeaturedMovies, Mode=OneWay}" SelectionMode="Single" IsItemClickEnabled="True" ItemClick="GridView_ItemClick">
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Movie">
+                            <Grid Width="300" Height="170" Margin="10" CornerRadius="8">
+                                <Image Source="{x:Bind FullPosterUrl}" Stretch="UniformToFill" />
+                                <Border Background="#AA000000" VerticalAlignment="Bottom" Padding="10">
+                                    <TextBlock Text="{x:Bind Name}" Foreground="White" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+
+                <TextBlock Text="Phim Mới Cập Nhật" FontSize="24" FontWeight="Bold" Margin="0,30,0,10"/>
+                <GridView ItemsSource="{x:Bind ViewModel.LatestMovies, Mode=OneWay}" SelectionMode="Single" IsItemClickEnabled="True" ItemClick="GridView_ItemClick">
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Movie">
+                            <StackPanel Width="150" Margin="10">
+                                <Border CornerRadius="8">
+                                    <Image Source="{x:Bind FullThumbUrl}" Width="150" Height="225" Stretch="UniformToFill" />
+                                </Border>
+                                <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" FontWeight="Bold" Margin="0,8,0,0"/>
+                                <TextBlock Text="{x:Bind Year}" TextTrimming="CharacterEllipsis" Foreground="Gray" FontSize="12"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

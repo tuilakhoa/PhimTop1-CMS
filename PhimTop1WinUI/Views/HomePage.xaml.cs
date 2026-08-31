@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
+using PhimTop1WinUI.Models;
 using PhimTop1WinUI.ViewModels;
 
 namespace PhimTop1WinUI.Views
@@ -11,6 +12,14 @@ namespace PhimTop1WinUI.Views
         {
             this.InitializeComponent();
             _ = ViewModel.LoadDataAsync();
+        }
+
+        private void GridView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is Movie movie)
+            {
+                Frame.Navigate(typeof(MovieDetailPage), movie);
+            }
         }
     }
 }
