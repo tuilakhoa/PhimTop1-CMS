@@ -12,20 +12,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
 
-    - name: Restore dependencies
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Restore NuGet Packages
+      run: nuget restore PhimTop1WinUI/PhimTop1WinUI.csproj -PackagesDirectory packages
+
+    - name: Restore dotnet tools
       run: dotnet restore PhimTop1WinUI/PhimTop1WinUI.csproj -r win-x64 -p:Platform=x64
 
-    - name: Build and Publish EXE
-      # Remove the MSIX-specific parameters. Just standard dotnet publish.
-      run: dotnet publish PhimTop1WinUI/PhimTop1WinUI.csproj -c Release -r win-x64 --no-restore -p:Platform=x64 -p:PublishProfile=win-x64.pubxml
+    - name: Build with MSBuild
+      run: msbuild PhimTop1WinUI/PhimTop1WinUI.csproj /p:Configuration=Release /p:Platform=x64 /p:WindowsPackageType=None /p:WindowsAppSDKSelfContained=true /restore
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
         name: PhimTop1WinUI-Release-EXE
-        path: PhimTop1WinUI/bin/x64/Release/net8.0-windows10.0.19041.0/win-x64/publish/
+        path: PhimTop1WinUI/bin/x64/Release/net8.0-windows10.0.19041.0/win-x64/
