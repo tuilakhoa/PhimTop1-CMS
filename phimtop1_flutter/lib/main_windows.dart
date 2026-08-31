@@ -67,14 +67,10 @@ class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
   @override
   Widget build(BuildContext context) {
     return NavigationView(
-      appBar: const NavigationAppBar(
-        title: Text('PhimTop1', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        automaticallyImplyLeading: false,
-      ),
       pane: NavigationPane(
         selected: _currentIndex,
         onChanged: (i) => setState(() => _currentIndex = i),
-        displayMode: PaneDisplayMode.open,
+        header: const Padding(padding: EdgeInsets.all(10), child: Text('PhimTop1', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
         items: [
           PaneItem(
             icon: const Icon(FluentIcons.home),
@@ -115,7 +111,7 @@ class _WindowsHomeScreenState extends State<WindowsHomeScreen> {
   Widget build(BuildContext context) {
     final homeProvider = context.watch<HomeProvider>();
 
-    if (homeProvider.isLoading && homeProvider.items.isEmpty) {
+    if (homeProvider.isLoading && homeProvider.normalMovies.isEmpty) {
       return const Center(child: ProgressRing());
     }
 
@@ -125,7 +121,7 @@ class _WindowsHomeScreenState extends State<WindowsHomeScreen> {
         Wrap(
           spacing: 16,
           runSpacing: 16,
-          children: homeProvider.items.map((movie) => _buildMovieCard(context, movie)).toList(),
+          children: homeProvider.normalMovies.map((movie) => _buildMovieCard(context, movie)).toList(),
         ),
       ],
     );
@@ -219,12 +215,11 @@ class _WindowsVideoPlayerScreenState extends State<WindowsVideoPlayerScreen> {
 
   Future<void> _loadVideo() async {
     final detailProvider = context.read<DetailProvider>();
-    await detailProvider.fetchMovieDetail(widget.movieSlug);
-    final data = detailProvider.movieDetailData;
+    await detailProvider.fetchDetail(widget.movieSlug);
 
-    if (data?.episodes != null && data!.episodes!.isNotEmpty) {
-      if (data.episodes![0].serverData.isNotEmpty) {
-        final link = data.episodes![0].serverData[0].linkM3u8;
+    if (detailProvider.episodes.isNotEmpty) {
+      if (detailProvider.episodes[0].serverData.isNotEmpty) {
+        final link = detailProvider.episodes[0].serverData[0].linkM3u8;
         if (link.isNotEmpty) {
           player.open(Media(link));
           setState(() { _isPlaying = true; });
@@ -244,17 +239,17 @@ class _WindowsVideoPlayerScreenState extends State<WindowsVideoPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     final detailProvider = context.watch<DetailProvider>();
-    final title = detailProvider.movieDetailData?.movie?.name ?? "Đang tải...";
+    final title = detailProvider.movie?.name ?? "Đang tải...";
 
     return NavigationView(
-      appBar: NavigationAppBar(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        leading: IconButton(
-          icon: const Icon(FluentIcons.back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       content: ScaffoldPage(
+        header: PageHeader(
+          title: Text(title),
+          leading: IconButton(
+            icon: const Icon(FluentIcons.back),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
         content: Center(
           child: detailProvider.isLoading
               ? const ProgressRing()
