@@ -20,11 +20,12 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore PhimTop1WinUI/PhimTop1WinUI.csproj -r win-x64 -p:Platform=x64
 
-    - name: Build and Publish MSIX
-      run: dotnet publish PhimTop1WinUI/PhimTop1WinUI.csproj -c Release -r win-x64 --no-restore -p:Platform=x64 -p:PublishProfile=win-x64.pubxml -p:UapAppxPackageBuildMode=SideloadOnly -p:AppxBundle=Never -p:GenerateAppxPackageOnBuild=true
+    - name: Build and Publish EXE
+      # Remove the MSIX-specific parameters. Just standard dotnet publish.
+      run: dotnet publish PhimTop1WinUI/PhimTop1WinUI.csproj -c Release -r win-x64 --no-restore -p:Platform=x64 -p:PublishProfile=win-x64.pubxml
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: PhimTop1WinUI-Release
-        path: PhimTop1WinUI/bin/x64/Release/net8.0-windows10.0.19041.0/win-x64/AppPackages/
+        name: PhimTop1WinUI-Release-EXE
+        path: PhimTop1WinUI/bin/x64/Release/net8.0-windows10.0.19041.0/win-x64/publish/
