@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show ThemeMode;
+import 'package:flutter/material.dart' show ThemeMode, Material;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
@@ -10,7 +11,7 @@ import 'providers/home_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/detail_provider.dart';
-import 'models/movie.dart';
+import 'models/movie_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +44,7 @@ class MyWindowsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeMode = context.watch<ThemeProvider>().themeMode;
     return FluentApp(
-      title: 'PhimTop1',
+      title: 'PhimTop1 Windows',
       themeMode: themeMode,
       theme: FluentThemeData(brightness: Brightness.light),
       darkTheme: FluentThemeData(brightness: Brightness.dark),
@@ -85,11 +86,6 @@ class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
             title: const Text('Tìm Kiếm'),
             body: const Center(child: Text('Tìm Kiếm (Đang phát triển cho Desktop)')),
           ),
-          PaneItem(
-            icon: const Icon(FluentIcons.library),
-            title: const Text('Tủ Phim'),
-            body: const Center(child: Text('Tủ Phim (Đang phát triển cho Desktop)')),
-          ),
         ],
       ),
     );
@@ -112,11 +108,14 @@ class _WindowsHomeScreenState extends State<WindowsHomeScreen> {
     });
   }
 
+  String _getThumb(MovieItem m) => (m.thumbUrl ?? '').startsWith('http') ? m.thumbUrl! : 'https://phimimg.com/${m.thumbUrl}';
+  String _getPoster(MovieItem m) => (m.posterUrl ?? '').startsWith('http') ? m.posterUrl! : 'https://phimimg.com/${m.posterUrl}';
+
   @override
   Widget build(BuildContext context) {
     final homeProvider = context.watch<HomeProvider>();
 
-    if (homeProvider.isLoading && homeProvider.latestMovies.isEmpty) {
+    if (homeProvider.isLoading && homeProvider.items.isEmpty) {
       return const Center(child: ProgressRing());
     }
 
@@ -126,13 +125,13 @@ class _WindowsHomeScreenState extends State<WindowsHomeScreen> {
         Wrap(
           spacing: 16,
           runSpacing: 16,
-          children: homeProvider.latestMovies.map((movie) => _buildMovieCard(context, movie)).toList(),
+          children: homeProvider.items.map((movie) => _buildMovieCard(context, movie)).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildMovieCard(BuildContext context, Movie movie) {
+  Widget _buildMovieCard(BuildContext context, MovieItem movie) {
     return HoverButton(
       onPressed: () {
         showDialog(
@@ -143,15 +142,22 @@ class _WindowsHomeScreenState extends State<WindowsHomeScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(movie.originName),
+                Text(movie.originName ?? ''),
                 const SizedBox(height: 10),
-                Text('Năm: ${movie.year}'),
+                Text('Năm: ${movie.year ?? ''}'),
               ],
             ),
             actions: [
               Button(
                 child: const Text('Đóng'),
                 onPressed: () => Navigator.pop(ctx),
+              ),
+              FilledButton(
+                child: const Text('Xem Phim'),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(context, FluentPageRoute(builder: (_) => WindowsVideoPlayerScreen(movieSlug: movie.slug)));
+                },
               ),
             ],
           ),
@@ -171,7 +177,7 @@ class _WindowsHomeScreenState extends State<WindowsHomeScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  movie.getPosterUrl(),
+                  _getThumb(movie),
                   width: 150,
                   height: 220,
                   fit: BoxFit.cover,
@@ -180,11 +186,90 @@ class _WindowsHomeScreenState extends State<WindowsHomeScreen> {
               ),
               const SizedBox(height: 8),
               Text(movie.name, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-              Text(movie.year.toString(), style: TextStyle(color: FluentTheme.of(context).resources.textFillColorTertiary)),
+              Text(movie.year?.toString() ?? '', style: TextStyle(color: FluentTheme.of(context).resources.textFillColorTertiary)),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class WindowsVideoPlayerScreen extends StatefulWidget {
+  final String movieSlug;
+  const WindowsVideoPlayerScreen({Key? key, required this.movieSlug}) : super(key: key);
+
+  @override
+  State<WindowsVideoPlayerScreen> createState() => _WindowsVideoPlayerScreenState();
+}
+
+class _WindowsVideoPlayerScreenState extends State<WindowsVideoPlayerScreen> {
+  late final Player player;
+  late final VideoController controller;
+  bool _isPlaying = false;
+  String _error = "";
+
+  @override
+  void initState() {
+    super.initState();
+    player = Player();
+    controller = VideoController(player);
+    _loadVideo();
+  }
+
+  Future<void> _loadVideo() async {
+    final detailProvider = context.read<DetailProvider>();
+    await detailProvider.fetchMovieDetail(widget.movieSlug);
+    final data = detailProvider.movieDetailData;
+
+    if (data?.episodes != null && data!.episodes!.isNotEmpty) {
+      if (data.episodes![0].serverData.isNotEmpty) {
+        final link = data.episodes![0].serverData[0].linkM3u8;
+        if (link.isNotEmpty) {
+          player.open(Media(link));
+          setState(() { _isPlaying = true; });
+          return;
+        }
+      }
+    }
+    setState(() { _error = "Không tìm thấy link video (M3U8) cho phim này."; });
+  }
+
+  @override
+  void dispose() {
+    player.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final detailProvider = context.watch<DetailProvider>();
+    final title = detailProvider.movieDetailData?.movie?.name ?? "Đang tải...";
+
+    return NavigationView(
+      appBar: NavigationAppBar(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        leading: IconButton(
+          icon: const Icon(FluentIcons.back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      content: ScaffoldPage(
+        content: Center(
+          child: detailProvider.isLoading
+              ? const ProgressRing()
+              : _error.isNotEmpty
+                  ? Text(_error, style: const TextStyle(color: Colors.red))
+                  : _isPlaying
+                      ? AspectRatio(
+                          aspectRatio: 16 / 9,
+                          child: Material(
+                            child: Video(controller: controller),
+                          ),
+                        )
+                      : const ProgressRing(),
+        ),
+      ),
     );
   }
 }
