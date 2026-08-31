@@ -1,0 +1,38 @@
+name: Build Flutter Linux App
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version: '3.x'
+
+    - name: Install Linux Build Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang cmake git ninja-build pkg-config libgtk-3-dev liblzma-dev libmpv-dev
+
+    - name: Install dependencies
+      working-directory: ./phimtop1_flutter
+      run: flutter pub get
+
+    - name: Build Linux Executable
+      working-directory: ./phimtop1_flutter
+      run: flutter build linux -t lib/main_windows.dart --release
+
+    - name: Upload Linux Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: PhimTop1-Linux-App
+        path: phimtop1_flutter/build/linux/x64/release/bundle/
