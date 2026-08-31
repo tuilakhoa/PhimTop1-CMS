@@ -1,0 +1,31 @@
+name: Build WinUI 3 App
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.2.0
+
+    - name: Restore NuGet Packages
+      run: nuget restore PhimTop1WinUI/PhimTop1WinUI.csproj
+
+    - name: Build the WinUI app
+      run: msbuild PhimTop1WinUI/PhimTop1WinUI.csproj /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=SideloadOnly /p:AppxBundle=Never /p:GenerateAppxPackageOnBuild=true /restore
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: PhimTop1WinUI-Release
+        path: PhimTop1WinUI/bin/x64/Release/net8.0-windows10.0.19041.0/win-x64/AppPackages/
