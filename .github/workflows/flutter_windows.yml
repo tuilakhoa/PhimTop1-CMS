@@ -24,7 +24,7 @@ jobs:
 
     - name: Build Windows Executable
       working-directory: ./phimtop1_flutter
-      run: flutter build windows --release
+      run: flutter build windows -t lib/main_windows.dart --release
 
     - name: Compile Inno Setup Installer
       working-directory: ./phimtop1_flutter/windows
