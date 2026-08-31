@@ -254,7 +254,7 @@ class _WindowsVideoPlayerScreenState extends State<WindowsVideoPlayerScreen> {
           child: detailProvider.isLoading
               ? const ProgressRing()
               : _error.isNotEmpty
-                  ? Text(_error, style: const TextStyle(color: Colors.red))
+                  ? Text(_error, style: TextStyle(color: Colors.red))
                   : _isPlaying
                       ? AspectRatio(
                           aspectRatio: 16 / 9,
