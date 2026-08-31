@@ -1,0 +1,38 @@
+name: Build Flutter Windows Setup
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version: '3.x'
+
+    - name: Install dependencies
+      working-directory: ./phimtop1_flutter
+      run: flutter pub get
+
+    - name: Build Windows Executable
+      working-directory: ./phimtop1_flutter
+      run: flutter build windows --release
+
+    - name: Compile Inno Setup Installer
+      working-directory: ./phimtop1_flutter/windows
+      run: |
+        "C:\Program Files (x86)\Inno Setup 6\iscc.exe" installer.iss
+
+    - name: Upload Setup Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: PhimTop1-Windows-Setup
+        path: phimtop1_flutter/windows/Output/PhimTop1_Setup.exe
