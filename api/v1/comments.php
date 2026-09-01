@@ -15,7 +15,7 @@ $settings = getSettings();
 $apiKey = $settings['appApiKey'] ?? '';
 
 $headers = getallheaders();
-$clientApiKey = $headers['X-App-API-Key'] ?? ($_GET['key'] ?? '');
+$clientApiKey = $_SERVER['HTTP_X_APP_API_KEY'] ?? ($headers['X-App-API-Key'] ?? ($headers['x-app-api-key'] ?? ($_GET['key'] ?? '')));
 if (!empty($apiKey) && $clientApiKey !== $apiKey) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Invalid API Key']);

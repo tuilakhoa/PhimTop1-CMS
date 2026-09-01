@@ -19,7 +19,7 @@ $apiKey = $settings['appApiKey'] ?? '';
 
 // Verify App API Key if set
 $headers = getallheaders();
-$clientApiKey = $headers['X-App-API-Key'] ?? ($_GET['key'] ?? '');
+$clientApiKey = $_SERVER['HTTP_X_APP_API_KEY'] ?? ($headers['X-App-API-Key'] ?? ($headers['x-app-api-key'] ?? ($_GET['key'] ?? '')));
 
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();

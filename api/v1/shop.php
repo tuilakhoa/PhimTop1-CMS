@@ -14,7 +14,7 @@ $settings = getSettings();
 $apiKey = $settings['appApiKey'] ?? '';
 
 $headers = getallheaders();
-$clientApiKey = $headers['X-App-API-Key'] ?? ($_GET['key'] ?? '');
+$clientApiKey = $_SERVER['HTTP_X_APP_API_KEY'] ?? ($headers['X-App-API-Key'] ?? ($headers['x-app-api-key'] ?? ($_GET['key'] ?? '')));
 
 function verifyToken($token) {
     global $jwtSecret;
