@@ -83,7 +83,7 @@ class _WindowsHistoryScreenState extends State<WindowsHistoryScreen> {
     }
 
     if (_error != null) {
-      return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      return Center(child: Text(_error!, style: const TextStyle(color: Color(0xFFF44336))));
     }
 
     if (_history.isEmpty) {
@@ -105,7 +105,7 @@ class _WindowsHistoryScreenState extends State<WindowsHistoryScreen> {
         itemCount: _history.length,
         itemBuilder: (context, index) {
           final item = _history[index];
-          final imageUrl = item.posterUrl.isNotEmpty ? item.posterUrl : 'https://via.placeholder.com/150';
+          final imageUrl = item.thumbUrl.isNotEmpty ? item.thumbUrl : 'https://via.placeholder.com/150';
 
           return GestureDetector(
             onTap: () {
@@ -148,7 +148,7 @@ class _WindowsHistoryScreenState extends State<WindowsHistoryScreen> {
                   Positioned(
                     top: 4, right: 4,
                     child: IconButton(
-                      icon: const Icon(FluentIcons.delete, color: Colors.red),
+                      icon: const Icon(FluentIcons.delete, color: Color(0xFFF44336)),
                       onPressed: () => _deleteHistory(item.movieSlug),
                     ),
                   ),

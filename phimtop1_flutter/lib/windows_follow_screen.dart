@@ -83,7 +83,7 @@ class _WindowsFollowScreenState extends State<WindowsFollowScreen> {
     }
 
     if (_error != null) {
-      return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      return Center(child: Text(_error!, style: const TextStyle(color: Color(0xFFF44336))));
     }
 
     if (_follows.isEmpty) {
@@ -105,11 +105,11 @@ class _WindowsFollowScreenState extends State<WindowsFollowScreen> {
         itemCount: _follows.length,
         itemBuilder: (context, index) {
           final item = _follows[index];
-          final imageUrl = item.posterUrl.isNotEmpty ? item.posterUrl : 'https://via.placeholder.com/150';
+          final imageUrl = (item.thumbUrl != null && item.thumbUrl!.isNotEmpty) ? item.thumbUrl! : 'https://via.placeholder.com/150';
 
           return GestureDetector(
             onTap: () {
-              Navigator.push(context, FluentPageRoute(builder: (_) => WindowsDetailScreen(movieSlug: item.movieSlug)));
+              Navigator.push(context, FluentPageRoute(builder: (_) => WindowsDetailScreen(movieSlug: item.itemSlug)));
             },
             child: Container(
               decoration: BoxDecoration(
@@ -136,14 +136,14 @@ class _WindowsFollowScreenState extends State<WindowsFollowScreen> {
                           end: Alignment.topCenter,
                         ),
                       ),
-                      child: Text(item.movieName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
+                      child: Text(item.itemName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
                     ),
                   ),
                   Positioned(
                     top: 4, right: 4,
                     child: IconButton(
-                      icon: const Icon(FluentIcons.heart_fill, color: Colors.red),
-                      onPressed: () => _unfollow(item.movieSlug),
+                      icon: const Icon(FluentIcons.heart_fill, color: Color(0xFFF44336)),
+                      onPressed: () => _unfollow(item.itemSlug),
                     ),
                   ),
                 ],

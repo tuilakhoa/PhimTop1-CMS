@@ -11,7 +11,7 @@ class WindowsSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final themeProvider = context.watch<ThemeProvider>();
-    final isLoggedIn = authProvider.isLoggedIn;
+    final isLoggedIn = authProvider.token != null;
 
     return ScaffoldPage(
       header: const PageHeader(

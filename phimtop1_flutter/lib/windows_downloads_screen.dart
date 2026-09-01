@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' show ThemeMode, Material, Brightness, Cro
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import '../providers/download_provider.dart';
+import '../models/download_task.dart';
 import 'windows_detail_screen.dart';
 
 class WindowsDownloadsScreen extends StatelessWidget {
@@ -42,23 +43,19 @@ class WindowsDownloadsScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       if (!isCompleted) ProgressBar(value: progress * 100),
                       if (!isCompleted) Text('${(progress * 100).toStringAsFixed(1)}%', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                      if (isCompleted) const Text('Đã tải xong', style: TextStyle(color: Colors.green, fontSize: 12)),
+                      if (isCompleted) const Text('Đã tải xong', style: TextStyle(color: Color(0xFF4CAF50), fontSize: 12)),
                     ],
                   ),
                   trailing: Row(
                     children: [
                       if (!isCompleted) IconButton(
-                        icon: Icon(task.status == DownloadStatus.paused ? FluentIcons.play : FluentIcons.pause),
+                        icon: const Icon(FluentIcons.cancel),
                         onPressed: () {
-                          if (task.status == DownloadStatus.paused) {
-                            downloadProvider.resumeDownload(task.id);
-                          } else {
-                            downloadProvider.pauseDownload(task.id);
-                          }
+                          downloadProvider.cancelDownload(task.id);
                         },
                       ),
                       IconButton(
-                        icon: const Icon(FluentIcons.delete, color: Colors.red),
+                        icon: const Icon(FluentIcons.delete, color: Color(0xFFF44336)),
                         onPressed: () => downloadProvider.deleteDownload(task.id),
                       ),
                     ],
