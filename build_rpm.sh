@@ -12,5 +12,5 @@ tar -czvf phimtop1-1.0.0.tar.gz phimtop1-1.0.0
 cd ../..
 
 echo "Building RPM..."
-rpmbuild --define "_topdir $(pwd)/rpmbuild" -ba rpmbuild/SPECS/phimtop1.spec
+QA_RPATHS=$(( 0x0001|0x0002 )) rpmbuild --define "_topdir $(pwd)/rpmbuild" -ba rpmbuild/SPECS/phimtop1.spec
 echo "RPM build finished. Files are in rpmbuild/RPMS"
