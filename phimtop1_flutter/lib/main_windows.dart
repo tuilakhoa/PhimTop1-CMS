@@ -86,7 +86,7 @@ class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
         ),
       ),
       child: NavigationView(
-        appBar: NavigationAppBar(
+        titleBar: NavigationAppBar(
           height: 50,
           leading: null, // Cho phép Fluent UI tự tạo nút Hamburger
           title: () {
