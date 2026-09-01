@@ -62,13 +62,13 @@ class _WindowsHistoryScreenState extends State<WindowsHistoryScreen> {
     }
   }
 
-  Future<void> _deleteHistory(String movieSlug) async {
+  Future<void> _clearHistory() async {
     final token = context.read<AuthProvider>().token;
     if (token == null) return;
 
     try {
-      final response = await cmsApi.deleteHistory(token, movieSlug);
-      if (response.status == 'success') {
+      final success = await cmsApi.clearHistory(token);
+      if (success) {
         _fetchHistory();
       }
     } catch (e) {
@@ -91,8 +91,12 @@ class _WindowsHistoryScreenState extends State<WindowsHistoryScreen> {
     }
 
     return ScaffoldPage(
-      header: const PageHeader(
-        title: Text('Lịch Sử Xem Phim', style: TextStyle(color: Colors.white)),
+      header: PageHeader(
+        title: const Text('Lịch Sử Xem Phim', style: TextStyle(color: Colors.white)),
+        commandBar: Button(
+          onPressed: _history.isNotEmpty ? _clearHistory : null,
+          child: const Text('Xóa tất cả'),
+        ),
       ),
       content: GridView.builder(
         padding: const EdgeInsets.all(24.0),
@@ -143,13 +147,6 @@ class _WindowsHistoryScreenState extends State<WindowsHistoryScreen> {
                           Text(item.episodeName, style: const TextStyle(color: Colors.grey, fontSize: 12)),
                         ],
                       ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 4, right: 4,
-                    child: IconButton(
-                      icon: const Icon(FluentIcons.delete, color: Color(0xFFF44336)),
-                      onPressed: () => _deleteHistory(item.movieSlug),
                     ),
                   ),
                 ],

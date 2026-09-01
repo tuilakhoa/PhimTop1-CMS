@@ -62,20 +62,6 @@ class _WindowsFollowScreenState extends State<WindowsFollowScreen> {
     }
   }
 
-  Future<void> _unfollow(String movieSlug) async {
-    final token = context.read<AuthProvider>().token;
-    if (token == null) return;
-
-    try {
-      final response = await cmsApi.toggleFollow(token, movieSlug);
-      if (response.status == 'success') {
-        _fetchFollows();
-      }
-    } catch (e) {
-      // Error handling
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -137,13 +123,6 @@ class _WindowsFollowScreenState extends State<WindowsFollowScreen> {
                         ),
                       ),
                       child: Text(item.itemName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
-                    ),
-                  ),
-                  Positioned(
-                    top: 4, right: 4,
-                    child: IconButton(
-                      icon: const Icon(FluentIcons.heart_fill, color: Color(0xFFF44336)),
-                      onPressed: () => _unfollow(item.itemSlug),
                     ),
                   ),
                 ],
