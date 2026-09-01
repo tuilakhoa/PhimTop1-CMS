@@ -75,6 +75,7 @@ class WindowsHomeLayout extends StatefulWidget {
 
 class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
   int _currentIndex = 0;
+  PaneDisplayMode _displayMode = PaneDisplayMode.compact;
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +91,8 @@ class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Row(
             children: [
-              const SizedBox(width: 48), // Chừa chỗ cho PaneToggleButton
+              const PaneToggleButton(),
+              const SizedBox(width: 12),
               const Icon(FluentIcons.play, color: Color(0xFF6B48FF), size: 20),
               const SizedBox(width: 8),
               const Text('PhimTop1', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
@@ -124,8 +126,9 @@ class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
             ],
           ),
         ),
+        onDisplayModeChanged: (mode) => setState(() => _displayMode = mode),
         pane: NavigationPane(
-          displayMode: PaneDisplayMode.compact,
+          displayMode: _displayMode,
           size: const NavigationPaneSize(openWidth: 220, compactWidth: 50),
           selected: _currentIndex,
           indicator: const EndNavigationIndicator(),
