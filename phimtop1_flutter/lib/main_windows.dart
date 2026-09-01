@@ -75,7 +75,7 @@ class WindowsHomeLayout extends StatefulWidget {
 
 class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
   int _currentIndex = 0;
-  PaneDisplayMode _displayMode = PaneDisplayMode.compact;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -87,48 +87,50 @@ class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
         ),
       ),
       child: NavigationView(
-        titleBar: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            children: [
-              const PaneToggleButton(),
-              const SizedBox(width: 12),
-              const Icon(FluentIcons.play, color: Color(0xFF6B48FF), size: 20),
-              const SizedBox(width: 8),
-              const Text('PhimTop1', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
-              const Spacer(),
-              SizedBox(
-                width: 300,
-                height: 32,
-                child: TextBox(
-                  placeholder: 'Tìm kiếm phim...',
-                  prefix: const Padding(padding: EdgeInsets.only(left: 12.0, right: 8.0), child: Icon(FluentIcons.search, size: 14)),
-                  decoration: WidgetStateProperty.all(
-                    BoxDecoration(color: const Color(0xFF161623), borderRadius: BorderRadius.circular(16))
+        titleBar: TitleBar(
+          icon: const Icon(FluentIcons.play, color: Color(0xFF6B48FF), size: 20),
+          title: const Text('PhimTop1', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+          content: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 300,
+                    height: 32,
+                    child: TextBox(
+                      placeholder: 'Tìm kiếm phim...',
+                      prefix: const Padding(padding: EdgeInsets.only(left: 12.0, right: 8.0), child: Icon(FluentIcons.search, size: 14)),
+                      decoration: WidgetStateProperty.all(
+                        BoxDecoration(color: const Color(0xFF161623), borderRadius: BorderRadius.circular(16))
+                      ),
+                      onSubmitted: (value) {
+                        if (value.isNotEmpty) {
+                          context.read<ExploreProvider>().setFilters(searchKeyword: value);
+                          setState(() => _currentIndex = 1);
+                        }
+                      },
+                    ),
                   ),
-                  onSubmitted: (value) {
-                    if (value.isNotEmpty) {
-                      context.read<ExploreProvider>().setFilters(searchKeyword: value);
-                      setState(() => _currentIndex = 1);
-                    }
-                  },
-                ),
+                  const SizedBox(width: 16),
+                  const IconButton(icon: Icon(FluentIcons.ringer, size: 16), onPressed: null),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 28, height: 28,
+                    decoration: const BoxDecoration(color: Color(0xFF6B48FF), shape: BoxShape.circle),
+                    alignment: Alignment.center,
+                    child: const Icon(FluentIcons.contact, size: 14, color: Colors.white),
+                  ),
+                ],
               ),
-              const SizedBox(width: 16),
-              const IconButton(icon: Icon(FluentIcons.ringer, size: 16), onPressed: null),
-              const SizedBox(width: 8),
-              Container(
-                width: 28, height: 28,
-                decoration: const BoxDecoration(color: Color(0xFF6B48FF), shape: BoxShape.circle),
-                alignment: Alignment.center,
-                child: const Icon(FluentIcons.contact, size: 14, color: Colors.white),
-              ),
-            ],
+            ),
           ),
         ),
-        onDisplayModeChanged: (mode) => setState(() => _displayMode = mode),
+        
         pane: NavigationPane(
-          displayMode: _displayMode,
+          displayMode: PaneDisplayMode.auto,
           size: const NavigationPaneSize(openWidth: 220, compactWidth: 50),
           selected: _currentIndex,
           indicator: const EndNavigationIndicator(),
@@ -150,42 +152,42 @@ class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
           items: [
             PaneItem(
               icon: const Icon(FluentIcons.home),
-              title: const Text('Trang Chủ', style: TextStyle(fontSize: 14)),
+              title: const Text('Trang Chủ', ),
               body: const WindowsHomeScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.search),
-              title: const Text('Khám Phá', style: TextStyle(fontSize: 14)),
+              title: const Text('Khám Phá', ),
               body: const WindowsSearchScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.video),
-              title: const Text('Phim Mới', style: TextStyle(fontSize: 14)),
+              title: const Text('Phim Mới', ),
               body: const WindowsSearchScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.play),
-              title: const Text('Phim Bộ', style: TextStyle(fontSize: 14)),
+              title: const Text('Phim Bộ', ),
               body: const WindowsSearchScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.my_movies_t_v),
-              title: const Text('Phim Lẻ', style: TextStyle(fontSize: 14)),
+              title: const Text('Phim Lẻ', ),
               body: const WindowsSearchScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.list),
-              title: const Text('Thể Loại', style: TextStyle(fontSize: 14)),
+              title: const Text('Thể Loại', ),
               body: const WindowsSearchScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.globe),
-              title: const Text('Quốc Gia', style: TextStyle(fontSize: 14)),
+              title: const Text('Quốc Gia', ),
               body: const WindowsSearchScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.medal),
-              title: const Text('Top IMDb', style: TextStyle(fontSize: 14)),
+              title: const Text('Top IMDb', ),
               body: const WindowsSearchScreen(),
             ),
             
@@ -193,34 +195,34 @@ class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
             
             PaneItem(
               icon: const Icon(FluentIcons.heart),
-              title: const Text('Yêu Thích', style: TextStyle(fontSize: 14)),
+              title: const Text('Yêu Thích', ),
               body: const WindowsFollowScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.history),
-              title: const Text('Xem Sau', style: TextStyle(fontSize: 14)),
+              title: const Text('Xem Sau', ),
               body: const WindowsFollowScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.recent),
-              title: const Text('Lịch Sử', style: TextStyle(fontSize: 14)),
+              title: const Text('Lịch Sử', ),
               body: const WindowsHistoryScreen(),
             ),
             PaneItem(
               icon: const Icon(FluentIcons.download),
-              title: const Text('Tải Xuống', style: TextStyle(fontSize: 14)),
+              title: const Text('Tải Xuống', ),
               body: const WindowsDownloadsScreen(),
             ),
           ],
           footerItems: [
             PaneItemAction(
               icon: const Icon(FluentIcons.shopping_cart_solid, color: Color(0xFFFFA500)),
-              title: const Text('Cửa hàng vật phẩm', style: TextStyle(color: Color(0xFFFFA500), fontSize: 14)),
+              title: const Text('Cửa hàng vật phẩm', style: TextStyle(color: Color(0xFFFFA500))),
               onTap: () {},
             ),
             PaneItem(
               icon: const Icon(FluentIcons.settings),
-              title: const Text('Cài đặt', style: TextStyle(fontSize: 14)),
+              title: const Text('Cài đặt', ),
               body: const WindowsSettingsScreen(),
             ),
           ],
