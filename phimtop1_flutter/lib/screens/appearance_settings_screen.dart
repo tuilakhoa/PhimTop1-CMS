@@ -48,6 +48,29 @@ class AppearanceSettingsScreen extends StatelessWidget {
             ),
           ),
           
+          const SizedBox(height: 12),
+          
+          Container(
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: MenuRowTile(
+              icon: Icons.color_lens,
+              iconColor: Colors.blueAccent,
+              textColor: textColor,
+              title: 'Màu chủ đạo hệ thống',
+              subtitle: 'Đồng bộ màu sắc chính của ứng dụng với màu (Accent Color) trên Windows/Linux.',
+              trailing: Switch(
+                value: themeProvider.useSystemAccent,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (val) {
+                  themeProvider.setUseSystemAccent(val);
+                },
+              ),
+            ),
+          ),
+          
           const SizedBox(height: 24),
           
           // Color Mode Section

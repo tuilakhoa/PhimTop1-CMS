@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:system_theme/system_theme.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
 
 class AppTheme {
   // Updated to PhimTop1's signature orange/yellow
   static const Color defaultPrimaryColor = Color(0xFFFF8F00);
   
-  static ThemeData getTheme({required Brightness brightness, required String skin}) {
+  static ThemeData getTheme({required Brightness brightness, required String skin, bool useSystemAccent = false}) {
     Color primaryColor = defaultPrimaryColor;
     
-    if (skin == 'vip') {
-      primaryColor = const Color(0xFFD4AF37); // Gold
-    } else if (skin == 'futingyun') {
-      primaryColor = const Color(0xFFE06B5F);
-    } else if (skin == 'zhaoling') {
-      primaryColor = const Color(0xFF6B4226);
+    if (useSystemAccent && !kIsWeb && (Platform.isWindows || Platform.isAndroid || Platform.isLinux)) {
+      primaryColor = SystemTheme.accentColor.accent;
+    } else {
+      if (skin == 'vip') {
+        primaryColor = const Color(0xFFD4AF37); // Gold
+      } else if (skin == 'futingyun') {
+        primaryColor = const Color(0xFFE06B5F);
+      } else if (skin == 'zhaoling') {
+        primaryColor = const Color(0xFF6B4226);
+      }
     }
 
     // Common modern rounded shapes

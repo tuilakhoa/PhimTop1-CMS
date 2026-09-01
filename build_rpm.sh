@@ -13,4 +13,12 @@ cd ../..
 
 echo "Building RPM..."
 QA_RPATHS=$(( 0x0001|0x0002 )) rpmbuild --define "_topdir $(pwd)/rpmbuild" -ba rpmbuild/SPECS/phimtop1.spec
-echo "RPM build finished. Files are in rpmbuild/RPMS"
+
+echo "Moving RPM out and cleaning up..."
+# Find the built RPM and move it to phimtop1_flutter/
+find rpmbuild/RPMS -name "*.rpm" -exec mv {} ./phimtop1-linux.rpm \;
+
+# Clean up garbage files
+rm -rf rpmbuild/BUILD rpmbuild/BUILDROOT rpmbuild/RPMS rpmbuild/SOURCES rpmbuild/SRPMS
+
+echo "RPM build finished. File is phimtop1-linux.rpm"

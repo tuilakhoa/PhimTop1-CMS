@@ -24,7 +24,11 @@ import 'services/tv_remote_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_links/app_links.dart';
 import 'dart:async';
+import 'package:flutter_acrylic/flutter_acrylic.dart';
+import 'package:window_manager/window_manager.dart';
+import 'dart:io';
 
+import 'package:system_theme/system_theme.dart';
 import 'firebase_options.dart';
 
 import 'providers/watch_party_provider.dart';
@@ -32,6 +36,38 @@ import 'providers/watch_party_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+  
+  try {
+    final bool isDesktop = !kIsWeb && (Platform.isWindows || Platform.isLinux);
+    if (!kIsWeb && (Platform.isWindows || Platform.isAndroid || Platform.isLinux)) {
+      SystemTheme.fallbackColor = Colors.blue;
+      await SystemTheme.accentColor.load();
+    }
+    if (isDesktop) {
+      await windowManager.ensureInitialized();
+      await Window.initialize();
+      if (Platform.isWindows) {
+        await Window.setEffect(effect: WindowEffect.mica, dark: true);
+      } else if (Platform.isLinux) {
+        await Window.setEffect(effect: WindowEffect.transparent);
+      }
+      WindowOptions windowOptions = const WindowOptions(
+        size: Size(1280, 720),
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.hidden,
+        title: 'PhimTop1',
+      );
+      windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    }
+  } catch (e) {
+    print("Desktop window / SystemTheme init error: $e");
+  }
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -170,8 +206,8 @@ class _MyAppState extends State<MyApp> {
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
           title: 'PhimTop1',
-          theme: AppTheme.getTheme(brightness: Brightness.light, skin: themeProvider.currentSkin),
-          darkTheme: AppTheme.getTheme(brightness: Brightness.dark, skin: themeProvider.currentSkin),
+          theme: AppTheme.getTheme(brightness: Brightness.light, skin: themeProvider.currentSkin, useSystemAccent: themeProvider.useSystemAccent),
+          darkTheme: AppTheme.getTheme(brightness: Brightness.dark, skin: themeProvider.currentSkin, useSystemAccent: themeProvider.useSystemAccent),
           themeMode: themeProvider.themeMode,
           routerConfig: _router,
           debugShowCheckedModeBanner: false,
