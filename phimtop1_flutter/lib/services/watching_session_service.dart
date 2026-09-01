@@ -78,7 +78,7 @@ class WatchingSessionService {
 
   Future<void> _sendHeartbeat(Map<String, dynamic> payload) async {
     try {
-      String url = '${AppConfig.baseUrl}api/v1/watching_session.php?action=heartbeat&key=${AppConfig.apiKey}';
+      String url = '${AppConfig.baseUrl}api/v1/watching_session.php?action=heartbeat';
       
       final response = await _dio.post(
         url,

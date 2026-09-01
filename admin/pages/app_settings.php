@@ -7,6 +7,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $appApiKey = trim($_POST['appApiKey'] ?? '');
     $appBannerEnabled = isset($_POST['appBannerEnabled']) ? 1 : 0;
     $appDownloadUrl = trim($_POST['appDownloadUrl'] ?? '');
+    $appDownloadUrlWindows = trim($_POST['appDownloadUrlWindows'] ?? '');
+    $appDownloadUrlLinux = trim($_POST['appDownloadUrlLinux'] ?? '');
+    $appDownloadUrlFedora = trim($_POST['appDownloadUrlFedora'] ?? '');
+    $appDownloadUrlUbuntu = trim($_POST['appDownloadUrlUbuntu'] ?? '');
     $appInAppUpdateUrl = trim($_POST['appInAppUpdateUrl'] ?? '');
     $appDownloadUrlTv = trim($_POST['appDownloadUrlTv'] ?? '');
     
@@ -23,6 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'appApiKey' => $appApiKey,
         'appBannerEnabled' => $appBannerEnabled,
         'appDownloadUrl' => $appDownloadUrl,
+        'appDownloadUrlWindows' => $appDownloadUrlWindows,
+        'appDownloadUrlLinux' => $appDownloadUrlLinux,
+        'appDownloadUrlFedora' => $appDownloadUrlFedora,
+        'appDownloadUrlUbuntu' => $appDownloadUrlUbuntu,
         'appInAppUpdateUrl' => $appInAppUpdateUrl,
         'appDownloadUrlTv' => $appDownloadUrlTv,
         'appSchemaEnabled' => $appSchemaEnabled,
@@ -30,6 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'appSchemaOs' => $appSchemaOs,
         'appSchemaCategory' => $appSchemaCategory,
         'appSchemaPrice' => $appSchemaPrice,
+        'appSchemaCurrency' => $appSchemaCurrency,
+        'appSchemaRatingValue' => $appSchemaRatingValue,
+        'appSchemaRatingCount' => $appSchemaRatingCount,
         'appLatestVersion' => trim($_POST['appLatestVersion'] ?? '1.0.0'),
         'appBuildNumber' => !empty($_POST['appBuildNumber']) ? (int)$_POST['appBuildNumber'] : 0,
         'appForceUpdate' => isset($_POST['appForceUpdate']) ? 1 : 0,
@@ -48,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     // vì hệ thống chuyển sang mô hình Private (Closed CMS), 
     // Firebase được quản lý trực tiếp qua codebase bằng CLI.
     
-    $settings = getSettings(); // Refresh
+    $settings = getSettings(true); // Refresh
 }
 ?>
 
@@ -109,6 +120,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <label class="block text-sm font-medium text-gray-300 mb-2">Link Tải App Android TV (APK)</label>
                 <input type="text" name="appDownloadUrlTv" value="<?= htmlspecialchars($settings['appDownloadUrlTv'] ?? '') ?>" placeholder="https://..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
                 <p class="text-xs text-gray-500 mt-2">Đường dẫn tải ứng dụng dành cho Smart TV. Nếu để trống, nút tải app TV trên web sẽ không hiển thị.</p>
+            </div>
+
+            <div class="border-t border-gray-800 pt-6">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Link Tải App Windows (.exe)</label>
+                <input type="text" name="appDownloadUrlWindows" value="<?= htmlspecialchars($settings['appDownloadUrlWindows'] ?? '') ?>" placeholder="https://..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <p class="text-xs text-gray-500 mt-2">Đường dẫn tải ứng dụng dành cho Windows. Nếu để trống, nút tải app Windows trên web sẽ không hiển thị.</p>
+            </div>
+
+            <div class="border-t border-gray-800 pt-6">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Link Tải App Ubuntu / Debian (.deb)</label>
+                <input type="text" name="appDownloadUrlUbuntu" value="<?= htmlspecialchars($settings['appDownloadUrlUbuntu'] ?? '') ?>" placeholder="https://..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <p class="text-xs text-gray-500 mt-2">Đường dẫn tải file .deb (nếu điền, web sẽ tự tạo lệnh sudo apt install cho khách copy).</p>
+            </div>
+
+            <div class="border-t border-gray-800 pt-6">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Link Tải App Fedora / RedHat (.rpm)</label>
+                <input type="text" name="appDownloadUrlFedora" value="<?= htmlspecialchars($settings['appDownloadUrlFedora'] ?? '') ?>" placeholder="https://..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <p class="text-xs text-gray-500 mt-2">Đường dẫn tải file .rpm (nếu điền, web sẽ tự tạo lệnh sudo dnf install cho khách copy).</p>
+            </div>
+
+            <div class="border-t border-gray-800 pt-6">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Câu lệnh cài đặt Linux Tuỳ Chọn (Bash Script/Snap)</label>
+                <input type="text" name="appDownloadUrlLinux" value="<?= htmlspecialchars($settings['appDownloadUrlLinux'] ?? '') ?>" placeholder="curl -sSL ... | bash" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
+                <p class="text-xs text-gray-500 mt-2">Nếu bạn dùng Bash script hoặc Snap/Flatpak thay vì file .rpm/.deb trực tiếp, hãy nhập nguyên câu lệnh vào đây.</p>
             </div>
 
             <div class="border-t border-gray-800 pt-6">

@@ -7,7 +7,7 @@ class WatchPartyService {
     try {
       final response = await http.post(
         Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=create'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'X-App-API-Key': AppConfig.apiKey},
         body: jsonEncode({
           'movie_slug': movieSlug,
           'episode_name': episodeName,
@@ -25,7 +25,7 @@ class WatchPartyService {
   static Future<Map<String, dynamic>> joinParty(String roomCode) async {
     try {
       final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=join&room_code=$roomCode'),
+        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=join&room_code=$roomCode'), headers: {'X-App-API-Key': AppConfig.apiKey},
       );
       
       return jsonDecode(response.body);
@@ -38,7 +38,7 @@ class WatchPartyService {
     try {
       final response = await http.post(
         Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=sync'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'X-App-API-Key': AppConfig.apiKey},
         body: jsonEncode({
           'room_code': roomCode,
           'is_playing': isPlaying ? 1 : 0,
@@ -55,7 +55,7 @@ class WatchPartyService {
   static Future<Map<String, dynamic>> getState(String roomCode) async {
     try {
       final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=state&room_code=$roomCode'),
+        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=state&room_code=$roomCode'), headers: {'X-App-API-Key': AppConfig.apiKey},
       );
       
       return jsonDecode(response.body);
@@ -67,7 +67,7 @@ class WatchPartyService {
   static Future<Map<String, dynamic>> getPublicParties(String movieSlug) async {
     try {
       final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=list_public&movie_slug=$movieSlug'),
+        Uri.parse('${AppConfig.baseUrl.replaceAll(RegExp(r'/$'), '').replaceAll('/api/v1/api', '')}/api/v1/watch_party.php?action=list_public&movie_slug=$movieSlug'), headers: {'X-App-API-Key': AppConfig.apiKey},
       );
       
       return jsonDecode(response.body);

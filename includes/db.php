@@ -79,9 +79,9 @@ function getFirestore() {
     return null;
 }
 
-function getSettings() {
+function getSettings($forceRefresh = false) {
     static $cachedSettings = null;
-    if ($cachedSettings !== null) {
+    if (!$forceRefresh && $cachedSettings !== null) {
         return $cachedSettings;
     }
     
@@ -169,6 +169,10 @@ function getSettings() {
         'appApiKey' => '',
         'appBannerEnabled' => 0,
         'appDownloadUrl' => '',
+        'appDownloadUrlWindows' => '',
+        'appDownloadUrlLinux' => '',
+        'appDownloadUrlFedora' => '',
+        'appDownloadUrlUbuntu' => '',
         'appInAppUpdateUrl' => '',
         'appDownloadUrlTv' => '',
         'appSchemaEnabled' => 0,
@@ -217,10 +221,10 @@ function getSettings() {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 19) {
+            if (!isset($row['db_version']) || $row['db_version'] < 22) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 19]);
-                $row['db_version'] = 19;
+                updateSettings(['db_version' => 22]);
+                $row['db_version'] = 22;
             }
             
             $cachedSettings = array_merge($defaultSettings, $row);

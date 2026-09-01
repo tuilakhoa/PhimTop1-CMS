@@ -290,7 +290,7 @@ if ($pdo) {
                     </button>
                 </form>
 
-                <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv'])): ?>
+                <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv']) || !empty($settings['appDownloadUrlWindows']) || !empty($settings['appDownloadUrlLinux']) || !empty($settings['appDownloadUrlFedora']) || !empty($settings['appDownloadUrlUbuntu'])): ?>
                 <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="hidden md:flex items-center bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold py-2 px-4 rounded-full transition-colors shadow-[0_0_15px_rgba(234,179,8,0.3)] border border-yellow-400/50">
                     <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Tải App
                 </button>
@@ -360,7 +360,7 @@ if ($pdo) {
 
                     <?php do_action('theme_mobile_menu'); ?>
                     
-                    <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv'])): ?>
+                    <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv']) || !empty($settings['appDownloadUrlWindows']) || !empty($settings['appDownloadUrlLinux']) || !empty($settings['appDownloadUrlFedora']) || !empty($settings['appDownloadUrlUbuntu'])): ?>
                     <button onclick="document.getElementById('downloadAppModal').classList.remove('hidden')" class="flex w-full items-center justify-center bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-yellow-500/30 mt-2">
                         <i data-lucide="download" class="w-5 h-5 mr-2"></i> Tải Ứng Dụng
                     </button>
@@ -403,6 +403,57 @@ if ($pdo) {
                             </div>
                             <i data-lucide="download" class="w-4 h-4 text-gray-400"></i>
                         </a>
+                        <?php endif; ?>
+
+                        <?php if (!empty($settings['appDownloadUrlWindows'])): ?>
+                        <a href="<?= htmlspecialchars($settings['appDownloadUrlWindows']) ?>" target="_blank" class="flex items-center justify-between bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 font-medium py-2.5 px-4 rounded-xl transition-all border border-blue-500/30">
+                            <div class="flex items-center text-sm">
+                                <i data-lucide="monitor" class="w-4 h-4 mr-2"></i> Windows
+                            </div>
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </a>
+                        <?php endif; ?>
+
+                        <?php if (!empty($settings['appDownloadUrlUbuntu'])): ?>
+                        <div class="bg-gray-800/50 p-3 rounded-xl border border-gray-700/50 mt-2">
+                            <div class="flex items-center justify-between text-sm text-gray-300 mb-2">
+                                <div class="flex items-center font-medium">
+                                    <i data-lucide="terminal" class="w-4 h-4 mr-2"></i> Ubuntu / Debian
+                                </div>
+                                <span class="text-xs text-gray-500">Terminal</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <code class="flex-1 bg-black/50 px-3 py-2 rounded text-green-400 text-xs font-mono break-all border border-white/5 select-all">wget -O app.deb <?= htmlspecialchars($settings['appDownloadUrlUbuntu']) ?> && sudo apt install -y ./app.deb</code>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($settings['appDownloadUrlFedora'])): ?>
+                        <div class="bg-gray-800/50 p-3 rounded-xl border border-gray-700/50 mt-2">
+                            <div class="flex items-center justify-between text-sm text-gray-300 mb-2">
+                                <div class="flex items-center font-medium">
+                                    <i data-lucide="terminal" class="w-4 h-4 mr-2"></i> Fedora / RedHat
+                                </div>
+                                <span class="text-xs text-gray-500">Terminal</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <code class="flex-1 bg-black/50 px-3 py-2 rounded text-green-400 text-xs font-mono break-all border border-white/5 select-all">sudo dnf install -y <?= htmlspecialchars($settings['appDownloadUrlFedora']) ?></code>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($settings['appDownloadUrlLinux'])): ?>
+                        <div class="bg-gray-800/50 p-3 rounded-xl border border-gray-700/50 mt-2">
+                            <div class="flex items-center justify-between text-sm text-gray-300 mb-2">
+                                <div class="flex items-center font-medium">
+                                    <i data-lucide="terminal" class="w-4 h-4 mr-2"></i> Linux (Script/Khác)
+                                </div>
+                                <span class="text-xs text-gray-500">Terminal</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <code class="flex-1 bg-black/50 px-3 py-2 rounded text-green-400 text-xs font-mono break-all border border-white/5 select-all"><?= htmlspecialchars($settings['appDownloadUrlLinux']) ?></code>
+                            </div>
+                        </div>
                         <?php endif; ?>
                     </div>
                 </div>

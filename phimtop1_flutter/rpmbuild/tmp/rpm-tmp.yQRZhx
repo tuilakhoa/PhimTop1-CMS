@@ -1,0 +1,4 @@
+test -d '/home/khoa/Bản tải về/phimtop1cms/phimtop1_flutter/rpmbuild/BUILD/phimtop1-1.0.0-build' && /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w '/home/khoa/Bản tải về/phimtop1cms/phimtop1_flutter/rpmbuild/BUILD/phimtop1-1.0.0-build'
+/usr/bin/rm -rf '/home/khoa/Bản tải về/phimtop1cms/phimtop1_flutter/rpmbuild/BUILD/phimtop1-1.0.0-build'
+/usr/bin/mkdir -p '/home/khoa/Bản tải về/phimtop1cms/phimtop1_flutter/rpmbuild/BUILD/phimtop1-1.0.0-build'
+/usr/bin/mkdir -p '/home/khoa/Bản tải về/phimtop1cms/phimtop1_flutter/rpmbuild/BUILD/phimtop1-1.0.0-build/SPECPARTS'
