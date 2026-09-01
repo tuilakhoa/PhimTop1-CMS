@@ -86,54 +86,42 @@ class _WindowsHomeLayoutState extends State<WindowsHomeLayout> {
         ),
       ),
       child: NavigationView(
-        titleBar: NavigationAppBar(
-          height: 50,
-          leading: null, // Cho phép Fluent UI tự tạo nút Hamburger
-          title: () {
-            return const Padding(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Row(
-                children: [
-                  Icon(FluentIcons.play, color: Color(0xFF6B48FF), size: 20),
-                  SizedBox(width: 8),
-                  Text('PhimTop1', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
-                ],
-              ),
-            );
-          }(),
-          actions: Padding(
-            padding: const EdgeInsets.only(right: 16.0, top: 10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(
-                  width: 300,
-                  height: 32,
-                  child: TextBox(
-                    placeholder: 'Tìm kiếm phim...',
-                    prefix: const Padding(padding: EdgeInsets.only(left: 12.0, right: 8.0), child: Icon(FluentIcons.search, size: 14)),
-                    decoration: WidgetStateProperty.all(
-                      BoxDecoration(color: const Color(0xFF161623), borderRadius: BorderRadius.circular(16))
-                    ),
-                    onSubmitted: (value) {
-                      if (value.isNotEmpty) {
-                        context.read<ExploreProvider>().setFilters(searchKeyword: value);
-                        setState(() => _currentIndex = 1);
-                      }
-                    },
+        titleBar: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            children: [
+              const SizedBox(width: 48), // Chừa chỗ cho PaneToggleButton
+              const Icon(FluentIcons.play, color: Color(0xFF6B48FF), size: 20),
+              const SizedBox(width: 8),
+              const Text('PhimTop1', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+              const Spacer(),
+              SizedBox(
+                width: 300,
+                height: 32,
+                child: TextBox(
+                  placeholder: 'Tìm kiếm phim...',
+                  prefix: const Padding(padding: EdgeInsets.only(left: 12.0, right: 8.0), child: Icon(FluentIcons.search, size: 14)),
+                  decoration: WidgetStateProperty.all(
+                    BoxDecoration(color: const Color(0xFF161623), borderRadius: BorderRadius.circular(16))
                   ),
+                  onSubmitted: (value) {
+                    if (value.isNotEmpty) {
+                      context.read<ExploreProvider>().setFilters(searchKeyword: value);
+                      setState(() => _currentIndex = 1);
+                    }
+                  },
                 ),
-                const SizedBox(width: 16),
-                const IconButton(icon: Icon(FluentIcons.ringer, size: 16), onPressed: null),
-                const SizedBox(width: 8),
-                Container(
-                  width: 28, height: 28,
-                  decoration: const BoxDecoration(color: Color(0xFF6B48FF), shape: BoxShape.circle),
-                  alignment: Alignment.center,
-                  child: const Icon(FluentIcons.contact, size: 14, color: Colors.white),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 16),
+              const IconButton(icon: Icon(FluentIcons.ringer, size: 16), onPressed: null),
+              const SizedBox(width: 8),
+              Container(
+                width: 28, height: 28,
+                decoration: const BoxDecoration(color: Color(0xFF6B48FF), shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: const Icon(FluentIcons.contact, size: 14, color: Colors.white),
+              ),
+            ],
           ),
         ),
         pane: NavigationPane(
