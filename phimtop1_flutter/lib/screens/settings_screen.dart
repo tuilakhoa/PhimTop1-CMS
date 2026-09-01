@@ -35,6 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _bioLogin = false;
   String _cacheSize = "Đang tính...";
   int _autoClearDays = 0;
+  bool _minimizeToTray = false;
   String _biometricLabel = "Sinh trắc học";
 
   @override
@@ -106,6 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _bioAppLock = prefs.getBool('app_lock_biometric') ?? false;
         _bioLogin = prefs.getBool('bio_login_enabled') ?? false;
         _autoClearDays = prefs.getInt('auto_clear_cache_days') ?? 0;
+        _minimizeToTray = prefs.getBool('minimize_to_tray_on_close') ?? false;
         _biometricLabel = bioType;
       });
     }
@@ -680,6 +682,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 12),
           _buildSectionHeader("Khác"),
           _buildMenuGroup(context, [
+            if (!kIsWeb && (Platform.isWindows || Platform.isLinux))
+              MenuRowTile(
+                icon: Icons.minimize_outlined,
+                iconColor: Colors.blue,
+                textColor: textColor,
+                title: "Thu nhỏ xuống khay",
+                subtitle: "Khi bấm X sẽ thu nhỏ thay vì thoát",
+                trailing: Switch(
+                  value: _minimizeToTray,
+                  activeColor: Theme.of(context).primaryColor,
+                  onChanged: (val) async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('minimize_to_tray_on_close', val);
+                    setState(() { _minimizeToTray = val; });
+                  },
+                ),
+              ),
             MenuRowTile(
               icon: Icons.cleaning_services_outlined,
               iconColor: Colors.deepOrange,

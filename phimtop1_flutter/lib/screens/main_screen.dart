@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/foundation.dart';
-import 'dart:io';
 import 'tv_dashboard_screen.dart';
-import 'fluent_desktop_shell.dart';
 
 class MainScreen extends StatelessWidget {
   final Widget child;
@@ -15,12 +12,6 @@ class MainScreen extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final bool isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     final bool isTvMode = isLandscape && size.width > 800;
-    
-    final bool isDesktop = !kIsWeb && (Platform.isWindows || Platform.isLinux);
-
-    if (isDesktop) {
-      return FluentDesktopShell(child: child);
-    }
 
     if (isTvMode) {
       return TvDashboardScreen(child: child);

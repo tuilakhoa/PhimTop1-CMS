@@ -30,8 +30,6 @@ import '../screens/shop_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'dart:io';
-import '../screens/fluent_desktop_shell.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -83,10 +81,6 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (BuildContext context, GoRouterState state, Widget child) {
-        final bool isDesktop = !kIsWeb && (Platform.isWindows || Platform.isLinux);
-        if (isDesktop) {
-          return FluentDesktopShell(child: child);
-        }
         return MainScreen(child: child);
       },
       routes: <RouteBase>[

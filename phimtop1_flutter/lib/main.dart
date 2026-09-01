@@ -24,11 +24,11 @@ import 'services/tv_remote_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_links/app_links.dart';
 import 'dart:async';
-import 'package:flutter_acrylic/flutter_acrylic.dart';
-import 'package:window_manager/window_manager.dart';
-import 'dart:io';
 
 import 'package:system_theme/system_theme.dart';
+import 'package:window_manager/window_manager.dart';
+import 'package:flutter_acrylic/flutter_acrylic.dart';
+import 'package:tray_manager/tray_manager.dart';
 import 'firebase_options.dart';
 
 import 'providers/watch_party_provider.dart';
@@ -38,34 +38,60 @@ void main() async {
   MediaKit.ensureInitialized();
   
   try {
-    final bool isDesktop = !kIsWeb && (Platform.isWindows || Platform.isLinux);
     if (!kIsWeb && (Platform.isWindows || Platform.isAndroid || Platform.isLinux)) {
       SystemTheme.fallbackColor = Colors.blue;
       await SystemTheme.accentColor.load();
     }
-    if (isDesktop) {
+  } catch (e) {
+    print("SystemTheme init error: $e");
+  }
+
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+    try {
       await windowManager.ensureInitialized();
-      await Window.initialize();
-      if (Platform.isWindows) {
-        await Window.setEffect(effect: WindowEffect.mica, dark: true);
-      } else if (Platform.isLinux) {
-        await Window.setEffect(effect: WindowEffect.transparent);
-      }
       WindowOptions windowOptions = const WindowOptions(
         size: Size(1280, 720),
         center: true,
         backgroundColor: Colors.transparent,
         skipTaskbar: false,
         titleBarStyle: TitleBarStyle.hidden,
-        title: 'PhimTop1',
+        backgroundColor: Colors.transparent,
       );
+      await windowManager.setPreventClose(true);
       windowManager.waitUntilReadyToShow(windowOptions, () async {
         await windowManager.show();
         await windowManager.focus();
       });
+
+      await Window.initialize();
+      if (Platform.isWindows) {
+        await Window.setEffect(
+          effect: WindowEffect.mica,
+          color: const Color(0xCC222222),
+        );
+      } else if (Platform.isLinux) {
+        await Window.setEffect(
+          effect: WindowEffect.transparent,
+          color: const Color(0xCC222222),
+        );
+      }
+
+      // Initialize tray
+      await trayManager.setIcon(
+        Platform.isWindows ? 'assets/logo.ico' : 'assets/logo.png',
+      );
+      Menu menu = Menu(
+        items: [
+          MenuItem(key: 'show_window', label: 'Show Window'),
+          MenuItem.separator(),
+          MenuItem(key: 'exit_app', label: 'Exit'),
+        ],
+      );
+      await trayManager.setContextMenu(menu);
+
+    } catch (e) {
+      print("Window manager/acrylic init error: $e");
     }
-  } catch (e) {
-    print("Desktop window / SystemTheme init error: $e");
   }
 
   try {
@@ -156,7 +182,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with TrayListener, WindowListener {
   late final GoRouter _router;
   late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
@@ -167,6 +193,12 @@ class _MyAppState extends State<MyApp> {
     _router = createRouter(widget.hasAgreed, widget.hasSeenOnboarding, widget.hasAppLock);
     
     _initDeepLinks();
+    
+    if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+      trayManager.addListener(this);
+      windowManager.addListener(this);
+    }
+
     
     // Listen for cast commands
     TvRemoteService().onPlayCommand.listen((slug) {
@@ -197,7 +229,48 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     _linkSubscription?.cancel();
+    if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+      trayManager.removeListener(this);
+      windowManager.removeListener(this);
+    }
     super.dispose();
+  }
+
+
+  @override
+  void onTrayIconMouseDown() {
+    windowManager.show();
+    windowManager.focus();
+  }
+
+  @override
+  void onTrayIconRightMouseDown() {
+    trayManager.popUpContextMenu();
+  }
+
+  @override
+  void onTrayMenuItemClick(MenuItem menuItem) {
+    if (menuItem.key == 'show_window') {
+      windowManager.show();
+      windowManager.focus();
+    } else if (menuItem.key == 'exit_app') {
+      windowManager.destroy();
+    }
+  }
+
+  @override
+  void onWindowClose() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool minimize = prefs.getBool('minimize_to_tray_on_close') ?? false;
+
+    if (minimize) {
+      bool isPreventClose = await windowManager.isPreventClose();
+      if (isPreventClose) {
+        windowManager.hide();
+      }
+    } else {
+      windowManager.destroy();
+    }
   }
 
   @override
@@ -209,7 +282,27 @@ class _MyAppState extends State<MyApp> {
           theme: AppTheme.getTheme(brightness: Brightness.light, skin: themeProvider.currentSkin, useSystemAccent: themeProvider.useSystemAccent),
           darkTheme: AppTheme.getTheme(brightness: Brightness.dark, skin: themeProvider.currentSkin, useSystemAccent: themeProvider.useSystemAccent),
           themeMode: themeProvider.themeMode,
+
+          builder: (context, child) {
+            if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+              return Scaffold(
+                backgroundColor: Colors.transparent,
+                body: Column(
+                  children: [
+                    const WindowCaption(
+                      brightness: Brightness.dark,
+                      backgroundColor: Colors.transparent,
+                      title: Text('PhimTop1'),
+                    ),
+                    Expanded(child: child ?? const SizedBox()),
+                  ],
+                ),
+              );
+            }
+            return child ?? const SizedBox();
+          },
           routerConfig: _router,
+
           debugShowCheckedModeBanner: false,
         );
       }
