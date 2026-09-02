@@ -81,6 +81,11 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     
+    if (isset($settings['allowLogin']) && $settings['allowLogin'] == 0) {
+        header("Location: /login.php?error=" . urlencode("Đăng nhập tài khoản hiện đang bị khóa bởi Quản trị viên."));
+        exit;
+    }
+
     if (!$email || !$password) {
         header("Location: /login.php?error=" . urlencode("Vui lòng nhập email và mật khẩu."));
         exit;

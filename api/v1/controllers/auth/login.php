@@ -3,6 +3,14 @@ $input = json_decode(file_get_contents('php://input'), true);
 $email = $input['email'] ?? '';
 $password = $input['password'] ?? '';
 
+
+
+if (isset($settings['allowLogin']) && $settings['allowLogin'] == 0) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Đăng nhập tài khoản hiện đang bị khóa bởi Quản trị viên.']);
+    exit;
+}
+
 $user = null;
 $fs = getFirestore();
 if ($fs) {

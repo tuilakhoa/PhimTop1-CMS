@@ -84,9 +84,21 @@ if (isset($_SESSION['user'])) {
         </div>
     <?php else: ?>
         <div class="flex items-center space-x-3 text-sm font-medium">
-            <a href="/login.php" class="text-phim-yellow hover:text-yellow-400 transition-colors">Đăng nhập</a>
-            <span class="text-gray-600">|</span>
-            <a href="/register.php" class="text-gray-300 hover:text-white transition-colors">Đăng ký</a>
+            <?php 
+            $canLogin = (!isset($settings['allowLogin']) || $settings['allowLogin'] == 1);
+            $canRegister = (!isset($settings['allowRegistration']) || $settings['allowRegistration'] == 1);
+            ?>
+            <?php if ($canLogin): ?>
+                <a href="/login.php" class="text-phim-yellow hover:text-yellow-400 transition-colors">Đăng nhập</a>
+            <?php endif; ?>
+            
+            <?php if ($canLogin && $canRegister): ?>
+                <span class="text-gray-600">|</span>
+            <?php endif; ?>
+            
+            <?php if ($canRegister): ?>
+                <a href="/register.php" class="text-gray-300 hover:text-white transition-colors">Đăng ký</a>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </div>

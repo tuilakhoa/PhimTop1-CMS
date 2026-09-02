@@ -11,6 +11,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
     $updates = [];
     $updates['displayMode'] = 'api';
     if (isset($_POST['apiSource'])) $updates['apiSource'] = $_POST['apiSource'];
+    if (isset($_POST['allowLogin'])) $updates['allowLogin'] = (int)$_POST['allowLogin'];
     if (isset($_POST['allowRegistration'])) $updates['allowRegistration'] = (int)$_POST['allowRegistration'];
     if (isset($_POST['enableComics'])) $updates['enableComics'] = (int)$_POST['enableComics'];
     if (isset($_POST['comicApiUrl'])) $updates['comicApiUrl'] = $_POST['comicApiUrl'];
