@@ -435,4 +435,67 @@ if (!empty($_GET['party'])) {
 </div>
 <?php endif; ?>
 
-<?php include __DIR__ . '/footer.php'; ?>
+<script>
+    const movieData = {
+        slug: "<?= addslashes($slug) ?>",
+        name: "<?= addslashes(htmlspecialchars_decode($movie['name'])) ?>",
+        thumb_url: "<?= addslashes($movie['thumb_url']) ?>"
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check initial follow state
+        fetch(`/api/follow.php?action=check&slug=${encodeURIComponent(movieData.slug)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' && data.is_following) {
+                    updateFollowBtnUI(true);
+                }
+            })
+            .catch(err => console.error("Error checking follow status:", err));
+    });
+
+    function updateFollowBtnUI(isFollowing) {
+        const icon = document.getElementById('follow-icon');
+        const text = document.getElementById('follow-text');
+        if (!icon || !text) return;
+        
+        if (isFollowing) {
+            icon.classList.add('fill-current', 'text-[#fcc526]');
+            text.innerText = 'Đã lưu';
+        } else {
+            icon.classList.remove('fill-current', 'text-[#fcc526]');
+            text.innerText = 'Lưu phim';
+        }
+    }
+
+    function toggleFollowMovie() {
+        fetch('/api/follow.php?action=toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                item_slug: movieData.slug,
+                item_type: 'movie',
+                item_name: movieData.name,
+                thumb_url: movieData.thumb_url
+            })
+        })
+        .then(res => {
+            if (res.status === 401) {
+                alert("Vui lòng đăng nhập để lưu phim!");
+                // Optionally redirect to login: window.location.href = '/login.php';
+                return null;
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data && data.status === 'success') {
+                updateFollowBtnUI(data.action === 'added');
+            } else if (data && data.message) {
+                alert("Lỗi: " + data.message);
+            }
+        })
+        .catch(err => console.error("Error toggling follow:", err));
+    }
+</script><?php include __DIR__ . '/footer.php'; ?>

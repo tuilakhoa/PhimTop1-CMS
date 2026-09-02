@@ -22,6 +22,11 @@ if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     
+    if (isset($settings['allowRegistration']) && $settings['allowRegistration'] == 0) {
+        header("Location: /register.php?error=" . urlencode("Đăng ký tài khoản mới hiện đang bị khóa bởi Quản trị viên."));
+        exit;
+    }
+
     if (!$name || !$email || !$password) {
         header("Location: /register.php?error=" . urlencode("Vui lòng điền đầy đủ thông tin."));
         exit;

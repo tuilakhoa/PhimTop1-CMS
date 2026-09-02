@@ -54,6 +54,14 @@
         </div>
         
         <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Cho phép Đăng ký tài khoản mới</label>
+            <select name="allowRegistration" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow mb-4">
+                <option value="1" <?= (!isset($settings['allowRegistration']) || $settings['allowRegistration'] == 1) ? 'selected' : '' ?>>Bật (Cho phép người dùng đăng ký)</option>
+                <option value="0" <?= (isset($settings['allowRegistration']) && $settings['allowRegistration'] == 0) ? 'selected' : '' ?>>Tắt (Khóa đăng ký)</option>
+            </select>
+        </div>
+        
+        <div class="mb-6">
             <label class="block text-sm font-medium text-gray-300 mb-2">Tính năng Xem Tiếp (Continue Watching)</label>
             <select name="enableContinueWatching" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow mb-4">
                 <option value="1" <?= (!isset($settings['enableContinueWatching']) || $settings['enableContinueWatching'] == 1) ? 'selected' : '' ?>>Bật (Cho phép lưu lịch sử và xem tiếp)</option>

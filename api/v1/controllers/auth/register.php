@@ -4,6 +4,12 @@ $email = $input['email'] ?? '';
 $password = $input['password'] ?? '';
 $name = $input['name'] ?? 'User';
 
+if (isset($settings['allowRegistration']) && $settings['allowRegistration'] == 0) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Đăng ký tài khoản mới hiện đang bị khóa bởi Quản trị viên.']);
+    exit;
+}
+
 if (empty($email) || empty($password)) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Email and password are required']);
