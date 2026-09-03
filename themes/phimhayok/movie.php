@@ -89,14 +89,14 @@ if (!empty($_GET['party'])) {
 
     <!-- Hero Content Layer -->
     <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] relative z-10 flex flex-col md:flex-row gap-8 items-end">
-        <!-- Poster (Hidden on very small screens to save space) -->
-        <div class="w-40 md:w-56 lg:w-64 shrink-0 rounded-xl overflow-hidden shadow-2xl border border-gray-800 hidden sm:block bg-[#141414]">
+        <!-- Poster -->
+        <div class="shrink-0 rounded-xl overflow-hidden shadow-2xl border border-gray-800 bg-[#141414]" style="width: 240px; display: block;">
             <img fetchpriority="high" src="<?= htmlspecialchars($movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-auto aspect-[3/4] object-cover">
         </div>
 
         <!-- Main Info -->
         <div class="flex-1 min-w-0 flex flex-col gap-4">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-lg"><?= htmlspecialchars($movie['name']) ?></h1>
+            <h1 class="text-3xl md:text-5xl font-bold text-white leading-tight drop-shadow-lg"><?= htmlspecialchars($movie['name']) ?></h1>
             <h2 class="text-lg md:text-xl text-gray-400 italic"><?= htmlspecialchars($movie['origin_name']) ?></h2>
 
             <!-- Fast Horizontal Metadata (No heavy blur) -->
@@ -149,7 +149,7 @@ if (!empty($_GET['party'])) {
 
 <!-- Main Details Section -->
 <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] mb-16 mt-6">
-    <div class="flex flex-col lg:flex-row gap-8">
+    <div class="flex flex-col md:flex-row gap-8">
         
         <!-- Left Column (Core content: Episodes, Plot, Actors, Comments) -->
         <div class="flex-1 min-w-0 space-y-10">
@@ -163,7 +163,7 @@ if (!empty($_GET['party'])) {
                 </div>
                 
                 <div class="bg-[#101010] rounded-2xl p-5 border border-gray-800/80 shadow-inner">
-                    <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar" id="episode-list">
+                    <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar" id="episode-list">
                         <?php 
                         $server = $episodes[0] ?? ['server_data' => []];
                         foreach ($server['server_data'] as $ep): 
@@ -332,7 +332,7 @@ if (!empty($_GET['party'])) {
         </div>
 
         <!-- Right Column: Meta Info (Directors, Country) -->
-        <div class="w-full lg:w-[320px] shrink-0">
+        <div class="w-full md:w-[280px] shrink-0">
             <div class="bg-[#101010] rounded-2xl p-6 border border-gray-800/80 sticky top-24">
                 <h3 class="text-lg font-bold text-white mb-5 border-b border-gray-800 pb-3 flex items-center">
                     <i data-lucide="info" class="w-5 h-5 mr-2 text-gray-400"></i> Thông tin thêm
