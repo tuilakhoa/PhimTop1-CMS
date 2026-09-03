@@ -126,20 +126,20 @@ if (!empty($_GET['party'])) {
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-5 w-full">
                 <?php if (!empty($episodes[0]['server_data'])): ?>
                     <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($episodes[0]['server_data'][0]['slug']) ?>" 
-                       class="px-8 py-3 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-lg transition-transform hover:-translate-y-1 flex items-center shadow-lg w-full md:w-auto justify-center">
+                       class="px-8 py-3 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-lg transition-transform hover:-translate-y-1 flex items-center justify-center shadow-lg w-full md:w-auto">
                         <i data-lucide="play" class="w-5 h-5 fill-current mr-2"></i> Xem ngay
                     </a>
                 <?php else: ?>
-                    <button class="px-8 py-3 bg-gray-800 text-gray-500 font-bold rounded-lg cursor-not-allowed border border-gray-700">
+                    <button class="px-8 py-3 bg-gray-800 text-gray-500 font-bold rounded-lg cursor-not-allowed border border-gray-700 w-full md:w-auto">
                         Đang Cập Nhật
                     </button>
                 <?php endif; ?>
                 
-                <button onclick="toggleFollowMovie()" id="follow-btn" class="flex-1 md:flex-none px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center border border-gray-700 shadow-lg">
+                <button onclick="toggleFollowMovie()" id="follow-btn" class="px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center border border-gray-700 shadow-lg w-full sm:flex-1 md:w-auto md:flex-none">
                     <i data-lucide="bookmark" id="follow-icon" class="w-5 h-5 mr-2"></i> <span id="follow-text">Lưu phim</span>
                 </button>
                 
-                <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center justify-center border border-gray-700 shadow-lg" title="Chia sẻ">
+                <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center justify-center border border-gray-700 shadow-lg w-full sm:w-auto" title="Chia sẻ">
                     <i data-lucide="share-2" class="w-5 h-5"></i>
                 </button>
             </div>
