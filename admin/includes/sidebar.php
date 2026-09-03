@@ -25,6 +25,7 @@
                         'settings' => ['icon' => 'settings', 'title' => 'Cấu Hình Chung'],
                         'app_settings' => ['icon' => 'smartphone', 'title' => 'App & API Settings'],
                         'update' => ['icon' => 'refresh-cw', 'title' => 'Cập Nhật Phiên Bản'],
+                        'plugins' => ['icon' => 'puzzle', 'title' => 'Quản Lý Plugins'],
                         'system_status' => ['icon' => 'activity', 'title' => 'Kiểm Tra Hệ Thống'],
                     ],
                     'SEO & Bảo Mật' => [
