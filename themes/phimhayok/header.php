@@ -13,6 +13,11 @@ if (!function_exists('getPhimImgUrl')) {
             // It's a TMDB image. We can serve it directly from TMDB's image CDN.
             return 'https://image.tmdb.org/t/p/w500' . $url;
         }
+        
+        // If the URL is a local crawl path, return it directly
+        if (strpos($url, '/uploads/') === 0) {
+            return $url;
+        }
 
         $domain = $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
         return rtrim($domain, '/') . '/' . ltrim($url, '/');

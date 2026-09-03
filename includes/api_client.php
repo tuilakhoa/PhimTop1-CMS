@@ -378,8 +378,8 @@ function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category 
         'items' => $items,
         'titlePage' => 'Danh Sách Phim',
         'domain' => '',
-        'seoOnPage' => (object)[],
-        'params' => (object)[],
+        'seoOnPage' => [],
+        'params' => [],
         'pagination' => [
             'totalPages' => $totalPages,
             'currentPage' => $page
@@ -434,7 +434,7 @@ function fetchLocalMovieDetail($slug) {
     return [
         'movie' => $movie,
         'episodes' => array_values($episodes),
-        'seoOnPage' => (object)[],
+        'seoOnPage' => [],
         'domain' => ''
     ];
 }
