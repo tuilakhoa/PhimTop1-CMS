@@ -106,6 +106,8 @@ if ($action === 'crawl_single') {
         'content' => $movie['content'] ?? '',
         'actor' => $actor,
         'director' => $director,
+        'categories_json' => json_encode($movie['category'] ?? []),
+        'countries_json' => json_encode($movie['country'] ?? []),
         'view' => $movie['view'] ?? 0,
         'updated_at' => date('Y-m-d H:i:s')
     ];

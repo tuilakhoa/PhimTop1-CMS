@@ -7,13 +7,10 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     $firstCatObj = reset($movie['category']);
     $firstCat = is_array($firstCatObj) ? ($firstCatObj['slug'] ?? '') : (is_string($firstCatObj) ? $firstCatObj : '');
     if ($firstCat) {
-        $sugRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=6", 3600) : @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=6");
-        if ($sugRes) {
-            $sugData = json_decode($sugRes, true);
-            if (isset($sugData['data']['items'])) {
-                $suggestions = $sugData['data']['items'];
-                $sugDomain = $sugData['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
-            }
+        $sugData = fetchApiFilms('the-loai', $firstCat, 1, '', '', '', '', '');
+        if ($sugData && isset($sugData['items'])) {
+            $suggestions = array_slice($sugData['items'], 0, 6);
+            $sugDomain = $sugData['domain'] ?? 'https://phimimg.com/';
         }
     }
 }

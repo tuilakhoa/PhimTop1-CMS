@@ -7,13 +7,10 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
     $firstCatObj = reset($movie['category']);
     $firstCat = is_array($firstCatObj) ? ($firstCatObj['slug'] ?? '') : (is_string($firstCatObj) ? $firstCatObj : '');
     if ($firstCat) {
-        $sugRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12", 3600) : @file_get_contents("https://phimapi.com/v1/api/the-loai/" . urlencode($firstCat) . "?limit=12");
-        if ($sugRes) {
-            $sugData = json_decode($sugRes, true);
-            if (isset($sugData['data']['items'])) {
-                $suggestions = $sugData['data']['items'];
-                $sugDomain = $sugData['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
-            }
+        $sugData = fetchApiFilms('the-loai', $firstCat, 1, '', '', '', '', '');
+        if ($sugData && isset($sugData['items'])) {
+            $suggestions = array_slice($sugData['items'], 0, 12);
+            $sugDomain = $sugData['domain'] ?? 'https://phimimg.com/';
         }
     }
 }
@@ -34,12 +31,15 @@ if ($tmdbId && $tmdbApiKey) {
     }
 } else {
     // Fallback to PhimAPI
-    $imgRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images", 86400) : @file_get_contents("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images");
-    if ($imgRes) {
-        $imgData = json_decode($imgRes, true);
-        if (isset($imgData['data'])) {
-            $movieImages['backdrops'] = $imgData['data']['backdrops'] ?? [];
-            $movieImages['posters'] = $imgData['data']['posters'] ?? [];
+    $images = [];
+    if (!isset($settings['dataSource']) || $settings['dataSource'] !== 'local') {
+        $imgRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images", 86400) : @file_get_contents("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images");
+        if ($imgRes) {
+            $imgData = json_decode($imgRes, true);
+            if (isset($imgData['data'])) {
+                $movieImages['backdrops'] = $imgData['data']['backdrops'] ?? [];
+                $movieImages['posters'] = $imgData['data']['posters'] ?? [];
+            }
         }
     }
 }

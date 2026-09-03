@@ -1,20 +1,22 @@
 <?php
 // Fetch peoples
 $peoples = [];
-$ch = curl_init('https://phimapi.com/v1/api/phim/' . urlencode($slug) . '/peoples');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
-$response = @curl_exec($ch);
-if ($response) {
-    $pData = json_decode($response, true);
-    if (!empty($pData['data']['peoples'])) {
-        $peoples = $pData['data']['peoples'];
+if (!isset($settings['dataSource']) || $settings['dataSource'] !== 'local') {
+    $ch = curl_init('https://phimapi.com/v1/api/phim/' . urlencode($slug) . '/peoples');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
+    $response = @curl_exec($ch);
+    if ($response) {
+        $pData = json_decode($response, true);
+        if (!empty($pData['data']['peoples'])) {
+            $peoples = $pData['data']['peoples'];
+        }
     }
+    @curl_close($ch);
 }
-@curl_close($ch);
 
 // Nâng cấp thông tin theo IMDB
-if (empty($peoples) && !empty($movie['imdb']['id'])) {
+if (empty($peoples) && !empty($movie['imdb']['id']) && (!isset($settings['dataSource']) || $settings['dataSource'] !== 'local')) {
     $imdbId = $movie['imdb']['id'];
     $ch2 = curl_init('https://phimapi.com/imdb/title/' . urlencode($imdbId));
     curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
@@ -28,7 +30,7 @@ if (empty($peoples) && !empty($movie['imdb']['id'])) {
                     $peoples[] = [
                         'name' => $director,
                         'character' => 'Đạo diễn',
-                        'profile_path' => ''
+                        'profile_path' => null
                     ];
                 }
             }
@@ -39,7 +41,7 @@ if (empty($peoples) && !empty($movie['imdb']['id'])) {
                     $peoples[] = [
                         'name' => $actor,
                         'character' => 'Diễn viên',
-                        'profile_path' => ''
+                        'profile_path' => null
                     ];
                 }
             }

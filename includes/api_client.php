@@ -361,6 +361,19 @@ function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category 
     $stmt->execute($params);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    foreach ($items as &$item) {
+        if (!empty($item['categories_json'])) {
+            $item['category'] = json_decode($item['categories_json'], true);
+        } else {
+            $item['category'] = [];
+        }
+        if (!empty($item['countries_json'])) {
+            $item['country'] = json_decode($item['countries_json'], true);
+        } else {
+            $item['country'] = [];
+        }
+    }
+    
     return [
         'items' => $items,
         'titlePage' => 'Danh Sách Phim',
@@ -383,6 +396,18 @@ function fetchLocalMovieDetail($slug) {
     $movie = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$movie) return null;
+    
+    if (!empty($movie['categories_json'])) {
+        $movie['category'] = json_decode($movie['categories_json'], true);
+    } else {
+        $movie['category'] = [];
+    }
+    
+    if (!empty($movie['countries_json'])) {
+        $movie['country'] = json_decode($movie['countries_json'], true);
+    } else {
+        $movie['country'] = [];
+    }
     
     $stmtEp = $pdo->prepare("SELECT * FROM episodes WHERE movie_slug = ? ORDER BY id ASC");
     $stmtEp->execute([$slug]);
