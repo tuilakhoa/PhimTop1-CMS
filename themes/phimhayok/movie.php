@@ -102,12 +102,12 @@ if (!empty($_GET['party'])) {
             <!-- Fast Horizontal Metadata (No heavy blur) -->
             <div class="flex flex-wrap items-center gap-2 text-sm text-gray-200 mt-2">
                 <span class="bg-[#fcc526] text-black font-bold px-2.5 py-1 rounded shadow"><?= htmlspecialchars($movie['quality'] ?? 'HD') ?></span>
-                <span class="bg-gray-800/80 border border-gray-700 px-2.5 py-1 rounded"><?= htmlspecialchars($movie['lang'] ?? 'Vietsub') ?></span>
-                <span class="bg-gray-800/80 border border-gray-700 px-2.5 py-1 rounded"><?= htmlspecialchars($movie['year'] ?? date('Y')) ?></span>
-                <span class="bg-gray-800/80 border border-gray-700 px-2.5 py-1 rounded flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['time'] ?? 'Đang cập nhật') ?></span>
-                <span class="bg-gray-800/80 border border-gray-700 px-2.5 py-1 rounded text-[#fcc526] flex items-center"><i data-lucide="play-circle" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['episode_current'] ?? 'Đang cập nhật') ?></span>
+                <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded"><?= htmlspecialchars($movie['lang'] ?? 'Vietsub') ?></span>
+                <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded"><?= htmlspecialchars($movie['year'] ?? date('Y')) ?></span>
+                <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['time'] ?? 'Đang cập nhật') ?></span>
+                <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded text-[#fcc526] flex items-center"><i data-lucide="play-circle" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['episode_current'] ?? 'Đang cập nhật') ?></span>
                 <?php if ($tmdbVote > 0): ?>
-                <span class="bg-blue-900/60 border border-blue-800 px-2.5 py-1 rounded font-bold flex items-center text-white"><i data-lucide="star" class="w-3.5 h-3.5 mr-1.5 text-[#fcc526] fill-current"></i><?= number_format($tmdbVote, 1) ?></span>
+                <span class="bg-blue-900 border border-blue-800 px-2.5 py-1 rounded font-bold flex items-center text-white"><i data-lucide="star" class="w-3.5 h-3.5 mr-1.5 text-[#fcc526] fill-current"></i><?= number_format($tmdbVote, 1) ?></span>
                 <?php endif; ?>
             </div>
 
@@ -162,14 +162,14 @@ if (!empty($_GET['party'])) {
                     </h3>
                 </div>
                 
-                <div class="bg-[#101010] rounded-2xl p-5 border border-gray-800/80 shadow-inner">
+                <div class="bg-[#141414] rounded-2xl p-5 border border-gray-800 shadow-inner">
                     <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar" id="episode-list">
                         <?php 
                         $server = $episodes[0] ?? ['server_data' => []];
                         foreach ($server['server_data'] as $ep): 
                         ?>
                             <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($ep['slug']) ?>" 
-                               class="px-2 py-2.5 bg-[#1a1a1a] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded-lg transition-colors text-center truncate border border-gray-800"
+                               class="px-2 py-2.5 bg-[#202020] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded-lg transition-colors text-center truncate border border-gray-800"
                                title="<?= htmlspecialchars($ep['name']) ?>">
                                 <?= htmlspecialchars($ep['name']) ?>
                             </a>
@@ -186,7 +186,7 @@ if (!empty($_GET['party'])) {
                 <h3 class="text-xl font-bold text-white flex items-center mb-4">
                     <span class="w-1.5 h-6 bg-[#fcc526] mr-3 rounded-full shadow-[0_0_8px_#fcc526]"></span> Nội Dung Phim
                 </h3>
-                <div class="text-gray-300 text-[15px] leading-relaxed whitespace-pre-line text-justify bg-[#101010] p-6 rounded-2xl border border-gray-800/80">
+                <div class="text-gray-300 text-[15px] leading-relaxed whitespace-pre-line text-justify bg-[#141414] p-6 rounded-2xl border border-gray-800">
                     <?= nl2br(htmlspecialchars(strip_tags($movie['content'] ?? 'Chưa có nội dung mô tả cho phim này.'))) ?>
                 </div>
             </div>
@@ -200,8 +200,8 @@ if (!empty($_GET['party'])) {
                     <span class="w-1.5 h-6 bg-[#fcc526] mr-3 rounded-full shadow-[0_0_8px_#fcc526]"></span> Bình luận (<span id="comment-count">0</span>)
                 </h3>
                 
-                <div class="bg-[#101010] rounded-2xl p-6 border border-gray-800/80">
-                    <div class="bg-[#1a1a1a] rounded-xl p-4 border border-gray-700 focus-within:border-gray-500 transition-colors shadow-inner">
+                <div class="bg-[#141414] rounded-2xl p-6 border border-gray-800">
+                    <div class="bg-[#202020] rounded-xl p-4 border border-gray-700 focus-within:border-gray-500 transition-colors shadow-inner">
                         <input type="text" id="comment-name" class="w-full bg-transparent text-white text-sm outline-none mb-3 pb-3 border-b border-gray-800 hidden" placeholder="Nhập tên của bạn...">
                         <textarea id="comment-content" rows="2" class="w-full bg-transparent text-white text-sm outline-none resize-none placeholder-gray-500" placeholder="Chia sẻ cảm nghĩ của bạn về bộ phim này..."></textarea>
                         <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-800">
@@ -279,7 +279,7 @@ if (!empty($_GET['party'])) {
                                             <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center shrink-0 border border-gray-700">
                                                 <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
                                             </div>
-                                            <div class="flex-1 bg-[#1a1a1a] p-4 rounded-xl rounded-tl-none border border-gray-800/50">
+                                            <div class="flex-1 bg-[#202020] p-4 rounded-xl rounded-tl-none border border-gray-800/50">
                                                 <div class="flex items-baseline mb-2 border-b border-gray-800 pb-2">
                                                     <span class="font-bold text-gray-200 text-sm mr-2">${c.user_name}</span>
                                                     <span class="text-xs text-gray-500">${c.time_ago}</span>
@@ -333,7 +333,7 @@ if (!empty($_GET['party'])) {
 
         <!-- Right Column: Meta Info (Directors, Country) -->
         <div class="w-full md:w-[280px] shrink-0">
-            <div class="bg-[#101010] rounded-2xl p-6 border border-gray-800/80 sticky top-24">
+            <div class="bg-[#141414] rounded-2xl p-6 border border-gray-800 sticky top-24">
                 <h3 class="text-lg font-bold text-white mb-5 border-b border-gray-800 pb-3 flex items-center">
                     <i data-lucide="info" class="w-5 h-5 mr-2 text-gray-400"></i> Thông tin thêm
                 </h3>
@@ -372,7 +372,7 @@ if (!empty($_GET['party'])) {
     </h3>
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         <?php foreach ($suggestions as $item): ?>
-            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-xl bg-[#101010] transition-all duration-300">
+            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-xl bg-[#141414] transition-all duration-300">
                 <div class="aspect-[3/4] relative overflow-hidden rounded-xl border border-gray-800 group-hover:border-gray-600 transition-colors">
                     <img loading="lazy" src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
@@ -386,7 +386,7 @@ if (!empty($_GET['party'])) {
                     
                     <!-- Play icon -->
                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border border-white/50 backdrop-blur-sm transform group-hover:scale-110 transition-all">
+                        <div class="w-12 h-12 bg-black/60 rounded-full flex items-center justify-center border border-gray-500 backdrop-blur-sm transform group-hover:scale-110 transition-all">
                             <i data-lucide="play" class="w-5 h-5 text-white fill-current ml-1"></i>
                         </div>
                     </div>
