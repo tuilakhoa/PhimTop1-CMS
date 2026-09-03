@@ -96,23 +96,42 @@
 </div>
 
 <!-- Output Log Area -->
-<div class="mt-6 bg-black/80 rounded-xl border border-admin-border overflow-hidden flex flex-col h-[400px]">
+<div class="mt-6 bg-black/80 rounded-xl border border-admin-border overflow-hidden flex flex-col" style="height: 450px;">
     <div class="flex items-center justify-between px-4 py-3 border-b border-admin-border bg-admin-panel">
         <h3 class="text-sm font-bold text-gray-300 flex items-center gap-2">
             <i data-lucide="terminal" class="w-4 h-4 text-green-400"></i> Tiến Trình Crawl
         </h3>
-        <button id="clearLogBtn" class="text-xs text-gray-500 hover:text-white transition-colors">Xóa Log</button>
+        <button id="clearLogBtn" class="text-xs text-gray-500 hover:text-white transition-colors bg-gray-800 px-2 py-1 rounded">Xóa Log</button>
     </div>
-    <div id="crawlLog" class="p-4 flex-1 overflow-y-auto font-mono text-sm space-y-1 text-gray-300">
+    <div id="crawlLog" class="p-4 flex-1 font-mono text-sm space-y-1 text-gray-300 custom-scrollbar" style="overflow-y: auto; max-height: calc(450px - 50px);">
         <div class="text-gray-500 italic">Sẵn sàng...</div>
     </div>
 </div>
+
+<style>
+/* Tùy chỉnh thanh cuộn cho đẹp mắt */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.4);
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
     const logEl = document.getElementById('crawlLog');
+    const MAX_LOG_LINES = 200; // Giới hạn số dòng để tránh đơ trình duyệt
     
     function logMessage(msg, type = 'info') {
         const div = document.createElement('div');
@@ -125,6 +144,13 @@ document.addEventListener('DOMContentLoaded', function() {
         div.className = colorClass;
         div.innerHTML = `<span class="text-gray-600">[${time}]</span> ${msg}`;
         logEl.appendChild(div);
+        
+        // Xóa bớt log cũ nếu vượt quá giới hạn
+        while (logEl.children.length > MAX_LOG_LINES) {
+            logEl.removeChild(logEl.firstChild);
+        }
+        
+        // Tự động cuộn xuống dưới cùng
         logEl.scrollTop = logEl.scrollHeight;
     }
 
