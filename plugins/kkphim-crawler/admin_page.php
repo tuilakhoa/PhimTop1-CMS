@@ -32,6 +32,34 @@
         </form>
     </div>
 
+    <!-- Panel Cron Job -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="clock" class="text-admin-primary"></i> Thiết lập Cron Job Tự Động
+        </h3>
+        <div class="text-gray-300 text-sm space-y-2 mb-4">
+            <p>Hệ thống tự động crawl phim mới nhất từ <code class="bg-black/50 px-1 py-0.5 rounded text-green-400">https://phimapi.com/v1/api/home</code>.</p>
+            <p>Hệ thống cũng tự nhận biết phim nào đã full hoặc có tập mới để tiến hành cập nhật lại.</p>
+            <p>Sử dụng lệnh sau để chạy Cron qua CLI (Khuyên dùng):</p>
+            <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-green-400">php <?= __DIR__ ?>/cron.php</code>
+            <p class="mt-2">Hoặc thiết lập cron truy cập qua Web (nếu không có SSH):</p>
+            <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-green-400"><?= (isset($_SERVER["HTTPS"]) ? "https://" : "http://") . $_SERVER["HTTP_HOST"] . "/plugins/kkphim-crawler/cron.php?key=kkphim_cron" ?></code>
+        </div>
+    </div>
+
+    <!-- Panel Mass Crawl -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="rocket" class="text-red-400"></i> Crawl Hàng Loạt Tốc Độ Cao
+        </h3>
+        <div class="text-gray-300 text-sm space-y-2 mb-4">
+            <p>Dành riêng cho việc crawl toàn bộ 30.000 phim mới hoàn toàn. Công cụ sử dụng đa luồng (Multi-cURL) giúp tăng tốc độ lên gấp 20 lần.</p>
+            <p>Vì số lượng quá lớn, bạn <strong>bắt buộc</strong> phải chạy qua <strong>Terminal (CLI)</strong> trên VPS/Server để tránh lỗi timeout của Web.</p>
+            <p>Cú pháp chạy: <code class="bg-black/50 px-1 py-0.5 rounded text-red-400">php mass_crawl.php [từ_trang] [đến_trang]</code></p>
+            <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-red-400">php <?= __DIR__ ?>/mass_crawl.php 1 1500</code>
+        </div>
+    </div>
+
     <!-- Panel Crawl 1 Phim -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
