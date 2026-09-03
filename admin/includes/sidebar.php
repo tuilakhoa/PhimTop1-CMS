@@ -7,38 +7,32 @@
                 <?php 
                 $settings_sidebar = getSettings();
                 $menuGroups = [
-                    'Quản Lý Nội Dung' => [
-                        'dashboard' => ['icon' => 'layout-dashboard', 'title' => 'Tổng Quan'],
-                        'watch_parties' => ['icon' => 'users', 'title' => 'Phòng Xem Chung'],
-                        'watching_sessions' => ['icon' => 'monitor-play', 'title' => 'Người Đang Xem'],
-                        'movies' => ['icon' => 'film', 'title' => 'Quản Lý Phim'],
-                        'blocked_movies' => ['icon' => 'shield-alert', 'title' => 'Phim Đã Gỡ'],
-                        'categories' => ['icon' => 'list-tree', 'title' => 'Thể Loại & Quốc Gia'],
-                        'comments' => ['icon' => 'message-square', 'title' => 'Quản Lý Bình Luận'],
-                        'feedbacks' => ['icon' => 'message-circle', 'title' => 'Quản Lý Phản Hồi'],
+                    'Tổng Quan' => [
+                        'dashboard' => ['icon' => 'layout-dashboard', 'title' => 'Bảng Điều Khiển'],
                     ],
-                    'Công Cụ & Tiện Ích' => [
-                        'email_marketing' => ['icon' => 'mail', 'title' => 'Email Marketing'],
-                        'notifications' => ['icon' => 'bell', 'title' => 'Push Notifications'],
-                        'cast' => ['icon' => 'users', 'title' => 'Diễn Viên & Đạo Diễn'],
-                        'database' => ['icon' => 'database', 'title' => 'Quản Lý Database'],
-                        'theme_editor' => ['icon' => 'file-code', 'title' => 'Sửa Giao Diện'],
-                        'system_status' => ['icon' => 'activity', 'title' => 'Kiểm Tra Hệ Thống'],
+                    'Quản Lý Nội Dung' => [
+                        'movies' => ['icon' => 'film', 'title' => 'Phim'],
+                        'categories' => ['icon' => 'list-tree', 'title' => 'Thể Loại & Quốc Gia'],
+                        'blocked_movies' => ['icon' => 'shield-alert', 'title' => 'Phim Đã Gỡ'],
+                    ],
+                    'Người Dùng & Tương Tác' => [
+                        'members' => ['icon' => 'user-check', 'title' => 'Thành Viên'],
+                        'roles' => ['icon' => 'shield', 'title' => 'Phân Quyền Admin'],
+                        'watching_sessions' => ['icon' => 'monitor-play', 'title' => 'Người Đang Xem'],
                         'events' => ['icon' => 'gift', 'title' => 'Sự Kiện & Thưởng Xu'],
                     ],
-                    'Hệ Thống' => [
-                        'members' => ['icon' => 'users', 'title' => 'Thành Viên'],
-                        'roles' => ['icon' => 'shield', 'title' => 'Phân Quyền Admin'],
+                    'Hệ Thống & Cài Đặt' => [
                         'settings' => ['icon' => 'settings', 'title' => 'Cấu Hình Chung'],
+                        'app_settings' => ['icon' => 'smartphone', 'title' => 'App & API Settings'],
+                        'update' => ['icon' => 'refresh-cw', 'title' => 'Cập Nhật Phiên Bản'],
+                        'system_status' => ['icon' => 'activity', 'title' => 'Kiểm Tra Hệ Thống'],
+                    ],
+                    'SEO & Bảo Mật' => [
                         'security' => ['icon' => 'shield-check', 'title' => 'Bảo Mật & Đo Lường'],
                         'seo' => ['icon' => 'search', 'title' => 'Cấu Hình SEO'],
                         'seo_manager' => ['icon' => 'file-search', 'title' => 'SEO Từng Trang'],
                         'sitemap' => ['icon' => 'map', 'title' => 'Quản Lý Sitemap'],
                         'robots' => ['icon' => 'file-text', 'title' => 'Robots.txt'],
-                        'themes' => ['icon' => 'palette', 'title' => 'Giao Diện'],
-                        'update' => ['icon' => 'refresh-cw', 'title' => 'Cập Nhật Phiên Bản'],
-                        'plugins' => ['icon' => 'plug', 'title' => 'Quản Lý Plugin'],
-                        'app_settings' => ['icon' => 'smartphone', 'title' => 'App & API Settings']
                     ]
                 ];
                 

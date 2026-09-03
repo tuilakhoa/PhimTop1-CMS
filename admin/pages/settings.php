@@ -1,4 +1,10 @@
-<h2 class="text-2xl font-bold text-white mb-6">Cấu Hình Chung</h2>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <h2 class="text-2xl font-bold text-white">Cấu Hình Chung</h2>
+    <div class="relative w-full md:w-64">
+        <i data-lucide="search" class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+        <input type="text" id="localSettingSearch" placeholder="Tìm kiếm cài đặt..." class="w-full bg-gray-900 border border-gray-700 rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:ring-1 focus:ring-admin-primary outline-none transition-all">
+    </div>
+</div>
 
 <div class="mb-6 border-b border-gray-800">
     <nav class="-mb-px flex space-x-8" aria-label="Tabs" id="settings-tabs">
@@ -386,5 +392,45 @@ service cloud.firestore {
             resultEl.textContent = 'Lỗi kết nối: ' + e.message;
             resultEl.className = 'text-sm mt-3 text-red-500 block';
         }
+    }
+
+    // Local Settings Search Logic
+    const localSettingSearch = document.getElementById('localSettingSearch');
+    if (localSettingSearch) {
+        localSettingSearch.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            // Lấy tất cả các block chứa label
+            const blocks = document.querySelectorAll('.tab-content .mb-6, .tab-content .grid > div, .tab-content > div:not(.mb-6)');
+            let firstMatchTab = null;
+
+            blocks.forEach(block => {
+                // Lọc nội dung text bên trong block (bao gồm label, description...)
+                const text = block.textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                
+                if (text.includes(query)) {
+                    block.style.display = '';
+                    block.style.opacity = '1';
+                    
+                    // Tìm tab cha chứa block này
+                    const parentTab = block.closest('.tab-content');
+                    if (parentTab && !firstMatchTab && query.length > 0) {
+                        firstMatchTab = parentTab.id.replace('tab-', '');
+                    }
+                } else {
+                    if(query.length > 0) {
+                        block.style.display = 'none';
+                    } else {
+                        block.style.display = '';
+                        block.style.opacity = '1';
+                    }
+                }
+            });
+
+            // Nếu tìm thấy kết quả và đang search, tự động chuyển qua tab đầu tiên có kết quả
+            if (firstMatchTab && query.length > 0) {
+                switchTab(firstMatchTab);
+            }
+        });
     }
 </script>

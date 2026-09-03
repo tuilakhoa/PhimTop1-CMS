@@ -1,0 +1,2 @@
+ALTER TABLE settings ADD COLUMN allowLogin INTEGER DEFAULT 1;
+ALTER TABLE settings ADD COLUMN allowRegistration INTEGER DEFAULT 1;
