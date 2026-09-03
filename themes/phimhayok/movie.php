@@ -78,7 +78,7 @@ if (!empty($_GET['party'])) {
 ?>
 
 <!-- New Cinematic Hero Section -->
-<div class="relative w-full min-h-[75vh] flex items-end pb-12 pt-28 -mt-20 overflow-hidden">
+<div class="relative w-full flex -mt-20 overflow-hidden" style="min-height: 70vh; align-items: flex-end; padding-bottom: 3rem; padding-top: 7rem;">
     <!-- Background Layer (Optimized with fetchpriority) -->
     <div class="absolute inset-0 z-0 bg-black">
         <img fetchpriority="high" src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : $movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-full object-cover opacity-30">
@@ -88,7 +88,7 @@ if (!empty($_GET['party'])) {
     </div>
 
     <!-- Hero Content Layer -->
-    <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] relative z-10 flex flex-col md:flex-row gap-8 items-end">
+    <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] relative z-10 flex flex-col md:flex-row gap-8" style="align-items: flex-end;">
         <!-- Poster -->
         <div class="shrink-0 rounded-xl overflow-hidden shadow-2xl border border-gray-800 bg-[#141414]" style="width: 240px; display: block;">
             <img fetchpriority="high" src="<?= htmlspecialchars($movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-auto aspect-[3/4] object-cover">
