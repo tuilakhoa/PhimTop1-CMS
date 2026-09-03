@@ -10,8 +10,20 @@ if (php_sapi_name() !== 'cli') {
 require_once __DIR__ . '/../../includes/db.php';
 require_once __DIR__ . '/../../includes/repositories.php';
 
-$from_page = isset($argv[1]) ? (int)$argv[1] : 1;
-$to_page = isset($argv[2]) ? (int)$argv[2] : 1000;
+$progress_file = __DIR__ . '/crawler_progress.txt';
+
+if (isset($argv[1])) {
+    $from_page = (int)$argv[1];
+} else {
+    if (file_exists($progress_file)) {
+        $from_page = (int)trim(file_get_contents($progress_file));
+        echo "=> Tìm thấy file lưu tiến độ. Tự động tiếp tục từ trang: $from_page\n";
+    } else {
+        $from_page = 1;
+    }
+}
+
+$to_page = isset($argv[2]) ? (int)$argv[2] : 9999;
 
 echo "=================================================\n";
 echo "BẮT ĐẦU CRAWL HÀNG LOẠT (CHẾ ĐỘ ĐẢM BẢO) TỪ TRANG $from_page ĐẾN $to_page\n";
@@ -248,6 +260,10 @@ for ($page = $from_page; $page <= $to_page; $page++) {
     }
     
     echo "   -> Đã lưu thành công $successCount/" . count($slugs) . " phim ở trang $page.\n";
+    
+    // Lưu lại tiến trình (đánh dấu trang tiếp theo sẽ chạy)
+    file_put_contents($progress_file, $page + 1);
+
     echo "   [Nghỉ 30 giây để tránh Rate Limit API...]\n";
     sleep(30);
 }
