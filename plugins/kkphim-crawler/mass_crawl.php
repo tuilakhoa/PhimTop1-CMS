@@ -248,6 +248,8 @@ for ($page = $from_page; $page <= $to_page; $page++) {
     }
     
     echo "   -> Đã lưu thành công $successCount/" . count($slugs) . " phim ở trang $page.\n";
+    echo "   [Nghỉ 30 giây để tránh Rate Limit API...]\n";
+    sleep(30);
 }
 
 echo "\n=================================================\n";
