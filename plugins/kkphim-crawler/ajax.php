@@ -168,4 +168,42 @@ if ($action === 'crawl_single') {
     exit;
 }
 
+if ($action === 'get_failed_slugs') {
+    $failedFile = __DIR__ . '/failed_slugs.log';
+    $slugs = [];
+    if (file_exists($failedFile)) {
+        $lines = file($failedFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        // Lọc các slug hợp lệ, loại bỏ trùng lặp
+        $slugs = array_values(array_unique(array_filter(array_map('trim', $lines))));
+    }
+    echo json_encode(['status' => 'success', 'slugs' => $slugs]);
+    exit;
+}
+
+if ($action === 'remove_failed_slug') {
+    $slugToRemove = $_POST['slug'] ?? '';
+    $failedFile = __DIR__ . '/failed_slugs.log';
+    if (!empty($slugToRemove) && file_exists($failedFile)) {
+        $lines = file($failedFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $newLines = [];
+        $removed = false;
+        foreach ($lines as $line) {
+            if (trim($line) !== $slugToRemove) {
+                $newLines[] = trim($line);
+            } else {
+                $removed = true;
+            }
+        }
+        if ($removed) {
+            if (empty($newLines)) {
+                unlink($failedFile);
+            } else {
+                file_put_contents($failedFile, implode("\n", $newLines) . "\n");
+            }
+        }
+    }
+    echo json_encode(['status' => 'success']);
+    exit;
+}
+
 echo json_encode(['status' => 'error', 'message' => 'Invalid action']);

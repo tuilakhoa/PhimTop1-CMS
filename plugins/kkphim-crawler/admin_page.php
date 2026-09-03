@@ -60,6 +60,22 @@
         </div>
     </div>
 
+    <!-- Panel Phim Lỗi (Failed Movies) -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg lg:col-span-2">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="alert-triangle" class="text-yellow-400"></i> Quản Lý Phim Lỗi Mạng
+        </h3>
+        <div class="flex items-center justify-between mb-4">
+            <div class="text-gray-300 text-sm">
+                Số phim crawl lỗi cần tải lại: <strong id="failedCount" class="text-yellow-400 text-lg">0</strong> phim
+            </div>
+            <button id="btnRecrawlFailed" class="bg-yellow-600 hover:bg-yellow-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Crawl Lại Phim Lỗi
+            </button>
+        </div>
+        <p class="text-xs text-gray-400 italic">Tính năng này giúp bạn thử tải lại những phim bị lỗi từ quá trình "Crawl Hàng Loạt". Khi tải thành công, số lượng sẽ tự động giảm.</p>
+    </div>
+
     <!-- Panel Crawl 1 Phim -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -117,6 +133,85 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const pluginPath = '/plugins/kkphim-crawler/ajax.php';
+    let failedSlugsList = [];
+
+    // Tải danh sách phim lỗi
+    async function loadFailedSlugs() {
+        try {
+            const formData = new FormData();
+            formData.append('action', 'get_failed_slugs');
+            const res = await fetch(pluginPath, { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.status === 'success') {
+                failedSlugsList = data.slugs;
+                document.getElementById('failedCount').textContent = failedSlugsList.length;
+                document.getElementById('btnRecrawlFailed').disabled = failedSlugsList.length === 0;
+            }
+        } catch (e) {
+            console.error('Cannot load failed slugs', e);
+        }
+    }
+    
+    // Gọi khi load trang
+    loadFailedSlugs();
+
+    // Xử lý Recrawl phim lỗi
+    document.getElementById('btnRecrawlFailed').addEventListener('click', async () => {
+        if (failedSlugsList.length === 0) return;
+        
+        const btn = document.getElementById('btnRecrawlFailed');
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang tải lại...';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        logMessage(`Bắt đầu thử tải lại ${failedSlugsList.length} phim lỗi...`, 'warn');
+        
+        let successCount = 0;
+        let failCount = 0;
+        
+        // Copy mảng để loop
+        const slugsToProcess = [...failedSlugsList];
+
+        for (let i = 0; i < slugsToProcess.length; i++) {
+            const slug = slugsToProcess[i];
+            const mData = new FormData();
+            mData.append('action', 'crawl_single');
+            mData.append('slug', slug);
+            mData.append('fetch_images', document.getElementById('fetch_images')?.checked ? '1' : '0'); // Nếu có
+            
+            try {
+                const mRes = await fetch(pluginPath, { method: 'POST', body: mData });
+                const mJson = await mRes.json();
+                
+                if (mJson.status === 'success') {
+                    logMessage(`[Phim Lỗi - ${i+1}/${slugsToProcess.length}] Tải thành công: <b>${mJson.movie_name}</b>`, 'success');
+                    successCount++;
+                    
+                    // Xóa khỏi file log lỗi
+                    const rData = new FormData();
+                    rData.append('action', 'remove_failed_slug');
+                    rData.append('slug', slug);
+                    await fetch(pluginPath, { method: 'POST', body: rData });
+                    
+                    // Cập nhật mảng và UI
+                    failedSlugsList = failedSlugsList.filter(s => s !== slug);
+                    document.getElementById('failedCount').textContent = failedSlugsList.length;
+                } else {
+                    logMessage(`[Phim Lỗi - ${i+1}/${slugsToProcess.length}] Vẫn lỗi (${slug}): ${mJson.message}`, 'error');
+                    failCount++;
+                }
+            } catch (e) {
+                logMessage(`[Phim Lỗi - ${i+1}/${slugsToProcess.length}] Lỗi mạng (${slug})`, 'error');
+                failCount++;
+            }
+        }
+        
+        logMessage(`<b>Hoàn thành tải lại! Thành công: ${successCount}, Lỗi: ${failCount}</b>`, 'info');
+        
+        btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Crawl Lại Phim Lỗi';
+        btn.disabled = failedSlugsList.length === 0;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
 
     // Crawl Single Movie
     document.getElementById('crawlSingleForm').addEventListener('submit', async (e) => {
