@@ -77,203 +77,144 @@ if (!empty($_GET['party'])) {
 }
 ?>
 
-<!-- Backdrop Header -->
-<div class="relative w-full h-[50vh] overflow-hidden -mt-20">
-    <div class="absolute inset-0">
-        <img fetchpriority="high" src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : $movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-full object-cover">
+<!-- New Cinematic Hero Section -->
+<div class="relative w-full min-h-[75vh] flex items-end pb-12 pt-28 -mt-20 overflow-hidden">
+    <!-- Background Layer (Optimized with fetchpriority) -->
+    <div class="absolute inset-0 z-0 bg-black">
+        <img fetchpriority="high" src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : $movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-full object-cover opacity-30">
+        <!-- Gradients to blend -->
         <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent"></div>
     </div>
-</div>
 
-<div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] -mt-[30vh] md:-mt-[25vh] relative z-10 mb-16">
-    <div class="flex flex-col md:flex-row gap-8">
-        
-        <!-- Left Sidebar: Poster & Metadata -->
-        <div class="w-[240px] md:w-[280px] shrink-0 mx-auto md:mx-0 flex flex-col gap-6">
-            <!-- Poster -->
-            <div class="rounded-xl overflow-hidden shadow-2xl border border-gray-800 relative group">
-                <img src="<?= htmlspecialchars($movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-auto aspect-[3/4] object-cover">
-                <div class="absolute top-2 right-2">
-                    <span class="bg-[#fcc526] text-black text-[11px] font-bold px-2 py-1 rounded shadow-lg">
-                        <?= htmlspecialchars($movie['quality'] ?? 'HD') ?> <?= !empty($movie['lang']) ? '• '.$movie['lang'] : '' ?>
-                    </span>
-                </div>
-            </div>
-            
-            <!-- Metadata Box -->
-            <div class="bg-[#141414] rounded-xl p-5 border border-gray-800 text-sm text-gray-300 flex flex-col gap-3 shadow-lg">
-                <div class="flex justify-between border-b border-gray-800 pb-2">
-                    <span class="text-gray-500">Trạng thái:</span>
-                    <span class="text-[#fcc526] font-medium"><?= htmlspecialchars($movie['episode_current'] ?? 'Đang cập nhật') ?></span>
-                </div>
-                <div class="flex justify-between border-b border-gray-800 pb-2">
-                    <span class="text-gray-500">Tổng tập:</span>
-                    <span class="text-white"><?= htmlspecialchars($movie['episode_total'] ?? 'Đang cập nhật') ?></span>
-                </div>
-                <div class="flex justify-between border-b border-gray-800 pb-2">
-                    <span class="text-gray-500">Thời lượng:</span>
-                    <span class="text-white"><?= htmlspecialchars($movie['time'] ?? 'Đang cập nhật') ?></span>
-                </div>
-                <div class="flex justify-between border-b border-gray-800 pb-2">
-                    <span class="text-gray-500">Ngôn ngữ:</span>
-                    <span class="text-white"><?= htmlspecialchars($movie['lang'] ?? 'Vietsub') ?></span>
-                </div>
-                <div class="flex justify-between border-b border-gray-800 pb-2">
-                    <span class="text-gray-500">Năm:</span>
-                    <span class="text-white"><?= htmlspecialchars($movie['year'] ?? date('Y')) ?></span>
-                </div>
-                <div class="flex flex-col border-b border-gray-800 pb-2">
-                    <span class="text-gray-500 mb-1">Quốc gia:</span>
-                    <span class="text-white"><?= htmlspecialchars(is_array($movie['country'] ?? null) ? implode(', ', array_map(function($c) { return is_array($c) ? $c['name'] : $c; }, $movie['country'])) : ($movie['country'] ?? 'Đang cập nhật')) ?></span>
-                </div>
-                <div class="flex flex-col border-b border-gray-800 pb-2">
-                    <span class="text-gray-500 mb-1">Đạo diễn:</span>
-                    <span class="text-white"><?= htmlspecialchars(is_array($movie['director'] ?? null) ? implode(', ', $movie['director']) : ($movie['director'] ?? 'Đang cập nhật')) ?></span>
-                </div>
-                <div class="flex flex-col pb-1">
-                    <span class="text-gray-500 mb-1">Diễn viên:</span>
-                    <span class="text-white line-clamp-3 hover:line-clamp-none transition-all"><?= htmlspecialchars(is_array($movie['actor'] ?? null) ? implode(', ', $movie['actor']) : ($movie['actor'] ?? 'Đang cập nhật')) ?></span>
-                </div>
-            </div>
+    <!-- Hero Content Layer -->
+    <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] relative z-10 flex flex-col md:flex-row gap-8 items-end">
+        <!-- Poster (Hidden on very small screens to save space) -->
+        <div class="w-40 md:w-56 lg:w-64 shrink-0 rounded-xl overflow-hidden shadow-2xl border border-gray-800 hidden sm:block bg-[#141414]">
+            <img fetchpriority="high" src="<?= htmlspecialchars($movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-auto aspect-[3/4] object-cover">
         </div>
-        
-        <!-- Right Content: Info & Episodes -->
-        <div class="flex-1 min-w-0 text-white pt-2 md:pt-4">
-            <!-- Title -->
-            <h1 class="text-3xl md:text-5xl font-bold mb-2 text-white leading-tight drop-shadow-md"><?= htmlspecialchars($movie['name']) ?></h1>
-            <h2 class="text-lg text-gray-400 mb-4 italic"><?= htmlspecialchars($movie['origin_name']) ?> (<?= htmlspecialchars($movie['year'] ?? date('Y')) ?>)</h2>
-            
+
+        <!-- Main Info -->
+        <div class="flex-1 min-w-0 flex flex-col gap-4">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-lg"><?= htmlspecialchars($movie['name']) ?></h1>
+            <h2 class="text-lg md:text-xl text-gray-400 italic"><?= htmlspecialchars($movie['origin_name']) ?></h2>
+
+            <!-- Fast Horizontal Metadata (No heavy blur) -->
+            <div class="flex flex-wrap items-center gap-2 text-sm text-gray-200 mt-2">
+                <span class="bg-[#fcc526] text-black font-bold px-2.5 py-1 rounded shadow"><?= htmlspecialchars($movie['quality'] ?? 'HD') ?></span>
+                <span class="bg-gray-800/80 border border-gray-700 px-2.5 py-1 rounded"><?= htmlspecialchars($movie['lang'] ?? 'Vietsub') ?></span>
+                <span class="bg-gray-800/80 border border-gray-700 px-2.5 py-1 rounded"><?= htmlspecialchars($movie['year'] ?? date('Y')) ?></span>
+                <span class="bg-gray-800/80 border border-gray-700 px-2.5 py-1 rounded flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['time'] ?? 'Đang cập nhật') ?></span>
+                <span class="bg-gray-800/80 border border-gray-700 px-2.5 py-1 rounded text-[#fcc526] flex items-center"><i data-lucide="play-circle" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['episode_current'] ?? 'Đang cập nhật') ?></span>
+                <?php if ($tmdbVote > 0): ?>
+                <span class="bg-blue-900/60 border border-blue-800 px-2.5 py-1 rounded font-bold flex items-center text-white"><i data-lucide="star" class="w-3.5 h-3.5 mr-1.5 text-[#fcc526] fill-current"></i><?= number_format($tmdbVote, 1) ?></span>
+                <?php endif; ?>
+            </div>
+
             <!-- Genres -->
-            <div class="flex flex-wrap gap-2 mb-6">
+            <div class="flex flex-wrap gap-2 mt-1">
                 <?php 
                 $cats = is_array($movie['category'] ?? null) ? $movie['category'] : [];
                 foreach ($cats as $cat): 
                     $catName = is_array($cat) ? ($cat['name'] ?? '') : $cat;
                 ?>
-                    <a href="#" class="px-3 py-1 bg-[#202020] text-gray-300 text-xs rounded hover:bg-[#303030] transition-colors border border-gray-800"><?= htmlspecialchars($catName) ?></a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors text-sm font-medium">#<?= htmlspecialchars($catName) ?></a>
                 <?php endforeach; ?>
             </div>
-            
-            <!-- Actions -->
-            <div class="flex flex-wrap items-center gap-3 mb-8 bg-[#141414]/50 p-4 rounded-2xl border border-gray-800/50 backdrop-blur-sm">
+
+            <!-- Actions (Solid colors for performance) -->
+            <div class="flex flex-wrap items-center gap-3 mt-5">
                 <?php if (!empty($episodes[0]['server_data'])): ?>
                     <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($episodes[0]['server_data'][0]['slug']) ?>" 
-                       class="px-8 py-2.5 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-full transition-all hover:scale-105 flex items-center shadow-lg shadow-yellow-500/20">
-                        Xem ngay
+                       class="px-8 py-3 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-lg transition-transform hover:-translate-y-1 flex items-center shadow-lg">
+                        <i data-lucide="play" class="w-5 h-5 fill-current mr-2"></i> Xem ngay
                     </a>
-
                 <?php else: ?>
-                    <button class="px-8 py-2.5 bg-gray-700 text-gray-400 font-bold rounded-full cursor-not-allowed">
+                    <button class="px-8 py-3 bg-gray-800 text-gray-500 font-bold rounded-lg cursor-not-allowed border border-gray-700">
                         Đang Cập Nhật
                     </button>
                 <?php endif; ?>
                 
-                <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-6 py-2.5 bg-[#303030] hover:bg-[#404040] text-white text-sm font-medium rounded-full transition-colors flex items-center border border-gray-700">
-                    <i data-lucide="send" class="w-4 h-4 mr-2"></i> Chia sẻ
-                </button>
-                <button onclick="toggleFollowMovie()" id="follow-btn" class="px-6 py-2.5 bg-[#303030] hover:bg-[#404040] text-white text-sm font-medium rounded-full transition-colors flex items-center border border-gray-700">
-                    <i data-lucide="bookmark" id="follow-icon" class="w-4 h-4 mr-2"></i> <span id="follow-text">Lưu phim</span>
+                <button onclick="toggleFollowMovie()" id="follow-btn" class="px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors flex items-center border border-gray-700 shadow-lg">
+                    <i data-lucide="bookmark" id="follow-icon" class="w-5 h-5 mr-2"></i> <span id="follow-text">Lưu phim</span>
                 </button>
                 
-                <?php if ($tmdbVote > 0): ?>
-                <div class="ml-auto bg-[#1e293b] text-white px-4 py-2 rounded-lg flex items-center font-bold text-sm border border-blue-900/50 shadow-inner">
-                    <i data-lucide="star" class="w-4 h-4 mr-1.5 text-[#fcc526] fill-current"></i>
-                    <?= number_format($tmdbVote, 1) ?> <span class="text-blue-200 text-xs font-normal ml-1">/10 Đánh giá</span>
-                </div>
-                <?php endif; ?>
+                <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center border border-gray-700 shadow-lg" title="Chia sẻ">
+                    <i data-lucide="share-2" class="w-5 h-5"></i>
+                </button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Details Section -->
+<div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] mb-16 mt-6">
+    <div class="flex flex-col lg:flex-row gap-8">
+        
+        <!-- Left Column (Core content: Episodes, Plot, Actors, Comments) -->
+        <div class="flex-1 min-w-0 space-y-10">
             
-            <!-- Description -->
-<div class="mb-10" id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
-                <h3 class="text-xl font-bold mb-4 flex items-center text-white">
-                    <span class="w-1 h-5 bg-[#fcc526] mr-2 rounded"></span> Giới thiệu:
-                </h3>
-                <div class="text-gray-400 text-sm leading-relaxed whitespace-pre-line bg-[#141414] p-5 rounded-xl border border-gray-800 shadow-inner">
-                    <?= nl2br(htmlspecialchars(strip_tags($movie['content'] ?? 'Chưa có nội dung mô tả cho phim này.'))) ?>
-                </div>
-            </div>
-            
-            <!-- Cast / Peoples Component -->
-            <?php include __DIR__ . '/components/actors.php'; ?>
-            
-            <!-- Episodes List -->
-<div class="mb-10" id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
-                <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
-                    <h3 class="text-xl font-bold text-white">Danh sách tập</h3>
-                    <div class="flex items-center gap-2">
-                        <div class="relative">
-                            <input type="text" id="search-episode" placeholder="Tìm tập phim..." class="bg-[#202020] text-sm text-white px-3 py-1.5 rounded-lg border border-gray-700 outline-none focus:border-[#fcc526] w-full md:w-48">
-                            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
-                        </div>
-                        <button class="text-gray-400 hover:text-white text-sm flex items-center transition-colors shrink-0">
-                            <i data-lucide="arrow-down-up" class="w-4 h-4 mr-1"></i> Sắp xếp
-                        </button>
-                    </div>
+            <!-- Episodes Section -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <span class="w-1.5 h-6 bg-[#fcc526] mr-3 rounded-full shadow-[0_0_8px_#fcc526]"></span> Danh Sách Tập
+                    </h3>
                 </div>
                 
-                <div class="bg-[#141414] rounded-xl p-5 border border-gray-800 shadow-lg">
-                    <h4 class="text-[#fcc526] font-medium mb-4 flex items-center">
-                        <i data-lucide="menu" class="w-4 h-4 mr-2"></i> Phần 1
-                    </h4>
-                    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5 max-h-[400px] overflow-y-auto custom-scrollbar" id="episode-list">
+                <div class="bg-[#101010] rounded-2xl p-5 border border-gray-800/80 shadow-inner">
+                    <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar" id="episode-list">
                         <?php 
                         $server = $episodes[0] ?? ['server_data' => []];
                         foreach ($server['server_data'] as $ep): 
                         ?>
                             <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($ep['slug']) ?>" 
-                               class="px-2 py-2.5 bg-[#202020] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded transition-all text-center truncate border border-gray-800"
+                               class="px-2 py-2.5 bg-[#1a1a1a] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded-lg transition-colors text-center truncate border border-gray-800"
                                title="<?= htmlspecialchars($ep['name']) ?>">
                                 <?= htmlspecialchars($ep['name']) ?>
                             </a>
                         <?php endforeach; ?>
                         <?php if(empty($server['server_data'])): ?>
-                            <div class="col-span-full text-gray-500 text-sm py-4">Chưa có tập phim nào được cập nhật.</div>
+                            <div class="col-span-full text-gray-500 text-sm py-4">Chưa có tập phim nào.</div>
                         <?php endif; ?>
                     </div>
                 </div>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        var searchEp = document.getElementById('search-episode');
-                        if (searchEp) {
-                            searchEp.addEventListener('input', function(e) {
-                                var keyword = e.target.value.toLowerCase().trim();
-                                var eps = document.querySelectorAll('#episode-list a');
-                                eps.forEach(ep => {
-                                    var text = ep.textContent.toLowerCase().trim();
-                                    if (text.includes(keyword)) {
-                                        ep.style.display = '';
-                                    } else {
-                                        ep.style.display = 'none';
-                                    }
-                                });
-                            });
-                        }
-                    });
-                </script>
             </div>
-            
-            <!-- Comments (Dynamic UI) -->
-<div class="mb-10" id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
-                <h3 class="text-xl font-bold mb-4 flex items-center text-white">
-                    <i data-lucide="message-square" class="w-5 h-5 mr-2 text-[#fcc526]"></i> Bình luận (<span id="comment-count">0</span>)
+
+            <!-- Content/Plot -->
+            <div>
+                <h3 class="text-xl font-bold text-white flex items-center mb-4">
+                    <span class="w-1.5 h-6 bg-[#fcc526] mr-3 rounded-full shadow-[0_0_8px_#fcc526]"></span> Nội Dung Phim
+                </h3>
+                <div class="text-gray-300 text-[15px] leading-relaxed whitespace-pre-line text-justify bg-[#101010] p-6 rounded-2xl border border-gray-800/80">
+                    <?= nl2br(htmlspecialchars(strip_tags($movie['content'] ?? 'Chưa có nội dung mô tả cho phim này.'))) ?>
+                </div>
+            </div>
+
+            <!-- Cast / Peoples Component -->
+            <?php include __DIR__ . '/components/actors.php'; ?>
+
+            <!-- Comments -->
+            <div id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
+                <h3 class="text-xl font-bold text-white flex items-center mb-4">
+                    <span class="w-1.5 h-6 bg-[#fcc526] mr-3 rounded-full shadow-[0_0_8px_#fcc526]"></span> Bình luận (<span id="comment-count">0</span>)
                 </h3>
                 
-                <div class="bg-[#141414] rounded-xl p-5 border border-gray-800 shadow-lg">
-                    <div class="relative bg-[#202020] rounded-lg p-3 border border-gray-700">
-                        <input type="text" id="comment-name" class="w-full bg-transparent text-white text-sm outline-none mb-2 pb-2 border-b border-gray-700 hidden" placeholder="Nhập tên của bạn...">
-                        <textarea id="comment-content" rows="3" class="w-full bg-transparent text-white text-sm outline-none resize-none placeholder-gray-500" placeholder="Vui lòng nhập nội dung..."></textarea>
-                        <div class="flex items-center justify-between mt-2 border-t border-gray-700 pt-3">
-                            <label class="flex items-center text-gray-400 text-sm cursor-pointer hover:text-white transition-colors">
-                                <input type="checkbox" id="comment-anon" checked class="mr-2 rounded border-gray-600 bg-gray-700 text-[#fcc526] focus:ring-[#fcc526]"> Ẩn danh ?
+                <div class="bg-[#101010] rounded-2xl p-6 border border-gray-800/80">
+                    <div class="bg-[#1a1a1a] rounded-xl p-4 border border-gray-700 focus-within:border-gray-500 transition-colors shadow-inner">
+                        <input type="text" id="comment-name" class="w-full bg-transparent text-white text-sm outline-none mb-3 pb-3 border-b border-gray-800 hidden" placeholder="Nhập tên của bạn...">
+                        <textarea id="comment-content" rows="2" class="w-full bg-transparent text-white text-sm outline-none resize-none placeholder-gray-500" placeholder="Chia sẻ cảm nghĩ của bạn về bộ phim này..."></textarea>
+                        <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-800">
+                            <label class="flex items-center text-gray-400 text-sm cursor-pointer hover:text-white transition-colors select-none">
+                                <input type="checkbox" id="comment-anon" checked class="mr-2 rounded border-gray-600 bg-gray-700 text-[#fcc526] focus:ring-[#fcc526]"> Ẩn danh
                             </label>
-                            <button id="btn-submit-comment" class="bg-[#5c4a16] text-[#fcc526] font-bold px-4 py-1.5 rounded-lg text-sm flex items-center hover:bg-[#7a621c] transition-colors border border-[#7a621c]">
-                                Gửi bình luận <i data-lucide="send" class="w-4 h-4 ml-1.5"></i>
+                            <button id="btn-submit-comment" class="bg-white hover:bg-gray-200 text-black font-bold px-5 py-2 rounded-lg text-sm flex items-center transition-colors shadow">
+                                Gửi <i data-lucide="send" class="w-4 h-4 ml-2"></i>
                             </button>
                         </div>
                     </div>
                     
-                    <div id="comments-list" class="mt-6 space-y-5">
+                    <div id="comments-list" class="mt-8 space-y-6">
                         <div class="text-center text-gray-500 text-sm py-4">Đang tải bình luận...</div>
                     </div>
                 </div>
@@ -330,26 +271,27 @@ if (!empty($_GET['party'])) {
                                 res.data.forEach(c => {
                                     var deleteBtn = '';
                                     if (isAdmin || (currentUser && currentUser === c.user_name)) {
-                                        deleteBtn = `<button onclick="deleteComment(${c.id})" class="text-red-500 text-xs ml-3 hover:underline font-medium border border-red-500/30 px-2 py-0.5 rounded">Xóa</button>`;
+                                        deleteBtn = `<button onclick="deleteComment(${c.id})" class="text-red-500 text-xs ml-3 hover:underline font-medium">Xóa</button>`;
                                     }
                                     
                                     html += `
-                                        <div class="flex gap-3">
+                                        <div class="flex gap-4">
                                             <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center shrink-0 border border-gray-700">
-                                                <svg class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                                <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
                                             </div>
-                                            <div class="flex-1">
-                                                <div class="flex items-baseline mb-1">
+                                            <div class="flex-1 bg-[#1a1a1a] p-4 rounded-xl rounded-tl-none border border-gray-800/50">
+                                                <div class="flex items-baseline mb-2 border-b border-gray-800 pb-2">
                                                     <span class="font-bold text-gray-200 text-sm mr-2">${c.user_name}</span>
                                                     <span class="text-xs text-gray-500">${c.time_ago}</span>
                                                     ${deleteBtn}
                                                 </div>
-                                                <p class="text-sm text-gray-300">${c.content}</p>
+                                                <p class="text-sm text-gray-300 leading-relaxed">${c.content}</p>
                                             </div>
                                         </div>
                                     `;
                                 });
                                 commentsList.innerHTML = html;
+                                if(typeof lucide !== 'undefined') lucide.createIcons();
                             }
                         });
                 }
@@ -373,7 +315,8 @@ if (!empty($_GET['party'])) {
                     .then(res => res.json())
                     .then(res => {
                         submitBtn.disabled = false;
-                        submitBtn.innerHTML = 'Gửi bình luận <svg class="w-4 h-4 ml-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
+                        submitBtn.innerHTML = 'Gửi <i data-lucide="send" class="w-4 h-4 ml-2"></i>';
+                        if(typeof lucide !== 'undefined') lucide.createIcons();
                         if (res.success) {
                             contentInput.value = '';
                             fetchComments();
@@ -386,48 +329,71 @@ if (!empty($_GET['party'])) {
                 fetchComments();
             });
             </script>
+        </div>
 
-            
+        <!-- Right Column: Meta Info (Directors, Country) -->
+        <div class="w-full lg:w-[320px] shrink-0">
+            <div class="bg-[#101010] rounded-2xl p-6 border border-gray-800/80 sticky top-24">
+                <h3 class="text-lg font-bold text-white mb-5 border-b border-gray-800 pb-3 flex items-center">
+                    <i data-lucide="info" class="w-5 h-5 mr-2 text-gray-400"></i> Thông tin thêm
+                </h3>
+                
+                <div class="space-y-4 text-sm">
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 mb-1">Đạo diễn:</span>
+                        <span class="text-gray-200 font-medium"><?= htmlspecialchars(is_array($movie['director'] ?? null) ? implode(', ', $movie['director']) : ($movie['director'] ?? 'Đang cập nhật')) ?></span>
+                    </div>
+                    
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 mb-1">Quốc gia:</span>
+                        <span class="text-gray-200 font-medium"><?= htmlspecialchars(is_array($movie['country'] ?? null) ? implode(', ', array_map(function($c) { return is_array($c) ? $c['name'] : $c; }, $movie['country'])) : ($movie['country'] ?? 'Đang cập nhật')) ?></span>
+                    </div>
+
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 mb-1">Tổng số tập:</span>
+                        <span class="text-gray-200 font-medium"><?= htmlspecialchars($movie['episode_total'] ?? 'Đang cập nhật') ?></span>
+                    </div>
+
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 mb-1">Chất lượng:</span>
+                        <span class="text-[#fcc526] font-medium"><?= htmlspecialchars($movie['quality'] ?? 'HD') ?></span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Movie Suggestions -->
+<!-- Movie Suggestions (Lazy loaded images) -->
 <?php if (!empty($suggestions)): ?>
 <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] mb-16 relative z-10">
     <h3 class="text-2xl font-bold mb-6 flex items-center text-white">
-        <i data-lucide="flame" class="w-6 h-6 mr-2 text-red-500"></i> Đề xuất phim liên quan
+        <span class="w-1.5 h-6 bg-red-500 mr-3 rounded-full shadow-[0_0_8px_#ef4444]"></span> Đề Xuất Phim Liên Quan
     </h3>
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         <?php foreach ($suggestions as $item): ?>
-            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-xl bg-transparent transition-all duration-300">
-                <div class="aspect-[3/4] relative overflow-hidden rounded-xl border border-transparent group-hover:border-gray-700">
-                    <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+            <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-xl bg-[#101010] transition-all duration-300">
+                <div class="aspect-[3/4] relative overflow-hidden rounded-xl border border-gray-800 group-hover:border-gray-600 transition-colors">
+                    <img loading="lazy" src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
                     
-                    <!-- Vietsub Badge (Yellow top right) -->
+                    <!-- Vietsub Badge -->
                     <div class="absolute top-2 right-2">
-                        <span class="bg-[#fcc526] text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-lg uppercase">
+                        <span class="bg-[#fcc526] text-black text-[10px] font-bold px-2 py-0.5 rounded shadow uppercase">
                             <?= htmlspecialchars($item['lang'] ?? 'Vietsub') ?>
                         </span>
                     </div>
                     
-                    <!-- Hot Badge (Orange bottom left) -->
-                    <div class="absolute bottom-2 left-2">
-                        <span class="bg-[#ff4d00] text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg uppercase tracking-wider">
-                            Hot
-                        </span>
-                    </div>
-                    
+                    <!-- Play icon -->
                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div class="w-12 h-12 bg-black/60 rounded-full flex items-center justify-center border border-gray-500 transform group-hover:scale-110 transition-transform backdrop-blur-sm">
-                            <i data-lucide="play" class="w-5 h-5 text-white ml-1"></i>
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border border-white/50 backdrop-blur-sm transform group-hover:scale-110 transition-all">
+                            <i data-lucide="play" class="w-5 h-5 text-white fill-current ml-1"></i>
                         </div>
                     </div>
                 </div>
                 <div class="pt-3 pb-2 px-1">
                     <h3 class="text-white font-medium text-sm truncate group-hover:text-[#fcc526] transition-colors"><?= htmlspecialchars($item['name']) ?></h3>
-                    <p class="text-xs text-gray-500 truncate mt-0.5"><?= htmlspecialchars($item['origin_name']) ?> <span class="bg-[#202020] px-1.5 py-0.5 rounded ml-1"><?= htmlspecialchars($item['year'] ?? date('Y')) ?></span></p>
+                    <p class="text-xs text-gray-500 truncate mt-0.5"><?= htmlspecialchars($item['origin_name']) ?> <span class="text-gray-600 ml-1">(<?= htmlspecialchars($item['year'] ?? date('Y')) ?>)</span></p>
                 </div>
             </a>
         <?php endforeach; ?>
@@ -484,7 +450,6 @@ if (!empty($_GET['party'])) {
         .then(res => {
             if (res.status === 401) {
                 alert("Vui lòng đăng nhập để lưu phim!");
-                // Optionally redirect to login: window.location.href = '/login.php';
                 return null;
             }
             return res.json();
@@ -498,4 +463,5 @@ if (!empty($_GET['party'])) {
         })
         .catch(err => console.error("Error toggling follow:", err));
     }
-</script><?php include __DIR__ . '/footer.php'; ?>
+</script>
+<?php include __DIR__ . '/footer.php'; ?>
