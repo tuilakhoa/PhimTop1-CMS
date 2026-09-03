@@ -78,7 +78,7 @@ if (!empty($_GET['party'])) {
 ?>
 
 <!-- New Cinematic Hero Section -->
-<div class="relative w-full flex items-end -mt-20 overflow-hidden min-h-[70vh] pb-8 md:pb-12 pt-28">
+<div class="relative w-full flex -mt-20 overflow-hidden" style="min-height: 70vh; align-items: flex-end; padding-bottom: 3rem; padding-top: 7rem;">
     <!-- Background Layer (Optimized with fetchpriority) -->
     <div class="absolute inset-0 z-0 bg-black">
         <img fetchpriority="high" src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : $movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-full object-cover opacity-30">
@@ -88,19 +88,19 @@ if (!empty($_GET['party'])) {
     </div>
 
     <!-- Hero Content Layer -->
-    <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
+    <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1200px] relative z-10 flex flex-col md:flex-row gap-8" style="align-items: flex-end;">
         <!-- Poster -->
-        <div class="shrink-0 rounded-xl overflow-hidden shadow-2xl border border-gray-800 bg-[#141414] w-40 md:w-60">
+        <div class="shrink-0 rounded-xl overflow-hidden shadow-2xl border border-gray-800 bg-[#141414]" style="width: 240px; display: block;">
             <img fetchpriority="high" src="<?= htmlspecialchars($movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-auto aspect-[3/4] object-cover">
         </div>
 
         <!-- Main Info -->
-        <div class="flex-1 min-w-0 flex flex-col gap-4 items-center text-center md:items-start md:text-left w-full">
+        <div class="flex-1 min-w-0 flex flex-col gap-4">
             <h1 class="text-3xl md:text-5xl font-bold text-white leading-tight drop-shadow-lg"><?= htmlspecialchars($movie['name']) ?></h1>
             <h2 class="text-lg md:text-xl text-gray-400 italic"><?= htmlspecialchars($movie['origin_name']) ?></h2>
 
             <!-- Fast Horizontal Metadata (No heavy blur) -->
-            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 text-sm text-gray-200 mt-2">
+            <div class="flex flex-wrap items-center gap-2 text-sm text-gray-200 mt-2">
                 <span class="bg-[#fcc526] text-black font-bold px-2.5 py-1 rounded shadow"><?= htmlspecialchars($movie['quality'] ?? 'HD') ?></span>
                 <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded"><?= htmlspecialchars($movie['lang'] ?? 'Vietsub') ?></span>
                 <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded"><?= htmlspecialchars($movie['year'] ?? date('Y')) ?></span>
@@ -123,23 +123,23 @@ if (!empty($_GET['party'])) {
             </div>
 
             <!-- Actions (Solid colors for performance) -->
-            <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-5 w-full">
+            <div class="flex flex-wrap items-center gap-3 mt-5">
                 <?php if (!empty($episodes[0]['server_data'])): ?>
                     <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($episodes[0]['server_data'][0]['slug']) ?>" 
-                       class="px-8 py-3 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-lg transition-transform hover:-translate-y-1 flex items-center justify-center shadow-lg w-full md:w-auto">
+                       class="px-8 py-3 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-lg transition-transform hover:-translate-y-1 flex items-center shadow-lg">
                         <i data-lucide="play" class="w-5 h-5 fill-current mr-2"></i> Xem ngay
                     </a>
                 <?php else: ?>
-                    <button class="px-8 py-3 bg-gray-800 text-gray-500 font-bold rounded-lg cursor-not-allowed border border-gray-700 w-full md:w-auto">
+                    <button class="px-8 py-3 bg-gray-800 text-gray-500 font-bold rounded-lg cursor-not-allowed border border-gray-700">
                         Đang Cập Nhật
                     </button>
                 <?php endif; ?>
                 
-                <button onclick="toggleFollowMovie()" id="follow-btn" class="px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center border border-gray-700 shadow-lg w-full sm:flex-1 md:w-auto md:flex-none">
+                <button onclick="toggleFollowMovie()" id="follow-btn" class="px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors flex items-center border border-gray-700 shadow-lg">
                     <i data-lucide="bookmark" id="follow-icon" class="w-5 h-5 mr-2"></i> <span id="follow-text">Lưu phim</span>
                 </button>
                 
-                <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center justify-center border border-gray-700 shadow-lg w-full sm:w-auto" title="Chia sẻ">
+                <button onclick="shareMovie('<?= htmlspecialchars(addslashes($movie['name'])) ?>')" class="px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center border border-gray-700 shadow-lg" title="Chia sẻ">
                     <i data-lucide="share-2" class="w-5 h-5"></i>
                 </button>
             </div>
