@@ -59,6 +59,11 @@ function isKidsModeActive() {
 
 function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = '', $country = '', $year = '', $sort = '') {
     $settings = getSettings();
+    $dataSource = $settings['dataSource'] ?? 'api';
+    if ($dataSource === 'local') {
+        return fetchLocalFilms($type, $slug, $page, $keyword, $category, $country, $year, $sort);
+    }
+
     $apiSource = $settings['apiSource'] ?? 'kkphim';
     
     // Map internal DB types to API types
@@ -192,6 +197,11 @@ function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = 
 
 function fetchApiMovieDetail($slug) {
     $settings = getSettings();
+    $dataSource = $settings['dataSource'] ?? 'api';
+    if ($dataSource === 'local') {
+        return fetchLocalMovieDetail($slug);
+    }
+    
     $apiSource = $settings['apiSource'] ?? 'kkphim';
     
     $url = '';
@@ -308,4 +318,98 @@ function getYearsList() {
     }
     
     return [];
+}
+
+function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category = '', $country = '', $year = '', $sort = '') {
+    $pdo = getPDO();
+    if (!$pdo) return null;
+    $limit = 24;
+    $offset = ($page - 1) * $limit;
+    
+    $where = ["1=1"];
+    $params = [];
+    
+    if ($keyword) {
+        $where[] = "(name LIKE ? OR origin_name LIKE ? OR slug LIKE ?)";
+        $params[] = "%$keyword%";
+        $params[] = "%$keyword%";
+        $params[] = "%$keyword%";
+    }
+    
+    if ($type === 'danh-sach' && $slug) {
+        if ($slug === 'phim-le') $where[] = "type = 'single'";
+        else if ($slug === 'phim-bo') $where[] = "type = 'series'";
+        else if ($slug === 'hoat-hinh') $where[] = "type = 'hoathinh'";
+        else if ($slug === 'tv-shows') $where[] = "type = 'tvshows'";
+    }
+    
+    if ($year) {
+        $where[] = "year = ?";
+        $params[] = $year;
+    }
+    
+    $whereClause = implode(' AND ', $where);
+    
+    $countSql = "SELECT COUNT(*) FROM movies WHERE $whereClause";
+    $stmt = $pdo->prepare($countSql);
+    $stmt->execute($params);
+    $totalItems = $stmt->fetchColumn();
+    $totalPages = ceil($totalItems / $limit);
+    
+    $sql = "SELECT * FROM movies WHERE $whereClause ORDER BY updated_at DESC LIMIT $limit OFFSET $offset";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    return [
+        'items' => $items,
+        'titlePage' => 'Danh Sách Phim',
+        'domain' => '',
+        'seoOnPage' => (object)[],
+        'params' => (object)[],
+        'pagination' => [
+            'totalPages' => $totalPages,
+            'currentPage' => $page
+        ]
+    ];
+}
+
+function fetchLocalMovieDetail($slug) {
+    $pdo = getPDO();
+    if (!$pdo) return null;
+    
+    $stmt = $pdo->prepare("SELECT * FROM movies WHERE slug = ?");
+    $stmt->execute([$slug]);
+    $movie = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$movie) return null;
+    
+    $stmtEp = $pdo->prepare("SELECT * FROM episodes WHERE movie_slug = ? ORDER BY id ASC");
+    $stmtEp->execute([$slug]);
+    $eps = $stmtEp->fetchAll(PDO::FETCH_ASSOC);
+    
+    $episodes = [];
+    foreach ($eps as $ep) {
+        $serverName = $ep['server_name'];
+        if (!isset($episodes[$serverName])) {
+            $episodes[$serverName] = [
+                'server_name' => $serverName,
+                'server_data' => []
+            ];
+        }
+        $episodes[$serverName]['server_data'][] = [
+            'name' => $ep['name'],
+            'slug' => $ep['slug'],
+            'filename' => $ep['filename'],
+            'link_embed' => $ep['embed_url'],
+            'link_m3u8' => $ep['m3u8_url']
+        ];
+    }
+    
+    return [
+        'movie' => $movie,
+        'episodes' => array_values($episodes),
+        'seoOnPage' => (object)[],
+        'domain' => ''
+    ];
 }
