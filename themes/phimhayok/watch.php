@@ -14,6 +14,27 @@ if (!empty($movie['category']) && is_array($movie['category'])) {
         }
     }
 }
+
+// Fetch Keywords
+$movieKeywords = [];
+if (isset($settings['dataSource']) && $settings['dataSource'] === 'local' && !empty($movie['seo_keywords'])) {
+    $movieKeywords = array_map('trim', explode(',', $movie['seo_keywords']));
+} else {
+    $ch = curl_init('https://phimapi.com/v1/api/phim/' . urlencode($slug) . '/keywords');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
+    $kwRes = curl_exec($ch);
+    curl_close($ch);
+    
+    if ($kwRes) {
+        $kwData = json_decode($kwRes, true);
+        if (isset($kwData['data']['keywords']) && is_array($kwData['data']['keywords'])) {
+            foreach ($kwData['data']['keywords'] as $kw) {
+                if (!empty($kw['name'])) $movieKeywords[] = trim($kw['name']);
+            }
+        }
+    }
+}
 ?>
 
 <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1400px] py-6">

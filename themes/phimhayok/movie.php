@@ -62,6 +62,29 @@ if ($tmdbId && $tmdbApiKey) {
     }
 }
 
+// Fetch Keywords
+$movieKeywords = [];
+if (isset($settings['dataSource']) && $settings['dataSource'] === 'local' && !empty($movie['seo_keywords'])) {
+    // If local and has keywords, use them
+    $movieKeywords = array_map('trim', explode(',', $movie['seo_keywords']));
+} else {
+    // Call API
+    $ch = curl_init('https://phimapi.com/v1/api/phim/' . urlencode($slug) . '/keywords');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
+    $kwRes = curl_exec($ch);
+    curl_close($ch);
+    
+    if ($kwRes) {
+        $kwData = json_decode($kwRes, true);
+        if (isset($kwData['data']['keywords']) && is_array($kwData['data']['keywords'])) {
+            foreach ($kwData['data']['keywords'] as $kw) {
+                if (!empty($kw['name'])) $movieKeywords[] = trim($kw['name']);
+            }
+        }
+    }
+}
+
 // Extract TMDB info
 $tmdbVote = $movie['tmdb']['vote_average'] ?? 0;
 $tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
@@ -429,6 +452,19 @@ if (!empty($_GET['party'])) {
                         <span class="text-gray-500 mb-1">Chất lượng:</span>
                         <span class="text-[#fcc526] font-medium"><?= htmlspecialchars($movie['quality'] ?? 'HD') ?></span>
                     </div>
+
+                    <?php if (!empty($movieKeywords)): ?>
+                    <div class="flex flex-col mt-4 pt-4 border-t border-gray-800/50">
+                        <span class="text-gray-500 mb-2">Từ khóa:</span>
+                        <div class="flex flex-wrap gap-2">
+                            <?php foreach ($movieKeywords as $kw): ?>
+                                <a href="/<?= $settings['slugSearch'] ?? 'tim-kiem' ?>?keyword=<?= urlencode($kw) ?>" class="inline-block px-3 py-1 text-xs text-gray-300 bg-gray-800/50 hover:bg-gray-700 hover:text-white rounded-full transition-colors">
+                                    <?= htmlspecialchars($kw) ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
