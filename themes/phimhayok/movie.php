@@ -34,16 +34,8 @@ if ($tmdbId && $tmdbApiKey) {
     $images = [];
     $rawImgData = null;
     
-    if (isset($settings['dataSource']) && $settings['dataSource'] === 'local') {
-        if (!empty($movie['images_json'])) {
-            $rawImgData = is_string($movie['images_json']) ? json_decode($movie['images_json'], true) : $movie['images_json'];
-        }
-    } else {
-        $imgRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images", 86400) : @file_get_contents("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images");
-        if ($imgRes) {
-            $parsed = json_decode($imgRes, true);
-            if (isset($parsed['data'])) $rawImgData = $parsed['data'];
-        }
+    if (!empty($movie['images_json'])) {
+        $rawImgData = is_string($movie['images_json']) ? json_decode($movie['images_json'], true) : $movie['images_json'];
     }
     
     if ($rawImgData && isset($rawImgData['images']) && is_array($rawImgData['images'])) {

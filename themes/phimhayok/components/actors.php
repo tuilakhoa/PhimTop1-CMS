@@ -8,54 +8,7 @@ if (!empty($movie['peoples_json'])) {
     }
 }
 
-if (empty($peoples) && (!isset($settings['dataSource']) || $settings['dataSource'] !== 'local')) {
-    $ch = curl_init('https://phimapi.com/v1/api/phim/' . urlencode($slug) . '/peoples');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
-    $response = @curl_exec($ch);
-    if ($response) {
-        $pData = json_decode($response, true);
-        if (!empty($pData['data']['peoples'])) {
-            $peoples = $pData['data']['peoples'];
-        }
-    }
-    @curl_close($ch);
-}
-
-// Nâng cấp thông tin theo IMDB
-if (empty($peoples) && !empty($movie['imdb']['id']) && (!isset($settings['dataSource']) || $settings['dataSource'] !== 'local')) {
-    $imdbId = $movie['imdb']['id'];
-    $ch2 = curl_init('https://phimapi.com/imdb/title/' . urlencode($imdbId));
-    curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch2, CURLOPT_HTTPHEADER, ['accept: application/json']);
-    $response2 = @curl_exec($ch2);
-    if ($response2) {
-        $imdbData = json_decode($response2, true);
-        if (!empty($imdbData['movie']['director'])) {
-            foreach ((array)$imdbData['movie']['director'] as $director) {
-                if (!empty($director) && $director !== 'Đang cập nhật') {
-                    $peoples[] = [
-                        'name' => $director,
-                        'character' => 'Đạo diễn',
-                        'profile_path' => null
-                    ];
-                }
-            }
-        }
-        if (!empty($imdbData['movie']['actor'])) {
-            foreach ((array)$imdbData['movie']['actor'] as $actor) {
-                if (!empty($actor) && $actor !== 'Đang cập nhật') {
-                    $peoples[] = [
-                        'name' => $actor,
-                        'character' => 'Diễn viên',
-                        'profile_path' => null
-                    ];
-                }
-            }
-        }
-    }
-    @curl_close($ch2);
-}
+// Removed API fetches as per user request to use Local DB only
 
 // Fallback to movie object actor/director
 if (empty($peoples)) {

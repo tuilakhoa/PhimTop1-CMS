@@ -33,24 +33,9 @@
     <div id="tab-general" class="tab-content block animate-fade-in">
 
         
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn Dữ Liệu Hiển Thị</label>
-            <select name="dataSource" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
-                <option value="api" <?= (!isset($settings['dataSource']) || $settings['dataSource'] === 'api') ? 'selected' : '' ?>>Gọi API Trực Tiếp (Mặc định)</option>
-                <option value="local" <?= (isset($settings['dataSource']) && $settings['dataSource'] === 'local') ? 'selected' : '' ?>>Dữ liệu Crawl (Local Database)</option>
-            </select>
-            <p class="text-xs text-gray-500 mt-2">Tính năng Crawl đang được thử nghiệm. Bạn có thể chọn lấy từ Local Database nếu đã crawl dữ liệu.</p>
-        </div>
 
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-300 mb-2">Nguồn API (Áp dụng khi dùng "Gọi API Trực Tiếp")</label>
-            <select name="apiSource" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-1 focus:ring-red-500 outline-none transition-shadow">
-                <option value="kkphim" <?= (!isset($settings['apiSource']) || $settings['apiSource'] === 'kkphim') ? 'selected' : '' ?>>KKPhim (phimapi.com)</option>
 
-                <option value="nguonc" <?= (isset($settings['apiSource']) && $settings['apiSource'] === 'nguonc') ? 'selected' : '' ?>>NguonC (phim.nguonc.com)</option>
-            </select>
-            <p class="text-xs text-gray-500 mt-2">Hệ thống sẽ tự động điều chỉnh cấu trúc dữ liệu để giao diện hoạt động bình thường trên mọi nguồn.</p>
-        </div>
+
 
 
 
