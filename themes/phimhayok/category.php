@@ -97,7 +97,7 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
             <?php foreach ($movies as $item): ?>
                 <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-lg bg-[#141414] border border-gray-800/50 hover:border-gray-600  ">
                     <div class="aspect-[3/4] relative overflow-hidden">
-                        <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy"
+                        <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy"
                              class="w-full h-full object-cover   ">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 "></div>
                         

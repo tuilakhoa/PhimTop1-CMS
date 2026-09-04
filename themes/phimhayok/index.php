@@ -71,7 +71,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="swiper-wrapper">
                 <?php foreach($featuredMovies as $featured): ?>
                 <div class="swiper-slide relative w-full h-full">
-                    <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+                    <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
                     
@@ -111,7 +111,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         </div>
     <?php else: $featured = $featuredMovies[0]; ?>
         <div class="absolute inset-0">
-            <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['thumb_url']) ? $featured['thumb_url'] : ($featured['poster_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+            <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
             <!-- Overlay gradients to make text readable -->
             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
@@ -150,7 +150,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="absolute right-8 md:right-12 bottom-12 hidden lg:flex space-x-2">
                 <?php foreach (array_slice($movies, 1, 4) as $m): ?>
                     <div class="w-24 h-14 rounded-md overflow-hidden border border-white/30 cursor-pointer hover:border-white transition-colors opacity-70 hover:opacity-100">
-                        <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($m['poster_url']) ? $m['poster_url'] : ($m['thumb_url'] ?? ''))) ?>" class="w-full h-full object-cover">
+                        <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($m['thumb_url']) ? $m['thumb_url'] : ($m['poster_url'] ?? ''))) ?>" class="w-full h-full object-cover">
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -230,7 +230,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2">
                             <!-- 16:9 Aspect Ratio Image -->
                             <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-xl border border-white/5 shadow-lg">
-                                <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
+                                <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" loading="lazy"
                                      class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
                                 
                                 <!-- Top Left Yellow Tag -->
@@ -302,7 +302,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <?php foreach (array_slice($movies, 0, 4) as $item): ?>
                     <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1">
                         <div class="aspect-video relative overflow-hidden bg-gray-900 rounded-xl border border-white/5 shadow-lg">
-                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['poster_url']) ? $item['poster_url'] : ($item['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                            <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
                             <?php if (!empty($item['episode_current'])): ?>
                                 <div class="absolute top-2 left-2">
                                     <span class="bg-phim-yellow text-black text-[11px] font-bold px-2 py-0.5 rounded-sm"><?= htmlspecialchars($item['episode_current'] ?? '') ?></span>
@@ -475,7 +475,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                         <?php 
                         $rank = 1;
                         foreach ($category['data'] as $item): 
-                            $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
+                            $thumb = !empty($item['thumb_url']) ? $item['thumb_url'] : (!empty($item['poster_url']) ? $item['poster_url'] : '');
                             $rankColor = $rank === 1 ? 'text-yellow-400 [text-shadow:0_0_12px_rgba(250,204,21,0.8)]' : 
                                         ($rank === 2 ? 'text-gray-300 [text-shadow:0_0_12px_rgba(209,213,219,0.7)]' : 
                                         ($rank === 3 ? 'text-amber-600 [text-shadow:0_0_12px_rgba(217,119,6,0.6)]' : 'text-gray-600'));
@@ -525,7 +525,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         <div class="swiper swiper-vertical-posters">
             <div class="swiper-wrapper pb-4">
                 <?php foreach (array_slice($movies, 0, 8) as $item): 
-                    $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
+                    $thumb = !empty($item['thumb_url']) ? $item['thumb_url'] : (!empty($item['poster_url']) ? $item['poster_url'] : '');
                 ?>
                     <div class="swiper-slide w-48 md:w-52">
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">
@@ -583,7 +583,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="swiper swiper-vertical-posters">
                 <div class="swiper-wrapper pb-4">
                     <?php foreach ($slider['data'] as $item): 
-                        $thumb = !empty($item['poster_url']) ? $item['poster_url'] : (!empty($item['thumb_url']) ? $item['thumb_url'] : '');
+                        $thumb = !empty($item['thumb_url']) ? $item['thumb_url'] : (!empty($item['poster_url']) ? $item['poster_url'] : '');
                     ?>
                         <div class="swiper-slide w-48 md:w-52">
                             <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="block group relative cursor-pointer">

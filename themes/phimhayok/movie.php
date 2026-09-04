@@ -99,9 +99,9 @@ if (!empty($_GET['party'])) {
 <div class="relative w-full flex -mt-20 overflow-hidden" style="min-height: 70vh; align-items: flex-end; padding-bottom: 3rem; padding-top: 7rem;">
     <!-- Background Layer (Optimized with fetchpriority) -->
     <div class="absolute inset-0 z-0 bg-black">
-        <img fetchpriority="high" src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : $movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-full object-cover opacity-30">
+        <img fetchpriority="high" src="<?= htmlspecialchars(!empty($movie['poster_url']) ? $movie['poster_url'] : $movie['thumb_url']) ?>" alt="<?= htmlspecialchars($movie['name']) ?>" class="w-full h-full object-cover opacity-50">
         <!-- Gradients to blend -->
-        <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent"></div>
     </div>
 
