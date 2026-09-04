@@ -189,11 +189,21 @@ if (!empty($_GET['party'])) {
                         <?php if (empty($episodes)): ?>
                             <div class="text-gray-500 text-sm py-4">Chưa có tập phim nào.</div>
                         <?php else: ?>
-                            <?php foreach ($episodes as $index => $server): ?>
-                                <div class="mb-4 last:mb-0">
-                                    <h4 class="text-[#fcc526] font-semibold text-sm mb-2 px-1">
+                            <!-- Server tabs -->
+                            <?php if (count($episodes) > 1): ?>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <?php foreach ($episodes as $index => $server): ?>
+                                    <button onclick="switchServerTab(<?= $index ?>)" id="server-btn-<?= $index ?>" class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors <?= $index === 0 ? 'bg-[#fcc526] text-black shadow-md' : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700' ?>">
+                                        <i data-lucide="server" class="w-3.5 h-3.5 inline-block mr-1"></i>
                                         <?= htmlspecialchars($server['server_name'] ?? 'Server ' . ($index + 1)) ?>
-                                    </h4>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- Server contents -->
+                            <?php foreach ($episodes as $index => $server): ?>
+                                <div id="server-content-<?= $index ?>" class="server-content-panel <?= $index === 0 ? 'block' : 'hidden' ?>">
                                     <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar">
                                         <?php foreach ($server['server_data'] as $ep): ?>
                                             <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($ep['slug']) ?>?server=<?= $index ?>" 
@@ -236,6 +246,24 @@ if (!empty($_GET['party'])) {
             </div>
 
             <script>
+            function switchServerTab(index) {
+                document.querySelectorAll('.server-content-panel').forEach(el => {
+                    el.classList.add('hidden');
+                    el.classList.remove('block');
+                });
+                document.getElementById('server-content-' + index).classList.remove('hidden');
+                document.getElementById('server-content-' + index).classList.add('block');
+                
+                const buttons = document.querySelectorAll('[id^="server-btn-"]');
+                buttons.forEach(btn => {
+                    btn.className = "px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700";
+                });
+                const activeBtn = document.getElementById('server-btn-' + index);
+                if (activeBtn) {
+                    activeBtn.className = "px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-[#fcc526] text-black shadow-md";
+                }
+            }
+
             function switchMediaTab(tab) {
                 const btnEp = document.getElementById('tab-btn-episodes');
                 const btnImg = document.getElementById('tab-btn-images');

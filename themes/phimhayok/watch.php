@@ -170,13 +170,21 @@ if (isset($_SESSION['user'])) {
                             <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
                         </div>
                     </div>
+                    <!-- Server tabs -->
+                    <?php if (count($episodes) > 1): ?>
+                    <div class="flex flex-wrap gap-2 mb-4 border-b border-gray-800 pb-4">
+                        <?php foreach ($episodes as $sIdx => $server): ?>
+                            <button onclick="switchServerTab(<?= $sIdx ?>)" id="server-btn-<?= $sIdx ?>" class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors <?= $sIdx === $currentServerIndex ? 'bg-red-600 text-white shadow-md' : 'bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] border border-gray-800' ?>">
+                                <i data-lucide="server" class="w-3.5 h-3.5 inline-block mr-1"></i>
+                                <?= htmlspecialchars($server['server_name'] ?? 'Server ' . ($sIdx + 1)) ?>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
                     
                     <div class="max-h-[400px] overflow-y-auto custom-scrollbar pr-2" id="episode-list">
                         <?php foreach ($episodes as $sIdx => $server): ?>
-                            <div class="mb-5 last:mb-0">
-                                <h4 class="text-[#fcc526] font-semibold text-sm mb-3 px-1 border-l-2 border-[#fcc526] pl-2">
-                                    <?= htmlspecialchars($server['server_name'] ?? 'Server ' . ($sIdx + 1)) ?>
-                                </h4>
+                            <div id="server-content-<?= $sIdx ?>" class="server-content-panel <?= $sIdx === $currentServerIndex ? 'block' : 'hidden' ?>">
                                 <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-5 xl:grid-cols-7 gap-2.5">
                                     <?php foreach ($server['server_data'] as $e): 
                                         $isActive = ($currentEp['slug'] === $e['slug'] && $currentServerIndex === $sIdx);
@@ -194,6 +202,23 @@ if (isset($_SESSION['user'])) {
                         <?php endforeach; ?>
                     </div>
                     <script>
+                        function switchServerTab(index) {
+                            document.querySelectorAll('.server-content-panel').forEach(el => {
+                                el.classList.add('hidden');
+                                el.classList.remove('block');
+                            });
+                            document.getElementById('server-content-' + index).classList.remove('hidden');
+                            document.getElementById('server-content-' + index).classList.add('block');
+                            
+                            const buttons = document.querySelectorAll('[id^="server-btn-"]');
+                            buttons.forEach(btn => {
+                                btn.className = "px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] border border-gray-800";
+                            });
+                            const activeBtn = document.getElementById('server-btn-' + index);
+                            if (activeBtn) {
+                                activeBtn.className = "px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-red-600 text-white shadow-md";
+                            }
+                        }
                         document.addEventListener('DOMContentLoaded', function() {
                             var searchEp = document.getElementById('search-episode');
                             if (searchEp) {
