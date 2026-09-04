@@ -437,6 +437,14 @@ function fetchLocalMovieDetail($slug) {
         ];
     }
     
+    // Fetch SEO metadata for keywords
+    $stmtSeo = $pdo->prepare("SELECT seo_keywords FROM seo_metadata WHERE item_id = ? AND type = 'movie'");
+    $stmtSeo->execute([$slug]);
+    $seoRow = $stmtSeo->fetch(PDO::FETCH_ASSOC);
+    if ($seoRow && !empty($seoRow['seo_keywords'])) {
+        $movie['seo_keywords'] = $seoRow['seo_keywords'];
+    }
+    
     return [
         'movie' => $movie,
         'episodes' => array_values($episodes),

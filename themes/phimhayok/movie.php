@@ -64,25 +64,8 @@ if ($tmdbId && $tmdbApiKey) {
 
 // Fetch Keywords
 $movieKeywords = [];
-if (isset($settings['dataSource']) && $settings['dataSource'] === 'local' && !empty($movie['seo_keywords'])) {
-    // If local and has keywords, use them
+if (!empty($movie['seo_keywords'])) {
     $movieKeywords = array_map('trim', explode(',', $movie['seo_keywords']));
-} else {
-    // Call API
-    $ch = curl_init('https://phimapi.com/v1/api/phim/' . urlencode($slug) . '/keywords');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
-    $kwRes = curl_exec($ch);
-    curl_close($ch);
-    
-    if ($kwRes) {
-        $kwData = json_decode($kwRes, true);
-        if (isset($kwData['data']['keywords']) && is_array($kwData['data']['keywords'])) {
-            foreach ($kwData['data']['keywords'] as $kw) {
-                if (!empty($kw['name'])) $movieKeywords[] = trim($kw['name']);
-            }
-        }
-    }
 }
 
 // Extract TMDB info
