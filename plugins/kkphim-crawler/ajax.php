@@ -246,4 +246,15 @@ if ($action === 'reset_cron_batch') {
     exit;
 }
 
+if ($action === 'set_cron_batch_progress') {
+    $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
+    if ($page < 1) $page = 1;
+    
+    $progressFile = __DIR__ . '/cron_batch_progress.txt';
+    file_put_contents($progressFile, $page);
+    
+    echo json_encode(['status' => 'success', 'message' => "Đã cập nhật mốc tiến độ thành trang $page", 'page' => $page]);
+    exit;
+}
+
 echo json_encode(['status' => 'error', 'message' => 'Invalid action']);

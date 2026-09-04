@@ -71,9 +71,12 @@
         </h3>
         <div class="text-gray-300 text-sm space-y-2 mb-4">
             <p>Cron job đặc biệt giúp crawl dần dữ liệu phim cũ, <strong>mỗi lần chạy sẽ tự động crawl 20 trang</strong> và ghi nhớ tiến độ.</p>
-            <div class="bg-black/40 p-3 rounded-lg border border-purple-500/30 flex justify-between items-center my-3">
-                <span>Trang hiện tại sắp crawl:</span>
-                <span class="text-2xl font-bold text-purple-400" id="cronBatchProgress"><?= $cronBatchPage ?></span>
+            <div class="bg-black/40 p-3 rounded-lg border border-purple-500/30 flex flex-col sm:flex-row justify-between items-center my-3 gap-3">
+                <span>Trang hiện hành (sẽ crawl tiếp theo):</span>
+                <div class="flex items-center gap-2">
+                    <input type="number" id="inputCronBatchProgress" value="<?= $cronBatchPage ?>" min="1" class="w-24 bg-black/50 border border-admin-border rounded-lg px-2 py-1 text-white text-center font-bold text-lg focus:outline-none focus:border-purple-500 transition-colors">
+                    <button id="btnSetCronBatch" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg text-sm transition-colors">Lưu lại</button>
+                </div>
             </div>
             <p>Cú pháp chạy CLI (cron):</p>
             <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-purple-400">php <?= __DIR__ ?>/cron_batch.php</code>
@@ -298,7 +301,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Reset Cron Batch Progress
     const btnResetCronBatch = document.getElementById('btnResetCronBatch');
-    if (btnResetCronBatch) {
+    const inputCronBatchProgress = document.getElementById('inputCronBatchProgress');
+    if (btnResetCronBatch && inputCronBatchProgress) {
         btnResetCronBatch.addEventListener('click', async () => {
             if (!confirm('Bạn có chắc chắn muốn reset tiến trình Cron Batch về lại trang 1?')) return;
             
@@ -309,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await res.json();
                 
                 if (data.status === 'success') {
-                    document.getElementById('cronBatchProgress').textContent = '1';
+                    inputCronBatchProgress.value = '1';
                     logMessage('Đã reset tiến độ Cron Batch về trang 1', 'success');
                 } else {
                     logMessage('Lỗi khi reset: ' + data.message, 'error');
@@ -317,6 +321,40 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (e) {
                 logMessage('Lỗi mạng khi reset', 'error');
             }
+        });
+    }
+
+    // Tùy chỉnh (Set) Cron Batch Progress
+    const btnSetCronBatch = document.getElementById('btnSetCronBatch');
+    if (btnSetCronBatch && inputCronBatchProgress) {
+        btnSetCronBatch.addEventListener('click', async () => {
+            const newPage = parseInt(inputCronBatchProgress.value);
+            if (isNaN(newPage) || newPage < 1) {
+                logMessage('Vui lòng nhập số trang hợp lệ!', 'error');
+                return;
+            }
+            
+            btnSetCronBatch.disabled = true;
+            btnSetCronBatch.textContent = 'Đang lưu...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'set_cron_batch_progress');
+                formData.append('page', newPage);
+                const res = await fetch(pluginPath, { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    logMessage(data.message, 'success');
+                } else {
+                    logMessage('Lỗi cập nhật: ' + data.message, 'error');
+                }
+            } catch (e) {
+                logMessage('Lỗi kết nối khi cập nhật tiến độ', 'error');
+            }
+            
+            btnSetCronBatch.disabled = false;
+            btnSetCronBatch.textContent = 'Lưu lại';
         });
     }
 
