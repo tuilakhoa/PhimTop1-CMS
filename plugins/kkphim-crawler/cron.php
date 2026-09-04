@@ -117,6 +117,9 @@ foreach ($items as $item) {
             
             $movieId = $dbMovie ? $dbMovie['id'] : ($movie['_id'] ?? uniqid());
 
+            $peoplesRes = $crawler->getMoviePeoples($movie['slug']);
+            $peoplesData = ($peoplesRes && !empty($peoplesRes['data']['peoples'])) ? $peoplesRes['data']['peoples'] : [];
+
             $movieData = [
                 'id' => $movieId,
                 'name' => $movie['name'] ?? '',
@@ -137,6 +140,8 @@ foreach ($items as $item) {
                 'categories_json' => json_encode($movie['category'] ?? []),
                 'countries_json' => json_encode($movie['country'] ?? []),
                 'view' => $dbMovie ? ($dbMovie['view'] ?? 0) : ($movie['view'] ?? 0),
+                'time' => $movie['time'] ?? '',
+                'peoples_json' => json_encode($peoplesData),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
             
@@ -160,6 +165,32 @@ foreach ($items as $item) {
                 }
             }
             
+            // Lưu keywords
+            $kwRes = $crawler->getMovieKeywords($movie['slug']);
+            if ($kwRes && isset($kwRes['data']['keywords']) && is_array($kwRes['data']['keywords'])) {
+                $keywords = [];
+                foreach ($kwRes['data']['keywords'] as $kw) {
+                    if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
+                }
+                if (!empty($keywords)) {
+                    $keywordString = implode(', ', $keywords);
+                    $seoRepo = getSeoRepository();
+                    $seoData = $seoRepo->getSeoMetadata('movie', $movie['slug']);
+                    if (!$seoData) {
+                        $seoData = [
+                            'type' => 'movie',
+                            'item_id' => $movie['slug'],
+                            'seo_title' => $movieData['name'],
+                            'seo_desc' => mb_substr(strip_tags($movieData['content']), 0, 160),
+                            'seo_keywords' => $keywordString
+                        ];
+                    } else {
+                        $seoData['seo_keywords'] = $keywordString;
+                    }
+                    $seoRepo->saveSeoMetadata($seoData);
+                }
+            }
+
             // Lưu tập phim
             $pdo = getPDO();
             if ($pdo) {

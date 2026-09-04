@@ -1,7 +1,14 @@
 <?php
 // Fetch peoples
 $peoples = [];
-if (!isset($settings['dataSource']) || $settings['dataSource'] !== 'local') {
+if (!empty($movie['peoples_json'])) {
+    $decoded = json_decode($movie['peoples_json'], true);
+    if (is_array($decoded) && !empty($decoded)) {
+        $peoples = $decoded;
+    }
+}
+
+if (empty($peoples) && (!isset($settings['dataSource']) || $settings['dataSource'] !== 'local')) {
     $ch = curl_init('https://phimapi.com/v1/api/phim/' . urlencode($slug) . '/peoples');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);

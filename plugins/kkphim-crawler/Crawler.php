@@ -62,6 +62,11 @@ class KKPhimCrawler {
         return $this->request("/quoc-gia");
     }
 
+    // 9. Lấy thông tin keywords
+    public function getMovieKeywords($slug) {
+        return $this->request("/v1/api/phim/" . urlencode($slug) . "/keywords");
+    }
+
     // Tiện ích: Tải và lưu ảnh về local
     public function downloadImage($url, $savePath) {
         if (empty($url)) return false;
