@@ -172,32 +172,83 @@ if (!empty($_GET['party'])) {
         <!-- Left Column (Core content: Episodes, Plot, Actors, Comments) -->
         <div class="flex-1 min-w-0 space-y-10">
             
-            <!-- Episodes Section -->
+            <!-- Tabs Section (Episodes / Images) -->
             <div>
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold text-white flex items-center">
-                        <span class="w-1.5 h-6 bg-[#fcc526] mr-3 rounded-full shadow-[0_0_8px_#fcc526]"></span> Danh Sách Tập
-                    </h3>
+                <div class="flex items-center gap-6 mb-4 border-b border-gray-800">
+                    <button id="tab-btn-episodes" onclick="switchMediaTab('episodes')" class="pb-3 border-b-2 border-[#fcc526] text-white text-lg font-bold flex items-center transition-colors">
+                        <span class="w-1.5 h-5 bg-[#fcc526] mr-2 rounded-full shadow-[0_0_8px_#fcc526] hidden md:block"></span> Danh Sách Tập
+                    </button>
+                    <?php if (!empty($movieImages['backdrops']) || !empty($movieImages['posters'])): ?>
+                    <button id="tab-btn-images" onclick="switchMediaTab('images')" class="pb-3 border-b-2 border-transparent text-gray-500 hover:text-white text-lg font-bold flex items-center transition-colors">
+                        Thư Viện Ảnh
+                    </button>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="bg-[#141414] rounded-2xl p-5 border border-gray-800 shadow-inner">
-                    <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar" id="episode-list">
-                        <?php 
-                        $server = $episodes[0] ?? ['server_data' => []];
-                        foreach ($server['server_data'] as $ep): 
-                        ?>
-                            <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($ep['slug']) ?>" 
-                               class="px-2 py-2.5 bg-[#202020] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded-lg transition-colors text-center truncate border border-gray-800"
-                               title="<?= htmlspecialchars($ep['name']) ?>">
-                                <?= htmlspecialchars($ep['name']) ?>
-                            </a>
-                        <?php endforeach; ?>
-                        <?php if(empty($server['server_data'])): ?>
-                            <div class="col-span-full text-gray-500 text-sm py-4">Chưa có tập phim nào.</div>
-                        <?php endif; ?>
+                    <!-- Episodes Content -->
+                    <div id="tab-content-episodes" class="block">
+                        <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar" id="episode-list">
+                            <?php 
+                            $server = $episodes[0] ?? ['server_data' => []];
+                            foreach ($server['server_data'] as $ep): 
+                            ?>
+                                <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($ep['slug']) ?>" 
+                                   class="px-2 py-2.5 bg-[#202020] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded-lg transition-colors text-center truncate border border-gray-800"
+                                   title="<?= htmlspecialchars($ep['name']) ?>">
+                                    <?= htmlspecialchars($ep['name']) ?>
+                                </a>
+                            <?php endforeach; ?>
+                            <?php if(empty($server['server_data'])): ?>
+                                <div class="col-span-full text-gray-500 text-sm py-4">Chưa có tập phim nào.</div>
+                            <?php endif; ?>
+                        </div>
                     </div>
+
+                    <!-- Images Content -->
+                    <?php if (!empty($movieImages['backdrops']) || !empty($movieImages['posters'])): ?>
+                    <div id="tab-content-images" class="hidden">
+                        <div class="flex gap-4 overflow-x-auto custom-scrollbar pb-2">
+                            <?php 
+                            $galleryImages = array_merge(array_slice($movieImages['backdrops'], 0, 8), array_slice($movieImages['posters'], 0, 4));
+                            foreach ($galleryImages as $img): 
+                                $imgUrl = isset($img['file_path']) ? $img['file_path'] : '';
+                                if (empty($imgUrl)) continue;
+                                if (strpos($imgUrl, 'http') !== 0) $imgUrl = 'https://image.tmdb.org/t/p/w780' . $imgUrl;
+                            ?>
+                            <div class="shrink-0 relative group rounded-xl overflow-hidden cursor-pointer" onclick="window.open('<?= htmlspecialchars(str_replace('/w780/', '/original/', $imgUrl)) ?>', '_blank')">
+                                <img loading="lazy" src="<?= htmlspecialchars($imgUrl) ?>" class="h-32 md:h-40 w-auto rounded-xl object-cover hover:scale-110 transition-transform duration-300 bg-[#202020]">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <i data-lucide="zoom-in" class="w-6 h-6 text-white"></i>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
+
+            <script>
+            function switchMediaTab(tab) {
+                const btnEp = document.getElementById('tab-btn-episodes');
+                const btnImg = document.getElementById('tab-btn-images');
+                const contentEp = document.getElementById('tab-content-episodes');
+                const contentImg = document.getElementById('tab-content-images');
+                
+                if (tab === 'episodes') {
+                    if (btnEp) btnEp.className = "pb-3 border-b-2 border-[#fcc526] text-white text-lg font-bold flex items-center transition-colors";
+                    if (btnImg) btnImg.className = "pb-3 border-b-2 border-transparent text-gray-500 hover:text-white text-lg font-bold flex items-center transition-colors";
+                    if (contentEp) { contentEp.classList.remove('hidden'); contentEp.classList.add('block'); }
+                    if (contentImg) { contentImg.classList.remove('block'); contentImg.classList.add('hidden'); }
+                } else {
+                    if (btnEp) btnEp.className = "pb-3 border-b-2 border-transparent text-gray-500 hover:text-white text-lg font-bold flex items-center transition-colors";
+                    if (btnImg) btnImg.className = "pb-3 border-b-2 border-[#fcc526] text-white text-lg font-bold flex items-center transition-colors";
+                    if (contentEp) { contentEp.classList.remove('block'); contentEp.classList.add('hidden'); }
+                    if (contentImg) { contentImg.classList.remove('hidden'); contentImg.classList.add('block'); }
+                }
+            }
+            </script>
 
             <!-- Content/Plot -->
             <div>
@@ -212,32 +263,7 @@ if (!empty($_GET['party'])) {
             <!-- Cast / Peoples Component -->
             <?php include __DIR__ . '/components/actors.php'; ?>
 
-            <!-- Images Gallery -->
-            <?php if (!empty($movieImages['backdrops']) || !empty($movieImages['posters'])): ?>
-            <div>
-                <h3 class="text-xl font-bold text-white flex items-center mb-4">
-                    <span class="w-1.5 h-6 bg-[#fcc526] mr-3 rounded-full shadow-[0_0_8px_#fcc526]"></span> Thư Viện Ảnh
-                </h3>
-                <div class="bg-[#141414] rounded-2xl p-5 border border-gray-800 shadow-inner overflow-x-auto custom-scrollbar">
-                    <div class="flex gap-4">
-                        <?php 
-                        $galleryImages = array_merge(array_slice($movieImages['backdrops'], 0, 8), array_slice($movieImages['posters'], 0, 4));
-                        foreach ($galleryImages as $img): 
-                            $imgUrl = isset($img['file_path']) ? $img['file_path'] : '';
-                            if (empty($imgUrl)) continue;
-                            if (strpos($imgUrl, 'http') !== 0) $imgUrl = 'https://image.tmdb.org/t/p/w780' . $imgUrl;
-                        ?>
-                        <div class="shrink-0 relative group rounded-xl overflow-hidden cursor-pointer" onclick="window.open('<?= htmlspecialchars(str_replace('/w780/', '/original/', $imgUrl)) ?>', '_blank')">
-                            <img loading="lazy" src="<?= htmlspecialchars($imgUrl) ?>" class="h-40 w-auto rounded-xl object-cover hover:scale-110 transition-transform duration-300 bg-[#202020]">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <i data-lucide="zoom-in" class="w-6 h-6 text-white"></i>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
-            <?php endif; ?>
+
 
             <!-- Comments -->
             <div id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
