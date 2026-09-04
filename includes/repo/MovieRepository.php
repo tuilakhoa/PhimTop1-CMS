@@ -135,12 +135,12 @@ class MovieRepository {
         } else {
             if (!$this->pdo) return false;
             
-            $sql = "INSERT INTO movies (id, name, origin_name, slug, thumb_url, poster_url, year, type, status, episode_current, quality, lang, chieu_rap, content, actor, director, categories_json, countries_json, view, time, peoples_json, updated_at)
-                VALUES (:id, :name, :origin_name, :slug, :thumb_url, :poster_url, :year, :type, :status, :episode_current, :quality, :lang, :chieu_rap, :content, :actor, :director, :categories_json, :countries_json, :view, :time, :peoples_json, :updated_at)
+            $sql = "INSERT INTO movies (id, name, origin_name, slug, thumb_url, poster_url, year, type, status, episode_current, quality, lang, chieu_rap, content, actor, director, categories_json, countries_json, view, time, peoples_json, images_json, updated_at)
+                VALUES (:id, :name, :origin_name, :slug, :thumb_url, :poster_url, :year, :type, :status, :episode_current, :quality, :lang, :chieu_rap, :content, :actor, :director, :categories_json, :countries_json, :view, :time, :peoples_json, :images_json, :updated_at)
                 ON DUPLICATE KEY UPDATE 
                 name=VALUES(name), origin_name=VALUES(origin_name), thumb_url=VALUES(thumb_url), poster_url=VALUES(poster_url), 
                 year=VALUES(year), type=VALUES(type), status=VALUES(status), episode_current=VALUES(episode_current), 
-                quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap), content=VALUES(content), actor=VALUES(actor), director=VALUES(director), categories_json=VALUES(categories_json), countries_json=VALUES(countries_json), time=VALUES(time), peoples_json=VALUES(peoples_json), updated_at=VALUES(updated_at)";
+                quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap), content=VALUES(content), actor=VALUES(actor), director=VALUES(director), categories_json=VALUES(categories_json), countries_json=VALUES(countries_json), time=VALUES(time), peoples_json=VALUES(peoples_json), images_json=VALUES(images_json), updated_at=VALUES(updated_at)";
             $stmt = $this->pdo->prepare($sql);
             
             // Lọc các trường có trong SQL
@@ -166,6 +166,7 @@ class MovieRepository {
                 ':view' => $data['view'] ?? 0,
                 ':time' => $data['time'] ?? '',
                 ':peoples_json' => $data['peoples_json'] ?? '[]',
+                ':images_json' => $data['images_json'] ?? '[]',
                 ':updated_at' => $data['updated_at']
             ];
             $stmt->execute($params);

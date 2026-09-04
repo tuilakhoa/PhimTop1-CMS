@@ -142,8 +142,15 @@ foreach ($items as $item) {
                 'view' => $dbMovie ? ($dbMovie['view'] ?? 0) : ($movie['view'] ?? 0),
                 'time' => $movie['time'] ?? '',
                 'peoples_json' => json_encode($peoplesData),
+                'images_json' => json_encode([]),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
+
+            // Lấy danh sách hình ảnh (gallery/backdrops)
+            $imagesRes = $crawler->getMovieImages($slug);
+            if ($imagesRes && isset($imagesRes['data'])) {
+                $movieData['images_json'] = json_encode($imagesRes['data']);
+            }
             
             // Lưu phim
             $repo->saveMovie($movieData);

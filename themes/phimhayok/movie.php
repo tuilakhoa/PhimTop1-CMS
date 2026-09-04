@@ -30,9 +30,15 @@ if ($tmdbId && $tmdbApiKey) {
         if (isset($tmdbData['posters'])) $movieImages['posters'] = $tmdbData['posters'];
     }
 } else {
-    // Fallback to PhimAPI
+    // Fallback to PhimAPI or Local Data
     $images = [];
-    if (!isset($settings['dataSource']) || $settings['dataSource'] !== 'local') {
+    if (isset($settings['dataSource']) && $settings['dataSource'] === 'local') {
+        if (!empty($movie['images_json'])) {
+            $imgData = is_string($movie['images_json']) ? json_decode($movie['images_json'], true) : $movie['images_json'];
+            $movieImages['backdrops'] = $imgData['backdrops'] ?? [];
+            $movieImages['posters'] = $imgData['posters'] ?? [];
+        }
+    } else {
         $imgRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images", 86400) : @file_get_contents("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images");
         if ($imgRes) {
             $imgData = json_decode($imgRes, true);
