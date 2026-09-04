@@ -17,39 +17,73 @@ $totalMovies = 0;
 $totalPages = 0;
 $movies = [];
 
-    // Chế độ API
-    if ($q !== '') {
-        $url = "https://phimapi.com/v1/api/tim-kiem?keyword=" . urlencode($q) . "&page=" . $page;
-        $res = @file_get_contents($url);
-        if ($res) {
-            $data = json_decode($res, true);
-            if (isset($data['data']['items'])) {
-                $movies = $data['data']['items'];
-                $totalMovies = $data['data']['params']['pagination']['totalItems'] ?? 0;
-                $totalPages = $data['data']['params']['pagination']['totalPages'] ?? 0;
-            }
-        }
-    } else {
-        $url = "https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=" . $page;
-        $res = @file_get_contents($url);
-        if ($res) {
-            $data = json_decode($res, true);
-            if (isset($data['items'])) {
-                $movies = $data['items'];
-                $totalMovies = $data['pagination']['totalItems'] ?? 0;
-                $totalPages = $data['pagination']['totalPages'] ?? 0;
-            }
-        }
-    }
+    $dataSource = $settings['dataSource'] ?? 'api';
     
-    // Normalize API movie thumbnails
-    foreach ($movies as &$movie) {
-        $domain = $data['APP_DOMAIN_CDN_IMAGE'] ?? $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
-        $thumb = $movie['thumb_url'] ?? $movie['poster_url'] ?? '';
-        if (!preg_match('/^http/', $thumb) && $thumb) {
-            $movie['thumb_url'] = rtrim($domain, '/') . '/' . ltrim($thumb, '/');
+    if ($dataSource === 'local') {
+        // Chế độ Local (Database)
+        if ($q !== '') {
+            $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM movies WHERE name LIKE ? OR origin_name LIKE ? OR slug LIKE ?");
+            $searchParam = "%$q%";
+            $stmtCount->execute([$searchParam, $searchParam, $searchParam]);
+            $totalMovies = $stmtCount->fetchColumn();
+            $totalPages = ceil($totalMovies / $limit);
+            
+            $stmt = $pdo->prepare("SELECT * FROM movies WHERE name LIKE ? OR origin_name LIKE ? OR slug LIKE ? ORDER BY updated_at DESC LIMIT $limit OFFSET $offset");
+            $stmt->execute([$searchParam, $searchParam, $searchParam]);
+            $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $totalMovies = $pdo->query("SELECT COUNT(*) FROM movies")->fetchColumn();
+            $totalPages = ceil($totalMovies / $limit);
+            
+            $stmt = $pdo->prepare("SELECT * FROM movies ORDER BY updated_at DESC LIMIT $limit OFFSET $offset");
+            $stmt->execute();
+            $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
-        $movie['updated_at'] = $movie['modified']['time'] ?? date('c');
+        
+        // Normalize local movie thumbnails
+        foreach ($movies as &$movie) {
+            $domain = 'https://phimimg.com/';
+            $thumb = $movie['thumb_url'] ?? $movie['poster_url'] ?? '';
+            if (!preg_match('/^http/', $thumb) && $thumb) {
+                $movie['thumb_url'] = rtrim($domain, '/') . '/' . ltrim($thumb, '/');
+            }
+        }
+        
+    } else {
+        // Chế độ API (Dự phòng / Live)
+        if ($q !== '') {
+            $url = "https://phimapi.com/v1/api/tim-kiem?keyword=" . urlencode($q) . "&page=" . $page;
+            $res = @file_get_contents($url);
+            if ($res) {
+                $data = json_decode($res, true);
+                if (isset($data['data']['items'])) {
+                    $movies = $data['data']['items'];
+                    $totalMovies = $data['data']['params']['pagination']['totalItems'] ?? 0;
+                    $totalPages = $data['data']['params']['pagination']['totalPages'] ?? 0;
+                }
+            }
+        } else {
+            $url = "https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=" . $page;
+            $res = @file_get_contents($url);
+            if ($res) {
+                $data = json_decode($res, true);
+                if (isset($data['items'])) {
+                    $movies = $data['items'];
+                    $totalMovies = $data['pagination']['totalItems'] ?? 0;
+                    $totalPages = $data['pagination']['totalPages'] ?? 0;
+                }
+            }
+        }
+        
+        // Normalize API movie thumbnails
+        foreach ($movies as &$movie) {
+            $domain = $data['APP_DOMAIN_CDN_IMAGE'] ?? $data['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+            $thumb = $movie['thumb_url'] ?? $movie['poster_url'] ?? '';
+            if (!preg_match('/^http/', $thumb) && $thumb) {
+                $movie['thumb_url'] = rtrim($domain, '/') . '/' . ltrim($thumb, '/');
+            }
+            $movie['updated_at'] = $movie['modified']['time'] ?? date('c');
+        }
     }
 } catch (\Throwable $e) {
     echo "<div class='text-red-500 bg-red-100 p-4 rounded mb-4'>Error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . "</div>";
