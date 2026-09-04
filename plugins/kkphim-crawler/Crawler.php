@@ -32,7 +32,7 @@ class KKPhimCrawler {
     }
 
     public function getMovieDetail($slug) {
-        return $this->request("/v1/api/phim/" . urlencode($slug));
+        return $this->request("/phim/" . urlencode($slug));
     }
 
     // 3. Lấy hình ảnh phim

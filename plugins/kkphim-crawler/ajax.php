@@ -78,7 +78,7 @@ if ($action === 'crawl_single') {
     }
     
     $movie = $res['data']['item'] ?? $res['movie'];
-    $episodesList = $movie['episodes'] ?? [];
+    $episodesList = $res['episodes'] ?? ($movie['episodes'] ?? []);
     $domainPrefix = $res['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
     
     // Xử lý thông tin phim

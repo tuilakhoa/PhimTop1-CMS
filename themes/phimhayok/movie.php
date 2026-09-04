@@ -194,21 +194,29 @@ if (!empty($_GET['party'])) {
                 <div class="bg-[#141414] rounded-2xl p-5 border border-gray-800 shadow-inner">
                     <!-- Episodes Content -->
                     <div id="tab-content-episodes" class="block">
-                        <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar" id="episode-list">
-                            <?php 
-                            $server = $episodes[0] ?? ['server_data' => []];
-                            foreach ($server['server_data'] as $ep): 
-                            ?>
-                                <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($ep['slug']) ?>" 
-                                   class="px-2 py-2.5 bg-[#202020] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded-lg transition-colors text-center truncate border border-gray-800"
-                                   title="<?= htmlspecialchars($ep['name']) ?>">
-                                    <?= htmlspecialchars($ep['name']) ?>
-                                </a>
+                        <?php if (empty($episodes)): ?>
+                            <div class="text-gray-500 text-sm py-4">Chưa có tập phim nào.</div>
+                        <?php else: ?>
+                            <?php foreach ($episodes as $index => $server): ?>
+                                <div class="mb-4 last:mb-0">
+                                    <h4 class="text-[#fcc526] font-semibold text-sm mb-2 px-1">
+                                        <?= htmlspecialchars($server['server_name'] ?? 'Server ' . ($index + 1)) ?>
+                                    </h4>
+                                    <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar">
+                                        <?php foreach ($server['server_data'] as $ep): ?>
+                                            <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($ep['slug']) ?>?server=<?= $index ?>" 
+                                               class="px-2 py-2.5 bg-[#202020] hover:bg-[#fcc526] hover:text-black text-gray-300 text-sm font-medium rounded-lg transition-colors text-center truncate border border-gray-800"
+                                               title="<?= htmlspecialchars($ep['name']) ?>">
+                                                <?= htmlspecialchars($ep['name']) ?>
+                                            </a>
+                                        <?php endforeach; ?>
+                                        <?php if(empty($server['server_data'])): ?>
+                                            <div class="col-span-full text-gray-500 text-sm py-2">Chưa có tập phim nào.</div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
-                            <?php if(empty($server['server_data'])): ?>
-                                <div class="col-span-full text-gray-500 text-sm py-4">Chưa có tập phim nào.</div>
-                            <?php endif; ?>
-                        </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Images Content -->

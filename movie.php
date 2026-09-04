@@ -54,16 +54,33 @@ $currentEp = null;
 $videoUrl = '';
 $isM3U8 = false;
 
-if (!empty($episodes[0]['server_data'])) {
+if (!empty($episodes)) {
     $epToPlay = null;
     $epParam = $_GET['ep'] ?? '';
+    $serverIndex = isset($_GET['server']) ? (int)$_GET['server'] : 0;
+    $currentServerIndex = 0;
     
     // Check if user requested a specific episode via ?ep= parameter
     if ($epParam) {
-        foreach ($episodes[0]['server_data'] as $e) {
-            if ($e['slug'] === $epParam) {
-                $epToPlay = $e;
-                break;
+        if (isset($episodes[$serverIndex]['server_data'])) {
+            foreach ($episodes[$serverIndex]['server_data'] as $e) {
+                if ($e['slug'] === $epParam) {
+                    $epToPlay = $e;
+                    $currentServerIndex = $serverIndex;
+                    break;
+                }
+            }
+        }
+        // Fallback: search all servers if not found in specified index
+        if (!$epToPlay) {
+            foreach ($episodes as $sIdx => $server) {
+                foreach ($server['server_data'] as $e) {
+                    if ($e['slug'] === $epParam) {
+                        $epToPlay = $e;
+                        $currentServerIndex = $sIdx;
+                        break 2;
+                    }
+                }
             }
         }
     }
@@ -78,10 +95,13 @@ if (!empty($episodes[0]['server_data'])) {
                 $stmt->execute([$_SESSION['user']['email'], $originalSlug, $profileId]);
                 $row = $stmt->fetch();
                 if ($row && !empty($row['episode_slug'])) {
-                    foreach ($episodes[0]['server_data'] as $e) {
-                        if ($e['slug'] === $row['episode_slug']) {
-                            $epToPlay = $e;
-                            break;
+                    foreach ($episodes as $sIdx => $server) {
+                        foreach ($server['server_data'] as $e) {
+                            if ($e['slug'] === $row['episode_slug']) {
+                                $epToPlay = $e;
+                                $currentServerIndex = $sIdx;
+                                break 2;
+                            }
                         }
                     }
                 }
@@ -89,9 +109,10 @@ if (!empty($episodes[0]['server_data'])) {
         }
     }
     
-    // Fallback to first episode
+    // Fallback to first episode of first server
     if (!$epToPlay) {
         $epToPlay = $episodes[0]['server_data'][0];
+        $currentServerIndex = 0;
     }
     
     $currentEp = $epToPlay;

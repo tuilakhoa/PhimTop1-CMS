@@ -149,7 +149,7 @@ if (isset($_SESSION['user'])) {
                 </button>
                 <div class="px-4 py-2 bg-red-600/10 border border-red-600/30 text-red-500 rounded text-sm font-medium flex items-center">
                     <i data-lucide="server" class="w-4 h-4 mr-2"></i>
-                    Server: <?= htmlspecialchars($episodes[0]['server_name'] ?? 'HLS/Embed') ?>
+                    Server: <?= htmlspecialchars($episodes[$currentServerIndex]['server_name'] ?? 'HLS/Embed') ?>
                 </div>
             </div>
         </div>
@@ -159,7 +159,7 @@ if (isset($_SESSION['user'])) {
         <!-- Main Column (Left) -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Episodes List -->
-            <?php if (!empty($episodes[0]['server_data'])): ?>
+            <?php if (!empty($episodes)): ?>
                 <div class="bg-[#141414] rounded-xl p-5 md:p-6 border border-gray-900">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-5 border-b border-gray-800 pb-3 gap-3">
                         <h3 class="text-lg font-bold text-white flex items-center uppercase tracking-wider">
@@ -171,17 +171,26 @@ if (isset($_SESSION['user'])) {
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-5 xl:grid-cols-7 gap-2.5 max-h-[400px] overflow-y-auto custom-scrollbar pr-2" id="episode-list">
-                        <?php foreach ($episodes[0]['server_data'] as $e): 
-                            $isActive = $currentEp['slug'] === $e['slug'];
-                            $classes = $isActive 
-                                ? "bg-red-600 text-white font-bold pointer-events-none ring-2 ring-red-600 ring-offset-2 ring-offset-[#141414]" 
-                                : "bg-[#1a1a1a] text-gray-400 hover:bg-[#2a2a2a] hover:text-white border border-gray-800 transition-colors";
-                        ?>
-                            <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>" 
-                               class="flex items-center justify-center py-2.5 rounded-md text-sm <?= $classes ?>">
-                                <?= htmlspecialchars($e['name']) ?>
-                            </a>
+                    <div class="max-h-[400px] overflow-y-auto custom-scrollbar pr-2" id="episode-list">
+                        <?php foreach ($episodes as $sIdx => $server): ?>
+                            <div class="mb-5 last:mb-0">
+                                <h4 class="text-[#fcc526] font-semibold text-sm mb-3 px-1 border-l-2 border-[#fcc526] pl-2">
+                                    <?= htmlspecialchars($server['server_name'] ?? 'Server ' . ($sIdx + 1)) ?>
+                                </h4>
+                                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-5 xl:grid-cols-7 gap-2.5">
+                                    <?php foreach ($server['server_data'] as $e): 
+                                        $isActive = ($currentEp['slug'] === $e['slug'] && $currentServerIndex === $sIdx);
+                                        $classes = $isActive 
+                                            ? "bg-red-600 text-white font-bold pointer-events-none ring-2 ring-red-600 ring-offset-2 ring-offset-[#141414]" 
+                                            : "bg-[#1a1a1a] text-gray-400 hover:bg-[#2a2a2a] hover:text-white border border-gray-800 transition-colors";
+                                    ?>
+                                        <a href="/<?= $settings["slugWatch"] ?? "xem-phim" ?>/<?= urlencode($slug) ?>/<?= urlencode($e['slug']) ?>?server=<?= $sIdx ?>" 
+                                           class="flex items-center justify-center py-2.5 rounded-md text-sm <?= $classes ?>">
+                                            <?= htmlspecialchars($e['name']) ?>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
                         <?php endforeach; ?>
                     </div>
                     <script>
