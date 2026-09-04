@@ -445,7 +445,7 @@ if (!empty($_GET['party'])) {
         <?php foreach ($suggestions as $item): ?>
             <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="group block relative overflow-hidden rounded-xl bg-[#141414] transition-all duration-300">
                 <div class="aspect-[3/4] relative overflow-hidden rounded-xl border border-gray-800 group-hover:border-gray-600 transition-colors">
-                    <img loading="lazy" src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
                     
                     <!-- Vietsub Badge -->

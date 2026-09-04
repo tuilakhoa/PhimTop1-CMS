@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (section && list) {
                 let html = '';
                         res.data.forEach(item => {
-                            let thumb = item.poster_url || item.thumb_url;
+                            let thumb = item.thumb_url || item.poster_url;
                             if (thumb && !thumb.startsWith('http')) {
                                 thumb = 'https://phimimg.com/' + thumb;
                             }
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (section && list) {
                         let html = '';
                         res.data.forEach(item => {
-                            let thumbUrl = item.poster_url || item.thumb_url;
+                            let thumbUrl = item.thumb_url || item.poster_url;
                             if (thumbUrl && !thumbUrl.startsWith('http')) {
                                 // Assume phimimg if missing
                                 thumbUrl = 'https://phimimg.com/' + thumbUrl;

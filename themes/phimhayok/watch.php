@@ -249,7 +249,7 @@ if (isset($_SESSION['user'])) {
                     <?php foreach ($suggestions as $item): ?>
                         <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($item['slug']) ?>" class="flex gap-4 group">
                             <div class="w-20 shrink-0 relative rounded overflow-hidden aspect-[3/4]">
-                                <img src="<?= htmlspecialchars(strpos($item['thumb_url'], 'http') === 0 ? $item['thumb_url'] : rtrim($sugDomain, '/') . '/' . ltrim($item['thumb_url'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                                <img src="<?= htmlspecialchars(getPhimImgUrl(!empty($item['thumb_url']) ? $item['thumb_url'] : ($item['poster_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
                                 <div class="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors"></div>
                             </div>
                             <div class="flex-1 py-1">
