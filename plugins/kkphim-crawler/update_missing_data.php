@@ -41,7 +41,7 @@ function multiRequestWithRetry($urls, $max_retries = 3) {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
             curl_multi_add_handle($multi, $ch);
@@ -52,7 +52,7 @@ function multiRequestWithRetry($urls, $max_retries = 3) {
         do {
             $status = curl_multi_exec($multi, $active);
             if ($active) {
-                curl_multi_select($multi);
+                curl_multi_select($multi, 0.5);
             }
         } while ($active && $status == CURLM_OK);
         
@@ -75,14 +75,14 @@ function multiRequestWithRetry($urls, $max_retries = 3) {
         curl_multi_close($multi);
         
         $failed_urls = $new_failed;
-        if (!empty($failed_urls)) sleep(1);
+        if (!empty($failed_urls)) sleep(2);
         $attempt++;
     }
     return $results;
 }
 
 // Xử lý theo batch
-$batchSize = 20;
+$batchSize = 10;
 $total = count($movies);
 $processed = 0;
 
@@ -159,7 +159,7 @@ for ($i = 0; $i < $total; $i += $batchSize) {
     $processed += count($batch);
     echo "Đã xử lý: $processed / $total phim...\n";
     
-    sleep(1); // Tránh bị block
+    sleep(3); // Tránh bị block bởi Cloudflare (Rate limit)
 }
 
 echo "\nHOÀN TẤT CẬP NHẬT!\n";
