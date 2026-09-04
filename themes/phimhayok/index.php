@@ -77,7 +77,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                     
             <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-10 pt-20">
                 <div class="max-w-2xl">
-                    <h1 class="text-3xl sm:text-4xl md:text-7xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl" style="font-family: 'Playfair Display', serif;">
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl line-clamp-2 md:line-clamp-3 overflow-hidden text-ellipsis" style="font-family: 'Playfair Display', serif;">
                         <?= htmlspecialchars($featured['name'] ?? '') ?>
                     </h1>
                     <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
@@ -120,7 +120,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-10 pt-20">
             <div class="max-w-2xl">
                 <!-- Title with custom elegant styling based on screenshot -->
-                <h1 class="text-3xl sm:text-4xl md:text-7xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl" style="font-family: 'Playfair Display', serif;">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl line-clamp-2 md:line-clamp-3 overflow-hidden text-ellipsis" style="font-family: 'Playfair Display', serif;">
                     <?= htmlspecialchars($featured['name'] ?? '') ?>
                 </h1>
                 
@@ -150,7 +150,7 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="absolute right-8 md:right-12 bottom-12 hidden lg:flex space-x-2">
                 <?php foreach (array_slice($movies, 1, 4) as $m): ?>
                     <div class="w-24 h-14 rounded-md overflow-hidden border border-white/30 cursor-pointer hover:border-white transition-colors opacity-70 hover:opacity-100">
-                        <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($m['thumb_url']) ? $m['thumb_url'] : ($m['poster_url'] ?? ''))) ?>" class="w-full h-full object-cover">
+                        <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($m['poster_url']) ? $m['poster_url'] : ($m['thumb_url'] ?? ''))) ?>" class="w-full h-full object-cover">
                     </div>
                 <?php endforeach; ?>
             </div>
