@@ -92,16 +92,18 @@ for ($i = 0; $i < $total; $i += $batchSize) {
     $detailUrls = [];
     $keywordUrls = [];
     $peoplesUrls = [];
+    $imagesUrls = [];
     
     foreach ($batch as $m) {
         $slug = $m['slug'];
         $detailUrls["detail_$slug"] = "https://phimapi.com/v1/api/phim/" . urlencode($slug);
         $keywordUrls["kw_$slug"] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/keywords";
         $peoplesUrls["peop_$slug"] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/peoples";
+        $imagesUrls["img_$slug"] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images";
     }
     
-    // Chạy song song 3 mảng API (60 request cùng lúc)
-    $allUrls = array_merge($detailUrls, $keywordUrls, $peoplesUrls);
+    // Chạy song song 4 mảng API (40 request cùng lúc)
+    $allUrls = array_merge($detailUrls, $keywordUrls, $peoplesUrls, $imagesUrls);
     $multiResults = multiRequestWithRetry($allUrls, 3);
     
     foreach ($batch as $m) {
@@ -153,6 +155,15 @@ for ($i = 0; $i < $total; $i += $batchSize) {
             $peoplesJson = json_encode($peoplesData);
             $updateStmt = $pdo->prepare("UPDATE movies SET peoples_json = ? WHERE slug = ?");
             $updateStmt->execute([$peoplesJson, $slug]);
+        }
+        
+        // Cập nhật images_json
+        $imagesRes = $multiResults["img_$slug"] ?? null;
+        if ($imagesRes && isset($imagesRes['data'])) {
+            $imagesData = $imagesRes['data'];
+            $imagesJson = json_encode($imagesData);
+            $updateStmt = $pdo->prepare("UPDATE movies SET images_json = ? WHERE slug = ?");
+            $updateStmt->execute([$imagesJson, $slug]);
         }
     }
     
