@@ -32,19 +32,31 @@ if ($tmdbId && $tmdbApiKey) {
 } else {
     // Fallback to PhimAPI or Local Data
     $images = [];
+    $rawImgData = null;
+    
     if (isset($settings['dataSource']) && $settings['dataSource'] === 'local') {
         if (!empty($movie['images_json'])) {
-            $imgData = is_string($movie['images_json']) ? json_decode($movie['images_json'], true) : $movie['images_json'];
-            $movieImages['backdrops'] = $imgData['backdrops'] ?? [];
-            $movieImages['posters'] = $imgData['posters'] ?? [];
+            $rawImgData = is_string($movie['images_json']) ? json_decode($movie['images_json'], true) : $movie['images_json'];
         }
     } else {
         $imgRes = function_exists('fetchApiWithCache') ? fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images", 86400) : @file_get_contents("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images");
         if ($imgRes) {
-            $imgData = json_decode($imgRes, true);
-            if (isset($imgData['data'])) {
-                $movieImages['backdrops'] = $imgData['data']['backdrops'] ?? [];
-                $movieImages['posters'] = $imgData['data']['posters'] ?? [];
+            $parsed = json_decode($imgRes, true);
+            if (isset($parsed['data'])) $rawImgData = $parsed['data'];
+        }
+    }
+    
+    if ($rawImgData && isset($rawImgData['images']) && is_array($rawImgData['images'])) {
+        $backdropBase = $rawImgData['image_sizes']['backdrop']['w780'] ?? 'https://image.tmdb.org/t/p/w780';
+        $posterBase = $rawImgData['image_sizes']['poster']['w500'] ?? 'https://image.tmdb.org/t/p/w500';
+        
+        foreach ($rawImgData['images'] as $img) {
+            if (isset($img['type']) && isset($img['file_path'])) {
+                if ($img['type'] === 'backdrop') {
+                    $movieImages['backdrops'][] = ['file_path' => $backdropBase . $img['file_path']];
+                } elseif ($img['type'] === 'poster') {
+                    $movieImages['posters'][] = ['file_path' => $posterBase . $img['file_path']];
+                }
             }
         }
     }
@@ -199,6 +211,33 @@ if (!empty($_GET['party'])) {
 
             <!-- Cast / Peoples Component -->
             <?php include __DIR__ . '/components/actors.php'; ?>
+
+            <!-- Images Gallery -->
+            <?php if (!empty($movieImages['backdrops']) || !empty($movieImages['posters'])): ?>
+            <div>
+                <h3 class="text-xl font-bold text-white flex items-center mb-4">
+                    <span class="w-1.5 h-6 bg-[#fcc526] mr-3 rounded-full shadow-[0_0_8px_#fcc526]"></span> Thư Viện Ảnh
+                </h3>
+                <div class="bg-[#141414] rounded-2xl p-5 border border-gray-800 shadow-inner overflow-x-auto custom-scrollbar">
+                    <div class="flex gap-4">
+                        <?php 
+                        $galleryImages = array_merge(array_slice($movieImages['backdrops'], 0, 8), array_slice($movieImages['posters'], 0, 4));
+                        foreach ($galleryImages as $img): 
+                            $imgUrl = isset($img['file_path']) ? $img['file_path'] : '';
+                            if (empty($imgUrl)) continue;
+                            if (strpos($imgUrl, 'http') !== 0) $imgUrl = 'https://image.tmdb.org/t/p/w780' . $imgUrl;
+                        ?>
+                        <div class="shrink-0 relative group rounded-xl overflow-hidden cursor-pointer" onclick="window.open('<?= htmlspecialchars(str_replace('/w780/', '/original/', $imgUrl)) ?>', '_blank')">
+                            <img loading="lazy" src="<?= htmlspecialchars($imgUrl) ?>" class="h-40 w-auto rounded-xl object-cover hover:scale-110 transition-transform duration-300 bg-[#202020]">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <i data-lucide="zoom-in" class="w-6 h-6 text-white"></i>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- Comments -->
             <div id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
