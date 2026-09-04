@@ -283,13 +283,20 @@ for ($page = $from_page; $page <= $to_page; $page++) {
     $multiResults = multiRequestWithRetry($detailUrls, 5);
     
     $successCount = 0;
+    $savedMovies = [];
     foreach ($multiResults as $slug => $detailRes) {
         if (saveMovieData($detailRes, $slug, $repo, $catRepo, $pdo, $crawler)) {
             $successCount++;
+            $movieName = isset($detailRes['data']['item']['name']) ? $detailRes['data']['item']['name'] : (isset($detailRes['movie']['name']) ? $detailRes['movie']['name'] : $slug);
+            $savedMovies[] = $movieName;
         }
     }
     
     echo "   -> Đã lưu thành công $successCount/" . count($slugs) . " phim ở trang $page.\n";
+    if ($successCount > 0) {
+        $logLine = "[" . date('Y-m-d H:i:s') . "] Trang $page: " . implode(", ", $savedMovies) . "\n";
+        file_put_contents(__DIR__ . '/cron_batch_history.log', $logLine, FILE_APPEND);
+    }
     
     // Lưu lại tiến trình (đánh dấu trang tiếp theo sẽ chạy)
     file_put_contents($progress_file, $page + 1);
