@@ -341,6 +341,12 @@ function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category 
         else if ($slug === 'phim-bo') $where[] = "type = 'series'";
         else if ($slug === 'hoat-hinh') $where[] = "type = 'hoathinh'";
         else if ($slug === 'tv-shows') $where[] = "type = 'tvshows'";
+    } else if ($type === 'the-loai' && $slug) {
+        $where[] = "categories_json LIKE ?";
+        $params[] = '%"slug":"' . $slug . '"%';
+    } else if ($type === 'quoc-gia' && $slug) {
+        $where[] = "countries_json LIKE ?";
+        $params[] = '%"slug":"' . $slug . '"%';
     }
     
     if ($year) {
