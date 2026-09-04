@@ -328,41 +328,44 @@ function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category 
     
     $where = ["1=1"];
     $params = [];
+    $join = "";
     
     if ($keyword) {
-        $where[] = "(name LIKE ? OR origin_name LIKE ? OR slug LIKE ?)";
+        $join = "LEFT JOIN seo_metadata sm ON m.slug = sm.item_id AND sm.type = 'movie'";
+        $where[] = "(m.name LIKE ? OR m.origin_name LIKE ? OR m.slug LIKE ? OR sm.seo_keywords LIKE ?)";
+        $params[] = "%$keyword%";
         $params[] = "%$keyword%";
         $params[] = "%$keyword%";
         $params[] = "%$keyword%";
     }
     
     if ($type === 'danh-sach' && $slug) {
-        if ($slug === 'phim-le') $where[] = "type = 'single'";
-        else if ($slug === 'phim-bo') $where[] = "type = 'series'";
-        else if ($slug === 'hoat-hinh') $where[] = "type = 'hoathinh'";
-        else if ($slug === 'tv-shows') $where[] = "type = 'tvshows'";
+        if ($slug === 'phim-le') $where[] = "m.type = 'single'";
+        else if ($slug === 'phim-bo') $where[] = "m.type = 'series'";
+        else if ($slug === 'hoat-hinh') $where[] = "m.type = 'hoathinh'";
+        else if ($slug === 'tv-shows') $where[] = "m.type = 'tvshows'";
     } else if ($type === 'the-loai' && $slug) {
-        $where[] = "categories_json LIKE ?";
+        $where[] = "m.categories_json LIKE ?";
         $params[] = '%"slug":"' . $slug . '"%';
     } else if ($type === 'quoc-gia' && $slug) {
-        $where[] = "countries_json LIKE ?";
+        $where[] = "m.countries_json LIKE ?";
         $params[] = '%"slug":"' . $slug . '"%';
     }
     
     if ($year) {
-        $where[] = "year = ?";
+        $where[] = "m.year = ?";
         $params[] = $year;
     }
     
     $whereClause = implode(' AND ', $where);
     
-    $countSql = "SELECT COUNT(*) FROM movies WHERE $whereClause";
+    $countSql = "SELECT COUNT(DISTINCT m.id) FROM movies m $join WHERE $whereClause";
     $stmt = $pdo->prepare($countSql);
     $stmt->execute($params);
     $totalItems = $stmt->fetchColumn();
     $totalPages = ceil($totalItems / $limit);
     
-    $sql = "SELECT * FROM movies WHERE $whereClause ORDER BY updated_at DESC LIMIT $limit OFFSET $offset";
+    $sql = "SELECT DISTINCT m.* FROM movies m $join WHERE $whereClause ORDER BY m.updated_at DESC LIMIT $limit OFFSET $offset";
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
