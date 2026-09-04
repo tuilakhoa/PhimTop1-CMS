@@ -237,4 +237,13 @@ if ($action === 'remove_failed_slug') {
     exit;
 }
 
+if ($action === 'reset_cron_batch') {
+    $progressFile = __DIR__ . '/cron_batch_progress.txt';
+    if (file_exists($progressFile)) {
+        unlink($progressFile);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Reset to page 1']);
+    exit;
+}
+
 echo json_encode(['status' => 'error', 'message' => 'Invalid action']);

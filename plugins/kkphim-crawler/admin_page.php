@@ -60,6 +60,33 @@
         </div>
     </div>
 
+    <!-- Panel Cron Batch (Crawl 20 trang mỗi lần) -->
+    <?php
+    $cronBatchFile = __DIR__ . '/cron_batch_progress.txt';
+    $cronBatchPage = file_exists($cronBatchFile) ? (int)trim(file_get_contents($cronBatchFile)) : 1;
+    ?>
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="list-ordered" class="text-purple-400"></i> Cron Crawl Luân Phiên (20 Trang)
+        </h3>
+        <div class="text-gray-300 text-sm space-y-2 mb-4">
+            <p>Cron job đặc biệt giúp crawl dần dữ liệu phim cũ, <strong>mỗi lần chạy sẽ tự động crawl 20 trang</strong> và ghi nhớ tiến độ.</p>
+            <div class="bg-black/40 p-3 rounded-lg border border-purple-500/30 flex justify-between items-center my-3">
+                <span>Trang hiện tại sắp crawl:</span>
+                <span class="text-2xl font-bold text-purple-400" id="cronBatchProgress"><?= $cronBatchPage ?></span>
+            </div>
+            <p>Cú pháp chạy CLI (cron):</p>
+            <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-purple-400">php <?= __DIR__ ?>/cron_batch.php</code>
+            <p class="mt-2">Hoặc chạy qua Web Cron (Cpanel/DirectAdmin):</p>
+            <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-purple-400"><?= (isset($_SERVER["HTTPS"]) ? "https://" : "http://") . $_SERVER["HTTP_HOST"] . "/plugins/kkphim-crawler/cron_batch.php?key=kkphim_cron" ?></code>
+        </div>
+        <div class="flex gap-2">
+            <button id="btnResetCronBatch" class="bg-red-600/80 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset về Trang 1
+            </button>
+        </div>
+    </div>
+
     <!-- Panel Phim Lỗi (Failed Movies) -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg lg:col-span-2">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -268,6 +295,30 @@ document.addEventListener('DOMContentLoaded', function() {
             logMessage(`Đã xảy ra lỗi mạng: ${error.message}`, 'error');
         }
     });
+
+    // Reset Cron Batch Progress
+    const btnResetCronBatch = document.getElementById('btnResetCronBatch');
+    if (btnResetCronBatch) {
+        btnResetCronBatch.addEventListener('click', async () => {
+            if (!confirm('Bạn có chắc chắn muốn reset tiến trình Cron Batch về lại trang 1?')) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'reset_cron_batch');
+                const res = await fetch(pluginPath, { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    document.getElementById('cronBatchProgress').textContent = '1';
+                    logMessage('Đã reset tiến độ Cron Batch về trang 1', 'success');
+                } else {
+                    logMessage('Lỗi khi reset: ' + data.message, 'error');
+                }
+            } catch (e) {
+                logMessage('Lỗi mạng khi reset', 'error');
+            }
+        });
+    }
 
     // Crawl List
     document.getElementById('crawlListForm').addEventListener('submit', async (e) => {
