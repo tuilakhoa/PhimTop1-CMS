@@ -32,6 +32,30 @@
         </form>
     </div>
 
+    <!-- Panel Crawl Theo Từ Khóa -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="search" class="text-blue-400"></i> Crawl Phim Theo Từ Khóa
+        </h3>
+        
+        <form id="crawlKeywordForm" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Từ Khóa</label>
+                    <input type="text" name="keyword" placeholder="Nhập tên phim..." class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400 transition-colors" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Số Lượng</label>
+                    <input type="number" name="limit" value="10" min="1" max="100" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400 transition-colors">
+                </div>
+            </div>
+            
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                <i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl
+            </button>
+        </form>
+    </div>
+
     <!-- Panel Cron Job -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -427,5 +451,76 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Bắt đầu Crawl';
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
+
+    // Crawl Keyword
+    const crawlKeywordForm = document.getElementById('crawlKeywordForm');
+    if (crawlKeywordForm) {
+        crawlKeywordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const keyword = e.target.keyword.value.trim();
+            const limit = parseInt(e.target.limit.value) || 10;
+            const fetchImages = document.getElementById('fetch_images')?.checked ? '1' : '0';
+            
+            if (!keyword) return;
+
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Tìm...';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            logMessage(`Đang tìm kiếm phim với từ khóa: <b>${keyword}</b>...`, 'info');
+
+            try {
+                // 1. Get slugs for this keyword
+                const pData = new FormData();
+                pData.append('action', 'crawl_keyword');
+                pData.append('keyword', keyword);
+                pData.append('limit', limit);
+                
+                const pRes = await fetch(pluginPath, { method: 'POST', body: pData });
+                const pJson = await pRes.json();
+                
+                if (pJson.status !== 'success') {
+                    logMessage(`Lỗi tìm kiếm: ${pJson.message}`, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    return;
+                }
+
+                const slugs = pJson.slugs || [];
+                logMessage(`Tìm thấy ${slugs.length} phim. Bắt đầu tải...`, 'info');
+
+                // 2. Fetch each movie in sequence
+                for (let i = 0; i < slugs.length; i++) {
+                    const slug = slugs[i];
+                    const mData = new FormData();
+                    mData.append('action', 'crawl_single');
+                    mData.append('slug', slug);
+                    mData.append('fetch_images', fetchImages);
+                    
+                    try {
+                        const mRes = await fetch(pluginPath, { method: 'POST', body: mData });
+                        const mJson = await mRes.json();
+                        
+                        if (mJson.status === 'success') {
+                            logMessage(`[Từ khóa - ${i+1}/${slugs.length}] Đã lưu: <b>${mJson.movie_name}</b>`, 'success');
+                        } else {
+                            logMessage(`[Từ khóa - ${i+1}/${slugs.length}] Lỗi (${slug}): ${mJson.message}`, 'error');
+                        }
+                    } catch (e) {
+                        logMessage(`[Từ khóa - ${i+1}/${slugs.length}] Lỗi mạng (${slug})`, 'error');
+                    }
+                }
+                logMessage('<b>Hoàn thành tải phim theo từ khóa!</b>', 'success');
+            } catch (err) {
+                logMessage(`Lỗi kết nối: ${err.message}`, 'error');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    }
 });
 </script>

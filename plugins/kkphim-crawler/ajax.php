@@ -34,6 +34,33 @@ if ($action === 'get_page_slugs') {
     exit;
 }
 
+if ($action === 'crawl_keyword') {
+    $keyword = $_POST['keyword'] ?? '';
+    $limit = isset($_POST['limit']) ? (int)$_POST['limit'] : 10;
+    
+    if (empty($keyword)) {
+        echo json_encode(['status' => 'error', 'message' => 'Vui lòng nhập từ khóa']);
+        exit;
+    }
+    
+    $res = $crawler->searchMovies($keyword, $limit);
+    
+    if (!$res || !isset($res['data']['items'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Lỗi kết nối API hoặc không tìm thấy phim nào']);
+        exit;
+    }
+    
+    $slugs = [];
+    foreach ($res['data']['items'] as $item) {
+        if (!empty($item['slug'])) {
+            $slugs[] = $item['slug'];
+        }
+    }
+    
+    echo json_encode(['status' => 'success', 'slugs' => $slugs, 'total' => count($slugs)]);
+    exit;
+}
+
 if ($action === 'crawl_single') {
     $slug = $_POST['slug'] ?? '';
     $fetchImages = isset($_POST['fetch_images']) && $_POST['fetch_images'] == '1';

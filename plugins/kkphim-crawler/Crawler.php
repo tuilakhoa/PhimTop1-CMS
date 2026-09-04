@@ -27,6 +27,10 @@ class KKPhimCrawler {
     }
 
     // 2. Lấy chi tiết phim theo slug (API mới v1)
+    public function searchMovies($keyword, $limit = 10) {
+        return $this->request("/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&limit=" . $limit);
+    }
+
     public function getMovieDetail($slug) {
         return $this->request("/v1/api/phim/" . urlencode($slug));
     }
