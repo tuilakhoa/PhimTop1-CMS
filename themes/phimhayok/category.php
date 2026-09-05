@@ -131,10 +131,16 @@ $filterSorts = [
                         <div class="absolute bottom-2 left-2 right-2 flex justify-between items-end">
                             <?php 
                             $cardImdb = $item['imdb_vote'] ?? ($item['imdb']['vote_average'] ?? 0);
+                            $cardTmdb = $item['tmdb_vote'] ?? ($item['tmdb']['vote_average'] ?? 0);
+                            
                             if ($cardImdb >= 7.5): 
                             ?>
-                                <span class="bg-[#f5c518] text-black text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center shadow-lg" title="Siêu Phẩm IMDb">
-                                    <i data-lucide="star" class="w-3 h-3 mr-0.5 fill-current"></i> <?= number_format($cardImdb, 1) ?>
+                                <span class="bg-[#f5c518] text-black text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center shadow-lg" title="Siêu Phẩm IMDb">
+                                    IMDb <i data-lucide="star" class="w-2.5 h-2.5 mx-0.5 fill-current"></i> <?= number_format($cardImdb, 1) ?>
+                                </span>
+                            <?php elseif ($cardTmdb >= 7.5): ?>
+                                <span class="text-[#90cea1] text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center shadow-lg" style="background-color: #0d253f; border: 1px solid rgba(1,180,228,0.5);" title="Siêu Phẩm TMDB">
+                                    TMDB <i data-lucide="star" class="w-2.5 h-2.5 mx-0.5 fill-current"></i> <?= number_format($cardTmdb, 1) ?>
                                 </span>
                             <?php else: ?>
                                 <span></span>
