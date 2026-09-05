@@ -76,11 +76,11 @@ function multiRequestWithRetry($urls, $max_retries = 5) {
             // Thành công nếu HTTP 200 và parse JSON có data
             if ($httpCode >= 200 && $httpCode < 300 && $parsed) {
                 $results[$key] = $parsed;
-            } elseif ($httpCode == 404) {
-                // Nếu 404 (Không tìm thấy), coi như không có dữ liệu, không thử lại
+            } elseif ($httpCode == 404 || $httpCode == 500) {
+                // Nếu 404 hoặc 500, API của nguồn có thể đang lỗi cục bộ với phim này, bỏ qua không retry
                 $results[$key] = [];
             } else {
-                // Thất bại, đưa vào mảng để thử lại
+                // Thất bại (có thể do rate limit, 502, 503, timeout), đưa vào mảng để thử lại
                 $new_failed[$key] = $failed_urls[$key];
             }
             
