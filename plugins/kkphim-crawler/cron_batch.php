@@ -152,73 +152,80 @@ function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $peoplesData, $images
         'updated_at' => date('Y-m-d H:i:s')
     ];
     
-    $repo->saveMovie($movieData);
-    
-    if (isset($movie['category']) && is_array($movie['category'])) {
-        foreach ($movie['category'] as $c) {
-            if (!empty($c['slug']) && !empty($c['name'])) {
-                $catRepo->saveCategory($c['slug'], $c['name'], 'genre');
-            }
-        }
-    }
-    if (isset($movie['country']) && is_array($movie['country'])) {
-        foreach ($movie['country'] as $c) {
-            if (!empty($c['slug']) && !empty($c['name'])) {
-                $catRepo->saveCategory($c['slug'], $c['name'], 'country');
-            }
-        }
-    }
-    
-    // Lưu keywords
-    if (!empty($keywordsData)) {
-        $keywords = [];
-        foreach ($keywordsData as $kw) {
-            if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
-        }
-        if (!empty($keywords)) {
-            $keywordString = implode(', ', $keywords);
-            $seoRepo = getSeoRepository();
-            $seoData = $seoRepo->getSeoMetadata('movie', $movie['slug']);
-            if (!$seoData) {
-                $seoData = [
-                    'type' => 'movie',
-                    'item_id' => $movie['slug'],
-                    'seo_title' => $movieData['name'],
-                    'seo_desc' => mb_substr(strip_tags($movieData['content']), 0, 160),
-                    'seo_keywords' => $keywordString
-                ];
-            } else {
-                $seoData['seo_keywords'] = $keywordString;
-            }
-            $seoRepo->saveSeoMetadata($seoData);
-        }
-    }
-
-    if ($pdo) {
-        $stmtDel = $pdo->prepare("DELETE FROM episodes WHERE movie_slug = ?");
-        $stmtDel->execute([$movie['slug']]);
+    try {
+        $repo->saveMovie($movieData);
         
-        $sqlEp = "INSERT INTO episodes (movie_slug, server_name, name, slug, filename, embed_url, m3u8_url) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $stmtIns = $pdo->prepare($sqlEp);
-        
-        foreach ($episodesList as $server) {
-            $serverName = $server['server_name'] ?? 'Server 1';
-            $epData = $server['server_data'] ?? [];
-            foreach ($epData as $ep) {
-                $stmtIns->execute([
-                    $movie['slug'],
-                    $serverName,
-                    $ep['name'] ?? '',
-                    $ep['slug'] ?? '',
-                    $ep['filename'] ?? '',
-                    $ep['link_embed'] ?? '',
-                    $ep['link_m3u8'] ?? ''
-                ]);
+        if (isset($movie['category']) && is_array($movie['category'])) {
+            foreach ($movie['category'] as $c) {
+                if (!empty($c['slug']) && !empty($c['name'])) {
+                    $catRepo->saveCategory($c['slug'], $c['name'], 'genre');
+                }
             }
         }
+        if (isset($movie['country']) && is_array($movie['country'])) {
+            foreach ($movie['country'] as $c) {
+                if (!empty($c['slug']) && !empty($c['name'])) {
+                    $catRepo->saveCategory($c['slug'], $c['name'], 'country');
+                }
+            }
+        }
+        
+        // Lưu keywords
+        if (!empty($keywordsData)) {
+            $keywords = [];
+            foreach ($keywordsData as $kw) {
+                if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
+            }
+            if (!empty($keywords)) {
+                $keywordString = implode(', ', $keywords);
+                $seoRepo = getSeoRepository();
+                $seoData = $seoRepo->getSeoMetadata('movie', $movie['slug']);
+                if (!$seoData) {
+                    $seoData = [
+                        'type' => 'movie',
+                        'item_id' => $movie['slug'],
+                        'seo_title' => $movieData['name'],
+                        'seo_desc' => mb_substr(strip_tags($movieData['content']), 0, 160),
+                        'seo_keywords' => $keywordString
+                    ];
+                } else {
+                    $seoData['seo_keywords'] = $keywordString;
+                }
+                $seoRepo->saveSeoMetadata($seoData);
+            }
+        }
+    
+        if ($pdo) {
+            $stmtDel = $pdo->prepare("DELETE FROM episodes WHERE movie_slug = ?");
+            $stmtDel->execute([$movie['slug']]);
+            
+            $sqlEp = "INSERT INTO episodes (movie_slug, server_name, name, slug, filename, embed_url, m3u8_url) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmtIns = $pdo->prepare($sqlEp);
+            
+            foreach ($episodesList as $server) {
+                $serverName = $server['server_name'] ?? 'Server 1';
+                $epData = $server['server_data'] ?? [];
+                foreach ($epData as $ep) {
+                    $epName = mb_substr($ep['name'] ?? '', 0, 100);
+                    $epSlug = mb_substr($ep['slug'] ?? '', 0, 255);
+                    $stmtIns->execute([
+                        $movie['slug'],
+                        $serverName,
+                        $epName,
+                        $epSlug,
+                        $ep['filename'] ?? '',
+                        $ep['link_embed'] ?? '',
+                        $ep['link_m3u8'] ?? ''
+                    ]);
+                }
+            }
+        }
+        return true;
+    } catch (Exception $e) {
+        file_put_contents(__DIR__ . '/cron_batch_errors.log', "[" . date('Y-m-d H:i:s') . "] Lỗi khi lưu phim {$movie['slug']}: " . $e->getMessage() . "\n", FILE_APPEND);
+        return false;
     }
-    return true;
 }
 
 // Bắt đầu loop qua các trang
