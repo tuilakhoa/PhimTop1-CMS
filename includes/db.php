@@ -221,10 +221,10 @@ function getSettings($forceRefresh = false) {
             $row['initialized'] = true;
             
             // Auto-migrate schema based on code version
-            if (!isset($row['db_version']) || $row['db_version'] < 29) {
+            if (!isset($row['db_version']) || $row['db_version'] < 30) {
                 // Update db_version to trigger migrations in updateSettings
-                updateSettings(['db_version' => 29]);
-                $row['db_version'] = 29;
+                updateSettings(['db_version' => 30]);
+                $row['db_version'] = 30;
             }
             
             $cachedSettings = array_merge($defaultSettings, $row);
