@@ -58,31 +58,156 @@
             </div>
         </div>
     </footer>
+    <!-- Share Modal -->
+    <div id="shareModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeShareModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-[#141414] border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="shareModalContent">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <i data-lucide="share-2" class="w-5 h-5 mr-2 text-phim-yellow"></i> Chia sẻ phim
+                </h3>
+                <button onclick="closeShareModal()" class="text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-full p-2 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <!-- Movie Info Preview -->
+            <div class="bg-[#1a1a1a] rounded-xl p-4 mb-5 border border-gray-800 flex items-center gap-4">
+                <div class="flex-1">
+                    <p class="text-sm text-gray-400 mb-1">Đang chia sẻ:</p>
+                    <p id="shareMovieName" class="text-white font-bold line-clamp-2"></p>
+                </div>
+            </div>
+
+            <!-- Social Share Buttons -->
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                <button onclick="shareSocial('facebook')" class="flex flex-col items-center justify-center py-3 bg-[#1877F2]/10 hover:bg-[#1877F2]/20 border border-[#1877F2]/30 rounded-xl transition-colors group">
+                    <i data-lucide="facebook" class="w-6 h-6 text-[#1877F2] mb-2 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-xs text-gray-300 font-medium">Facebook</span>
+                </button>
+                <button onclick="shareSocial('twitter')" class="flex flex-col items-center justify-center py-3 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 border border-[#1DA1F2]/30 rounded-xl transition-colors group">
+                    <i data-lucide="twitter" class="w-6 h-6 text-[#1DA1F2] mb-2 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-xs text-gray-300 font-medium">Twitter</span>
+                </button>
+                <button onclick="shareSocial('telegram')" class="flex flex-col items-center justify-center py-3 bg-[#0088cc]/10 hover:bg-[#0088cc]/20 border border-[#0088cc]/30 rounded-xl transition-colors group">
+                    <i data-lucide="send" class="w-6 h-6 text-[#0088cc] mb-2 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-xs text-gray-300 font-medium">Telegram</span>
+                </button>
+            </div>
+            
+            <!-- Copy Link -->
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-400 mb-2">Hoặc sao chép liên kết:</label>
+                <div class="flex relative">
+                    <input type="text" id="shareMovieUrl" readonly class="w-full bg-[#1a1a1a] border border-gray-700 rounded-l-lg py-3 px-4 text-gray-300 text-sm focus:outline-none focus:border-phim-yellow">
+                    <button onclick="copyShareLink()" class="bg-phim-yellow hover:bg-yellow-500 text-black font-bold px-5 rounded-r-lg flex items-center transition-colors">
+                        <i data-lucide="copy" class="w-4 h-4 mr-2"></i> Copy
+                    </button>
+                </div>
+                <p id="copySuccessMsg" class="text-green-500 text-xs mt-2 hidden flex items-center">
+                    <i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> Đã sao chép liên kết!
+                </p>
+            </div>
+
+            <!-- App Promo -->
+            <?php if (!empty($settings['appDownloadUrl'])): ?>
+            <div class="bg-gradient-to-r from-gray-900 to-black p-4 rounded-xl border border-gray-800 flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-white font-bold mb-0.5">Trải nghiệm tốt hơn</p>
+                    <p class="text-xs text-gray-500">Tải App để xem phim mượt mà, không quảng cáo</p>
+                </div>
+                <a href="<?= htmlspecialchars($settings['appDownloadUrl']) ?>" target="_blank" class="shrink-0 bg-white text-black text-xs font-bold px-3 py-1.5 rounded-full hover:bg-gray-200 transition-colors">
+                    Tải App
+                </a>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <script>
+      let currentShareUrl = '';
+      
       function shareMovie(movieName) {
-          var movieUrl = window.location.href;
-          var appUrl = '<?= !empty($settings['appDownloadUrl']) ? addslashes($settings['appDownloadUrl']) : 'https://phimtop1.com' ?>';
-          var shareText = `Đang xem phim: ${movieName}\nTải app Android để xem phim mượt mà, không quảng cáo: ${appUrl}`;
-          var fallbackText = `Đang xem phim: ${movieName}\nXem ngay tại: ${movieUrl}\n\nTải app Android để xem phim mượt mà, không quảng cáo: ${appUrl}`;
+          const modal = document.getElementById('shareModal');
+          const content = document.getElementById('shareModalContent');
           
-          if (navigator.share) {
+          // Try native Web Share API first on mobile
+          if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+              var appUrl = '<?= !empty($settings['appDownloadUrl']) ? addslashes($settings['appDownloadUrl']) : 'https://phimtop1.com' ?>';
+              var shareText = `Đang xem phim: ${movieName}\nTải app Android để xem phim mượt mà, không quảng cáo: ${appUrl}`;
               navigator.share({
                   title: movieName,
                   text: shareText,
-                  url: movieUrl
-              }).catch((error) => console.log('Error sharing', error));
+                  url: window.location.href
+              }).catch(console.error);
+              return;
+          }
+
+          // Fallback to custom Modal on Desktop
+          currentShareUrl = window.location.href;
+          document.getElementById('shareMovieName').textContent = movieName;
+          document.getElementById('shareMovieUrl').value = currentShareUrl;
+          document.getElementById('copySuccessMsg').classList.add('hidden');
+          
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          // Trigger animation
+          setTimeout(() => {
+              content.classList.remove('scale-95', 'opacity-0');
+              content.classList.add('scale-100', 'opacity-100');
+          }, 10);
+          
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+
+      function closeShareModal() {
+          const modal = document.getElementById('shareModal');
+          const content = document.getElementById('shareModalContent');
+          
+          content.classList.remove('scale-100', 'opacity-100');
+          content.classList.add('scale-95', 'opacity-0');
+          
+          setTimeout(() => {
+              modal.classList.remove('flex');
+              modal.classList.add('hidden');
+          }, 300);
+      }
+
+      function copyShareLink() {
+          const urlInput = document.getElementById('shareMovieUrl');
+          urlInput.select();
+          urlInput.setSelectionRange(0, 99999); 
+          
+          if (navigator.clipboard) {
+              navigator.clipboard.writeText(urlInput.value).then(() => {
+                  document.getElementById('copySuccessMsg').classList.remove('hidden');
+              });
           } else {
-              if (navigator.clipboard && window.isSecureContext) {
-                  navigator.clipboard.writeText(fallbackText).then(() => {
-                      alert('Đã copy nội dung chia sẻ vào khay nhớ tạm!');
-                  }).catch(() => {
-                      prompt('Copy nội dung này để chia sẻ:', fallbackText);
-                  });
-              } else {
-                  prompt('Copy nội dung này để chia sẻ:', fallbackText);
-              }
+              document.execCommand('copy');
+              document.getElementById('copySuccessMsg').classList.remove('hidden');
           }
       }
+
+      function shareSocial(platform) {
+          const url = encodeURIComponent(currentShareUrl);
+          const title = encodeURIComponent(document.getElementById('shareMovieName').textContent);
+          let shareUrl = '';
+          
+          switch(platform) {
+              case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break;
+              case 'twitter': shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`; break;
+              case 'telegram': shareUrl = `https://t.me/share/url?url=${url}&text=${title}`; break;
+          }
+          
+          if (shareUrl) {
+              window.open(shareUrl, 'share_window', 'width=600,height=500,location=no,menubar=no,toolbar=no');
+          }
+      }
+
       if (typeof lucide !== 'undefined') {
           lucide.createIcons();
       } else {
