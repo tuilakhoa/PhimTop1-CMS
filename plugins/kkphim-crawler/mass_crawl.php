@@ -79,6 +79,9 @@ function multiRequestWithRetry($urls, $max_retries = 5) {
             // Thành công nếu HTTP 200 và parse JSON có data
             if ($httpCode >= 200 && $httpCode < 300 && $parsed && (isset($parsed['data']['item']) || isset($parsed['movie']))) {
                 $results[$key] = $parsed;
+            } elseif ($httpCode == 404 || ($httpCode >= 200 && $httpCode < 300 && $parsed)) {
+                // Nếu 404 hoặc response OK nhưng thiếu data.item, không thử lại
+                $results[$key] = [];
             } else {
                 // Thất bại, đưa vào mảng để thử lại
                 $new_failed[$key] = $failed_urls[$key];

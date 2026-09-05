@@ -65,6 +65,8 @@ function multiRequestWithRetry($urls, $max_retries = 3) {
             
             if ($httpCode >= 200 && $httpCode < 300 && $parsed) {
                 $results[$key] = $parsed;
+            } elseif ($httpCode == 404) {
+                $results[$key] = [];
             } else {
                 $new_failed[$key] = $failed_urls[$key];
             }
