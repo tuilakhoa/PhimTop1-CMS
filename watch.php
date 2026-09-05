@@ -51,12 +51,35 @@ if (!$movie) {
     die("Phim không tồn tại.");
 }
 
+$currentServerIndex = isset($_GET['server']) ? (int)$_GET['server'] : 0;
+
 $currentEp = null;
 if (!empty($episodes)) {
-    foreach ($episodes[0]['server_data'] as $e) {
-        if ($e['slug'] === $ep) {
-            $currentEp = $e;
-            break;
+    // If the requested server index doesn't exist, fallback to 0
+    if (!isset($episodes[$currentServerIndex])) {
+        $currentServerIndex = 0;
+    }
+    
+    // Search in the requested server first
+    if (isset($episodes[$currentServerIndex]['server_data'])) {
+        foreach ($episodes[$currentServerIndex]['server_data'] as $e) {
+            if ($e['slug'] === $ep) {
+                $currentEp = $e;
+                break;
+            }
+        }
+    }
+    
+    // If not found in the requested server, search across all servers
+    if (!$currentEp) {
+        foreach ($episodes as $sIdx => $server) {
+            foreach ($server['server_data'] as $e) {
+                if ($e['slug'] === $ep) {
+                    $currentEp = $e;
+                    $currentServerIndex = $sIdx;
+                    break 2;
+                }
+            }
         }
     }
 }
