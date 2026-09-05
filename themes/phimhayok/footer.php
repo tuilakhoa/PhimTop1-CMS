@@ -86,15 +86,21 @@
             <!-- Social Share Buttons -->
             <div class="grid grid-cols-3 gap-3 mb-5">
                 <button onclick="shareSocial('facebook')" class="flex flex-col items-center justify-center py-3 bg-[#1877F2]/10 hover:bg-[#1877F2]/20 border border-[#1877F2]/30 rounded-xl transition-colors group">
-                    <i data-lucide="facebook" class="w-6 h-6 text-[#1877F2] mb-2 group-hover:scale-110 transition-transform"></i>
+                    <svg class="w-6 h-6 text-[#1877F2] mb-2 group-hover:scale-110 transition-transform fill-current" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
                     <span class="text-xs text-gray-300 font-medium">Facebook</span>
                 </button>
-                <button onclick="shareSocial('twitter')" class="flex flex-col items-center justify-center py-3 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 border border-[#1DA1F2]/30 rounded-xl transition-colors group">
-                    <i data-lucide="twitter" class="w-6 h-6 text-[#1DA1F2] mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-xs text-gray-300 font-medium">Twitter</span>
+                <button onclick="shareSocial('x')" class="flex flex-col items-center justify-center py-3 bg-white/5 hover:bg-white/10 border border-white/20 rounded-xl transition-colors group">
+                    <svg class="w-5 h-5 text-white mb-2 group-hover:scale-110 transition-transform fill-current" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    <span class="text-xs text-gray-300 font-medium">X</span>
                 </button>
                 <button onclick="shareSocial('telegram')" class="flex flex-col items-center justify-center py-3 bg-[#0088cc]/10 hover:bg-[#0088cc]/20 border border-[#0088cc]/30 rounded-xl transition-colors group">
-                    <i data-lucide="send" class="w-6 h-6 text-[#0088cc] mb-2 group-hover:scale-110 transition-transform"></i>
+                    <svg class="w-6 h-6 text-[#0088cc] mb-2 group-hover:scale-110 transition-transform fill-current" viewBox="0 0 24 24">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.888-.662 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
                     <span class="text-xs text-gray-300 font-medium">Telegram</span>
                 </button>
             </div>
@@ -105,11 +111,11 @@
                 <div class="flex relative">
                     <input type="text" id="shareMovieUrl" readonly class="w-full bg-[#1a1a1a] border border-gray-700 rounded-l-lg py-3 px-4 text-gray-300 text-sm focus:outline-none focus:border-phim-yellow">
                     <button onclick="copyShareLink()" class="bg-phim-yellow hover:bg-yellow-500 text-black font-bold px-5 rounded-r-lg flex items-center transition-colors">
-                        <i data-lucide="copy" class="w-4 h-4 mr-2"></i> Copy
+                        <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy
                     </button>
                 </div>
                 <p id="copySuccessMsg" class="text-green-500 text-xs mt-2 hidden flex items-center">
-                    <i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> Đã sao chép liên kết!
+                    <svg class="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Đã sao chép liên kết!
                 </p>
             </div>
 
@@ -160,8 +166,6 @@
               content.classList.remove('scale-95', 'opacity-0');
               content.classList.add('scale-100', 'opacity-100');
           }, 10);
-          
-          if (typeof lucide !== 'undefined') lucide.createIcons();
       }
 
       function closeShareModal() {
@@ -199,7 +203,7 @@
           
           switch(platform) {
               case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break;
-              case 'twitter': shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`; break;
+              case 'x': shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`; break;
               case 'telegram': shareUrl = `https://t.me/share/url?url=${url}&text=${title}`; break;
           }
           
