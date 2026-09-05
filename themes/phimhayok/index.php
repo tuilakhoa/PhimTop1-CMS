@@ -65,66 +65,35 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
 ?>
 
 <?php if (!empty($featuredMovies)): ?>
-<div class="relative w-full h-[60vh] md:h-[90vh] overflow-hidden -mt-[72px] bg-[#0a0a0a] group">
+<div class="relative w-full h-[60vh] md:h-[85vh] overflow-hidden -mt-[72px] bg-black">
     <?php if ($featuredStyle === 'slider' && count($featuredMovies) > 1): ?>
         <div class="swiper swiper-hero w-full h-full">
             <div class="swiper-wrapper">
                 <?php foreach($featuredMovies as $featured): ?>
                 <div class="swiper-slide relative w-full h-full">
-                    <div class="absolute inset-0 bg-black animate-pulse"></div>
-                    <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? 'Banner') ?>" class="w-full h-full object-cover opacity-90 transition-transform duration-[10s] hover:scale-105">
+                    <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
                     
-                    <!-- Advanced Gradients for Cinematic Feel -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent w-full md:w-[70%]"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent"></div>
-                    <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/60 to-transparent"></div>
-                    
-                    <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-24 max-w-[1600px] mx-auto z-10 pt-24 pb-12">
-                        <div class="max-w-3xl transform transition-all duration-700 translate-y-0 opacity-100">
-                            
-                            <!-- Metadata tags (Year, Rating, Quality) -->
-                            <div class="flex flex-wrap items-center gap-3 mb-4 md:mb-6 text-xs md:text-sm font-semibold tracking-wider">
-                                <?php if (!empty($featured['year'])): ?>
-                                    <span class="text-white/80 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10"><?= htmlspecialchars($featured['year']) ?></span>
-                                <?php endif; ?>
-                                <?php if (!empty($featured['quality'])): ?>
-                                    <span class="text-phim-yellow bg-phim-yellow/10 backdrop-blur-md px-3 py-1 rounded-full border border-phim-yellow/20 uppercase shadow-[0_0_10px_rgba(234,179,8,0.2)]"><?= htmlspecialchars($featured['quality']) ?></span>
-                                <?php endif; ?>
-                                <?php if (!empty($featured['episode_current'])): ?>
-                                    <span class="text-white bg-red-600/80 backdrop-blur-md px-3 py-1 rounded-full shadow-lg"><?= htmlspecialchars($featured['episode_current']) ?></span>
-                                <?php endif; ?>
-                            </div>
-
-                            <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4 leading-tight tracking-tight drop-shadow-2xl line-clamp-2 md:line-clamp-3">
-                                <?= htmlspecialchars($featured['name'] ?? '') ?>
-                            </h1>
-                            
-                            <?php if (!empty($featured['origin_name'])): ?>
-                                <h2 class="text-lg md:text-xl text-gray-400 font-medium mb-4 italic font-serif">
-                                    <?= htmlspecialchars($featured['origin_name']) ?>
-                                </h2>
-                            <?php endif; ?>
-
-                            <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
-                                <p class="text-gray-300/90 text-sm md:text-lg mb-8 md:mb-10 line-clamp-3 md:line-clamp-4 leading-relaxed max-w-2xl font-light text-shadow-sm">
-                                    <?= htmlspecialchars(strip_tags($featured['content'])) ?>
-                                </p>
-                            <?php endif; ?>
-                            
-                            <div class="flex flex-wrap items-center gap-4">
-                                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-black bg-phim-yellow rounded-full overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(234,179,8,0.5)] focus:outline-none focus:ring-4 focus:ring-yellow-400/50">
-                                    <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
-                                    <i data-lucide="play" class="w-6 h-6 mr-2 fill-current"></i>
-                                    Xem Phim Ngay
+            <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-10 pt-20">
+                <div class="max-w-2xl">
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl line-clamp-2 md:line-clamp-3 overflow-hidden text-ellipsis" style="font-family: 'Playfair Display', serif;">
+                        <?= htmlspecialchars($featured['name'] ?? '') ?>
+                    </h1>
+                    <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
+                        <p class="text-gray-300 text-sm md:text-lg mb-6 md:mb-8 line-clamp-3 leading-relaxed max-w-xl">
+                            <?= htmlspecialchars(strip_tags($featured['content'])) ?>
+                        </p>
+                    <?php endif; ?>
+                            <div class="flex items-center space-x-4">
+                                <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center transition-transform hover:scale-105 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
+                                    <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 text-black ml-2"></i>
                                 </a>
-                                
-                                <button class="group inline-flex items-center justify-center px-6 py-3.5 text-base font-bold text-white bg-white/10 backdrop-blur-md border border-white/20 rounded-full transition-all hover:bg-white/20 hover:border-white/40 hover:scale-105">
-                                    <i data-lucide="info" class="w-5 h-5 mr-2"></i>
-                                    Chi Tiết
+                                <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
+                                    <i data-lucide="heart" class="w-5 h-5 text-white"></i>
                                 </button>
-
-                                <button class="w-12 h-12 bg-white/5 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md border border-white/10 transition-all hover:scale-110 hover:text-red-500 group">
-                                    <i data-lucide="heart" class="w-5 h-5 text-white/70 group-hover:text-red-500 transition-colors"></i>
+                                <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
+                                    <i data-lucide="info" class="w-5 h-5 text-white"></i>
                                 </button>
                             </div>
                         </div>
@@ -132,90 +101,66 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 </div>
                 <?php endforeach; ?>
             </div>
-            
-            <!-- Modern Navigation & Pagination -->
-            <div class="absolute bottom-0 left-0 w-full z-50">
-                <div class="h-1.5 w-full bg-white/10">
-                    <div class="hero-progress-line h-full bg-gradient-to-r from-phim-yellow to-yellow-300 w-0 transition-all duration-75 ease-linear shadow-[0_0_10px_rgba(234,179,8,0.5)]"></div>
-                </div>
+            <!-- Navigation & Pagination -->
+            <div class="absolute bottom-0 left-0 w-full h-1 bg-white/20 z-50">
+                <div class="hero-progress-line h-full bg-phim-yellow w-0 transition-all duration-75 ease-linear"></div>
             </div>
-            
-            <div class="absolute bottom-8 right-8 md:right-16 lg:right-24 z-50 flex items-center gap-4">
-                <div class="swiper-button-prev !static !w-12 !h-12 !mt-0 bg-black/40 backdrop-blur-md border border-white/20 rounded-full !text-white hover:bg-white hover:!text-black transition-all flex items-center justify-center after:!text-sm after:!font-bold"></div>
-                <div class="swiper-pagination !static !w-auto space-x-2"></div>
-                <div class="swiper-button-next !static !w-12 !h-12 !mt-0 bg-black/40 backdrop-blur-md border border-white/20 rounded-full !text-white hover:bg-white hover:!text-black transition-all flex items-center justify-center after:!text-sm after:!font-bold"></div>
-            </div>
+            <div class="swiper-pagination !bottom-8"></div>
+            <div class="swiper-button-prev hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors"></div>
+            <div class="swiper-button-next hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors"></div>
         </div>
     <?php else: $featured = $featuredMovies[0]; ?>
-        <div class="absolute inset-0 bg-black animate-pulse"></div>
-        <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="<?= htmlspecialchars($featured['name'] ?? 'Banner') ?>" class="w-full h-full object-cover opacity-90 transition-transform duration-[10s] hover:scale-105">
+        <div class="absolute inset-0">
+            <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+            <!-- Overlay gradients to make text readable -->
+            <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+        </div>
         
-        <div class="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent w-full md:w-[70%]"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent"></div>
-        <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/60 to-transparent"></div>
-        
-        <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-24 max-w-[1600px] mx-auto z-10 pt-24 pb-12">
-            <div class="max-w-3xl transform transition-all duration-700 translate-y-0 opacity-100">
-                
-                <div class="flex flex-wrap items-center gap-3 mb-4 md:mb-6 text-xs md:text-sm font-semibold tracking-wider">
-                    <?php if (!empty($featured['year'])): ?>
-                        <span class="text-white/80 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10"><?= htmlspecialchars($featured['year']) ?></span>
-                    <?php endif; ?>
-                    <?php if (!empty($featured['quality'])): ?>
-                        <span class="text-phim-yellow bg-phim-yellow/10 backdrop-blur-md px-3 py-1 rounded-full border border-phim-yellow/20 uppercase shadow-[0_0_10px_rgba(234,179,8,0.2)]"><?= htmlspecialchars($featured['quality']) ?></span>
-                    <?php endif; ?>
-                    <?php if (!empty($featured['episode_current'])): ?>
-                        <span class="text-white bg-red-600/80 backdrop-blur-md px-3 py-1 rounded-full shadow-lg"><?= htmlspecialchars($featured['episode_current']) ?></span>
-                    <?php endif; ?>
-                </div>
-
-                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4 leading-tight tracking-tight drop-shadow-2xl line-clamp-2 md:line-clamp-3">
+        <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-10 pt-20">
+            <div class="max-w-2xl">
+                <!-- Title with custom elegant styling based on screenshot -->
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl line-clamp-2 md:line-clamp-3 overflow-hidden text-ellipsis" style="font-family: 'Playfair Display', serif;">
                     <?= htmlspecialchars($featured['name'] ?? '') ?>
                 </h1>
                 
-                <?php if (!empty($featured['origin_name'])): ?>
-                    <h2 class="text-lg md:text-xl text-gray-400 font-medium mb-4 italic font-serif">
-                        <?= htmlspecialchars($featured['origin_name']) ?>
-                    </h2>
-                <?php endif; ?>
-                
                 <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
-                    <p class="text-gray-300/90 text-sm md:text-lg mb-8 md:mb-10 line-clamp-3 md:line-clamp-4 leading-relaxed max-w-2xl font-light text-shadow-sm">
+                    <p class="text-gray-300 text-sm md:text-lg mb-6 md:mb-8 line-clamp-3 leading-relaxed max-w-xl">
                         <?= htmlspecialchars(strip_tags($featured['content'])) ?>
                     </p>
                 <?php endif; ?>
                 
-                <div class="flex flex-wrap items-center gap-4">
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-black bg-phim-yellow rounded-full overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(234,179,8,0.5)] focus:outline-none focus:ring-4 focus:ring-yellow-400/50">
-                        <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
-                        <i data-lucide="play" class="w-6 h-6 mr-2 fill-current"></i>
-                        Xem Phim Ngay
+                <div class="flex items-center space-x-4">
+                    <!-- Big Yellow Play Button -->
+                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center transition-transform hover:scale-105 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
+                        <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 text-black ml-2"></i>
                     </a>
                     
-                    <button class="group inline-flex items-center justify-center px-6 py-3.5 text-base font-bold text-white bg-white/10 backdrop-blur-md border border-white/20 rounded-full transition-all hover:bg-white/20 hover:border-white/40 hover:scale-105">
-                        <i data-lucide="info" class="w-5 h-5 mr-2"></i>
-                        Chi Tiết
+                    <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
+                        <i data-lucide="heart" class="w-5 h-5 text-white"></i>
                     </button>
-
-                    <button class="w-12 h-12 bg-white/5 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md border border-white/10 transition-all hover:scale-110 hover:text-red-500 group">
-                        <i data-lucide="heart" class="w-5 h-5 text-white/70 group-hover:text-red-500 transition-colors"></i>
+                    
+                    <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
+                        <i data-lucide="info" class="w-5 h-5 text-white"></i>
                     </button>
                 </div>
             </div>
             
-            <div class="absolute right-8 md:right-16 bottom-16 hidden lg:flex space-x-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <?php foreach (array_slice($movies, 1, 3) as $m): ?>
-                    <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($m['slug']) ?>" class="w-32 h-20 rounded-lg overflow-hidden border-2 border-white/20 cursor-pointer hover:border-phim-yellow transition-all transform hover:-translate-y-2 hover:shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+            <!-- Small thumbnails at bottom right (Only for single image mode) -->
+            <div class="absolute right-8 md:right-12 bottom-12 hidden lg:flex space-x-2">
+                <?php foreach (array_slice($movies, 1, 4) as $m): ?>
+                    <div class="w-24 h-14 rounded-md overflow-hidden border border-white/30 cursor-pointer hover:border-white transition-colors opacity-70 hover:opacity-100">
                         <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($m['poster_url']) ? $m['poster_url'] : ($m['thumb_url'] ?? ''))) ?>" class="w-full h-full object-cover">
-                    </a>
+                    </div>
                 <?php endforeach; ?>
             </div>
         </div>
     <?php endif; ?>
     
-    <div class="absolute right-8 md:right-12 top-24 md:top-32 flex items-center space-x-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <button class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all bg-black/40 backdrop-blur-md hover:scale-110">
-            <i data-lucide="volume-2" class="w-5 h-5 text-white"></i>
+    <!-- Right side controls (Volume - shared) -->
+    <div class="absolute right-8 md:right-12 bottom-32 md:bottom-40 flex items-center space-x-4 z-20">
+        <button class="w-12 h-12 rounded-full border border-gray-400 flex items-center justify-center hover:bg-white/10 transition-colors bg-black/40 backdrop-blur-sm">
+            <i data-lucide="volume-x" class="w-5 h-5 text-white"></i>
         </button>
     </div>
 </div>
