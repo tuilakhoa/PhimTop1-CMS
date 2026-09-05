@@ -6,17 +6,12 @@ if (!function_exists('getPhimImgUrl')) {
     function getPhimImgUrl($url) {
         global $data, $settings;
         if (empty($url)) return '';
-        // Proxy TMDB URLs if they start with http
-        if (preg_match('/^https?:\/\/image\.tmdb\.org\/(.*)/i', $url, $matches)) {
-            return 'https://wsrv.nl/?url=image.tmdb.org/' . $matches[1];
-        }
-        
         if (preg_match('/^http/', $url)) return $url;
         
         // If the URL looks like a TMDB image path (starts with / and has alphanumeric chars + ext)
         if (preg_match('/^\/[a-zA-Z0-9_-]+\.(jpg|jpeg|png|webp)$/i', $url)) {
-            // Serve through image proxy to avoid ISP blocking
-            return 'https://wsrv.nl/?url=image.tmdb.org/t/p/w500' . ltrim($url, '/');
+            // It's a TMDB image. We can serve it directly from TMDB's image CDN.
+            return 'https://image.tmdb.org/t/p/w500' . $url;
         }
         
         // If the URL is a local crawl path, return it directly
