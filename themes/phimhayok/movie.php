@@ -60,9 +60,9 @@ if (!empty($movie['seo_keywords'])) {
     $movieKeywords = array_map('trim', explode(',', $movie['seo_keywords']));
 }
 
-// Extract TMDB info
-$tmdbVote = $movie['tmdb']['vote_average'] ?? 0;
-$tmdbCount = $movie['tmdb']['vote_count'] ?? 0;
+// Extract TMDB & IMDB info
+$tmdbVote = $movie['tmdb_vote'] ?? ($movie['tmdb']['vote_average'] ?? 0);
+$imdbVote = $movie['imdb_vote'] ?? ($movie['imdb']['vote_average'] ?? 0);
 
 // Auto redirect for watch party
 if (!empty($_GET['party'])) {
@@ -123,7 +123,10 @@ if (!empty($_GET['party'])) {
                 <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['time'] ?? 'Đang cập nhật') ?></span>
                 <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded text-[#fcc526] flex items-center"><i data-lucide="play-circle" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['episode_current'] ?? 'Đang cập nhật') ?></span>
                 <?php if ($tmdbVote > 0): ?>
-                <span class="bg-blue-900 border border-blue-800 px-2.5 py-1 rounded font-bold flex items-center text-white"><i data-lucide="star" class="w-3.5 h-3.5 mr-1.5 text-[#fcc526] fill-current"></i><?= number_format($tmdbVote, 1) ?></span>
+                <span class="bg-blue-900 border border-blue-800 px-2.5 py-1 rounded font-bold flex items-center text-white" title="Điểm TMDB"><span class="text-blue-400 mr-1 text-xs">TMDB</span> <i data-lucide="star" class="w-3.5 h-3.5 mr-1 text-[#fcc526] fill-current"></i><?= number_format($tmdbVote, 1) ?></span>
+                <?php endif; ?>
+                <?php if ($imdbVote > 0): ?>
+                <span class="bg-yellow-900/80 border border-yellow-800 px-2.5 py-1 rounded font-bold flex items-center text-white" title="Điểm IMDB"><span class="text-yellow-400 mr-1 text-xs">IMDB</span> <i data-lucide="star" class="w-3.5 h-3.5 mr-1 text-[#fcc526] fill-current"></i><?= number_format($imdbVote, 1) ?></span>
                 <?php endif; ?>
             </div>
 

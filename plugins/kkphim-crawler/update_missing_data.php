@@ -111,15 +111,18 @@ for ($i = 0; $i < $total; $i += $batchSize) {
         $name = $m['name'];
         $content = $m['content'];
         
-        // Cập nhật time
+        // Cập nhật time, trailer_url, tmdb_vote, imdb_vote
         $detailRes = $multiResults["detail_$slug"] ?? null;
         if ($detailRes && (isset($detailRes['data']['item']) || isset($detailRes['movie']))) {
             $movieApi = $detailRes['data']['item'] ?? $detailRes['movie'];
             $time = $movieApi['time'] ?? '';
+            $trailerUrl = $movieApi['trailer_url'] ?? '';
+            $tmdbVote = $movieApi['tmdb']['vote_average'] ?? 0;
+            $imdbVote = $movieApi['imdb']['vote_average'] ?? 0;
             
-            if (!empty($time)) {
-                $updateStmt = $pdo->prepare("UPDATE movies SET time = ? WHERE slug = ?");
-                $updateStmt->execute([$time, $slug]);
+            if (!empty($time) || !empty($trailerUrl) || $tmdbVote > 0 || $imdbVote > 0) {
+                $updateStmt = $pdo->prepare("UPDATE movies SET time = COALESCE(NULLIF(?, ''), time), trailer_url = COALESCE(NULLIF(?, ''), trailer_url), tmdb_vote = IF(? > 0, ?, tmdb_vote), imdb_vote = IF(? > 0, ?, imdb_vote) WHERE slug = ?");
+                $updateStmt->execute([$time, $trailerUrl, $tmdbVote, $tmdbVote, $imdbVote, $imdbVote, $slug]);
             }
         }
         

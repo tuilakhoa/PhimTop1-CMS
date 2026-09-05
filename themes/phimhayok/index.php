@@ -64,27 +64,48 @@ $hanQuocData = array_values(array_filter($movies, function($m) { return stripos(
 $auMyData = array_values(array_filter($movies, function($m) { return stripos(json_encode($m['country'] ?? ''), 'Âu Mỹ') !== false || stripos(json_encode($m['country'] ?? ''), 'au-my') !== false; }));
 ?>
 
+<?php 
+if (!function_exists('getYoutubeId')) {
+    function getYoutubeId($url) {
+        if (empty($url)) return false;
+        preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $url, $match);
+        return $match[1] ?? false;
+    }
+}
+?>
+
 <?php if (!empty($featuredMovies)): ?>
-<div class="relative w-full h-[60vh] md:h-[85vh] overflow-hidden -mt-[72px] bg-black">
+<div class="relative w-full h-[60vh] md:h-[85vh] overflow-hidden -mt-[72px] bg-black hero-banner-wrapper">
     <?php if ($featuredStyle === 'slider' && count($featuredMovies) > 1): ?>
         <div class="swiper swiper-hero w-full h-full">
             <div class="swiper-wrapper">
-                <?php foreach($featuredMovies as $featured): ?>
-                <div class="swiper-slide relative w-full h-full">
-                    <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+                <?php foreach($featuredMovies as $index => $featured): 
+                    $ytId = getYoutubeId($featured['trailer_url'] ?? '');
+                ?>
+                <div class="swiper-slide relative w-full h-full" data-ytid="<?= htmlspecialchars($ytId) ?>" data-slide-index="<?= $index ?>">
+                    <!-- Background Image (Fallback/Initial) -->
+                    <div class="absolute inset-0 bg-image-layer transition-opacity duration-1000">
+                        <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+                    </div>
                     
-            <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-10 pt-20">
-                <div class="max-w-2xl">
-                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl line-clamp-2 md:line-clamp-3 overflow-hidden text-ellipsis" style="font-family: 'Playfair Display', serif;">
-                        <?= htmlspecialchars($featured['name'] ?? '') ?>
-                    </h1>
-                    <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
-                        <p class="text-gray-300 text-sm md:text-lg mb-6 md:mb-8 line-clamp-3 leading-relaxed max-w-xl">
-                            <?= htmlspecialchars(strip_tags($featured['content'])) ?>
-                        </p>
+                    <!-- Video Layer -->
+                    <?php if ($ytId): ?>
+                    <div class="absolute inset-0 w-[300%] h-[300%] -top-[100%] -left-[100%] z-0 hidden md:block yt-video-layer opacity-0 transition-opacity duration-1000 pointer-events-none" id="yt-player-container-<?= $index ?>"></div>
                     <?php endif; ?>
+
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10 pointer-events-none"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 z-10 pointer-events-none"></div>
+                    
+                    <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-20 pt-20 pointer-events-none">
+                        <div class="max-w-2xl pointer-events-auto">
+                            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl line-clamp-2 md:line-clamp-3 overflow-hidden text-ellipsis" style="font-family: 'Playfair Display', serif;">
+                                <?= htmlspecialchars($featured['name'] ?? '') ?>
+                            </h1>
+                            <?php if (!empty(trim(strip_tags($featured['content'] ?? '')))): ?>
+                                <p class="text-gray-300 text-sm md:text-lg mb-6 md:mb-8 line-clamp-3 leading-relaxed max-w-xl">
+                                    <?= htmlspecialchars(strip_tags($featured['content'])) ?>
+                                </p>
+                            <?php endif; ?>
                             <div class="flex items-center space-x-4">
                                 <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center transition-transform hover:scale-105 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
                                     <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 text-black ml-2"></i>
@@ -105,21 +126,30 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
             <div class="absolute bottom-0 left-0 w-full h-1 bg-white/20 z-50">
                 <div class="hero-progress-line h-full bg-phim-yellow w-0 transition-all duration-75 ease-linear"></div>
             </div>
-            <div class="swiper-pagination !bottom-8"></div>
-            <div class="swiper-button-prev hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors"></div>
-            <div class="swiper-button-next hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors"></div>
+            <div class="swiper-pagination !bottom-8 z-30"></div>
+            <div class="swiper-button-prev hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors z-30"></div>
+            <div class="swiper-button-next hidden md:flex !text-white/50 hover:!text-white after:!text-2xl transition-colors z-30"></div>
         </div>
-    <?php else: $featured = $featuredMovies[0]; ?>
-        <div class="absolute inset-0">
-            <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+    <?php else: 
+        $featured = $featuredMovies[0]; 
+        $ytId = getYoutubeId($featured['trailer_url'] ?? '');
+    ?>
+        <div class="absolute inset-0 w-full h-full" data-ytid="<?= htmlspecialchars($ytId) ?>" data-slide-index="0">
+            <div class="absolute inset-0 bg-image-layer transition-opacity duration-1000">
+                <img fetchpriority="high" src="<?= htmlspecialchars(getPhimImgUrl(!empty($featured['poster_url']) ? $featured['poster_url'] : ($featured['thumb_url'] ?? ''))) ?>" alt="Banner" class="w-full h-full object-cover">
+            </div>
+            
+            <?php if ($ytId): ?>
+            <div class="absolute inset-0 w-[300%] h-[300%] -top-[100%] -left-[100%] z-0 hidden md:block yt-video-layer opacity-0 transition-opacity duration-1000 pointer-events-none" id="yt-player-container-0"></div>
+            <?php endif; ?>
+
             <!-- Overlay gradients to make text readable -->
-            <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10 pointer-events-none"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 z-10 pointer-events-none"></div>
         </div>
         
-        <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-10 pt-20">
-            <div class="max-w-2xl">
-                <!-- Title with custom elegant styling based on screenshot -->
+        <div class="absolute inset-0 flex flex-col justify-center px-4 md:px-12 lg:px-20 max-w-[1400px] mx-auto z-20 pt-20 pointer-events-none">
+            <div class="max-w-2xl pointer-events-auto">
                 <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-4 md:mb-6 leading-tight drop-shadow-xl line-clamp-2 md:line-clamp-3 overflow-hidden text-ellipsis" style="font-family: 'Playfair Display', serif;">
                     <?= htmlspecialchars($featured['name'] ?? '') ?>
                 </h1>
@@ -131,23 +161,19 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
                 <?php endif; ?>
                 
                 <div class="flex items-center space-x-4">
-                    <!-- Big Yellow Play Button -->
                     <a href="/<?= $settings["slugMovie"] ?? "phim" ?>/<?= urlencode($featured['slug']) ?>" class="w-16 h-16 md:w-20 md:h-20 bg-phim-yellow hover:bg-yellow-400 rounded-full flex items-center justify-center transition-transform hover:scale-105 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
                         <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 text-black ml-2"></i>
                     </a>
-                    
                     <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
                         <i data-lucide="heart" class="w-5 h-5 text-white"></i>
                     </button>
-                    
                     <button class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 transition-colors">
                         <i data-lucide="info" class="w-5 h-5 text-white"></i>
                     </button>
                 </div>
             </div>
             
-            <!-- Small thumbnails at bottom right (Only for single image mode) -->
-            <div class="absolute right-8 md:right-12 bottom-12 hidden lg:flex space-x-2">
+            <div class="absolute right-8 md:right-12 bottom-12 hidden lg:flex space-x-2 pointer-events-auto z-30">
                 <?php foreach (array_slice($movies, 1, 4) as $m): ?>
                     <div class="w-24 h-14 rounded-md overflow-hidden border border-white/30 cursor-pointer hover:border-white transition-colors opacity-70 hover:opacity-100">
                         <img loading="lazy" src="<?= htmlspecialchars(getPhimImgUrl(!empty($m['poster_url']) ? $m['poster_url'] : ($m['thumb_url'] ?? ''))) ?>" class="w-full h-full object-cover">
@@ -158,12 +184,153 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
     <?php endif; ?>
     
     <!-- Right side controls (Volume - shared) -->
-    <div class="absolute right-8 md:right-12 bottom-32 md:bottom-40 flex items-center space-x-4 z-20">
-        <button class="w-12 h-12 rounded-full border border-gray-400 flex items-center justify-center hover:bg-white/10 transition-colors bg-black/40 backdrop-blur-sm">
-            <i data-lucide="volume-x" class="w-5 h-5 text-white"></i>
+    <div class="absolute right-8 md:right-12 bottom-32 md:bottom-40 flex items-center space-x-4 z-30">
+        <button id="hero-volume-btn" class="w-12 h-12 rounded-full border border-gray-400 flex items-center justify-center hover:bg-white/10 transition-colors bg-black/40 backdrop-blur-sm hidden">
+            <i data-lucide="volume-x" class="w-5 h-5 text-white" id="hero-volume-icon"></i>
         </button>
     </div>
 </div>
+
+<!-- YouTube API & Script for Hero Banner -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+    let ytPlayers = {};
+    let isHeroMuted = true;
+    let currentActiveSlideIndex = 0;
+    
+    function onYouTubeIframeAPIReady() {
+        // Initialize player for the first active slide
+        const firstSlide = document.querySelector('.hero-banner-wrapper .swiper-slide-active') || document.querySelector('.hero-banner-wrapper [data-slide-index="0"]');
+        if (firstSlide) {
+            initYoutubePlayer(firstSlide);
+        }
+    }
+
+    function initYoutubePlayer(slideEl) {
+        if (!slideEl) return;
+        const ytId = slideEl.getAttribute('data-ytid');
+        const index = slideEl.getAttribute('data-slide-index');
+        
+        if (!ytId) {
+            document.getElementById('hero-volume-btn').classList.add('hidden');
+            return;
+        }
+
+        document.getElementById('hero-volume-btn').classList.remove('hidden');
+
+        if (!ytPlayers[index]) {
+            const container = document.getElementById('yt-player-container-' + index);
+            if (!container) return;
+            
+            // Create a wrapper div inside the container
+            const playerDiv = document.createElement('div');
+            playerDiv.id = 'yt-player-' + index;
+            playerDiv.className = 'w-full h-full';
+            container.appendChild(playerDiv);
+
+            ytPlayers[index] = new YT.Player('yt-player-' + index, {
+                videoId: ytId,
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 0,
+                    'showinfo': 0,
+                    'modestbranding': 1,
+                    'loop': 1,
+                    'fs': 0,
+                    'cc_load_policy': 0,
+                    'iv_load_policy': 3,
+                    'autohide': 0,
+                    'playlist': ytId,
+                    'mute': isHeroMuted ? 1 : 0
+                },
+                events: {
+                    'onReady': function(event) {
+                        event.target.playVideo();
+                        if (isHeroMuted) {
+                            event.target.mute();
+                        } else {
+                            event.target.unMute();
+                        }
+                    },
+                    'onStateChange': function(event) {
+                        // When video starts playing, fade it in and fade out the background image
+                        if (event.data === YT.PlayerState.PLAYING) {
+                            container.classList.remove('opacity-0');
+                            container.classList.add('opacity-100');
+                            const bgLayer = slideEl.querySelector('.bg-image-layer');
+                            if (bgLayer) {
+                                bgLayer.classList.remove('opacity-100');
+                                bgLayer.classList.add('opacity-0');
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            // Player already initialized, just play it
+            ytPlayers[index].playVideo();
+            if (isHeroMuted) ytPlayers[index].mute();
+            else ytPlayers[index].unMute();
+        }
+    }
+
+    function pauseAllYoutubePlayers() {
+        for (let key in ytPlayers) {
+            if (ytPlayers[key] && typeof ytPlayers[key].pauseVideo === 'function') {
+                ytPlayers[key].pauseVideo();
+            }
+        }
+    }
+
+    // Toggle mute logic
+    document.getElementById('hero-volume-btn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        isHeroMuted = !isHeroMuted;
+        
+        const icon = document.getElementById('hero-volume-icon');
+        if (isHeroMuted) {
+            icon.setAttribute('data-lucide', 'volume-x');
+        } else {
+            icon.setAttribute('data-lucide', 'volume-2');
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // Apply to current active player
+        if (ytPlayers[currentActiveSlideIndex]) {
+            if (isHeroMuted) {
+                ytPlayers[currentActiveSlideIndex].mute();
+            } else {
+                ytPlayers[currentActiveSlideIndex].unMute();
+            }
+        }
+    });
+
+    // Listen to swiper slide changes in home.js (we'll hook it globally if swiper is ready)
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            const heroSwiper = document.querySelector('.swiper-hero')?.swiper;
+            if (heroSwiper) {
+                heroSwiper.on('slideChangeTransitionEnd', function() {
+                    pauseAllYoutubePlayers();
+                    const activeSlide = heroSwiper.slides[heroSwiper.activeIndex];
+                    if (activeSlide) {
+                        currentActiveSlideIndex = activeSlide.getAttribute('data-slide-index');
+                        
+                        // Hide volume button if no video
+                        if (!activeSlide.getAttribute('data-ytid')) {
+                            document.getElementById('hero-volume-btn').classList.add('hidden');
+                        } else {
+                            document.getElementById('hero-volume-btn').classList.remove('hidden');
+                        }
+                        
+                        initYoutubePlayer(activeSlide);
+                    }
+                });
+            }
+        }, 1000); // Delay slightly to ensure swiper is initialized
+    });
+</script>
 <?php endif; ?>
 
 <div class="px-3 sm:px-4 md:px-12 lg:px-20 max-w-[1920px] mx-auto py-8 md:py-12 bg-black relative z-20 space-y-16 md:space-y-24">
@@ -263,22 +430,34 @@ $auMyData = array_values(array_filter($movies, function($m) { return stripos(jso
         <h2 class="text-2xl font-bold text-white mb-6">Bạn đang quan tâm gì?</h2>
         
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] transition-transform">
-                Hành Động
+            <?php 
+            $colors = [
+                'from-blue-500 to-blue-700',
+                'from-cyan-400 to-cyan-600',
+                'from-purple-500 to-purple-700',
+                'from-green-500 to-green-700',
+                'from-red-500 to-red-700',
+                'from-orange-500 to-orange-700',
+                'from-pink-500 to-pink-700',
+                'from-teal-500 to-teal-700',
+                'from-indigo-500 to-indigo-700'
+            ];
+            $genreSlugList = $settings["slugGenre"] ?? "the-loai";
+            $displayGenres = array_slice($genres, 0, 9);
+            $remainingCount = max(0, count($genres) - count($displayGenres));
+            
+            foreach ($displayGenres as $index => $genre): 
+                $color = $colors[$index % count($colors)];
+            ?>
+            <a href="/<?= $genreSlugList ?>/<?= htmlspecialchars($genre['slug']) ?>" class="h-28 rounded-xl bg-gradient-to-br <?= $color ?> flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] transition-transform text-center px-2">
+                <?= htmlspecialchars($genre['name']) ?>
                 <div class="absolute -bottom-6 w-full h-12 bg-white/10 blur-xl group-hover:h-20 transition-all"></div>
             </a>
-            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] transition-transform">
-                Tâm Lý
-            </a>
-            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] transition-transform">
-                Hài Hước
-            </a>
-            <a href="#" class="h-28 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-white font-bold text-lg overflow-hidden relative group hover:scale-[1.02] transition-transform">
-                Kinh Dị
-            </a>
-            <a href="#" class="h-28 rounded-xl bg-[#2a2a2a] hover:bg-[#333] flex items-center justify-center text-white font-bold text-lg border border-gray-800 transition-colors">
-                +35 thể loại
-            </a>
+            <?php endforeach; ?>
+            
+            <button onclick="document.querySelector('.xl\\:hidden')?.click() || document.querySelector('.group button')?.click()" class="h-28 rounded-xl bg-[#2a2a2a] hover:bg-[#333] flex items-center justify-center text-white font-bold text-lg border border-gray-800 transition-colors">
+                +<?= $remainingCount ?> thể loại
+            </button>
         </div>
     </section>
 
