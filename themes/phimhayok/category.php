@@ -7,14 +7,21 @@ $currentCountry = $_GET['country'] ?? '';
 $currentYearVal = $_GET['year'] ?? '';
 $currentSortField = $_GET['sort_field'] ?? 'modified.time';
 $currentSortType = $_GET['sort_type'] ?? 'desc';
-$currentSort = $currentSortField . '-' . $currentSortType;
+$currentSort = $_GET['sort'] ?? ($currentSortField . '-' . $currentSortType);
 
 $filterCategories = ['' => 'Tất cả thể loại', 'hanh-dong' => 'Hành động', 'tinh-cam' => 'Tình cảm', 'hai-huoc' => 'Hài hước', 'kinh-di' => 'Kinh dị', 'tam-ly' => 'Tâm lý', 'hoat-hinh' => 'Hoạt hình', 'thien-nhien' => 'Thiên nhiên', 'co-trang' => 'Cổ trang', 'hinh-su' => 'Hình sự', 'tai-lieu' => 'Tài liệu', 'khoa-hoc' => 'Khoa học'];
 $filterCountries = ['' => 'Tất cả quốc gia', 'han-quoc' => 'Hàn Quốc', 'trung-quoc' => 'Trung Quốc', 'au-my' => 'Âu Mỹ', 'viet-nam' => 'Việt Nam', 'nhat-ban' => 'Nhật Bản', 'thai-lan' => 'Thái Lan', 'an-do' => 'Ấn Độ'];
 $filterYears = ['' => 'Tất cả năm'];
 $currentYear = (int)date('Y');
 for ($y = $currentYear; $y >= 2010; $y--) $filterYears[$y] = (string)$y;
-$filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)', 'modified.time-asc' => 'Thời gian cập nhật (Cũ nhất)', 'year-desc' => 'Năm phát hành (Mới nhất)', 'year-asc' => 'Năm phát hành (Cũ nhất)'];
+$filterSorts = [
+    'modified.time-desc' => 'Thời gian cập nhật (Mới nhất)', 
+    'modified.time-asc' => 'Thời gian cập nhật (Cũ nhất)', 
+    'year-desc' => 'Năm phát hành (Mới nhất)', 
+    'year-asc' => 'Năm phát hành (Cũ nhất)',
+    'imdb_vote-desc' => 'Điểm IMDb (Giảm dần)',
+    'tmdb_vote-desc' => 'Điểm TMDB (Giảm dần)'
+];
 ?>
 <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1400px] py-8">
     <div class="flex flex-col md:flex-row items-center justify-between mb-6">
@@ -120,14 +127,25 @@ $filterSorts = ['modified.time-desc' => 'Thời gian cập nhật (Mới nhất)
                             </div>
                         </div>
                         
-                        <!-- Episode count -->
-                        <?php if (!empty($item['episode_current'])): ?>
-                            <div class="absolute bottom-2 right-2">
+                        <!-- Episode count and IMDb -->
+                        <div class="absolute bottom-2 left-2 right-2 flex justify-between items-end">
+                            <?php 
+                            $cardImdb = $item['imdb_vote'] ?? ($item['imdb']['vote_average'] ?? 0);
+                            if ($cardImdb >= 7.5): 
+                            ?>
+                                <span class="bg-[#f5c518] text-black text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center shadow-lg" title="Siêu Phẩm IMDb">
+                                    <i data-lucide="star" class="w-3 h-3 mr-0.5 fill-current"></i> <?= number_format($cardImdb, 1) ?>
+                                </span>
+                            <?php else: ?>
+                                <span></span>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($item['episode_current'])): ?>
                                 <span class="bg-gray-900/80 backdrop-blur-sm text-gray-300 text-[11px] font-medium px-2 py-1 rounded shadow-lg border border-gray-700">
                                     <?= htmlspecialchars($item['episode_current']) ?>
                                 </span>
-                            </div>
-                        <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     <div class="p-3">
                         <h3 class="text-white font-medium text-sm truncate group-hover:text-red-500 "><?= htmlspecialchars($item['name']) ?></h3>

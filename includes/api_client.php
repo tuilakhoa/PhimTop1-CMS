@@ -67,7 +67,20 @@ function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category 
     $totalItems = $stmt->fetchColumn();
     $totalPages = ceil($totalItems / $limit);
     
-    $sql = "SELECT DISTINCT m.* FROM movies m $join WHERE $whereClause ORDER BY m.updated_at DESC LIMIT $limit OFFSET $offset";
+    $orderBy = "m.updated_at DESC";
+    if ($sort === 'imdb_vote-desc') {
+        $orderBy = "m.imdb_vote DESC, m.updated_at DESC";
+    } else if ($sort === 'tmdb_vote-desc') {
+        $orderBy = "m.tmdb_vote DESC, m.updated_at DESC";
+    } else if ($sort === 'year-desc') {
+        $orderBy = "m.year DESC, m.updated_at DESC";
+    } else if ($sort === 'year-asc') {
+        $orderBy = "m.year ASC, m.updated_at DESC";
+    } else if ($sort === 'modified.time-asc') {
+        $orderBy = "m.updated_at ASC";
+    }
+    
+    $sql = "SELECT DISTINCT m.* FROM movies m $join WHERE $whereClause ORDER BY $orderBy LIMIT $limit OFFSET $offset";
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
