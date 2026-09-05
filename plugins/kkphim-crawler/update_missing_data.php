@@ -120,8 +120,8 @@ for ($i = 0; $i < $total; $i += $batchSize) {
             $movieApi = $detailRes['data']['item'] ?? $detailRes['movie'];
             $time = $movieApi['time'] ?? '';
             $trailerUrl = $movieApi['trailer_url'] ?? '';
-            $tmdbVote = $movieApi['tmdb']['vote_average'] ?? 0;
-            $imdbVote = $movieApi['imdb']['vote_average'] ?? 0;
+            $tmdbVote = (isset($movieApi['tmdb']) && is_array($movieApi['tmdb'])) ? ($movieApi['tmdb']['vote_average'] ?? 0) : 0;
+            $imdbVote = (isset($movieApi['imdb']) && is_array($movieApi['imdb'])) ? ($movieApi['imdb']['vote_average'] ?? 0) : 0;
             
             if (!empty($time) || !empty($trailerUrl) || $tmdbVote > 0 || $imdbVote > 0) {
                 $updateStmt = $pdo->prepare("UPDATE movies SET time = COALESCE(NULLIF(?, ''), time), trailer_url = COALESCE(NULLIF(?, ''), trailer_url), tmdb_vote = IF(? > 0, ?, tmdb_vote), imdb_vote = IF(? > 0, ?, imdb_vote) WHERE slug = ?");

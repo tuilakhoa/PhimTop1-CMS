@@ -53,7 +53,7 @@
             <div class="border-t border-gray-900 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-gray-600">
                 <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($siteName ?? "PhimTop1") ?>. All rights reserved.</p>
                 <div class="mt-4 md:mt-0 flex space-x-4">
-                    <span class="hover:text-gray-300 cursor-pointer">Hoàng Sa & Trường Sa là của Việt Nam!</span>
+                    <span class="text-red-500 font-bold hover:text-red-400 text-sm uppercase tracking-wide cursor-pointer transition-colors duration-300 drop-shadow-md">Hoàng Sa & Trường Sa là của Việt Nam! 🇻🇳</span>
                 </div>
             </div>
         </div>

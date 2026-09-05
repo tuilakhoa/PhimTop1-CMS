@@ -126,8 +126,8 @@ function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $crawler) {
     $thumbUrl = $posterUrl;
     $posterUrl = $tempThumb;
     
-    $actor = isset($movie['actor']) && is_array($movie['actor']) ? implode(', ', $movie['actor']) : '';
-    $director = isset($movie['director']) && is_array($movie['director']) ? implode(', ', $movie['director']) : '';
+    $actor = isset($movie['actor']) ? (is_array($movie['actor']) ? implode(', ', $movie['actor']) : $movie['actor']) : '';
+    $director = isset($movie['director']) ? (is_array($movie['director']) ? implode(', ', $movie['director']) : $movie['director']) : '';
     
     $dbMovie = $repo->getMovieBySlug($slug);
     $movieId = $dbMovie ? $dbMovie['id'] : ($movie['_id'] ?? uniqid());
@@ -143,8 +143,8 @@ function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $crawler) {
         'thumb_url' => $thumbUrl,
         'poster_url' => $posterUrl,
         'trailer_url' => $movie['trailer_url'] ?? '',
-        'tmdb_vote' => $movie['tmdb']['vote_average'] ?? 0,
-        'imdb_vote' => $movie['imdb']['vote_average'] ?? 0,
+        'tmdb_vote' => (isset($movie['tmdb']) && is_array($movie['tmdb'])) ? ($movie['tmdb']['vote_average'] ?? 0) : 0,
+        'imdb_vote' => (isset($movie['imdb']) && is_array($movie['imdb'])) ? ($movie['imdb']['vote_average'] ?? 0) : 0,
         'year' => $movie['year'] ?? 0,
         'type' => $movie['type'] ?? '',
         'status' => $movie['status'] ?? '',
@@ -159,7 +159,7 @@ function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $crawler) {
         'countries_json' => json_encode($movie['country'] ?? []),
         'view' => $dbMovie ? ($dbMovie['view'] ?? 0) : ($movie['view'] ?? 0),
         'time' => $movie['time'] ?? '',
-        'peoples_json' => json_encode($peoplesData),
+        'peoples_json' => json_encode($peoplesData ?: []),
         'images_json' => json_encode([]),
         'updated_at' => date('Y-m-d H:i:s')
     ];
