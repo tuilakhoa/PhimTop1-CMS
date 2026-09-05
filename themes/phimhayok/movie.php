@@ -114,6 +114,28 @@ if (!empty($_GET['party'])) {
         <div class="flex-1 min-w-0 flex flex-col gap-4">
             <h1 class="text-3xl md:text-5xl font-bold text-white leading-tight drop-shadow-lg"><?= htmlspecialchars($movie['name']) ?></h1>
             <h2 class="text-lg md:text-xl text-gray-400 italic"><?= htmlspecialchars($movie['origin_name']) ?></h2>
+            
+            <!-- Ratings -->
+            <div class="flex items-center gap-3 mt-1">
+                <?php if ($tmdbVote > 0): ?>
+                <div class="flex items-center gap-2 bg-[#0d253f] border border-[#01b4e4]/30 rounded px-2.5 py-1 shadow-sm transform transition hover:scale-105 cursor-default" title="Điểm TMDB">
+                    <span class="font-black text-transparent bg-clip-text bg-gradient-to-r from-[#90cea1] to-[#01b4e4] text-xs sm:text-sm tracking-wider">TMDB</span>
+                    <div class="flex items-center gap-1">
+                        <i data-lucide="star" class="w-3.5 h-3.5 text-[#90cea1] fill-current"></i>
+                        <span class="text-white font-bold text-sm sm:text-base leading-none"><?= number_format($tmdbVote, 1) ?></span>
+                    </div>
+                </div>
+                <?php endif; ?>
+                <?php if ($imdbVote > 0): ?>
+                <div class="flex items-center gap-2 bg-[#1f1f1f] border border-[#f5c518]/30 rounded px-2.5 py-1 shadow-sm transform transition hover:scale-105 cursor-default" title="Điểm IMDB">
+                    <span class="bg-[#f5c518] text-black font-black px-1.5 rounded-sm text-xs sm:text-sm tracking-tighter">IMDb</span>
+                    <div class="flex items-center gap-1">
+                        <i data-lucide="star" class="w-3.5 h-3.5 text-[#f5c518] fill-current"></i>
+                        <span class="text-white font-bold text-sm sm:text-base leading-none"><?= number_format($imdbVote, 1) ?></span>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
 
             <!-- Fast Horizontal Metadata (No heavy blur) -->
             <div class="flex flex-wrap items-center gap-2 text-sm text-gray-200 mt-2">
@@ -122,12 +144,6 @@ if (!empty($_GET['party'])) {
                 <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded"><?= htmlspecialchars($movie['year'] ?? date('Y')) ?></span>
                 <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['time'] ?? 'Đang cập nhật') ?></span>
                 <span class="bg-gray-800 border border-gray-700 px-2.5 py-1 rounded text-[#fcc526] flex items-center"><i data-lucide="play-circle" class="w-3.5 h-3.5 mr-1.5"></i><?= htmlspecialchars($movie['episode_current'] ?? 'Đang cập nhật') ?></span>
-                <?php if ($tmdbVote > 0): ?>
-                <span class="bg-blue-900 border border-blue-800 px-2.5 py-1 rounded font-bold flex items-center text-white" title="Điểm TMDB"><span class="text-blue-400 mr-1 text-xs">TMDB</span> <i data-lucide="star" class="w-3.5 h-3.5 mr-1 text-[#fcc526] fill-current"></i><?= number_format($tmdbVote, 1) ?></span>
-                <?php endif; ?>
-                <?php if ($imdbVote > 0): ?>
-                <span class="bg-yellow-900/80 border border-yellow-800 px-2.5 py-1 rounded font-bold flex items-center text-white" title="Điểm IMDB"><span class="text-yellow-400 mr-1 text-xs">IMDB</span> <i data-lucide="star" class="w-3.5 h-3.5 mr-1 text-[#fcc526] fill-current"></i><?= number_format($imdbVote, 1) ?></span>
-                <?php endif; ?>
             </div>
 
             <!-- Genres -->
