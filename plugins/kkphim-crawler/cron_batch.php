@@ -51,7 +51,7 @@ function multiRequestWithRetry($urls, $max_retries = 5) {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
             curl_multi_add_handle($multi, $ch);
@@ -74,7 +74,7 @@ function multiRequestWithRetry($urls, $max_retries = 5) {
             $parsed = json_decode($res, true);
             
             // Thành công nếu HTTP 200 và parse JSON có data
-            if ($httpCode >= 200 && $httpCode < 300 && $parsed && (isset($parsed['data']['item']) || isset($parsed['movie']))) {
+            if ($httpCode >= 200 && $httpCode < 300 && $parsed) {
                 $results[$key] = $parsed;
             } else {
                 // Thất bại, đưa vào mảng để thử lại
@@ -102,7 +102,7 @@ function multiRequestWithRetry($urls, $max_retries = 5) {
 }
 
 // Hàm lưu dữ liệu
-function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $crawler) {
+function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $peoplesData, $imagesData, $keywordsData) {
     if (!$res || (!isset($res['data']['item']) && !isset($res['movie']))) {
         return false;
     }
@@ -126,9 +126,6 @@ function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $crawler) {
     $dbMovie = $repo->getMovieBySlug($slug);
     $movieId = $dbMovie ? $dbMovie['id'] : ($movie['_id'] ?? uniqid());
 
-    $peoplesRes = $crawler->getMoviePeoples($movie['slug']);
-    $peoplesData = ($peoplesRes && !empty($peoplesRes['data']['peoples'])) ? $peoplesRes['data']['peoples'] : [];
-
     $movieData = [
         'id' => $movieId,
         'name' => $movie['name'] ?? '',
@@ -151,15 +148,9 @@ function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $crawler) {
         'view' => $dbMovie ? ($dbMovie['view'] ?? 0) : ($movie['view'] ?? 0),
         'time' => $movie['time'] ?? '',
         'peoples_json' => json_encode($peoplesData),
-        'images_json' => json_encode([]),
+        'images_json' => json_encode($imagesData),
         'updated_at' => date('Y-m-d H:i:s')
     ];
-    
-    // Lấy danh sách hình ảnh (gallery/backdrops)
-    $imagesRes = $crawler->getMovieImages($slug);
-    if ($imagesRes && isset($imagesRes['data'])) {
-        $movieData['images_json'] = json_encode($imagesRes['data']);
-    }
     
     $repo->saveMovie($movieData);
     
@@ -179,10 +170,9 @@ function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $crawler) {
     }
     
     // Lưu keywords
-    $kwRes = $crawler->getMovieKeywords($movie['slug']);
-    if ($kwRes && isset($kwRes['data']['keywords']) && is_array($kwRes['data']['keywords'])) {
+    if (!empty($keywordsData)) {
         $keywords = [];
-        foreach ($kwRes['data']['keywords'] as $kw) {
+        foreach ($keywordsData as $kw) {
             if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
         }
         if (!empty($keywords)) {
@@ -243,7 +233,7 @@ for ($page = $from_page; $page <= $to_page; $page++) {
     while ($page_attempt <= 5) {
         $ch = curl_init($listUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
         $res = curl_exec($ch);
@@ -282,17 +272,40 @@ for ($page = $from_page; $page <= $to_page; $page++) {
     echo "   - Tìm thấy " . count($slugs) . " phim. Đang tải chi tiết ĐỒNG THỜI...\n";
     
     $detailUrls = [];
+    $peoplesUrls = [];
+    $imagesUrls = [];
+    $keywordsUrls = [];
+    
     foreach ($slugs as $slug) {
         $detailUrls[$slug] = "https://phimapi.com/v1/api/phim/" . urlencode($slug);
+        $peoplesUrls[$slug] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/peoples";
+        $imagesUrls[$slug] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images";
+        $keywordsUrls[$slug] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/keywords";
     }
     
-    // Bắn multi curl với cơ chế RETRY (tối đa 5 lần cho mỗi URL lỗi)
-    $multiResults = multiRequestWithRetry($detailUrls, 5);
+    // Bắn multi curl với cơ chế RETRY (tối đa 3 lần cho mỗi URL lỗi)
+    $multiResults = multiRequestWithRetry($detailUrls, 3);
+    
+    // Nếu có quá nhiều lỗi, có thể do rate limit, sleep 1 chút
+    usleep(500000); 
+    
+    // Fetch peoples, images, keywords concurrently in batches to avoid overwhelming the API
+    $peoplesResults = multiRequestWithRetry($peoplesUrls, 3);
+    usleep(500000);
+    
+    $imagesResults = multiRequestWithRetry($imagesUrls, 3);
+    usleep(500000);
+    
+    $keywordsResults = multiRequestWithRetry($keywordsUrls, 3);
     
     $successCount = 0;
     $savedMovies = [];
     foreach ($multiResults as $slug => $detailRes) {
-        if (saveMovieData($detailRes, $slug, $repo, $catRepo, $pdo, $crawler)) {
+        $peoplesData = isset($peoplesResults[$slug]['data']['peoples']) ? $peoplesResults[$slug]['data']['peoples'] : [];
+        $imagesData = isset($imagesResults[$slug]['data']) ? $imagesResults[$slug]['data'] : [];
+        $keywordsData = isset($keywordsResults[$slug]['data']['keywords']) ? $keywordsResults[$slug]['data']['keywords'] : [];
+        
+        if (saveMovieData($detailRes, $slug, $repo, $catRepo, $pdo, $peoplesData, $imagesData, $keywordsData)) {
             $successCount++;
             $movieName = isset($detailRes['data']['item']['name']) ? $detailRes['data']['item']['name'] : (isset($detailRes['movie']['name']) ? $detailRes['movie']['name'] : $slug);
             $savedMovies[] = $movieName;
