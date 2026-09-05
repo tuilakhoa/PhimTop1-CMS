@@ -114,28 +114,6 @@ if (!empty($_GET['party'])) {
         <div class="flex-1 min-w-0 flex flex-col gap-4">
             <h1 class="text-3xl md:text-5xl font-bold text-white leading-tight drop-shadow-lg"><?= htmlspecialchars($movie['name']) ?></h1>
             <h2 class="text-lg md:text-xl text-gray-400 italic"><?= htmlspecialchars($movie['origin_name']) ?></h2>
-            
-            <!-- Ratings -->
-            <div class="flex items-center gap-3 mt-1">
-                <?php if ($tmdbVote > 0): ?>
-                <div class="flex items-center gap-2 bg-[#0d253f] border border-[#01b4e4]/30 rounded px-2.5 py-1 shadow-sm transform transition hover:scale-105 cursor-default" title="Điểm TMDB">
-                    <span class="font-black text-transparent bg-clip-text bg-gradient-to-r from-[#90cea1] to-[#01b4e4] text-xs sm:text-sm tracking-wider">TMDB</span>
-                    <div class="flex items-center gap-1">
-                        <i data-lucide="star" class="w-3.5 h-3.5 text-[#90cea1] fill-current"></i>
-                        <span class="text-white font-bold text-sm sm:text-base leading-none"><?= number_format($tmdbVote, 1) ?></span>
-                    </div>
-                </div>
-                <?php endif; ?>
-                <?php if ($imdbVote > 0): ?>
-                <div class="flex items-center gap-2 bg-[#1f1f1f] border border-[#f5c518]/30 rounded px-2.5 py-1 shadow-sm transform transition hover:scale-105 cursor-default" title="Điểm IMDB">
-                    <span class="bg-[#f5c518] text-black font-black px-1.5 rounded-sm text-xs sm:text-sm tracking-tighter">IMDb</span>
-                    <div class="flex items-center gap-1">
-                        <i data-lucide="star" class="w-3.5 h-3.5 text-[#f5c518] fill-current"></i>
-                        <span class="text-white font-bold text-sm sm:text-base leading-none"><?= number_format($imdbVote, 1) ?></span>
-                    </div>
-                </div>
-                <?php endif; ?>
-            </div>
 
             <!-- Fast Horizontal Metadata (No heavy blur) -->
             <div class="flex flex-wrap items-center gap-2 text-sm text-gray-200 mt-2">
@@ -462,6 +440,29 @@ if (!empty($_GET['party'])) {
                     <i data-lucide="info" class="w-5 h-5 mr-2 text-gray-400"></i> Thông tin thêm
                 </h3>
                 
+                <?php if ($tmdbVote > 0 || $imdbVote > 0): ?>
+                <div class="flex items-center gap-3 mb-5">
+                    <?php if ($tmdbVote > 0): ?>
+                    <div class="flex items-center gap-2 rounded px-2.5 py-1" style="background-color: #0d253f; border: 1px solid rgba(1,180,228,0.3);" title="Điểm TMDB">
+                        <span class="font-black text-xs tracking-wider" style="color: #90cea1;">TMDB</span>
+                        <div class="flex items-center gap-1">
+                            <i data-lucide="star" class="w-3.5 h-3.5 fill-current" style="color: #90cea1;"></i>
+                            <span class="text-white font-bold text-sm leading-none"><?= number_format($tmdbVote, 1) ?></span>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if ($imdbVote > 0): ?>
+                    <div class="flex items-center gap-2 rounded px-2.5 py-1" style="background-color: #1f1f1f; border: 1px solid rgba(245,197,24,0.3);" title="Điểm IMDB">
+                        <span class="font-black px-1.5 rounded-sm text-xs tracking-tighter" style="background-color: #f5c518; color: #000;">IMDb</span>
+                        <div class="flex items-center gap-1">
+                            <i data-lucide="star" class="w-3.5 h-3.5 fill-current" style="color: #f5c518;"></i>
+                            <span class="text-white font-bold text-sm leading-none"><?= number_format($imdbVote, 1) ?></span>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
                 <div class="space-y-4 text-sm">
                     <div class="flex flex-col">
                         <span class="text-gray-500 mb-1">Đạo diễn:</span>
