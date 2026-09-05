@@ -33,7 +33,7 @@ $pdo = getPDO();
 $crawler = new KKPhimCrawler();
 
 // Hàm tải nhiều URL có cơ chế RETRY
-function multiRequestWithRetry($urls, $max_retries = 5) {
+function multiRequestWithRetry($urls, $max_retries = 5, $is_supplementary = false) {
     $results = [];
     $failed_urls = $urls;
     $attempt = 1;
@@ -76,8 +76,8 @@ function multiRequestWithRetry($urls, $max_retries = 5) {
             // Thành công nếu HTTP 200 và parse JSON có data
             if ($httpCode >= 200 && $httpCode < 300 && $parsed) {
                 $results[$key] = $parsed;
-            } elseif ($httpCode == 404 || $httpCode == 500) {
-                // Nếu 404 hoặc 500, API của nguồn có thể đang lỗi cục bộ với phim này, bỏ qua không retry
+            } elseif ($httpCode == 404 || $httpCode == 500 || $is_supplementary) {
+                // Nếu là 404/500 HOẶC là request dữ liệu phụ, không cần retry
                 $results[$key] = [];
             } else {
                 // Thất bại (có thể do rate limit, 502, 503, timeout), đưa vào mảng để thử lại
@@ -96,7 +96,9 @@ function multiRequestWithRetry($urls, $max_retries = 5) {
     // Nếu vẫn còn failed sau max retries
     if (!empty($failed_urls)) {
         foreach ($failed_urls as $key => $url) {
-            file_put_contents(__DIR__ . '/failed_slugs.log', $key . "\n", FILE_APPEND);
+            if (!$is_supplementary) {
+                file_put_contents(__DIR__ . '/failed_slugs.log', $key . "\n", FILE_APPEND);
+            }
             echo "     [Lỗi Cứng] Đã thử $max_retries lần vẫn lỗi URL: $url\n";
         }
     }
@@ -297,19 +299,19 @@ for ($page = $from_page; $page <= $to_page; $page++) {
     }
     
     // Bắn multi curl với cơ chế RETRY (tối đa 3 lần cho mỗi URL lỗi)
-    $multiResults = multiRequestWithRetry($detailUrls, 3);
+    $multiResults = multiRequestWithRetry($detailUrls, 3, false);
     
     // Nếu có quá nhiều lỗi, có thể do rate limit, sleep 1 chút
     usleep(500000); 
     
     // Fetch peoples, images, keywords concurrently in batches to avoid overwhelming the API
-    $peoplesResults = multiRequestWithRetry($peoplesUrls, 3);
+    $peoplesResults = multiRequestWithRetry($peoplesUrls, 1, true);
     usleep(500000);
     
-    $imagesResults = multiRequestWithRetry($imagesUrls, 3);
+    $imagesResults = multiRequestWithRetry($imagesUrls, 1, true);
     usleep(500000);
     
-    $keywordsResults = multiRequestWithRetry($keywordsUrls, 3);
+    $keywordsResults = multiRequestWithRetry($keywordsUrls, 1, true);
     
     $successCount = 0;
     $savedMovies = [];
