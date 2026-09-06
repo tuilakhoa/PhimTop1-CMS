@@ -12,7 +12,11 @@ $apiKey = $settings['appApiKey'] ?? '';
 $headers = getallheaders();
 $clientApiKey = $_SERVER['HTTP_X_APP_API_KEY'] ?? ($headers['X-App-API-Key'] ?? ($headers['x-app-api-key'] ?? ($_GET['key'] ?? '')));
 
-if (!empty($apiKey) && $clientApiKey !== $apiKey) {
+$referer = $_SERVER['HTTP_REFERER'] ?? '';
+$host = $_SERVER['HTTP_HOST'] ?? '';
+$isLocalReferer = (!empty($referer) && !empty($host) && strpos($referer, $host) !== false);
+
+if (!empty($apiKey) && $clientApiKey !== $apiKey && !$isLocalReferer) {
     http_response_code(403);
     echo json_encode(['status' => 'error', 'message' => 'Invalid API Key']);
     exit;
