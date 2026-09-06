@@ -195,6 +195,11 @@ class KKPhimCrawler {
                             $mainMovie['origin_name'] = $mainMovie['original_name'] ?? '';
                             $mainMovie['content'] = $mainMovie['description'] ?? '';
                             $mainMovie['episode_current'] = $mainMovie['current_episode'] ?? '';
+                            
+                            // Nguồn C trả về bị ngược thumb_url và poster_url so với chuẩn KKPhim
+                            $mainMovie['thumb_url'] = $movie['poster_url'] ?? '';
+                            $mainMovie['poster_url'] = $movie['thumb_url'] ?? '';
+                            
                             $mainMovie['actor'] = isset($mainMovie['casts']) ? explode(', ', $mainMovie['casts']) : [];
                             if (is_string($mainMovie['director'])) {
                                 $mainMovie['director'] = explode(', ', $mainMovie['director']);
