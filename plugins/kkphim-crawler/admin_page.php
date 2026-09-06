@@ -64,7 +64,7 @@
             <i data-lucide="clock" class="text-admin-primary"></i> Thiết lập Cron Job Tự Động
         </h3>
         <div class="text-gray-300 text-sm space-y-2 mb-4">
-            <p>Hệ thống tự động crawl phim mới nhất từ <code class="bg-black/50 px-1 py-0.5 rounded text-green-400">https://phimapi.com/v1/api/home</code>.</p>
+            <p>Hệ thống tự động crawl phim mới nhất từ <code class="bg-black/50 px-1 py-0.5 rounded text-green-400">cả 3 nguồn (KKPhim, Nguồn C, VsMov)</code>.</p>
             <p>Hệ thống cũng tự nhận biết phim nào đã full hoặc có tập mới để tiến hành cập nhật lại.</p>
             <p>Sử dụng lệnh sau để chạy Cron qua CLI (Khuyên dùng):</p>
             <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-green-400">php <?= __DIR__ ?>/cron.php</code>

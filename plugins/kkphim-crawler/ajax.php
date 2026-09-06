@@ -32,19 +32,32 @@ if ($action === 'save_source') {
 
 if ($action === 'get_page_slugs') {
     $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
-    $res = $crawler->getLatestMovies($page);
     
-    $items = $res['data']['items'] ?? $res['items'] ?? null;
-    if (!$res || !$items) {
-        echo json_encode(['status' => 'error', 'message' => 'Lỗi kết nối API hoặc dữ liệu trống']);
-        exit;
-    }
+    $crawlers = [
+        new KKPhimCrawler('kkphim'),
+        new KKPhimCrawler('nguonc'),
+        new KKPhimCrawler('vsmov')
+    ];
     
     $slugs = [];
-    foreach ($items as $item) {
-        if (!empty($item['slug'])) {
-            $slugs[] = $item['slug'];
+    $seenSlugs = [];
+    
+    foreach ($crawlers as $c) {
+        $res = $c->getLatestMovies($page);
+        if ($res) {
+            $items = $res['data']['items'] ?? $res['items'] ?? [];
+            foreach ($items as $item) {
+                if (!empty($item['slug']) && !isset($seenSlugs[$item['slug']])) {
+                    $slugs[] = $item['slug'];
+                    $seenSlugs[$item['slug']] = true;
+                }
+            }
         }
+    }
+    
+    if (empty($slugs)) {
+        echo json_encode(['status' => 'error', 'message' => 'Lỗi kết nối API hoặc dữ liệu trống trên cả 3 nguồn']);
+        exit;
     }
     
     echo json_encode(['status' => 'success', 'slugs' => $slugs]);
@@ -60,19 +73,32 @@ if ($action === 'crawl_keyword') {
         exit;
     }
     
-    $res = $crawler->searchMovies($keyword, $limit);
-    
-    $items = $res['data']['items'] ?? $res['items'] ?? null;
-    if (!$res || !$items) {
-        echo json_encode(['status' => 'error', 'message' => 'Lỗi kết nối API hoặc không tìm thấy phim nào']);
-        exit;
-    }
+    $crawlers = [
+        new KKPhimCrawler('kkphim'),
+        new KKPhimCrawler('nguonc'),
+        new KKPhimCrawler('vsmov')
+    ];
     
     $slugs = [];
-    foreach ($items as $item) {
-        if (!empty($item['slug'])) {
-            $slugs[] = $item['slug'];
+    $seenSlugs = [];
+    
+    foreach ($crawlers as $c) {
+        $res = $c->searchMovies($keyword, $limit);
+        if ($res) {
+            $items = $res['data']['items'] ?? $res['items'] ?? [];
+            foreach ($items as $item) {
+                if (!empty($item['slug']) && !isset($seenSlugs[$item['slug']])) {
+                    $slugs[] = $item['slug'];
+                    $seenSlugs[$item['slug']] = true;
+                    if (count($slugs) >= $limit) break 2; // Dừng nếu đã đủ limit
+                }
+            }
         }
+    }
+    
+    if (empty($slugs)) {
+        echo json_encode(['status' => 'error', 'message' => 'Lỗi kết nối API hoặc không tìm thấy phim nào']);
+        exit;
     }
     
     echo json_encode(['status' => 'success', 'slugs' => $slugs, 'total' => count($slugs)]);

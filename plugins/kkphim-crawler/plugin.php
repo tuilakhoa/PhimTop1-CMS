@@ -1,6 +1,6 @@
 <?php
-// Tên Plugin: KKPhim Crawler
-// Phiên bản: 1.0.0
+// Tên Plugin: Crawler Đa Nguồn (KKPhim, Nguồn C, VsMov)
+// Phiên bản: 1.1.0
 
 add_filter('admin_menu_groups', function($groups) {
     if (!isset($groups['Quản Lý Nội Dung'])) {
@@ -8,7 +8,7 @@ add_filter('admin_menu_groups', function($groups) {
     }
     $groups['Quản Lý Nội Dung']['plugin_kkphim_crawler'] = [
         'icon' => 'download',
-        'title' => 'Công Cụ Crawl KKPhim'
+        'title' => 'Crawl Phim Đa Nguồn'
     ];
     return $groups;
 });
