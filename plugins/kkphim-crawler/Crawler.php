@@ -195,6 +195,9 @@ class KKPhimCrawler {
                             $mainMovie['origin_name'] = $mainMovie['original_name'] ?? '';
                             $mainMovie['content'] = $mainMovie['description'] ?? '';
                             $mainMovie['episode_current'] = $mainMovie['current_episode'] ?? '';
+                            // Đưa về chuẩn KKPhim: thumb_url là ngang, poster_url là dọc
+                            $mainMovie['thumb_url'] = $movie['poster_url'] ?? '';
+                            $mainMovie['poster_url'] = $movie['thumb_url'] ?? '';
                             $mainMovie['actor'] = isset($mainMovie['casts']) ? explode(', ', $mainMovie['casts']) : [];
                             if (is_string($mainMovie['director'])) {
                                 $mainMovie['director'] = explode(', ', $mainMovie['director']);
@@ -222,13 +225,16 @@ class KKPhimCrawler {
                             $mainMovie['country'] = $standardCountries;
                         }
                         
-                        if ($sourceName === 'KKPhim') {
-                            // Giao diện web quy định: thumb_url là ảnh Dọc (Poster), poster_url là ảnh Ngang (Banner)
-                            // KKPhim lại trả về: thumb_url là ảnh Ngang, poster_url là ảnh Dọc
-                            // Do đó, BẮT BUỘC phải đảo ngược 2 link này nếu nguồn là KKPhim
+                        
+                        // Chuẩn hóa dữ liệu VsMov
+                        if ($sourceName === 'VsMov') {
+                            // Đưa về chuẩn KKPhim: thumb_url là ngang, poster_url là dọc
                             $mainMovie['thumb_url'] = $movie['poster_url'] ?? '';
                             $mainMovie['poster_url'] = $movie['thumb_url'] ?? '';
-                            
+                        }
+
+                        if ($sourceName === 'KKPhim') {
+                                                        
                             $crawler = new KKPhimCrawler('kkphim');
                             $peoplesRes = $crawler->getMoviePeoples($slug);
                             $peoplesData = ($peoplesRes && !empty($peoplesRes['data']['peoples'])) ? $peoplesRes['data']['peoples'] : [];
