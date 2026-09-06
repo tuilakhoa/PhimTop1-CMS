@@ -234,6 +234,9 @@ class KKPhimCrawler {
                         }
 
                         if ($sourceName === 'KKPhim') {
+                            // Đảo ngược thumb_url và poster_url cho KKPhim theo yêu cầu
+                            $mainMovie['thumb_url'] = $movie['poster_url'] ?? '';
+                            $mainMovie['poster_url'] = $movie['thumb_url'] ?? '';
                                                         
                             $crawler = new KKPhimCrawler('kkphim');
                             $peoplesRes = $crawler->getMoviePeoples($slug);
