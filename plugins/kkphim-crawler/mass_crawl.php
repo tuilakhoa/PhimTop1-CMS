@@ -116,7 +116,7 @@ function multiRequestWithRetry($urls, $max_retries = 5) {
 }
 
 // Hàm lưu dữ liệu
-function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $crawler) {
+function saveMovieData($slug, $repo, $catRepo, $pdo) {
     // Chúng ta không dùng $res nữa vì fetchMovieFromAllSources tự request lại
     $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
     
@@ -297,18 +297,13 @@ for ($page = $from_page; $page <= $to_page; $page++) {
     
     echo "   - Tìm thấy " . count($slugs) . " phim. Đang tải chi tiết ĐỒNG THỜI...\n";
     
-    $detailUrls = [];
-    foreach ($slugs as $slug) {
-        $detailUrls[$slug] = "https://phimapi.com/v1/api/phim/" . urlencode($slug);
-    }
-    
-    // Bắn multi curl với cơ chế RETRY (tối đa 5 lần cho mỗi URL lỗi)
-    $multiResults = multiRequestWithRetry($detailUrls, 5);
-    
     $successCount = 0;
-    foreach ($multiResults as $slug => $detailRes) {
-        if (saveMovieData($detailRes, $slug, $repo, $catRepo, $pdo, $crawler)) {
+    
+    foreach ($slugs as $slug) {
+        if (saveMovieData($slug, $repo, $catRepo, $pdo)) {
             $successCount++;
+        } else {
+            file_put_contents(__DIR__ . '/failed_slugs.log', "[" . date('Y-m-d H:i:s') . "] Lỗi $slug\n", FILE_APPEND);
         }
     }
     

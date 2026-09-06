@@ -306,44 +306,15 @@ for ($page = $from_page; $page <= $to_page; $page++) {
     
     echo "   - Tìm thấy " . count($slugs) . " phim. Đang tải chi tiết ĐỒNG THỜI...\n";
     
-    $detailUrls = [];
-    $peoplesUrls = [];
-    $imagesUrls = [];
-    $keywordsUrls = [];
-    
-    foreach ($slugs as $slug) {
-        $detailUrls[$slug] = "https://phimapi.com/v1/api/phim/" . urlencode($slug);
-        $peoplesUrls[$slug] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/peoples";
-        $imagesUrls[$slug] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images";
-        $keywordsUrls[$slug] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/keywords";
-    }
-    
-    // Bắn multi curl với cơ chế RETRY (tối đa 3 lần cho mỗi URL lỗi)
-    $multiResults = multiRequestWithRetry($detailUrls, 3, false);
-    
-    // Nếu có quá nhiều lỗi, có thể do rate limit, sleep 1 chút
-    usleep(500000); 
-    
-    // Fetch peoples, images, keywords concurrently in batches to avoid overwhelming the API
-    $peoplesResults = multiRequestWithRetry($peoplesUrls, 1, true);
-    usleep(500000);
-    
-    $imagesResults = multiRequestWithRetry($imagesUrls, 1, true);
-    usleep(500000);
-    
-    $keywordsResults = multiRequestWithRetry($keywordsUrls, 1, true);
-    
     $successCount = 0;
     $savedMovies = [];
-    foreach ($multiResults as $slug => $detailRes) {
-        $peoplesData = isset($peoplesResults[$slug]['data']['peoples']) ? $peoplesResults[$slug]['data']['peoples'] : [];
-        $imagesData = isset($imagesResults[$slug]['data']) ? $imagesResults[$slug]['data'] : [];
-        $keywordsData = isset($keywordsResults[$slug]['data']['keywords']) ? $keywordsResults[$slug]['data']['keywords'] : [];
-        
-        if (saveMovieData($detailRes, $slug, $repo, $catRepo, $pdo, $peoplesData, $imagesData, $keywordsData)) {
+    
+    foreach ($slugs as $slug) {
+        if (saveMovieData($slug, $repo, $catRepo, $pdo)) {
             $successCount++;
-            $movieName = isset($detailRes['data']['item']['name']) ? $detailRes['data']['item']['name'] : (isset($detailRes['movie']['name']) ? $detailRes['movie']['name'] : $slug);
-            $savedMovies[] = $movieName;
+            $savedMovies[] = $slug;
+        } else {
+            file_put_contents(__DIR__ . '/cron_batch_errors.log', "[" . date('Y-m-d H:i:s') . "] Không tải được thông tin phim: {$slug}\n", FILE_APPEND);
         }
     }
     
