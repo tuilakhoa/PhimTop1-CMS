@@ -554,7 +554,7 @@ if ($pdo) {
                         .catch(e => {
                             container.classList.add('hidden');
                         });
-                }, 500);
+                }, 200);
             });
             
             // Hide when clicking outside

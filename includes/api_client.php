@@ -33,9 +33,7 @@ function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category 
     $join = "";
     
     if ($keyword) {
-        $join = "LEFT JOIN seo_metadata sm ON m.slug = sm.item_id AND sm.type = 'movie'";
-        $where[] = "(m.name LIKE ? OR m.origin_name LIKE ? OR m.slug LIKE ? OR sm.seo_keywords LIKE ? OR m.actor LIKE ? OR m.director LIKE ?)";
-        $params[] = "%$keyword%";
+        $where[] = "(m.name LIKE ? OR m.origin_name LIKE ? OR m.slug LIKE ? OR m.actor LIKE ? OR m.director LIKE ?)";
         $params[] = "%$keyword%";
         $params[] = "%$keyword%";
         $params[] = "%$keyword%";
