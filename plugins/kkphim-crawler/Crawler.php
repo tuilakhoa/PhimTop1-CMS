@@ -238,6 +238,22 @@ class KKPhimCrawler {
                     $epList = $res['episodes'] ?? ($movie['episodes'] ?? []);
                     foreach ($epList as $server) {
                         $server['server_name'] = $sourceName . ' - ' . ($server['server_name'] ?? 'Server 1');
+                        
+                        // Chuẩn hóa mảng tập phim của Nguồn C (dùng 'items' và 'embed') sang chuẩn KKPhim ('server_data', 'link_embed')
+                        if (isset($server['items']) && !isset($server['server_data'])) {
+                            $server['server_data'] = [];
+                            foreach ($server['items'] as $epItem) {
+                                $server['server_data'][] = [
+                                    'name' => $epItem['name'] ?? '',
+                                    'slug' => $epItem['slug'] ?? '',
+                                    'filename' => $epItem['name'] ?? '',
+                                    'link_embed' => $epItem['embed'] ?? ($epItem['link_embed'] ?? ''),
+                                    'link_m3u8' => $epItem['m3u8'] ?? ($epItem['link_m3u8'] ?? '')
+                                ];
+                            }
+                            unset($server['items']);
+                        }
+                        
                         $episodes[] = $server;
                     }
                 }
