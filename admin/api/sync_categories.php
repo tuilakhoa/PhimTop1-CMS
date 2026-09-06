@@ -21,28 +21,49 @@ function fetchApi($url) {
 try {
     $repo = getCategoryRepository();
     
-    // Fetch Thể Loại
-    $genresData = fetchApi('https://phimapi.com/the-loai');
-    $genres = $genresData['data']['items'] ?? [];
+    // Thể Loại & Quốc Gia
+    $sources = [
+        'https://phimapi.com',
+        'https://vsmov.com',
+        'https://phim.nguonc.com/api' // Thử endpoint có thể có của NguonC
+    ];
     
-    // Fetch Quốc Gia
-    $countriesData = fetchApi('https://phimapi.com/quoc-gia');
-    $countries = $countriesData['data']['items'] ?? [];
+    $allGenres = [];
+    $allCountries = [];
+    $seenGenres = [];
+    $seenCountries = [];
+    
+    foreach ($sources as $base) {
+        $genresData = fetchApi($base . '/the-loai');
+        $countriesData = fetchApi($base . '/quoc-gia');
+        
+        $genres = $genresData['data']['items'] ?? $genresData['items'] ?? [];
+        $countries = $countriesData['data']['items'] ?? $countriesData['items'] ?? [];
+        
+        foreach ($genres as $item) {
+            if (!empty($item['slug']) && !empty($item['name']) && !isset($seenGenres[$item['slug']])) {
+                $allGenres[] = $item;
+                $seenGenres[$item['slug']] = true;
+            }
+        }
+        foreach ($countries as $item) {
+            if (!empty($item['slug']) && !empty($item['name']) && !isset($seenCountries[$item['slug']])) {
+                $allCountries[] = $item;
+                $seenCountries[$item['slug']] = true;
+            }
+        }
+    }
         
     $genresCount = 0;
-    foreach ($genres as $item) {
-        if (!empty($item['slug']) && !empty($item['name'])) {
-            $repo->saveCategory($item['slug'], $item['name'], 'genre');
-            $genresCount++;
-        }
+    foreach ($allGenres as $item) {
+        $repo->saveCategory($item['slug'], $item['name'], 'genre');
+        $genresCount++;
     }
     
     $countriesCount = 0;
-    foreach ($countries as $item) {
-        if (!empty($item['slug']) && !empty($item['name'])) {
-            $repo->saveCategory($item['slug'], $item['name'], 'country');
-            $countriesCount++;
-        }
+    foreach ($allCountries as $item) {
+        $repo->saveCategory($item['slug'], $item['name'], 'country');
+        $countriesCount++;
     }
     
     echo json_encode([

@@ -99,84 +99,95 @@ for ($i = 0; $i < $total; $i += $batchSize) {
     
     foreach ($batch as $m) {
         $slug = $m['slug'];
-        $detailUrls["detail_$slug"] = "https://phimapi.com/v1/api/phim/" . urlencode($slug);
-        $keywordUrls["kw_$slug"] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/keywords";
-        $peoplesUrls["peop_$slug"] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/peoples";
-        $imagesUrls["img_$slug"] = "https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images";
-    }
-    
-    // Chạy song song 4 mảng API (40 request cùng lúc)
-    $allUrls = array_merge($detailUrls, $keywordUrls, $peoplesUrls, $imagesUrls);
-    $multiResults = multiRequestWithRetry($allUrls, 3);
-    
-    foreach ($batch as $m) {
-        $slug = $m['slug'];
-        $name = $m['name'];
-        $content = $m['content'];
         
-        // Cập nhật time, trailer_url, tmdb_vote, imdb_vote
-        $detailRes = $multiResults["detail_$slug"] ?? null;
-        if ($detailRes && (isset($detailRes['data']['item']) || isset($detailRes['movie']))) {
-            $movieApi = $detailRes['data']['item'] ?? $detailRes['movie'];
+        $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
+        
+        if ($fullData['movie']) {
+            $movieApi = $fullData['movie'];
+            $episodesList = $fullData['episodes'];
+            $peoplesData = $fullData['peoples'];
+            $imagesData = $fullData['images'];
+            $keywordsData = $fullData['keywords'];
+            
+            // Cập nhật time, trailer_url, tmdb_vote, imdb_vote
             $time = $movieApi['time'] ?? '';
             $trailerUrl = $movieApi['trailer_url'] ?? '';
             $tmdbVote = (isset($movieApi['tmdb']) && is_array($movieApi['tmdb'])) ? ($movieApi['tmdb']['vote_average'] ?? 0) : 0;
             $imdbVote = (isset($movieApi['imdb']) && is_array($movieApi['imdb'])) ? ($movieApi['imdb']['vote_average'] ?? 0) : 0;
             
-            if (!empty($time) || !empty($trailerUrl) || $tmdbVote > 0 || $imdbVote > 0) {
-                $updateStmt = $pdo->prepare("UPDATE movies SET time = COALESCE(NULLIF(?, ''), time), trailer_url = COALESCE(NULLIF(?, ''), trailer_url), tmdb_vote = IF(? > 0, ?, tmdb_vote), imdb_vote = IF(? > 0, ?, imdb_vote) WHERE slug = ?");
-                $updateStmt->execute([$time, $trailerUrl, $tmdbVote, $tmdbVote, $imdbVote, $imdbVote, $slug]);
-            }
-        }
-        
-        // Cập nhật keywords
-        $kwRes = $multiResults["kw_$slug"] ?? null;
-        if ($kwRes && isset($kwRes['data']['keywords']) && is_array($kwRes['data']['keywords'])) {
-            $keywords = [];
-            foreach ($kwRes['data']['keywords'] as $kw) {
-                if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
-            }
-            if (!empty($keywords)) {
-                $keywordString = implode(', ', $keywords);
-                $seoData = $seoRepo->getSeoMetadata('movie', $slug);
-                if (!$seoData) {
-                    $seoData = [
-                        'type' => 'movie',
-                        'item_id' => $slug,
-                        'seo_title' => $name,
-                        'seo_desc' => mb_substr(strip_tags($content), 0, 160),
-                        'seo_keywords' => $keywordString
-                    ];
-                } else {
-                    $seoData['seo_keywords'] = $keywordString;
+            $updateStmt = $pdo->prepare("UPDATE movies SET 
+                time = COALESCE(NULLIF(?, ''), time), 
+                trailer_url = COALESCE(NULLIF(?, ''), trailer_url), 
+                tmdb_vote = IF(? > 0, ?, tmdb_vote), 
+                imdb_vote = IF(? > 0, ?, imdb_vote),
+                peoples_json = ?,
+                images_json = ?
+                WHERE slug = ?");
+            $updateStmt->execute([
+                $time, $trailerUrl, 
+                $tmdbVote, $tmdbVote, 
+                $imdbVote, $imdbVote, 
+                !empty($peoplesData) ? json_encode($peoplesData) : $m['peoples_json'],
+                !empty($imagesData) ? json_encode($imagesData) : $m['images_json'],
+                $slug
+            ]);
+            
+            // Cập nhật keywords
+            if (!empty($keywordsData)) {
+                $keywords = [];
+                foreach ($keywordsData as $kw) {
+                    if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
                 }
-                $seoRepo->saveSeoMetadata($seoData);
+                if (!empty($keywords)) {
+                    $keywordString = implode(', ', $keywords);
+                    $seoData = $seoRepo->getSeoMetadata('movie', $slug);
+                    if (!$seoData) {
+                        $seoData = [
+                            'type' => 'movie',
+                            'item_id' => $slug,
+                            'seo_title' => $m['name'],
+                            'seo_desc' => mb_substr(strip_tags($m['content']), 0, 160),
+                            'seo_keywords' => $keywordString
+                        ];
+                    } else {
+                        $seoData['seo_keywords'] = $keywordString;
+                    }
+                    $seoRepo->saveSeoMetadata($seoData);
+                }
             }
-        }
-        
-        // Cập nhật peoples_json
-        $peoplesRes = $multiResults["peop_$slug"] ?? null;
-        if ($peoplesRes && !empty($peoplesRes['data']['peoples'])) {
-            $peoplesData = $peoplesRes['data']['peoples'];
-            $peoplesJson = json_encode($peoplesData);
-            $updateStmt = $pdo->prepare("UPDATE movies SET peoples_json = ? WHERE slug = ?");
-            $updateStmt->execute([$peoplesJson, $slug]);
-        }
-        
-        // Cập nhật images_json
-        $imagesRes = $multiResults["img_$slug"] ?? null;
-        if ($imagesRes && isset($imagesRes['data'])) {
-            $imagesData = $imagesRes['data'];
-            $imagesJson = json_encode($imagesData);
-            $updateStmt = $pdo->prepare("UPDATE movies SET images_json = ? WHERE slug = ?");
-            $updateStmt->execute([$imagesJson, $slug]);
+            
+            // Cập nhật Episodes (Làm mới toàn bộ nguồn cho phim này)
+            if (!empty($episodesList)) {
+                $stmtDel = $pdo->prepare("DELETE FROM episodes WHERE movie_slug = ?");
+                $stmtDel->execute([$slug]);
+                
+                $sqlEp = "INSERT INTO episodes (movie_slug, server_name, name, slug, filename, embed_url, m3u8_url) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?)";
+                $stmtIns = $pdo->prepare($sqlEp);
+                
+                foreach ($episodesList as $server) {
+                    $serverName = $server['server_name'] ?? 'Server 1';
+                    $epData = $server['server_data'] ?? [];
+                    foreach ($epData as $ep) {
+                        $stmtIns->execute([
+                            $slug,
+                            $serverName,
+                            $ep['name'] ?? '',
+                            $ep['slug'] ?? '',
+                            $ep['filename'] ?? '',
+                            $ep['link_embed'] ?? '',
+                            $ep['link_m3u8'] ?? ''
+                        ]);
+                    }
+                }
+            }
         }
     }
     
     $processed += count($batch);
     echo "Đã xử lý: $processed / $total phim...\n";
     
-    sleep(3); // Tránh bị block bởi Cloudflare (Rate limit)
+    sleep(1); // Tránh bị block
 }
 
 echo "\nHOÀN TẤT CẬP NHẬT!\n";

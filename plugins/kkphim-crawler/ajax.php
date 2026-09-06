@@ -11,20 +11,37 @@ require_once __DIR__ . '/Crawler.php';
 
 header('Content-Type: application/json');
 
+$configFile = __DIR__ . '/config.json';
+$source = 'kkphim';
+if (file_exists($configFile)) {
+    $config = json_decode(file_get_contents($configFile), true);
+    if (isset($config['source'])) {
+        $source = $config['source'];
+    }
+}
+$crawler = new KKPhimCrawler($source);
+
 $action = $_POST['action'] ?? '';
-$crawler = new KKPhimCrawler();
+
+if ($action === 'save_source') {
+    $newSource = $_POST['source'] ?? 'kkphim';
+    file_put_contents($configFile, json_encode(['source' => $newSource]));
+    echo json_encode(['status' => 'success']);
+    exit;
+}
 
 if ($action === 'get_page_slugs') {
     $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
     $res = $crawler->getLatestMovies($page);
     
-    if (!$res || !isset($res['data']['items'])) {
+    $items = $res['data']['items'] ?? $res['items'] ?? null;
+    if (!$res || !$items) {
         echo json_encode(['status' => 'error', 'message' => 'Lỗi kết nối API hoặc dữ liệu trống']);
         exit;
     }
     
     $slugs = [];
-    foreach ($res['data']['items'] as $item) {
+    foreach ($items as $item) {
         if (!empty($item['slug'])) {
             $slugs[] = $item['slug'];
         }
@@ -45,13 +62,14 @@ if ($action === 'crawl_keyword') {
     
     $res = $crawler->searchMovies($keyword, $limit);
     
-    if (!$res || !isset($res['data']['items'])) {
+    $items = $res['data']['items'] ?? $res['items'] ?? null;
+    if (!$res || !$items) {
         echo json_encode(['status' => 'error', 'message' => 'Lỗi kết nối API hoặc không tìm thấy phim nào']);
         exit;
     }
     
     $slugs = [];
-    foreach ($res['data']['items'] as $item) {
+    foreach ($items as $item) {
         if (!empty($item['slug'])) {
             $slugs[] = $item['slug'];
         }
@@ -70,16 +88,20 @@ if ($action === 'crawl_single') {
         exit;
     }
     
-    $res = $crawler->getMovieDetail($slug);
+    $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
     
-    if (!$res || (!isset($res['data']['item']) && !isset($res['movie']))) {
+    if (!$fullData['movie']) {
         echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy phim hoặc API lỗi']);
         exit;
     }
     
-    $movie = $res['data']['item'] ?? $res['movie'];
-    $episodesList = $res['episodes'] ?? ($movie['episodes'] ?? []);
-    $domainPrefix = $res['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+    $movie = $fullData['movie'];
+    $episodesList = $fullData['episodes'];
+    $peoplesData = $fullData['peoples'];
+    $imagesData = $fullData['images'];
+    $keywordsData = $fullData['keywords'];
+    
+    $domainPrefix = $movie['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
     
     // Xử lý thông tin phim
     $thumbUrl = $movie['thumb_url'] ?? '';
@@ -115,12 +137,6 @@ if ($action === 'crawl_single') {
     
     $actor = isset($movie['actor']) ? (is_array($movie['actor']) ? implode(', ', $movie['actor']) : $movie['actor']) : '';
     $director = isset($movie['director']) ? (is_array($movie['director']) ? implode(', ', $movie['director']) : $movie['director']) : '';
-    
-    $peoplesRes = $crawler->getMoviePeoples($movie['slug']);
-    $peoplesData = ($peoplesRes && !empty($peoplesRes['data']['peoples'])) ? $peoplesRes['data']['peoples'] : [];
-    
-    $imagesRes = $crawler->getMovieImages($movie['slug']);
-    $imagesData = ($imagesRes && !empty($imagesRes['data'])) ? $imagesRes['data'] : [];
     
     $movieData = [
         'id' => $movie['_id'] ?? uniqid(),
@@ -173,10 +189,9 @@ if ($action === 'crawl_single') {
     }
     
     // Lưu keywords
-    $kwRes = $crawler->getMovieKeywords($movie['slug']);
-    if ($kwRes && isset($kwRes['data']['keywords']) && is_array($kwRes['data']['keywords'])) {
+    if (!empty($keywordsData)) {
         $keywords = [];
-        foreach ($kwRes['data']['keywords'] as $kw) {
+        foreach ($keywordsData as $kw) {
             if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
         }
         if (!empty($keywords)) {

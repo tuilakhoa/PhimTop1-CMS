@@ -14,49 +14,36 @@ function log_cron($msg) {
 
 log_cron("Bắt đầu chạy cron cập nhật phim");
 
-$ch = curl_init('https://phimapi.com/v1/api/home');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
-$response = curl_exec($ch);
-curl_close($ch);
-$data = json_decode($response, true);
+$crawlers = [
+    new KKPhimCrawler('kkphim'),
+    new KKPhimCrawler('nguonc'),
+    new KKPhimCrawler('vsmov')
+];
 
-if (!$data) {
-    log_cron("Lỗi: Không thể lấy dữ liệu từ API phimapi.com/v1/api/home");
-    exit(1);
-}
-
-// Tìm danh sách phim từ API
 $items = [];
-// Cấu trúc /v1/api/home thường có data.items hoặc danh sách các collection như phim le, phim bo
-if (isset($data['data']['items'])) {
-    $items = $data['data']['items'];
-} elseif (isset($data['items'])) {
-    $items = $data['items'];
-} else {
-    // Tìm các mảng phim trong data
-    $searchArray = isset($data['data']) ? $data['data'] : $data;
-    foreach ($searchArray as $key => $val) {
-        if (is_array($val)) {
-            // Kiểm tra xem có cấu trúc item phim không
-            if (isset($val['items']) && is_array($val['items'])) {
-                $items = array_merge($items, $val['items']);
-            } elseif (isset($val[0]) && is_array($val[0]) && isset($val[0]['slug'])) {
-                $items = array_merge($items, $val);
+$seenSlugs = [];
+
+foreach ($crawlers as $crawler) {
+    $data = $crawler->getLatestMovies(1);
+    if ($data) {
+        $sourceItems = $data['data']['items'] ?? $data['items'] ?? [];
+        foreach ($sourceItems as $item) {
+            if (!empty($item['slug']) && !isset($seenSlugs[$item['slug']])) {
+                $items[] = $item;
+                $seenSlugs[$item['slug']] = true;
             }
         }
     }
 }
 
 if (empty($items)) {
-    log_cron("Lỗi: Không tìm thấy item phim nào trong API");
+    log_cron("Lỗi: Không tìm thấy item phim nào trong tất cả API");
     exit(1);
 }
 
 log_cron("Tìm thấy " . count($items) . " phim cần kiểm tra.");
 
 $repo = getMovieRepository();
-$crawler = new KKPhimCrawler();
 
 $updated = 0;
 $skipped = 0;
@@ -94,12 +81,16 @@ foreach ($items as $item) {
 
     if ($needsUpdate) {
         // Tiến hành crawl chi tiết phim này
-        $res = $crawler->getMovieDetail($slug);
+        $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
         
-        if ($res && (isset($res['data']['item']) || isset($res['movie']))) {
-            $movie = $res['data']['item'] ?? $res['movie'];
-            $episodesList = $movie['episodes'] ?? [];
-            $domainPrefix = $res['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+        if ($fullData['movie']) {
+            $movie = $fullData['movie'];
+            $episodesList = $fullData['episodes'];
+            $peoplesData = $fullData['peoples'];
+            $imagesData = $fullData['images'];
+            $keywordsData = $fullData['keywords'];
+            
+            $domainPrefix = $movie['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
             
             // Xử lý thông tin phim như ajax.php
             $thumbUrl = $movie['thumb_url'] ?? '';
@@ -116,9 +107,6 @@ foreach ($items as $item) {
             $director = isset($movie['director']) && is_array($movie['director']) ? implode(', ', $movie['director']) : '';
             
             $movieId = $dbMovie ? $dbMovie['id'] : ($movie['_id'] ?? uniqid());
-
-            $peoplesRes = $crawler->getMoviePeoples($movie['slug']);
-            $peoplesData = ($peoplesRes && !empty($peoplesRes['data']['peoples'])) ? $peoplesRes['data']['peoples'] : [];
 
             $movieData = [
                 'id' => $movieId,
@@ -144,16 +132,10 @@ foreach ($items as $item) {
                 'countries_json' => json_encode($movie['country'] ?? []),
                 'view' => $dbMovie ? ($dbMovie['view'] ?? 0) : ($movie['view'] ?? 0),
                 'time' => $movie['time'] ?? '',
-                'peoples_json' => json_encode($peoplesData),
-                'images_json' => json_encode([]),
+                'peoples_json' => json_encode($peoplesData ?: []),
+                'images_json' => json_encode($imagesData ?: []),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
-
-            // Lấy danh sách hình ảnh (gallery/backdrops)
-            $imagesRes = $crawler->getMovieImages($slug);
-            if ($imagesRes && isset($imagesRes['data'])) {
-                $movieData['images_json'] = json_encode($imagesRes['data']);
-            }
             
             // Lưu phim
             $repo->saveMovie($movieData);
@@ -176,10 +158,9 @@ foreach ($items as $item) {
             }
             
             // Lưu keywords
-            $kwRes = $crawler->getMovieKeywords($movie['slug']);
-            if ($kwRes && isset($kwRes['data']['keywords']) && is_array($kwRes['data']['keywords'])) {
+            if (!empty($keywordsData)) {
                 $keywords = [];
-                foreach ($kwRes['data']['keywords'] as $kw) {
+                foreach ($keywordsData as $kw) {
                     if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
                 }
                 if (!empty($keywords)) {

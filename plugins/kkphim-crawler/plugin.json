@@ -1,6 +1,9 @@
 {
-    "name": "KKPhim Crawler",
-    "description": "Bộ công cụ Crawl toàn diện từ API KKPhim (phimapi.com) bản mới nhất.",
-    "version": "1.0.0",
-    "author": "Antigravity"
+    "name": "Crawler (Đa Nguồn)",
+    "version": "1.1",
+    "description": "Đồng bộ dữ liệu phim từ nhiều nguồn API (KKPhim, Nguồn C, VsMov)",
+    "author": "PhimTop1",
+    "admin_menu": {
+        "title": "Crawl Phim Đa Nguồn"
+    }
 }

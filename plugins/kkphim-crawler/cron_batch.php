@@ -30,8 +30,16 @@ echo "=================================================\n\n";
 $repo = getMovieRepository();
 $catRepo = getCategoryRepository();
 $pdo = getPDO();
-$crawler = new KKPhimCrawler();
-
+$configFile = __DIR__ . '/config.json';
+$source = 'kkphim';
+if (file_exists($configFile)) {
+    $config = json_decode(file_get_contents($configFile), true);
+    if (isset($config['source'])) {
+        $source = $config['source'];
+    }
+}
+$crawler = new KKPhimCrawler($source);
+$apiBase = $source === 'nguonc' ? 'https://phim.nguonc.com' : ($source === 'vsmov' ? 'https://vsmov.com' : 'https://phimapi.com');
 // Hàm tải nhiều URL có cơ chế RETRY
 function multiRequestWithRetry($urls, $max_retries = 5, $is_supplementary = false) {
     $results = [];
@@ -107,14 +115,21 @@ function multiRequestWithRetry($urls, $max_retries = 5, $is_supplementary = fals
 }
 
 // Hàm lưu dữ liệu
-function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $peoplesData, $imagesData, $keywordsData) {
-    if (!$res || (!isset($res['data']['item']) && !isset($res['movie']))) {
+function saveMovieData($slug, $repo, $catRepo, $pdo) {
+    // Chúng ta không dùng $res nữa vì fetchMovieFromAllSources tự request lại
+    $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
+    
+    if (!$fullData['movie']) {
         return false;
     }
     
-    $movie = $res['data']['item'] ?? $res['movie'];
-    $episodesList = $movie['episodes'] ?? [];
-    $domainPrefix = $res['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+    $movie = $fullData['movie'];
+    $episodesList = $fullData['episodes'];
+    $peoplesData = $fullData['peoples'];
+    $imagesData = $fullData['images'];
+    $keywordsData = $fullData['keywords'];
+    
+    $domainPrefix = $movie['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
     
     $thumbUrl = $movie['thumb_url'] ?? '';
     if (!preg_match('/^http/', $thumbUrl)) $thumbUrl = rtrim($domainPrefix, '/') . '/' . ltrim($thumbUrl, '/');
@@ -239,46 +254,51 @@ function saveMovieData($res, $slug, $repo, $catRepo, $pdo, $peoplesData, $images
 // Bắt đầu loop qua các trang
 for ($page = $from_page; $page <= $to_page; $page++) {
     echo "\n=> Đang lấy danh sách trang $page...\n";
-    $listUrl = "https://phimapi.com/v1/api/danh-sach?page={$page}";
+    $items = [];
+    $seenSlugs = [];
+    $urls = [
+        "https://phimapi.com/v1/api/danh-sach?page={$page}",
+        "https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page={$page}",
+        "https://vsmov.com/api/danh-sach/phim-moi-cap-nhat?page={$page}"
+    ];
     
-    $page_attempt = 1;
-    $data = null;
-    
-    // Retry cho trang danh sách (Tối đa 5 lần)
-    while ($page_attempt <= 5) {
-        $ch = curl_init($listUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
-        $res = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        
-        if ($httpCode == 200 && $res) {
-            $data = json_decode($res, true);
-            if (isset($data['data']['items'])) {
-                break; // Thành công
+    foreach ($urls as $listUrl) {
+        $page_attempt = 1;
+        while ($page_attempt <= 5) {
+            $ch = curl_init($listUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
+            $res = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            
+            if ($httpCode == 200 && $res) {
+                $data = json_decode($res, true);
+                $sourceItems = $data['data']['items'] ?? $data['items'] ?? null;
+                if ($sourceItems !== null) {
+                    foreach ($sourceItems as $item) {
+                        if (!empty($item['slug']) && !isset($seenSlugs[$item['slug']])) {
+                            $items[] = $item;
+                            $seenSlugs[$item['slug']] = true;
+                        }
+                    }
+                    break;
+                }
             }
+            echo "      - Lỗi tải danh sách {$listUrl}, thử lại lần " . ($page_attempt + 1) . "...\n";
+            $page_attempt++;
+            sleep(1);
         }
-        
-        echo "   [Lỗi Trang $page] Thử lại lần $page_attempt...\n";
-        $page_attempt++;
-        sleep(2);
     }
-    
-    if (!$data || !isset($data['data']['items'])) {
-        echo "[BỎ QUA] Không thể tải trang $page sau 5 lần thử.\n";
-        continue;
-    }
-    
-    if (empty($data['data']['items'])) {
+    if (empty($items)) {
         echo "=> Trang $page không có dữ liệu hoặc đã đến trang cuối.\n";
         break; // Thoát nếu trang rỗng
     }
     
     $slugs = [];
-    foreach ($data['data']['items'] as $item) {
+    foreach ($items as $item) {
         if (!empty($item['slug'])) {
             $slugs[] = $item['slug'];
         }

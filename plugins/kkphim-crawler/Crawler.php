@@ -1,6 +1,18 @@
 <?php
 class KKPhimCrawler {
-    private $baseUrl = 'https://phimapi.com';
+    private $source;
+    private $baseUrl;
+    
+    public function __construct($source = 'kkphim') {
+        $this->source = $source;
+        if ($source === 'nguonc') {
+            $this->baseUrl = 'https://phim.nguonc.com';
+        } elseif ($source === 'vsmov') {
+            $this->baseUrl = 'https://vsmov.com';
+        } else {
+            $this->baseUrl = 'https://phimapi.com';
+        }
+    }
     
     private function request($endpoint) {
         $url = $this->baseUrl . $endpoint;
@@ -21,54 +33,93 @@ class KKPhimCrawler {
         return null;
     }
 
-    // 1. Lấy danh sách phim mới nhất (API mới v1)
+    // 1. Lấy danh sách phim mới nhất
     public function getLatestMovies($page = 1) {
-        return $this->request("/v1/api/danh-sach?page={$page}");
+        if ($this->source === 'nguonc') {
+            return $this->request("/api/films/phim-moi-cap-nhat?page={$page}");
+        } elseif ($this->source === 'vsmov') {
+            return $this->request("/api/danh-sach/phim-moi-cap-nhat?page={$page}");
+        } else {
+            return $this->request("/v1/api/danh-sach?page={$page}");
+        }
     }
 
-    // 2. Lấy chi tiết phim theo slug (API mới v1)
+    // 2. Tìm kiếm phim
     public function searchMovies($keyword, $limit = 10) {
-        return $this->request("/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&limit=" . $limit);
+        if ($this->source === 'nguonc') {
+            return $this->request("/api/films/search?keyword=" . urlencode($keyword));
+        } elseif ($this->source === 'vsmov') {
+            return $this->request("/api/tim-kiem?keyword=" . urlencode($keyword) . "&limit=" . $limit);
+        } else {
+            return $this->request("/v1/api/tim-kiem?keyword=" . urlencode($keyword) . "&limit=" . $limit);
+        }
     }
 
+    // 3. Lấy chi tiết phim
     public function getMovieDetail($slug) {
-        return $this->request("/v1/api/phim/" . urlencode($slug));
+        if ($this->source === 'nguonc') {
+            return $this->request("/api/film/" . urlencode($slug));
+        } elseif ($this->source === 'vsmov') {
+            return $this->request("/api/phim/" . urlencode($slug));
+        } else {
+            return $this->request("/v1/api/phim/" . urlencode($slug));
+        }
     }
 
-    // 3. Lấy hình ảnh phim
+    // 4. Lấy hình ảnh phim
     public function getMovieImages($slug) {
-        return $this->request("/v1/api/phim/" . urlencode($slug) . "/images");
+        if ($this->source === 'kkphim') {
+            return $this->request("/v1/api/phim/" . urlencode($slug) . "/images");
+        }
+        return null; // Các nguồn khác có thể không hỗ trợ endpoint này riêng
     }
 
-    // 4. Lấy thông tin diễn viên / đạo diễn
+    // 5. Lấy thông tin diễn viên / đạo diễn
     public function getMoviePeoples($slug) {
-        return $this->request("/v1/api/phim/" . urlencode($slug) . "/peoples");
+        if ($this->source === 'kkphim') {
+            return $this->request("/v1/api/phim/" . urlencode($slug) . "/peoples");
+        }
+        return null;
     }
 
-    // 5. Lấy thông tin TMDB
+    // 6. Lấy thông tin TMDB
     public function getTmdbInfo($type, $id) {
-        // type: movie hoặc tv
-        return $this->request("/tmdb/{$type}/{$id}");
+        if ($this->source === 'kkphim') {
+            return $this->request("/tmdb/{$type}/{$id}");
+        }
+        return null;
     }
 
-    // 6. Lấy thông tin IMDB
+    // 7. Lấy thông tin IMDB
     public function getImdbInfo($id) {
-        return $this->request("/imdb/title/{$id}");
+        if ($this->source === 'kkphim') {
+            return $this->request("/imdb/title/{$id}");
+        }
+        return null;
     }
 
-    // 7. Lấy danh sách thể loại
+    // 8. Lấy danh sách thể loại
     public function getCategories() {
-        return $this->request("/the-loai");
+        if ($this->source === 'kkphim') {
+            return $this->request("/the-loai");
+        }
+        return null;
     }
 
-    // 8. Lấy danh sách quốc gia
+    // 9. Lấy danh sách quốc gia
     public function getCountries() {
-        return $this->request("/quoc-gia");
+        if ($this->source === 'kkphim') {
+            return $this->request("/quoc-gia");
+        }
+        return null;
     }
 
-    // 9. Lấy thông tin keywords
+    // 10. Lấy thông tin keywords
     public function getMovieKeywords($slug) {
-        return $this->request("/v1/api/phim/" . urlencode($slug) . "/keywords");
+        if ($this->source === 'kkphim') {
+            return $this->request("/v1/api/phim/" . urlencode($slug) . "/keywords");
+        }
+        return null;
     }
 
     // Tiện ích: Tải và lưu ảnh về local
@@ -87,5 +138,87 @@ class KKPhimCrawler {
         fclose($fp);
         
         return empty($error) && file_exists($savePath) && filesize($savePath) > 0;
+    }
+
+    public static function fetchMovieFromAllSources($slug) {
+        $urls = [
+            'KKPhim' => "https://phimapi.com/v1/api/phim/" . urlencode($slug),
+            'Nguồn C' => "https://phim.nguonc.com/api/film/" . urlencode($slug),
+            'VsMov' => "https://vsmov.com/api/phim/" . urlencode($slug)
+        ];
+        
+        $multi = curl_multi_init();
+        $channels = [];
+        
+        foreach ($urls as $sourceName => $url) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['accept: application/json']);
+            curl_multi_add_handle($multi, $ch);
+            $channels[$sourceName] = $ch;
+        }
+        
+        $active = null;
+        do {
+            $status = curl_multi_exec($multi, $active);
+            if ($active) {
+                curl_multi_select($multi, 0.5);
+            }
+        } while ($active && $status == CURLM_OK);
+        
+        $mainMovie = null;
+        $episodes = [];
+        $peoplesData = [];
+        $imagesData = [];
+        $keywordsData = [];
+        
+        foreach ($channels as $sourceName => $ch) {
+            $response = curl_multi_getcontent($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_multi_remove_handle($multi, $ch);
+            curl_close($ch);
+            
+            if ($httpCode >= 200 && $httpCode < 300 && $response) {
+                $res = json_decode($response, true);
+                if ($res && (isset($res['data']['item']) || isset($res['movie']))) {
+                    $movie = $res['data']['item'] ?? $res['movie'];
+                    
+                    if (!$mainMovie) {
+                        $mainMovie = $movie;
+                        $mainMovie['APP_DOMAIN_CDN_IMAGE'] = $res['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+                        
+                        if ($sourceName === 'KKPhim') {
+                            $crawler = new KKPhimCrawler('kkphim');
+                            $peoplesRes = $crawler->getMoviePeoples($slug);
+                            $peoplesData = ($peoplesRes && !empty($peoplesRes['data']['peoples'])) ? $peoplesRes['data']['peoples'] : [];
+                            
+                            $imagesRes = $crawler->getMovieImages($slug);
+                            $imagesData = ($imagesRes && isset($imagesRes['data'])) ? $imagesRes['data'] : [];
+                            
+                            $kwRes = $crawler->getMovieKeywords($slug);
+                            $keywordsData = ($kwRes && isset($kwRes['data']['keywords'])) ? $kwRes['data']['keywords'] : [];
+                        }
+                    }
+                    
+                    $epList = $res['episodes'] ?? ($movie['episodes'] ?? []);
+                    foreach ($epList as $server) {
+                        $server['server_name'] = $sourceName . ' - ' . ($server['server_name'] ?? 'Server 1');
+                        $episodes[] = $server;
+                    }
+                }
+            }
+        }
+        curl_multi_close($multi);
+        
+        return [
+            'movie' => $mainMovie,
+            'episodes' => $episodes,
+            'peoples' => $peoplesData,
+            'images' => $imagesData,
+            'keywords' => $keywordsData
+        ];
     }
 }

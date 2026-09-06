@@ -1,6 +1,8 @@
-<div class="mb-6">
-    <h2 class="text-2xl font-bold text-white mb-2">Công Cụ Crawl Phim (KKPhim)</h2>
-    <p class="text-gray-400">Đồng bộ tự động dữ liệu phim, ảnh, danh sách, chi tiết, TMDB, diễn viên từ KKPhim (phimapi.com) bản mới nhất.</p>
+<div class="mb-6 flex justify-between items-center flex-wrap gap-4">
+    <div>
+        <h2 class="text-2xl font-bold text-white mb-2">Công Cụ Crawl Phim (Đa Nguồn)</h2>
+        <p class="text-gray-400">Đồng bộ tự động dữ liệu phim, ảnh, danh sách, chi tiết, TMDB, diễn viên từ KKPhim, Nguồn C, VsMov.</p>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
