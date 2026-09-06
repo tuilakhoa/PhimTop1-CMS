@@ -62,7 +62,6 @@ if ($pdo) {
     <title><?= htmlspecialchars($seoTitle) ?></title>
     <meta name="description" content="<?= htmlspecialchars($seoDesc) ?>">
     <meta name="keywords" content="<?= htmlspecialchars($seoKeywords) ?>">
-    <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl) ?>">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph / SEO Meta Tags -->
