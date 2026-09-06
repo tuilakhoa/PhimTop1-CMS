@@ -190,6 +190,38 @@ class KKPhimCrawler {
                         $mainMovie = $movie;
                         $mainMovie['APP_DOMAIN_CDN_IMAGE'] = $res['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
                         
+                        // Chuẩn hóa dữ liệu Nguồn C về chuẩn KKPhim
+                        if ($sourceName === 'Nguồn C') {
+                            $mainMovie['origin_name'] = $mainMovie['original_name'] ?? '';
+                            $mainMovie['content'] = $mainMovie['description'] ?? '';
+                            $mainMovie['episode_current'] = $mainMovie['current_episode'] ?? '';
+                            $mainMovie['actor'] = isset($mainMovie['casts']) ? explode(', ', $mainMovie['casts']) : [];
+                            if (is_string($mainMovie['director'])) {
+                                $mainMovie['director'] = explode(', ', $mainMovie['director']);
+                            }
+                            // Phân tách Category của Nguồn C
+                            $standardCategories = [];
+                            $standardCountries = [];
+                            if (isset($mainMovie['category']) && is_array($mainMovie['category'])) {
+                                foreach ($mainMovie['category'] as $catGroup) {
+                                    $groupName = mb_strtolower($catGroup['group']['name'] ?? '', 'UTF-8');
+                                    if (isset($catGroup['list']) && is_array($catGroup['list'])) {
+                                        foreach ($catGroup['list'] as $item) {
+                                            $safeSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', str_replace('đ', 'd', str_replace('Đ', 'd', iconv('UTF-8', 'ASCII//TRANSLIT', $item['name']))))));
+                                            $itemData = ['name' => $item['name'], 'slug' => $safeSlug];
+                                            if (strpos($groupName, 'quốc gia') !== false || strpos($groupName, 'quoc gia') !== false) {
+                                                $standardCountries[] = $itemData;
+                                            } elseif (strpos($groupName, 'thể loại') !== false || strpos($groupName, 'the loai') !== false) {
+                                                $standardCategories[] = $itemData;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            $mainMovie['category'] = $standardCategories;
+                            $mainMovie['country'] = $standardCountries;
+                        }
+                        
                         if ($sourceName === 'KKPhim') {
                             $crawler = new KKPhimCrawler('kkphim');
                             $peoplesRes = $crawler->getMoviePeoples($slug);
