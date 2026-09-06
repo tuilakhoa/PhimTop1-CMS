@@ -489,7 +489,7 @@ if ($pdo) {
             input.setAttribute('autocomplete', 'off');
             
             var container = document.createElement('div');
-            container.className = 'absolute top-full left-0 mt-2 w-full bg-[#141414] border border-gray-800 rounded-xl shadow-2xl z-[100] overflow-hidden hidden';
+            container.className = 'absolute top-full left-0 mt-2 w-full bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.5)] z-[100] overflow-hidden hidden transition-all duration-300 opacity-0 translate-y-2';
             container.style.maxHeight = '400px';
             container.style.overflowY = 'auto';
             if(window.innerWidth < 768 && form.closest('#mobileMenu')) {
@@ -505,13 +505,17 @@ if ($pdo) {
                 clearTimeout(timeout);
                 var q = this.value.trim();
                 if (q.length < 2) {
-                    container.classList.add('hidden');
+                    container.classList.add('opacity-0', 'translate-y-2');
+                    setTimeout(() => container.classList.add('hidden'), 300);
                     return;
                 }
                 
                 // Show loading
-                container.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang tìm...</div>`;
+                container.innerHTML = `<div class="p-4 text-center text-gray-400 text-sm flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin text-[#fcc526]"></i> Đang tìm kiếm...</div>`;
                 container.classList.remove('hidden');
+                // trigger reflow
+                void container.offsetWidth;
+                container.classList.remove('opacity-0', 'translate-y-2');
                 lucide.createIcons();
                 
                 timeout = setTimeout(() => {
@@ -528,20 +532,21 @@ if ($pdo) {
                                         thumb = domain.replace(/\/$/, '') + '/' + thumb.replace(/^\//, '');
                                     }
                                     html += `
-                                        <a href="/phim/${item.slug}" class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors gap-3 group">
-                                            <div class="w-10 h-14 bg-gray-800 rounded overflow-hidden flex-shrink-0 shadow">
-                                                <img src="${thumb}" alt="${item.name.replace(/"/g, '&quot;')}" class="w-full h-full object-cover">
+                                        <a href="/phim/${item.slug}" class="flex items-center px-4 py-2 hover:bg-white/10 transition-colors gap-3 group border-b border-white/5 last:border-0">
+                                            <div class="w-10 h-14 bg-gray-900 rounded overflow-hidden flex-shrink-0 shadow-lg border border-gray-700 group-hover:border-[#fcc526] transition-colors relative">
+                                                <img src="${thumb}" alt="${item.name.replace(/"/g, '&quot;')}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <div class="text-gray-200 text-sm font-medium truncate group-hover:text-phim-yellow transition-colors">${item.name}</div>
-                                                <div class="text-gray-500 text-[11px] truncate">${item.origin_name || ''}</div>
-                                                ${item.actor ? `<div class="text-gray-400 text-[10px] truncate mt-1"><i data-lucide="users" class="w-3 h-3 inline-block mr-1"></i>${item.actor}</div>` : ''}
+                                                <div class="text-gray-200 text-sm font-medium truncate group-hover:text-[#fcc526] transition-colors">${item.name}</div>
+                                                <div class="text-gray-400 text-[11px] truncate mt-0.5">${item.origin_name || ''} ${item.year ? '• '+item.year : ''}</div>
+                                                ${item.actor ? `<div class="text-gray-500 text-[10px] truncate mt-1"><i data-lucide="users" class="w-3 h-3 inline-block mr-1"></i>${item.actor}</div>` : ''}
                                             </div>
                                         </a>
                                     `;
                                 });
                                 html += `
-                                    <a href="/search?keyword=${encodeURIComponent(q)}" class="block px-4 py-3 text-center text-sm text-phim-yellow hover:bg-gray-800 transition-colors font-medium border-t border-gray-800 mt-2">
+                                    <a href="/search?keyword=${encodeURIComponent(q)}" class="block px-4 py-3 text-center text-sm text-[#fcc526] hover:text-white hover:bg-[#fcc526] transition-colors font-medium border-t border-white/10 mt-1">
                                         Xem tất cả kết quả <i data-lucide="arrow-right" class="w-3 h-3 inline-block ml-1"></i>
                                     </a>
                                 </div>`;
