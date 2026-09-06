@@ -237,16 +237,6 @@ class KKPhimCrawler {
                             // Đưa về chuẩn KKPhim gốc (Không đảo ngược): thumb_url là dọc, poster_url là ngang
                             $mainMovie['thumb_url'] = $movie['thumb_url'] ?? '';
                             $mainMovie['poster_url'] = $movie['poster_url'] ?? '';
-                                                        
-                            $crawler = new KKPhimCrawler('kkphim');
-                            $peoplesRes = $crawler->getMoviePeoples($slug);
-                            $peoplesData = ($peoplesRes && !empty($peoplesRes['data']['peoples'])) ? $peoplesRes['data']['peoples'] : [];
-                            
-                            $imagesRes = $crawler->getMovieImages($slug);
-                            $imagesData = ($imagesRes && isset($imagesRes['data'])) ? $imagesRes['data'] : [];
-                            
-                            $kwRes = $crawler->getMovieKeywords($slug);
-                            $keywordsData = ($kwRes && isset($kwRes['data']['keywords'])) ? $kwRes['data']['keywords'] : [];
                         }
                     }
                     
@@ -276,6 +266,18 @@ class KKPhimCrawler {
         }
         curl_multi_close($multi);
         
+        // Luôn fetch thông tin diễn viên, hình ảnh từ KKPhim (nguồn giàu meta nhất)
+        if ($mainMovie) {
+            $crawler = new KKPhimCrawler('kkphim');
+            $peoplesRes = $crawler->getMoviePeoples($slug);
+            $peoplesData = ($peoplesRes && !empty($peoplesRes['data']['peoples'])) ? $peoplesRes['data']['peoples'] : [];
+            
+            $imagesRes = $crawler->getMovieImages($slug);
+            $imagesData = ($imagesRes && isset($imagesRes['data'])) ? $imagesRes['data'] : [];
+            
+            $kwRes = $crawler->getMovieKeywords($slug);
+            $keywordsData = ($kwRes && isset($kwRes['data']['keywords'])) ? $kwRes['data']['keywords'] : [];
+        }
         return [
             'movie' => $mainMovie,
             'episodes' => $episodes,
