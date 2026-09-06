@@ -103,34 +103,79 @@ for ($i = 0; $i < $total; $i += $batchSize) {
         $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
         
         if ($fullData['movie']) {
-            $movieApi = $fullData['movie'];
+            $movie = $fullData['movie'];
             $episodesList = $fullData['episodes'];
             $peoplesData = $fullData['peoples'];
             $imagesData = $fullData['images'];
             $keywordsData = $fullData['keywords'];
             
-            // Cập nhật time, trailer_url, tmdb_vote, imdb_vote
-            $time = $movieApi['time'] ?? '';
-            $trailerUrl = $movieApi['trailer_url'] ?? '';
-            $tmdbVote = (isset($movieApi['tmdb']) && is_array($movieApi['tmdb'])) ? ($movieApi['tmdb']['vote_average'] ?? 0) : 0;
-            $imdbVote = (isset($movieApi['imdb']) && is_array($movieApi['imdb'])) ? ($movieApi['imdb']['vote_average'] ?? 0) : 0;
+            $thumbUrl = $movie['thumb_url'] ?? '';
+            $posterUrl = $movie['poster_url'] ?? '';
+            if (empty($thumbUrl)) {
+                $thumbUrl = $posterUrl;
+            } elseif (empty($posterUrl)) {
+                $posterUrl = $thumbUrl;
+            }
+            if (strpos($thumbUrl, 'http') !== 0 && !empty($movie['APP_DOMAIN_CDN_IMAGE'])) {
+                $thumbUrl = rtrim($movie['APP_DOMAIN_CDN_IMAGE'], '/') . '/' . ltrim($thumbUrl, '/');
+            }
+            if (strpos($posterUrl, 'http') !== 0 && !empty($movie['APP_DOMAIN_CDN_IMAGE'])) {
+                $posterUrl = rtrim($movie['APP_DOMAIN_CDN_IMAGE'], '/') . '/' . ltrim($posterUrl, '/');
+            }
             
-            $updateStmt = $pdo->prepare("UPDATE movies SET 
-                time = COALESCE(NULLIF(?, ''), time), 
-                trailer_url = COALESCE(NULLIF(?, ''), trailer_url), 
-                tmdb_vote = IF(? > 0, ?, tmdb_vote), 
-                imdb_vote = IF(? > 0, ?, imdb_vote),
-                peoples_json = ?,
-                images_json = ?
-                WHERE slug = ?");
-            $updateStmt->execute([
-                $time, $trailerUrl, 
-                $tmdbVote, $tmdbVote, 
-                $imdbVote, $imdbVote, 
-                !empty($peoplesData) ? json_encode($peoplesData) : $m['peoples_json'],
-                !empty($imagesData) ? json_encode($imagesData) : $m['images_json'],
-                $slug
-            ]);
+            $actor = isset($movie['actor']) ? (is_array($movie['actor']) ? implode(', ', $movie['actor']) : $movie['actor']) : '';
+            $director = isset($movie['director']) ? (is_array($movie['director']) ? implode(', ', $movie['director']) : $movie['director']) : '';
+            
+            $repo = getMovieRepository();
+            $catRepo = getCategoryRepository();
+            $dbMovie = $repo->getMovieBySlug($slug);
+            $movieId = $dbMovie ? $dbMovie['id'] : ($movie['_id'] ?? uniqid());
+
+            $movieData = [
+                'id' => $movieId,
+                'name' => $movie['name'] ?? '',
+                'origin_name' => $movie['origin_name'] ?? '',
+                'slug' => $movie['slug'] ?? $slug,
+                'thumb_url' => $thumbUrl,
+                'poster_url' => $posterUrl,
+                'trailer_url' => $movie['trailer_url'] ?? '',
+                'tmdb_vote' => (isset($movie['tmdb']) && is_array($movie['tmdb'])) ? ($movie['tmdb']['vote_average'] ?? 0) : 0,
+                'imdb_vote' => (isset($movie['imdb']) && is_array($movie['imdb'])) ? ($movie['imdb']['vote_average'] ?? 0) : 0,
+                'year' => $movie['year'] ?? 0,
+                'type' => $movie['type'] ?? '',
+                'status' => $movie['status'] ?? '',
+                'episode_current' => $movie['episode_current'] ?? '',
+                'quality' => $movie['quality'] ?? '',
+                'lang' => $movie['lang'] ?? '',
+                'chieu_rap' => (isset($movie['chieurap']) && $movie['chieurap']) ? 1 : 0,
+                'content' => $movie['content'] ?? '',
+                'actor' => $actor,
+                'director' => $director,
+                'categories_json' => json_encode($movie['category'] ?? []),
+                'countries_json' => json_encode($movie['country'] ?? []),
+                'view' => $dbMovie ? ($dbMovie['view'] ?? 0) : ($movie['view'] ?? 0),
+                'time' => $movie['time'] ?? '',
+                'peoples_json' => json_encode($peoplesData ?: []),
+                'images_json' => json_encode($imagesData ?: []),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $repo->saveMovie($movieData);
+            
+            if (isset($movie['category']) && is_array($movie['category'])) {
+                foreach ($movie['category'] as $c) {
+                    if (!empty($c['slug']) && !empty($c['name'])) {
+                        $catRepo->saveCategory($c['slug'], $c['name'], 'genre');
+                    }
+                }
+            }
+            if (isset($movie['country']) && is_array($movie['country'])) {
+                foreach ($movie['country'] as $c) {
+                    if (!empty($c['slug']) && !empty($c['name'])) {
+                        $catRepo->saveCategory($c['slug'], $c['name'], 'country');
+                    }
+                }
+            }
             
             // Cập nhật keywords
             if (!empty($keywordsData)) {
