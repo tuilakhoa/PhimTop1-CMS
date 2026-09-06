@@ -195,9 +195,9 @@ class KKPhimCrawler {
                             $mainMovie['origin_name'] = $mainMovie['original_name'] ?? '';
                             $mainMovie['content'] = $mainMovie['description'] ?? '';
                             $mainMovie['episode_current'] = $mainMovie['current_episode'] ?? '';
-                            // Đưa về chuẩn KKPhim: thumb_url là ngang, poster_url là dọc
-                            $mainMovie['thumb_url'] = $movie['poster_url'] ?? '';
-                            $mainMovie['poster_url'] = $movie['thumb_url'] ?? '';
+                            // Đưa về chuẩn KKPhim gốc (Không đảo ngược): thumb_url là dọc, poster_url là ngang
+                            $mainMovie['thumb_url'] = $movie['thumb_url'] ?? '';
+                            $mainMovie['poster_url'] = $movie['poster_url'] ?? '';
                             $mainMovie['actor'] = isset($mainMovie['casts']) ? explode(', ', $mainMovie['casts']) : [];
                             if (is_string($mainMovie['director'])) {
                                 $mainMovie['director'] = explode(', ', $mainMovie['director']);
@@ -228,15 +228,15 @@ class KKPhimCrawler {
                         
                         // Chuẩn hóa dữ liệu VsMov
                         if ($sourceName === 'VsMov') {
-                            // Đưa về chuẩn KKPhim: thumb_url là ngang, poster_url là dọc
-                            $mainMovie['thumb_url'] = $movie['poster_url'] ?? '';
-                            $mainMovie['poster_url'] = $movie['thumb_url'] ?? '';
+                            // Đưa về chuẩn KKPhim gốc (Không đảo ngược): thumb_url là dọc, poster_url là ngang
+                            $mainMovie['thumb_url'] = $movie['thumb_url'] ?? '';
+                            $mainMovie['poster_url'] = $movie['poster_url'] ?? '';
                         }
 
                         if ($sourceName === 'KKPhim') {
-                            // Đảo ngược thumb_url và poster_url cho KKPhim theo yêu cầu
-                            $mainMovie['thumb_url'] = $movie['poster_url'] ?? '';
-                            $mainMovie['poster_url'] = $movie['thumb_url'] ?? '';
+                            // Đưa về chuẩn KKPhim gốc (Không đảo ngược): thumb_url là dọc, poster_url là ngang
+                            $mainMovie['thumb_url'] = $movie['thumb_url'] ?? '';
+                            $mainMovie['poster_url'] = $movie['poster_url'] ?? '';
                                                         
                             $crawler = new KKPhimCrawler('kkphim');
                             $peoplesRes = $crawler->getMoviePeoples($slug);

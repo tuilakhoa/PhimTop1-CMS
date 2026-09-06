@@ -189,7 +189,7 @@ if ($pdo) {
 </head>
 <body class="<?= $bodyClass ?> min-h-screen flex flex-col">
     <!-- Header -->
-    <nav class="header-solid fixed w-full top-0 z-50 transition-all duration-300 h-[72px]">
+    <nav id="mainNav" class="fixed w-full top-0 z-50 transition-all duration-300 h-[72px] bg-black/60 backdrop-blur-xl border-b border-white/5">
         <div class="px-4 md:px-6 lg:px-12 w-full h-full flex items-center justify-between">
             
             <!-- Left: Logo & Nav -->
@@ -287,8 +287,8 @@ if ($pdo) {
             <!-- Right: Search & Login -->
             <div class="flex items-center gap-4 shrink-0">
                 <form action="/search" method="GET" class="relative hidden md:block">
-                    <input type="text" name="keyword" placeholder="Tìm kiếm phim, tác giả..." 
-                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-transparent w-[300px] placeholder-gray-500 font-medium">
+                    <input type="text" name="keyword" placeholder="Tìm kiếm phim, diễn viên, đạo diễn..." 
+                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-transparent w-[300px] placeholder-gray-500 font-medium transition-all focus:w-[350px]">
                     <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-white">
                         <i data-lucide="search" class="w-5 h-5"></i>
                     </button>
@@ -314,7 +314,7 @@ if ($pdo) {
             <div class="px-4 py-4 space-y-4">
                 <!-- Mobile Search Form -->
                 <form action="/search" method="GET" class="relative w-full">
-                    <input type="text" name="keyword" placeholder="Tìm kiếm phim, tác giả..." 
+                    <input type="text" name="keyword" placeholder="Tìm kiếm phim, diễn viên..." 
                         class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-gray-800 w-full placeholder-gray-500 font-medium">
                     <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-white">
                         <i data-lucide="search" class="w-5 h-5"></i>
@@ -535,6 +535,7 @@ if ($pdo) {
                                             <div class="flex-1 min-w-0">
                                                 <div class="text-gray-200 text-sm font-medium truncate group-hover:text-phim-yellow transition-colors">${item.name}</div>
                                                 <div class="text-gray-500 text-[11px] truncate">${item.origin_name || ''}</div>
+                                                ${item.actor ? `<div class="text-gray-400 text-[10px] truncate mt-1"><i data-lucide="users" class="w-3 h-3 inline-block mr-1"></i>${item.actor}</div>` : ''}
                                             </div>
                                         </a>
                                     `;

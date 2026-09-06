@@ -2,7 +2,7 @@
 
 
 
-    <footer class="bg-[#0a0a0a] border-t border-gray-900 py-12">
+    <footer class="bg-black/50 backdrop-blur-xl border-t border-white/10 py-12 mt-10">
         <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1400px]">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <div class="col-span-1 md:col-span-2">

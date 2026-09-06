@@ -141,6 +141,9 @@ if (isset($_SESSION['user'])) {
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
+                <button onclick="toggleTheaterMode()" class="flex items-center px-4 py-2 bg-[#1a1a1a] hover:bg-[#252525] text-gray-300 hover:text-white text-sm font-medium rounded border border-gray-800">
+                    <i data-lucide="monitor" class="w-4 h-4 mr-2 text-cyan-400"></i> Theater
+                </button>
                 <button onclick="toggleWatchPartyDialog()" class="flex items-center px-4 py-2 bg-phim-yellow hover:bg-yellow-400 text-black text-sm font-bold rounded  shadow-[0_0_10px_rgba(234,179,8,0.3)]">
                     <i data-lucide="users" class="w-4 h-4 mr-2"></i> Xem Chung
                 </button>
@@ -441,6 +444,29 @@ document.addEventListener('DOMContentLoaded', function() {
     sendHeartbeat();
     setInterval(sendHeartbeat, 10000);
 });
+
+function toggleTheaterMode() {
+    let overlay = document.getElementById('theater-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'theater-overlay';
+        overlay.className = 'fixed inset-0 bg-black/90 z-40 hidden transition-opacity';
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', toggleTheaterMode);
+    }
+    
+    const playerArea = document.getElementById('player-container').parentElement;
+    
+    if (overlay.classList.contains('hidden')) {
+        overlay.classList.remove('hidden');
+        playerArea.style.position = 'relative';
+        playerArea.style.zIndex = '50';
+    } else {
+        overlay.classList.add('hidden');
+        playerArea.style.position = '';
+        playerArea.style.zIndex = '';
+    }
+}
 </script>
 
 <!-- Watch Party Dialog -->
