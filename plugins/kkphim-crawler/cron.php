@@ -234,7 +234,7 @@ foreach ($crawlers as $index => $crawler) {
                 
                 // Smart Early Stop
                 if ($consecutive_no_updates >= $max_consecutive_no_updates) {
-                    log_cron("[$currentSource] Đã quét $max_consecutive_no_updates phim liên tiếp không có thay đổi. Dừng quét nguồn này sớm.");
+                    log_cron("[$currentSource] Đã quét $max_consecutive_no_updates phim liên tiếp không có cập nhật mới. Dừng quét nguồn này sớm.");
                     $shouldStopSource = true;
                     break;
                 }

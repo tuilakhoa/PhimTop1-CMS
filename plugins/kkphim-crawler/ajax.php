@@ -560,7 +560,7 @@ if ($action === 'smart_sync_source') {
         } else {
             $consecutive++;
             if ($consecutive >= $max_consecutive) {
-                $logs[] = "Đã chạm ngưỡng $max_consecutive phim cũ liên tiếp. Dừng quét nguồn này.";
+                $logs[] = "Đã chạm ngưỡng $max_consecutive phim liên tiếp không có cập nhật mới. Dừng quét nguồn này.";
                 $should_stop = true;
                 break;
             }
