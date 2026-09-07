@@ -186,12 +186,21 @@ class KKPhimCrawler {
                 if ($res && (isset($res['data']['item']) || isset($res['movie']))) {
                     $movie = $res['data']['item'] ?? $res['movie'];
                     
+                    if ($mainMovie && empty($mainMovie['status']) && !empty($movie['status'])) {
+                        $mainMovie['status'] = $movie['status'];
+                    }
                     if (!$mainMovie) {
                         $mainMovie = $movie;
                         $mainMovie['APP_DOMAIN_CDN_IMAGE'] = $res['data']['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
                         
                         // Chuẩn hóa dữ liệu Nguồn C về chuẩn chung
+                        // Nếu là Nguồn C, chuẩn hóa dữ liệu
                         if ($sourceName === 'Nguồn C') {
+                            $mainMovie['origin_name'] = $mainMovie['original_name'] ?? '';
+                            $mainMovie['content'] = $mainMovie['description'] ?? '';
+                            $mainMovie['episode_current'] = $mainMovie['current_episode'] ?? '';
+                            
+
                             $mainMovie['origin_name'] = $mainMovie['original_name'] ?? '';
                             $mainMovie['content'] = $mainMovie['description'] ?? '';
                             $mainMovie['episode_current'] = $mainMovie['current_episode'] ?? '';

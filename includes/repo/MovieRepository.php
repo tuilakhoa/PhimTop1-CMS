@@ -139,7 +139,7 @@ class MovieRepository {
                 VALUES (:id, :name, :origin_name, :slug, :thumb_url, :poster_url, :trailer_url, :year, :type, :status, :episode_current, :quality, :lang, :chieu_rap, :content, :actor, :director, :categories_json, :countries_json, :view, :time, :peoples_json, :images_json, :tmdb_vote, :imdb_vote, :updated_at)
                 ON DUPLICATE KEY UPDATE 
                 name=VALUES(name), origin_name=VALUES(origin_name), thumb_url=VALUES(thumb_url), poster_url=VALUES(poster_url), trailer_url=VALUES(trailer_url), 
-                year=VALUES(year), type=VALUES(type), status=VALUES(status), episode_current=VALUES(episode_current), 
+                year=VALUES(year), type=VALUES(type), status=IF(VALUES(status) = '', status, VALUES(status)), episode_current=IF(VALUES(episode_current) = '', episode_current, VALUES(episode_current)), 
                 quality=VALUES(quality), lang=VALUES(lang), chieu_rap=VALUES(chieu_rap), content=VALUES(content), actor=VALUES(actor), director=VALUES(director), categories_json=VALUES(categories_json), countries_json=VALUES(countries_json), time=VALUES(time), peoples_json=VALUES(peoples_json), images_json=VALUES(images_json), tmdb_vote=VALUES(tmdb_vote), imdb_vote=VALUES(imdb_vote), updated_at=VALUES(updated_at)";
             $stmt = $this->pdo->prepare($sql);
             
