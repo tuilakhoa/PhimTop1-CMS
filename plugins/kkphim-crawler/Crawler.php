@@ -202,6 +202,10 @@ class KKPhimCrawler {
                             if (is_string($mainMovie['director'])) {
                                 $mainMovie['director'] = explode(', ', $mainMovie['director']);
                             }
+                            
+                            $mainMovie['quality'] = $movie['quality'] ?? '';
+                            $mainMovie['lang'] = $movie['language'] ?? '';
+
                             // Phân tách Category của Nguồn C
                             $standardCategories = [];
                             $standardCountries = [];
@@ -210,12 +214,25 @@ class KKPhimCrawler {
                                     $groupName = mb_strtolower($catGroup['group']['name'] ?? '', 'UTF-8');
                                     if (isset($catGroup['list']) && is_array($catGroup['list'])) {
                                         foreach ($catGroup['list'] as $item) {
+                                            $itemName = mb_strtolower($item['name'] ?? '', 'UTF-8');
                                             $safeSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', str_replace('đ', 'd', str_replace('Đ', 'd', iconv('UTF-8', 'ASCII//TRANSLIT', $item['name']))))));
                                             $itemData = ['name' => $item['name'], 'slug' => $safeSlug];
+                                            
                                             if (strpos($groupName, 'quốc gia') !== false || strpos($groupName, 'quoc gia') !== false) {
                                                 $standardCountries[] = $itemData;
                                             } elseif (strpos($groupName, 'thể loại') !== false || strpos($groupName, 'the loai') !== false) {
                                                 $standardCategories[] = $itemData;
+                                            } elseif ($groupName === 'năm' || $groupName === 'nam') {
+                                                $mainMovie['year'] = $item['name'];
+                                            } elseif (strpos($groupName, 'định dạng') !== false || strpos($groupName, 'dinh dang') !== false) {
+                                                if (strpos($itemName, 'phim bộ') !== false) $mainMovie['type'] = 'series';
+                                                elseif (strpos($itemName, 'phim lẻ') !== false) $mainMovie['type'] = 'single';
+                                                elseif (strpos($itemName, 'hoạt hình') !== false) $mainMovie['type'] = 'hoathinh';
+                                                elseif (strpos($itemName, 'tv show') !== false) $mainMovie['type'] = 'tvshows';
+                                                
+                                                if (strpos($itemName, 'đang chiếu') !== false) $mainMovie['status'] = 'ongoing';
+                                                elseif (strpos($itemName, 'hoàn') !== false || strpos($itemName, 'trọn') !== false) $mainMovie['status'] = 'completed';
+                                                elseif (strpos($itemName, 'sắp chiếu') !== false || strpos($itemName, 'trailer') !== false) $mainMovie['status'] = 'trailer';
                                             }
                                         }
                                     }

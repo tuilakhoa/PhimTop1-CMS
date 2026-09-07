@@ -22,11 +22,29 @@ echo "=================================================\n\n";
 $crawler = new KKPhimCrawler();
 $seoRepo = getSeoRepository();
 
-// Lấy toàn bộ slug trong DB
-$stmt = $pdo->query("SELECT slug, name, content FROM movies");
+$options = getopt('', ['limit:', 'force']);
+$limit = isset($options['limit']) ? (int)$options['limit'] : 1000;
+$force = isset($options['force']);
+
+// Mốc thời gian Crawler được nâng cấp để lấy full dữ liệu (bạn có thể đổi nếu cần)
+$upgradeTime = '2026-09-07 12:00:00';
+
+// Quét toàn bộ các phim chưa được update sau thời điểm nâng cấp crawler
+// Hoặc nếu dùng tham số --force thì quét tất cả
+$sql = "SELECT slug, name, content FROM movies";
+if (!$force) {
+    $sql .= " WHERE updated_at < '$upgradeTime' OR updated_at IS NULL";
+}
+$sql .= " ORDER BY id DESC";
+
+if ($limit > 0) {
+    $sql .= " LIMIT $limit";
+}
+
+$stmt = $pdo->query($sql);
 $movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-echo "Tìm thấy " . count($movies) . " phim trong database.\n";
+echo "Tìm thấy " . count($movies) . " phim cần quét lại dữ liệu.\n";
 
 function multiRequestWithRetry($urls, $max_retries = 3) {
     $results = [];
@@ -125,6 +143,11 @@ for ($i = 0; $i < $total; $i += $batchSize) {
             
             $actor = isset($movie['actor']) ? (is_array($movie['actor']) ? implode(', ', $movie['actor']) : $movie['actor']) : '';
             $director = isset($movie['director']) ? (is_array($movie['director']) ? implode(', ', $movie['director']) : $movie['director']) : '';
+            
+            // Đảo ngược thumb_url và poster_url theo rule của CMS
+            $tempThumb = $thumbUrl;
+            $thumbUrl = $posterUrl;
+            $posterUrl = $tempThumb;
             
             $repo = getMovieRepository();
             $catRepo = getCategoryRepository();
