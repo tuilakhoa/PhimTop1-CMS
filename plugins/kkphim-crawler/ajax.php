@@ -332,4 +332,61 @@ if ($action === 'set_cron_batch_progress') {
     exit;
 }
 
+if ($action === 'check_new_movies') {
+    $crawlers = [
+        new KKPhimCrawler('kkphim'),
+        new KKPhimCrawler('nguonc'),
+        new KKPhimCrawler('vsmov')
+    ];
+    $repo = getMovieRepository();
+    $stats = [];
+    $total_new = 0;
+    
+    foreach ($crawlers as $index => $crawler) {
+        $sourceNames = ['KKPhim', 'Nguồn C', 'VsMov'];
+        $sourceName = $sourceNames[$index];
+        $data = $crawler->getLatestMovies(1);
+        $new_count = 0;
+        
+        if ($data) {
+            $sourceItems = $data['data']['items'] ?? $data['items'] ?? [];
+            foreach ($sourceItems as $item) {
+                if (empty($item['slug'])) continue;
+                $slug = $item['slug'];
+                $api_episode_current = $item['episode_current'] ?? '';
+                $api_status = $item['status'] ?? '';
+                
+                $api_modified = $item['modified']['time'] ?? $item['modified'] ?? $item['updated_time'] ?? $item['time'] ?? '';
+                if (is_array($api_modified)) $api_modified = '';
+                
+                $dbMovie = $repo->getMovieBySlug($slug);
+                if (!$dbMovie) {
+                    $new_count++;
+                } else {
+                    $db_episode_current = $dbMovie['episode_current'] ?? '';
+                    $db_status = $dbMovie['status'] ?? '';
+                    $db_updated_at = $dbMovie['updated_at'] ?? '';
+                    
+                    if ($api_status && strtolower($api_status) !== strtolower($db_status)) {
+                        $new_count++;
+                    } elseif ($api_episode_current && $api_episode_current !== $db_episode_current) {
+                        $new_count++;
+                    } elseif ($api_modified && $db_updated_at && strtotime($api_modified) > strtotime($db_updated_at)) {
+                        $new_count++;
+                    }
+                }
+            }
+        }
+        $stats[] = "$sourceName: $new_count cập nhật";
+        $total_new += $new_count;
+    }
+    
+    echo json_encode([
+        'status' => 'success', 
+        'total' => $total_new,
+        'message' => 'Tìm thấy ' . $total_new . ' phim/tập phim mới ở Trang 1. (' . implode(', ', $stats) . ')'
+    ]);
+    exit;
+}
+
 echo json_encode(['status' => 'error', 'message' => 'Invalid action']);

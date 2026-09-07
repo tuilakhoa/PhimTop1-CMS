@@ -58,6 +58,22 @@
         </form>
     </div>
 
+    <!-- Panel Kiểm Tra Cập Nhật Nhanh -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg lg:col-span-2 mb-6">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="bell-ring" class="text-green-400"></i> Theo Dõi Phim Mới (Trang 1)
+        </h3>
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-4">
+            <div class="text-gray-300 text-sm flex-1">
+                <p>Nhấn nút bên phải để hệ thống đối chiếu nhanh <strong>Trang 1</strong> của 3 nguồn với CSDL hiện tại.</p>
+                <p class="mt-2 text-yellow-400 font-medium" id="checkUpdateResult">Trạng thái: Chưa kiểm tra.</p>
+            </div>
+            <button id="btnCheckUpdate" class="bg-green-600 hover:bg-green-500 text-white font-medium py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
+                <i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Ngay
+            </button>
+        </div>
+        <p class="text-xs text-gray-500 italic">Tính năng này giúp bạn nắm bắt xem có phim nào vừa ra lò chưa được cập nhật không.</p>
+    </div>
     <!-- Panel Cron Job -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -384,6 +400,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+        // Check update
+    const btnCheckUpdate = document.getElementById('btnCheckUpdate');
+    const checkUpdateResult = document.getElementById('checkUpdateResult');
+    if (btnCheckUpdate && checkUpdateResult) {
+        btnCheckUpdate.addEventListener('click', async () => {
+            btnCheckUpdate.disabled = true;
+            btnCheckUpdate.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang quét...';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            checkUpdateResult.textContent = 'Trạng thái: Đang lấy dữ liệu từ các nguồn...';
+            checkUpdateResult.className = "mt-2 text-yellow-400 font-medium";
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'check_new_movies');
+                const res = await fetch(pluginPath, { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    checkUpdateResult.textContent = 'Trạng thái: ' + data.message;
+                    if (data.total > 0) {
+                        checkUpdateResult.className = "mt-2 text-green-400 font-bold";
+                    } else {
+                        checkUpdateResult.className = "mt-2 text-gray-400 font-medium";
+                    }
+                } else {
+                    checkUpdateResult.textContent = 'Lỗi: ' + data.message;
+                    checkUpdateResult.className = "mt-2 text-red-400 font-medium";
+                }
+            } catch (e) {
+                checkUpdateResult.textContent = 'Lỗi mạng khi gọi API.';
+                checkUpdateResult.className = "mt-2 text-red-400 font-medium";
+            }
+            
+            btnCheckUpdate.disabled = false;
+            btnCheckUpdate.innerHTML = '<i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Ngay';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    }
     // Crawl List
     document.getElementById('crawlListForm').addEventListener('submit', async (e) => {
         e.preventDefault();
