@@ -7,6 +7,15 @@ require_once __DIR__ . '/../../includes/db.php';
 require_once __DIR__ . '/../../includes/repositories.php';
 require_once __DIR__ . '/Crawler.php';
 
+function getCrawlerSyncDB() {
+    static $db = null;
+    if ($db === null) {
+        $db = new PDO('sqlite:' . __DIR__ . '/sync.sqlite');
+        $db->exec("CREATE TABLE IF NOT EXISTS sync_meta (slug TEXT, source TEXT, modified TEXT, PRIMARY KEY(slug, source))");
+    }
+    return $db;
+}
+
 // Log chức năng
 function log_cron($msg) {
     echo "[" . date('Y-m-d H:i:s') . "] " . $msg . "\n";

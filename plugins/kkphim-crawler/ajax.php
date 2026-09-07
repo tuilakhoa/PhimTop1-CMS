@@ -9,6 +9,15 @@ require_once __DIR__ . '/../../includes/db.php';
 require_once __DIR__ . '/../../includes/repositories.php';
 require_once __DIR__ . '/Crawler.php';
 
+function getCrawlerSyncDB() {
+    static $db = null;
+    if ($db === null) {
+        $db = new PDO('sqlite:' . __DIR__ . '/sync.sqlite');
+        $db->exec("CREATE TABLE IF NOT EXISTS sync_meta (slug TEXT, source TEXT, modified TEXT, PRIMARY KEY(slug, source))");
+    }
+    return $db;
+}
+
 header('Content-Type: application/json');
 
 $configFile = __DIR__ . '/config.json';
@@ -356,8 +365,7 @@ if ($action === 'check_new_movies') {
                 $api_episode_current = $item['episode_current'] ?? '';
                 $api_status = $item['status'] ?? '';
                 
-                $api_modified = $item['modified']['time'] ?? $item['modified'] ?? $item['updated_time'] ?? $item['time'] ?? '';
-                if (is_array($api_modified)) $api_modified = '';
+                $api_modified = (string)($item['modified']['time'] ?? $item['modified'] ?? $item['updated_time'] ?? $item['time'] ?? '');
                 
                 $dbMovie = $repo->getMovieBySlug($slug);
                 if (!$dbMovie) {
@@ -365,13 +373,17 @@ if ($action === 'check_new_movies') {
                 } else {
                     $db_episode_current = $dbMovie['episode_current'] ?? '';
                     $db_status = $dbMovie['status'] ?? '';
-                    $db_updated_at = $dbMovie['updated_at'] ?? '';
+                    
+                    $syncDb = getCrawlerSyncDB();
+                    $stmt = $syncDb->prepare("SELECT modified FROM sync_meta WHERE slug = ? AND source = ?");
+                    $stmt->execute([$slug, $sourceName]);
+                    $saved_modified = $stmt->fetchColumn();
                     
                     if ($api_status && strtolower($api_status) !== strtolower($db_status)) {
                         $new_count++;
                     } elseif ($api_episode_current && $api_episode_current !== $db_episode_current) {
                         $new_count++;
-                    } elseif ($api_modified && $db_updated_at && strtotime($api_modified) > strtotime($db_updated_at)) {
+                    } elseif ($api_modified && $saved_modified && $api_modified !== $saved_modified) {
                         $new_count++;
                     }
                 }
@@ -420,11 +432,15 @@ if ($action === 'smart_sync_source') {
         
         $api_episode_current = $item['episode_current'] ?? '';
         $api_status = $item['status'] ?? '';
-        $api_modified = $item['modified']['time'] ?? $item['modified'] ?? $item['updated_time'] ?? $item['time'] ?? '';
-        if (is_array($api_modified)) $api_modified = '';
+        $api_modified = (string)($item['modified']['time'] ?? $item['modified'] ?? $item['updated_time'] ?? $item['time'] ?? '');
         
         $dbMovie = $repo->getMovieBySlug($slug);
         $needsUpdate = false;
+        
+        $syncDb = getCrawlerSyncDB();
+        $stmt = $syncDb->prepare("SELECT modified FROM sync_meta WHERE slug = ? AND source = ?");
+        $stmt->execute([$slug, $sourceName]);
+        $saved_modified = $stmt->fetchColumn();
         
         if (!$dbMovie) {
             $needsUpdate = true;
@@ -432,7 +448,6 @@ if ($action === 'smart_sync_source') {
         } else {
             $db_episode_current = $dbMovie['episode_current'] ?? '';
             $db_status = $dbMovie['status'] ?? '';
-            $db_updated_at = $dbMovie['updated_at'] ?? '';
             
             if ($api_status && strtolower($api_status) !== strtolower($db_status)) {
                 $needsUpdate = true;
@@ -440,7 +455,7 @@ if ($action === 'smart_sync_source') {
             } elseif ($api_episode_current && $api_episode_current !== $db_episode_current) {
                 $needsUpdate = true;
                 $logs[] = "Cập nhật tập mới ($db_episode_current -> $api_episode_current): $slug";
-            } elseif ($api_modified && $db_updated_at && strtotime($api_modified) > strtotime($db_updated_at)) {
+            } elseif ($api_modified && $saved_modified && $api_modified !== $saved_modified) {
                 $needsUpdate = true;
                 $logs[] = "Cập nhật link mới ($sourceName vừa ra thêm tập): $slug";
             }
@@ -554,6 +569,10 @@ if ($action === 'smart_sync_source') {
                 }
                 $logs[] = "-> Đã lưu phim: $slug";
                 $updated++;
+                if ($api_modified) {
+                    $stmtSync = $syncDb->prepare("INSERT INTO sync_meta (slug, source, modified) VALUES (?, ?, ?) ON CONFLICT(slug, source) DO UPDATE SET modified = excluded.modified");
+                    $stmtSync->execute([$slug, $sourceName, $api_modified]);
+                }
             } else {
                 $logs[] = "-> Lỗi không lấy được chi tiết phim: $slug";
             }
