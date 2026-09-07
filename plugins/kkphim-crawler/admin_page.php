@@ -1,3 +1,4 @@
+<div class="w-full max-w-full flex flex-col">
 <div class="mb-6 flex justify-between items-center flex-wrap gap-4">
     <div>
         <h2 class="text-2xl font-bold text-white mb-2">Công Cụ Crawl Phim (Đa Nguồn)</h2>
@@ -229,8 +230,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-
     // Tabs Logic
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -250,9 +249,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Show content
             const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
+            const targetEl = document.getElementById(targetId);
+            if(targetEl) targetEl.classList.remove('hidden');
         });
     });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 
 
     const logEl = document.getElementById('crawlLog');
@@ -315,29 +316,6 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang tải lại...';
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
-
 
         logMessage(`Bắt đầu thử tải lại ${failedSlugsList.length} phim lỗi...`, 'warn');
         
@@ -386,29 +364,6 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Crawl Lại Phim Lỗi';
         btn.disabled = failedSlugsList.length === 0;
         if (typeof lucide !== 'undefined') lucide.createIcons();
-
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
 
     });
 
@@ -510,29 +465,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btnCheckUpdate.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang quét...';
             if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
-
             checkUpdateResult.textContent = 'Trạng thái: Đang lấy dữ liệu từ các nguồn...';
             checkUpdateResult.className = "mt-2 text-yellow-400 font-medium";
 
@@ -563,29 +495,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btnCheckUpdate.innerHTML = '<i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Ngay';
             if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
-
         });
     }
         // Smart Sync
@@ -595,29 +504,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRunSmartSync.disabled = true;
             btnRunSmartSync.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang đồng bộ...';
             if (typeof lucide !== 'undefined') lucide.createIcons();
-
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
 
             checkUpdateResult.textContent = 'Trạng thái: Đang chạy Smart Sync...';
             checkUpdateResult.className = "mt-2 text-green-400 font-bold";
@@ -677,58 +563,12 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRunSmartSync.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> Hoàn Thành';
             if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
-
             
             setTimeout(() => {
                 btnRunSmartSync.disabled = false;
                 btnRunSmartSync.innerHTML = '<i data-lucide="zap" class="w-4 h-4"></i> Cập Nhật Nhanh (Smart Sync)';
                 btnRunSmartSync.style.display = 'none';
                 if (typeof lucide !== 'undefined') lucide.createIcons();
-
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
 
             }, 3000);
         });
@@ -750,29 +590,6 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.disabled = true;
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Crawl...';
         if (typeof lucide !== 'undefined') lucide.createIcons();
-
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
 
 
         logMessage(`Bắt đầu crawl từ trang ${fromPage} đến ${toPage}...`, 'info');
@@ -827,29 +644,6 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Bắt đầu Crawl';
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
-
     });
 
     // Crawl Keyword
@@ -867,29 +661,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = true;
             btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Tìm...';
             if (typeof lucide !== 'undefined') lucide.createIcons();
-
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
 
 
             logMessage(`Đang tìm kiếm phim với từ khóa: <b>${keyword}</b>...`, 'info');
@@ -909,29 +680,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     btn.disabled = false;
                     btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
                     if (typeof lucide !== 'undefined') lucide.createIcons();
-
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
 
                     return;
                 }
@@ -969,30 +717,9 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
             if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active classes
-            tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
-                b.classList.add('text-gray-400', 'border-transparent');
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            
-            // Add active class
-            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
-            btn.classList.remove('text-gray-400', 'border-transparent');
-            
-            // Show content
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-        });
-    });
-
         });
     }
 });
 </script>
+
+</div>
