@@ -40,3 +40,5 @@ GoogleService-Info.plist
 node_modules/
 node_modules/
 tailwindcss-linux-x64
+plugins/kkphim-crawler/cron_batch_progress.txt
+plugins/kkphim-crawler/cron_batch_progress.txt
