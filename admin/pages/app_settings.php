@@ -224,6 +224,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         </label>
                     </div>
                 </div>
+                
+                <div class="mt-4 flex justify-end">
+                    <button type="button" onclick="clearUpdateSettings()" class="bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white px-4 py-2 rounded-lg text-sm transition-colors border border-red-600/50">
+                        <i data-lucide="trash-2" class="w-4 h-4 inline mr-1"></i> Xóa Bản Cập Nhật
+                    </button>
+                </div>
+                
+                <script>
+                function clearUpdateSettings() {
+                    if (confirm('Bạn có chắc chắn muốn xóa bản cập nhật? Hành động này sẽ thiết lập lại phiên bản và không ép buộc cập nhật nữa.')) {
+                        document.querySelector('[name="appLatestVersion"]').value = '1.0.0';
+                        document.querySelector('[name="appBuildNumber"]').value = '1';
+                        document.querySelector('[name="appForceUpdate"]').checked = false;
+                        document.querySelector('[name="appLatestVersionIos"]').value = '1.0.0';
+                        document.querySelector('[name="appBuildNumberIos"]').value = '1';
+                        document.querySelector('[name="appForceUpdateIos"]').checked = false;
+                        
+                        let updateUrlInput = document.querySelector('[name="appInAppUpdateUrl"]');
+                        if (updateUrlInput) updateUrlInput.value = '';
+                        
+                        // Submit form to save
+                        document.querySelector('form').submit();
+                    }
+                }
+                </script>
             </div>
         </div>
 

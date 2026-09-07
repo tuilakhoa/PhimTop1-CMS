@@ -105,6 +105,11 @@ foreach ($crawlers as $index => $crawler) {
                 
                 // Tiến hành crawl chi tiết phim này từ cả 3 nguồn (Logic cũ)
                 $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
+    if ($fullData && !empty($fullData['movie'])) {
+        if (KKPhimCrawler::isMovieBlockedByCategoriesOrCountries($fullData['movie'], $pdo)) {
+            return false; // Skip this movie because it belongs to a blocked category or country
+        }
+    }
                 
                 if ($fullData['movie']) {
                     $movie = $fullData['movie'];

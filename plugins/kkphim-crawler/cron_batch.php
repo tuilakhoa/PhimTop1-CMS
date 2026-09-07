@@ -118,6 +118,11 @@ function multiRequestWithRetry($urls, $max_retries = 5, $is_supplementary = fals
 function saveMovieData($slug, $repo, $catRepo, $pdo) {
     // Chúng ta không dùng $res nữa vì fetchMovieFromAllSources tự request lại
     $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
+    if ($fullData && !empty($fullData['movie'])) {
+        if (KKPhimCrawler::isMovieBlockedByCategoriesOrCountries($fullData['movie'], $pdo)) {
+            return false; // Skip this movie because it belongs to a blocked category or country
+        }
+    }
     
     if (!$fullData['movie']) {
         return false;

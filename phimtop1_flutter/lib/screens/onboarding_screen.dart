@@ -162,18 +162,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 return CachedNetworkImage(
                   imageUrl: imageUrl,
                   fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(color: Colors.grey.withOpacity(0.2)),
+                  errorWidget: (context, url, error) => Container(color: Colors.grey.withOpacity(0.2)),
                 );
               },
             ),
           )
         else
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF1A1A24), Colors.black],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+          Opacity(
+            opacity: 0.5,
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 0.7,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
               ),
+              itemCount: 12,
+              itemBuilder: (context, index) {
+                return Container(color: Colors.grey.withOpacity(0.2));
+              },
             ),
           ),
           

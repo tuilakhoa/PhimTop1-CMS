@@ -209,7 +209,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
           if (m3u8Link.isNotEmpty) {
             setState(() { _isPlayingInline = true; });
             _initInlinePlayer(m3u8Link, episode, provider);
-          } else if (embedLink.isNotEmpty) {;
           } else if (embedLink.isNotEmpty) {
             Navigator.push(
               context,
@@ -396,6 +395,45 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
                       ),
                     ),
                     const SizedBox(height: 32),
+
+                    if (provider.episodes.length > 1) ...[
+                      Row(
+                        children: [
+                          Text("Chọn Server: ", style: TextStyle(color: _textColor, fontWeight: FontWeight.bold, fontSize: 18)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: provider.episodes.asMap().entries.map((e) {
+                                  final isSelected = provider.currentServerIndex == e.key;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      int currentEpIndex = provider.currentEpisodeIndex;
+                                      final currentEpName = provider.episodes[provider.currentServerIndex].serverData[currentEpIndex].name;
+                                      int newEpIndex = e.value.serverData.indexWhere((ep) => ep.name == currentEpName);
+                                      if (newEpIndex == -1) newEpIndex = 0;
+                                      provider.changeEpisode(newEpIndex, e.key);
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.only(right: 8),
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? Theme.of(context).primaryColor : _bgOpacity,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: isSelected ? Theme.of(context).primaryColor : _textColor.withOpacity(0.2)),
+                                      ),
+                                      child: Text(e.value.serverName, style: TextStyle(color: isSelected ? Colors.white : _textColor, fontWeight: FontWeight.bold)),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                    ],
                     if (provider.episodes.isNotEmpty) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -913,6 +951,49 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
                 ],
 
                 // Episodes
+
+                if (provider.episodes.length > 1) ...[
+                  Row(
+                    children: [
+                      Text("Chọn Server: ", style: TextStyle(color: _textColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: provider.episodes.asMap().entries.map((e) {
+                              final isSelected = provider.currentServerIndex == e.key;
+                              return GestureDetector(
+                                onTap: () {
+                                  int currentEpIndex = provider.currentEpisodeIndex;
+                                  if (provider.episodes[provider.currentServerIndex].serverData.isNotEmpty) {
+                                    final currentEpName = provider.episodes[provider.currentServerIndex].serverData[currentEpIndex].name;
+                                    int newEpIndex = e.value.serverData.indexWhere((ep) => ep.name == currentEpName);
+                                    if (newEpIndex == -1) newEpIndex = 0;
+                                    provider.changeEpisode(newEpIndex, e.key);
+                                  } else {
+                                    provider.changeEpisode(0, e.key);
+                                  }
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? Theme.of(context).primaryColor : _bgOpacity,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: isSelected ? Theme.of(context).primaryColor : _textColor.withOpacity(0.2)),
+                                  ),
+                                  child: Text(e.value.serverName, style: TextStyle(color: isSelected ? Colors.white : _textColor, fontWeight: FontWeight.bold)),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 if (provider.episodes.isNotEmpty) ...[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

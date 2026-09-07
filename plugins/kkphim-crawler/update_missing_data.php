@@ -119,6 +119,11 @@ for ($i = 0; $i < $total; $i += $batchSize) {
         $slug = $m['slug'];
         
         $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
+    if ($fullData && !empty($fullData['movie'])) {
+        if (KKPhimCrawler::isMovieBlockedByCategoriesOrCountries($fullData['movie'], $pdo)) {
+            return false; // Skip this movie because it belongs to a blocked category or country
+        }
+    }
         
         if ($fullData['movie']) {
             $movie = $fullData['movie'];

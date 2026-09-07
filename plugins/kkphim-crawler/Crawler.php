@@ -312,4 +312,29 @@ class KKPhimCrawler {
             'keywords' => $keywordsData
         ];
     }
+
+    public static function isMovieBlockedByCategoriesOrCountries($movie, $pdo) {
+        if (empty($movie['category']) && empty($movie['country'])) return false;
+        
+        $slugsToCheck = [];
+        if (!empty($movie['category'])) {
+            foreach ($movie['category'] as $cat) {
+                if (!empty($cat['slug'])) $slugsToCheck[] = $cat['slug'];
+            }
+        }
+        if (!empty($movie['country'])) {
+            foreach ($movie['country'] as $country) {
+                if (!empty($country['slug'])) $slugsToCheck[] = $country['slug'];
+            }
+        }
+        
+        if (empty($slugsToCheck)) return false;
+        
+        $placeholders = implode(',', array_fill(0, count($slugsToCheck), '?'));
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM categories WHERE slug IN ($placeholders) AND is_blocked = 1");
+        $stmt->execute($slugsToCheck);
+        $count = $stmt->fetchColumn();
+        
+        return $count > 0;
+    }
 }

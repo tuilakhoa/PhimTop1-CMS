@@ -124,6 +124,11 @@ if ($action === 'crawl_single') {
     }
     
     $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
+    if ($fullData && !empty($fullData['movie'])) {
+        if (KKPhimCrawler::isMovieBlockedByCategoriesOrCountries($fullData['movie'], $pdo)) {
+            return false; // Skip this movie because it belongs to a blocked category or country
+        }
+    }
     
     if (!$fullData['movie']) {
         echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy phim hoặc API lỗi']);
@@ -463,6 +468,11 @@ if ($action === 'smart_sync_source') {
             $consecutive = 0;
             // Fetch and save
             $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
+    if ($fullData && !empty($fullData['movie'])) {
+        if (KKPhimCrawler::isMovieBlockedByCategoriesOrCountries($fullData['movie'], $pdo)) {
+            return false; // Skip this movie because it belongs to a blocked category or country
+        }
+    }
             if ($fullData['movie']) {
                 $movie = $fullData['movie'];
                 $episodesList = $fullData['episodes'];

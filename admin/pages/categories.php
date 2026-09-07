@@ -33,10 +33,18 @@ foreach ($allCats as $row) {
             <i data-lucide="film" class="w-5 h-5 mr-2 text-blue-500"></i> Thể Loại (<?= count($genres) ?>)
         </h3>
         <div class="flex flex-wrap gap-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
-            <?php foreach ($genres as $genre): ?>
-                <span class="inline-flex items-center bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1.5 rounded-lg text-sm">
-                    <?= htmlspecialchars($genre['name']) ?>
-                </span>
+            <?php foreach ($genres as $genre): 
+                $isBlocked = !empty($genre['is_blocked']);
+            ?>
+                <div class="inline-flex items-center bg-gray-800 border border-gray-700 <?= $isBlocked ? 'opacity-50 line-through' : '' ?> text-gray-300 px-3 py-1.5 rounded-lg text-sm group">
+                    <span class="mr-2"><?= htmlspecialchars($genre['name']) ?></span>
+                    <button onclick="toggleCat('<?= htmlspecialchars($genre['slug']) ?>')" class="text-gray-500 hover:text-yellow-500 mx-1" title="<?= $isBlocked ? 'Bỏ chặn' : 'Chặn crawl' ?>">
+                        <i data-lucide="<?= $isBlocked ? 'unlock' : 'ban' ?>" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button onclick="deleteCat('<?= htmlspecialchars($genre['slug']) ?>')" class="text-gray-500 hover:text-red-500 mx-1" title="Xóa">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
             <?php endforeach; ?>
             <?php if (empty($genres)): ?>
                 <p class="text-gray-500 text-sm">Chưa có dữ liệu. Hãy nhấn "Đồng Bộ" ở trên.</p>
@@ -50,10 +58,18 @@ foreach ($allCats as $row) {
             <i data-lucide="globe" class="w-5 h-5 mr-2 text-purple-500"></i> Quốc Gia (<?= count($countries) ?>)
         </h3>
         <div class="flex flex-wrap gap-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
-            <?php foreach ($countries as $country): ?>
-                <span class="inline-flex items-center bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1.5 rounded-lg text-sm">
-                    <?= htmlspecialchars($country['name']) ?>
-                </span>
+            <?php foreach ($countries as $country): 
+                $isBlocked = !empty($country['is_blocked']);
+            ?>
+                <div class="inline-flex items-center bg-gray-800 border border-gray-700 <?= $isBlocked ? 'opacity-50 line-through' : '' ?> text-gray-300 px-3 py-1.5 rounded-lg text-sm group">
+                    <span class="mr-2"><?= htmlspecialchars($country['name']) ?></span>
+                    <button onclick="toggleCat('<?= htmlspecialchars($country['slug']) ?>')" class="text-gray-500 hover:text-yellow-500 mx-1" title="<?= $isBlocked ? 'Bỏ chặn' : 'Chặn crawl' ?>">
+                        <i data-lucide="<?= $isBlocked ? 'unlock' : 'ban' ?>" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button onclick="deleteCat('<?= htmlspecialchars($country['slug']) ?>')" class="text-gray-500 hover:text-red-500 mx-1" title="Xóa">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
             <?php endforeach; ?>
             <?php if (empty($countries)): ?>
                 <p class="text-gray-500 text-sm">Chưa có dữ liệu. Hãy nhấn "Đồng Bộ" ở trên.</p>
@@ -92,5 +108,36 @@ foreach ($allCats as $row) {
             btn.innerHTML = '<i data-lucide="refresh-cw" class="w-5 h-5 mr-2"></i> Thử Lại';
             lucide.createIcons();
         }
+    }
+
+    async function toggleCat(slug) {
+        if (!confirm('Bạn muốn chặn / bỏ chặn mục này? (Khi chặn, crawler sẽ bỏ qua phim thuộc mục này)')) return;
+        const fd = new FormData();
+        fd.append('action', 'toggle_block');
+        fd.append('slug', slug);
+        try {
+            const res = await fetch('api/category_action.php', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                alert(data.message);
+            }
+        } catch(e) {}
+    }
+    async function deleteCat(slug) {
+        if (!confirm('Bạn có chắc chắn muốn xóa mục này khỏi CSDL?')) return;
+        const fd = new FormData();
+        fd.append('action', 'delete');
+        fd.append('slug', slug);
+        try {
+            const res = await fetch('api/category_action.php', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                alert(data.message);
+            }
+        } catch(e) {}
     }
 </script>

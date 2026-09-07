@@ -1,0 +1,1 @@
+ALTER TABLE categories ADD COLUMN is_blocked TINYINT(1) DEFAULT 0;
