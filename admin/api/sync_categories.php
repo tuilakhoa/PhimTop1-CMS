@@ -25,13 +25,15 @@ try {
     $sources = [
         'https://phimapi.com',
         'https://vsmov.com',
-        'https://phim.nguonc.com/api' // Thử endpoint có thể có của NguonC
+        'https://phim.nguonc.com/api'
     ];
     
     $allGenres = [];
     $allCountries = [];
     $seenGenres = [];
     $seenCountries = [];
+    $seenGenresName = [];
+    $seenCountriesName = [];
     
     foreach ($sources as $base) {
         $genresData = fetchApi($base . '/the-loai');
@@ -41,18 +43,36 @@ try {
         $countries = $countriesData['data']['items'] ?? $countriesData['items'] ?? [];
         
         foreach ($genres as $item) {
-            if (!empty($item['slug']) && !empty($item['name']) && !isset($seenGenres[$item['slug']])) {
-                $allGenres[] = $item;
-                $seenGenres[$item['slug']] = true;
+            if (!empty($item['slug']) && !empty($item['name'])) {
+                $nameLower = mb_strtolower(trim($item['name']));
+                // Map a few common typos if necessary, e.g. lãng mạng -> lãng mạn
+                if ($nameLower === 'lãng mạng') {
+                    $item['name'] = 'Lãng Mạn';
+                    $item['slug'] = 'lang-man';
+                    $nameLower = 'lãng mạn';
+                }
+                
+                if (!isset($seenGenres[$item['slug']]) && !isset($seenGenresName[$nameLower])) {
+                    $allGenres[] = $item;
+                    $seenGenres[$item['slug']] = true;
+                    $seenGenresName[$nameLower] = true;
+                }
             }
         }
         foreach ($countries as $item) {
-            if (!empty($item['slug']) && !empty($item['name']) && !isset($seenCountries[$item['slug']])) {
-                $allCountries[] = $item;
-                $seenCountries[$item['slug']] = true;
+            if (!empty($item['slug']) && !empty($item['name'])) {
+                $nameLower = mb_strtolower(trim($item['name']));
+                if (!isset($seenCountries[$item['slug']]) && !isset($seenCountriesName[$nameLower])) {
+                    $allCountries[] = $item;
+                    $seenCountries[$item['slug']] = true;
+                    $seenCountriesName[$nameLower] = true;
+                }
             }
         }
     }
+    
+    // Clear old data to remove duplicates
+    $repo->clearCategories();
         
     $genresCount = 0;
     foreach ($allGenres as $item) {

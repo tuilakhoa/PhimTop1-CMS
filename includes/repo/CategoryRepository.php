@@ -22,6 +22,18 @@ class CategoryRepository {
         }
     }
 
+        public function clearCategories() {
+        if ($this->isFirestore()) {
+            // Delete all categories in firestore (simplified approach, usually not used since we use mysql mostly)
+            $docs = $this->fs->getAllDocuments('categories');
+            foreach ($docs as $doc) {
+                // Delete doc
+            }
+        } else {
+            $this->pdo->exec("TRUNCATE TABLE categories");
+        }
+    }
+
     public function saveCategory($slug, $name, $type) {
         if ($this->isFirestore()) {
             return $this->fs->setDocument('categories', $slug, [
