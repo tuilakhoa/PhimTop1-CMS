@@ -39,72 +39,28 @@ if ($repo->isMovieBlocked($slug)) {
     }
 
     if ($data && !empty($data['movie'])) {
-        $repo = getMovieRepository();
-        
         $movie = $data['movie'];
+        
+        // Sử dụng dữ liệu local (đã crawl) thay vì gọi API external
         $movieImages = ['backdrops' => [], 'posters' => []];
-        $tmdbId = $movie['tmdb']['id'] ?? null;
-        $tmdbType = $movie['tmdb']['type'] ?? 'movie';
-        $tmdbApiKey = $settings['tmdbApiKey'] ?? '';
-
-        if ($tmdbId && $tmdbApiKey) {
-            $tmdbRes = fetchApiWithCache("https://api.themoviedb.org/3/{$tmdbType}/{$tmdbId}/images?api_key=" . urlencode($tmdbApiKey), 86400);
-            if ($tmdbRes) {
-                $tmdbData = json_decode($tmdbRes, true);
-                if (isset($tmdbData['backdrops'])) $movieImages['backdrops'] = $tmdbData['backdrops'];
-                if (isset($tmdbData['posters'])) $movieImages['posters'] = $tmdbData['posters'];
-            }
-        } else {
-            $imgRes = fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/images", 86400);
-            if ($imgRes) {
-                $imgData = json_decode($imgRes, true);
-                if (isset($imgData['data'])) {
-                    $movieImages['backdrops'] = $imgData['data']['backdrops'] ?? [];
-                    $movieImages['posters'] = $imgData['data']['posters'] ?? [];
-                }
+        if (!empty($movie['images_json'])) {
+            $imagesData = json_decode($movie['images_json'], true);
+            if (is_array($imagesData)) {
+                $movieImages['backdrops'] = $imagesData['backdrops'] ?? [];
+                $movieImages['posters'] = $imagesData['posters'] ?? [];
             }
         }
         $data['images'] = $movieImages;
         
         $peoples = [];
-        $peoplesRes = fetchApiWithCache("https://phimapi.com/v1/api/phim/" . urlencode($slug) . "/peoples", 86400);
-        if ($peoplesRes) {
-            $pData = json_decode($peoplesRes, true);
-            if (!empty($pData['data']['peoples'])) {
-                $peoples = $pData['data']['peoples'];
+        if (!empty($movie['peoples_json'])) {
+            $peoplesData = json_decode($movie['peoples_json'], true);
+            if (is_array($peoplesData)) {
+                $peoples = $peoplesData;
             }
         }
         
-        if (empty($peoples) && !empty($movie['imdb']['id'])) {
-            $imdbId = $movie['imdb']['id'];
-            $imdbRes = fetchApiWithCache("https://phimapi.com/imdb/title/" . urlencode($imdbId), 86400);
-            if ($imdbRes) {
-                $imdbData = json_decode($imdbRes, true);
-                if (!empty($imdbData['movie']['director'])) {
-                    foreach ((array)$imdbData['movie']['director'] as $director) {
-                        if (!empty($director) && $director !== 'Đang cập nhật') {
-                            $peoples[] = [
-                                'name' => $director,
-                                'character' => 'Đạo diễn',
-                                'profile_path' => ''
-                            ];
-                        }
-                    }
-                }
-                if (!empty($imdbData['movie']['actor'])) {
-                    foreach ((array)$imdbData['movie']['actor'] as $actor) {
-                        if (!empty($actor) && $actor !== 'Đang cập nhật') {
-                            $peoples[] = [
-                                'name' => $actor,
-                                'character' => 'Diễn viên',
-                                'profile_path' => ''
-                            ];
-                        }
-                    }
-                }
-            }
-        }
-
+        // Fallback to basic actor/director fields if peoples_json is missing
         if (empty($peoples)) {
             if (!empty($movie['director'])) {
                 $dirs = is_array($movie['director']) ? $movie['director'] : explode(',', $movie['director']);
@@ -135,7 +91,6 @@ if ($repo->isMovieBlocked($slug)) {
         }
 
         $data['peoples'] = $peoples;
-        
     } else if (!$data) {
         try {
             $repo = getMovieRepository();

@@ -55,7 +55,6 @@ void main() async {
         backgroundColor: Colors.transparent,
         skipTaskbar: false,
         titleBarStyle: TitleBarStyle.hidden,
-        backgroundColor: Colors.transparent,
       );
       await windowManager.setPreventClose(true);
       windowManager.waitUntilReadyToShow(windowOptions, () async {
