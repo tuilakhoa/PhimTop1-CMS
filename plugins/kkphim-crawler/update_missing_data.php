@@ -249,6 +249,11 @@ for ($i = 0; $i < $total; $i += $batchSize) {
                     }
                 }
             }
+        } else {
+            // Đánh dấu là đã quét kể cả khi API trả về rỗng (phim bị lỗi/xóa trên nguồn)
+            // Để tránh bị loop vô tận ở các lần chạy sau
+            $stmtTouch = $pdo->prepare("UPDATE movies SET updated_at = ? WHERE slug = ?");
+            $stmtTouch->execute([date('Y-m-d H:i:s'), $slug]);
         }
     }
     
