@@ -5,61 +5,26 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Panel Crawl Danh Sách -->
-    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="list-video" class="text-admin-primary"></i> Crawl Danh Sách Phim Mới
-        </h3>
-        
-        <form id="crawlListForm" class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Từ Trang</label>
-                    <input type="number" name="from_page" value="1" min="1" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-admin-primary transition-colors">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Đến Trang</label>
-                    <input type="number" name="to_page" value="1" min="1" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-admin-primary transition-colors">
-                </div>
-            </div>
-            <div class="flex items-center gap-2 mb-2">
-                <input type="checkbox" id="fetch_images" name="fetch_images" class="rounded border-gray-600 bg-gray-700 text-admin-primary focus:ring-admin-primary">
-                <label for="fetch_images" class="text-sm text-gray-300">Tải & lưu ảnh (Thumb/Poster) về server cục bộ</label>
-            </div>
-            
-            <button type="submit" class="w-full bg-admin-primary hover:bg-admin-primary/90 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
-                <i data-lucide="play" class="w-4 h-4"></i> Bắt đầu Crawl
-            </button>
-        </form>
-    </div>
+<!-- Tabs Navigation -->
+<div class="flex border-b border-admin-border mb-6 gap-2 overflow-x-auto custom-scrollbar pb-2">
+    <button class="tab-btn active px-4 py-2 text-admin-primary font-medium border-b-2 border-admin-primary whitespace-nowrap" data-tab="tab-auto">
+        <i data-lucide="zap" class="w-4 h-4 inline-block mr-1"></i> Tự Động (Smart Sync)
+    </button>
+    <button class="tab-btn px-4 py-2 text-gray-400 font-medium hover:text-white border-b-2 border-transparent transition-colors whitespace-nowrap" data-tab="tab-manual">
+        <i data-lucide="mouse-pointer-click" class="w-4 h-4 inline-block mr-1"></i> Crawl Thủ Công
+    </button>
+    <button class="tab-btn px-4 py-2 text-gray-400 font-medium hover:text-white border-b-2 border-transparent transition-colors whitespace-nowrap" data-tab="tab-mass">
+        <i data-lucide="layers" class="w-4 h-4 inline-block mr-1"></i> Mass & Batch Crawl
+    </button>
+    <button class="tab-btn px-4 py-2 text-gray-400 font-medium hover:text-white border-b-2 border-transparent transition-colors whitespace-nowrap" data-tab="tab-failed">
+        <i data-lucide="alert-triangle" class="w-4 h-4 inline-block mr-1"></i> Phim Lỗi
+    </button>
+</div>
 
-    <!-- Panel Crawl Theo Từ Khóa -->
-    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="search" class="text-blue-400"></i> Crawl Phim Theo Từ Khóa
-        </h3>
-        
-        <form id="crawlKeywordForm" class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Từ Khóa</label>
-                    <input type="text" name="keyword" placeholder="Nhập tên phim..." class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400 transition-colors" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Số Lượng</label>
-                    <input type="number" name="limit" value="10" min="1" max="100" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400 transition-colors">
-                </div>
-            </div>
-            
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
-                <i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl
-            </button>
-        </form>
-    </div>
-
+<!-- Tab 1: Tự Động -->
+<div id="tab-auto" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Panel Kiểm Tra Cập Nhật Nhanh -->
-    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg lg:col-span-2 mb-6">
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg  mb-6">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
             <i data-lucide="bell-ring" class="text-green-400"></i> Theo Dõi Phim Mới (Trang 1)
         </h3>
@@ -93,7 +58,82 @@
             <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-green-400"><?= (isset($_SERVER["HTTPS"]) ? "https://" : "http://") . $_SERVER["HTTP_HOST"] . "/plugins/kkphim-crawler/cron.php?key=kkphim_cron" ?></code>
         </div>
     </div>
+</div>
 
+<!-- Tab 2: Thủ Công -->
+<div id="tab-manual" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Panel Crawl Danh Sách -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="list-video" class="text-admin-primary"></i> Crawl Danh Sách Phim Mới
+        </h3>
+        
+        <form id="crawlListForm" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Từ Trang</label>
+                    <input type="number" name="from_page" value="1" min="1" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-admin-primary transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Đến Trang</label>
+                    <input type="number" name="to_page" value="1" min="1" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-admin-primary transition-colors">
+                </div>
+            </div>
+            <div class="flex items-center gap-2 mb-2">
+                <input type="checkbox" id="fetch_images" name="fetch_images" class="rounded border-gray-600 bg-gray-700 text-admin-primary focus:ring-admin-primary">
+                <label for="fetch_images" class="text-sm text-gray-300">Tải & lưu ảnh (Thumb/Poster) về server cục bộ</label>
+            </div>
+            
+            <button type="submit" class="w-full bg-admin-primary hover:bg-admin-primary/90 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                <i data-lucide="play" class="w-4 h-4"></i> Bắt đầu Crawl
+            </button>
+        </form>
+    </div>
+    <!-- Panel Crawl Theo Từ Khóa -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="search" class="text-blue-400"></i> Crawl Phim Theo Từ Khóa
+        </h3>
+        
+        <form id="crawlKeywordForm" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Từ Khóa</label>
+                    <input type="text" name="keyword" placeholder="Nhập tên phim..." class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400 transition-colors" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Số Lượng</label>
+                    <input type="number" name="limit" value="10" min="1" max="100" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400 transition-colors">
+                </div>
+            </div>
+            
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                <i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl
+            </button>
+        </form>
+    </div>
+    <!-- Panel Crawl 1 Phim -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="file-search" class="text-admin-primary"></i> Crawl Chi Tiết 1 Phim
+        </h3>
+        
+        <form id="crawlSingleForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Slug của phim</label>
+                <input type="text" name="movie_slug" placeholder="vd: lightyear-canh-sat-vu-tru" required class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-admin-primary transition-colors">
+            </div>
+            
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                <i data-lucide="download-cloud" class="w-4 h-4"></i> Crawl Phim Này
+            </button>
+        </form>
+    </div>
+</div>
+</div>
+
+<!-- Tab 3: Mass & Batch -->
+<div id="tab-mass" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Panel Mass Crawl -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -106,7 +146,6 @@
             <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-red-400">php <?= __DIR__ ?>/mass_crawl.php 1 1500</code>
         </div>
     </div>
-
     <!-- Panel Cron Batch (Crawl 20 trang mỗi lần) -->
     <?php
     $cronBatchFile = __DIR__ . '/cron_batch_progress.txt';
@@ -136,9 +175,12 @@
             </button>
         </div>
     </div>
+</div>
 
+<!-- Tab 4: Failed -->
+<div id="tab-failed" class="tab-content hidden grid grid-cols-1 gap-6">
     <!-- Panel Phim Lỗi (Failed Movies) -->
-    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg lg:col-span-2">
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg ">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
             <i data-lucide="alert-triangle" class="text-yellow-400"></i> Quản Lý Phim Lỗi Mạng
         </h3>
@@ -151,24 +193,6 @@
             </button>
         </div>
         <p class="text-xs text-gray-400 italic">Tính năng này giúp bạn thử tải lại những phim bị lỗi từ quá trình "Crawl Hàng Loạt". Khi tải thành công, số lượng sẽ tự động giảm.</p>
-    </div>
-
-    <!-- Panel Crawl 1 Phim -->
-    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="file-search" class="text-admin-primary"></i> Crawl Chi Tiết 1 Phim
-        </h3>
-        
-        <form id="crawlSingleForm" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-400 mb-1">Slug của phim</label>
-                <input type="text" name="movie_slug" placeholder="vd: lightyear-canh-sat-vu-tru" required class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-admin-primary transition-colors">
-            </div>
-            
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
-                <i data-lucide="download-cloud" class="w-4 h-4"></i> Crawl Phim Này
-            </button>
-        </form>
     </div>
 </div>
 
@@ -206,6 +230,30 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
 
     const logEl = document.getElementById('crawlLog');
     const MAX_LOG_LINES = 200; // Giới hạn số dòng để tránh đơ trình duyệt
@@ -267,6 +315,30 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang tải lại...';
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
+
         logMessage(`Bắt đầu thử tải lại ${failedSlugsList.length} phim lỗi...`, 'warn');
         
         let successCount = 0;
@@ -314,6 +386,30 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Crawl Lại Phim Lỗi';
         btn.disabled = failedSlugsList.length === 0;
         if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
     });
 
     // Crawl Single Movie
@@ -413,6 +509,30 @@ document.addEventListener('DOMContentLoaded', function() {
             btnCheckUpdate.disabled = true;
             btnCheckUpdate.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang quét...';
             if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
             checkUpdateResult.textContent = 'Trạng thái: Đang lấy dữ liệu từ các nguồn...';
             checkUpdateResult.className = "mt-2 text-yellow-400 font-medium";
 
@@ -442,6 +562,30 @@ document.addEventListener('DOMContentLoaded', function() {
             btnCheckUpdate.disabled = false;
             btnCheckUpdate.innerHTML = '<i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Ngay';
             if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
         });
     }
         // Smart Sync
@@ -451,6 +595,30 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRunSmartSync.disabled = true;
             btnRunSmartSync.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang đồng bộ...';
             if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
             checkUpdateResult.textContent = 'Trạng thái: Đang chạy Smart Sync...';
             checkUpdateResult.className = "mt-2 text-green-400 font-bold";
             
@@ -508,12 +676,60 @@ document.addEventListener('DOMContentLoaded', function() {
             
             btnRunSmartSync.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> Hoàn Thành';
             if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
             
             setTimeout(() => {
                 btnRunSmartSync.disabled = false;
                 btnRunSmartSync.innerHTML = '<i data-lucide="zap" class="w-4 h-4"></i> Cập Nhật Nhanh (Smart Sync)';
                 btnRunSmartSync.style.display = 'none';
                 if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
             }, 3000);
         });
     }
@@ -534,6 +750,30 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.disabled = true;
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Crawl...';
         if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
 
         logMessage(`Bắt đầu crawl từ trang ${fromPage} đến ${toPage}...`, 'info');
 
@@ -586,6 +826,30 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Bắt đầu Crawl';
         if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
     });
 
     // Crawl Keyword
@@ -604,6 +868,30 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Tìm...';
             if (typeof lucide !== 'undefined') lucide.createIcons();
 
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
+
             logMessage(`Đang tìm kiếm phim với từ khóa: <b>${keyword}</b>...`, 'info');
 
             try {
@@ -621,6 +909,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     btn.disabled = false;
                     btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
                     if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
                     return;
                 }
 
@@ -656,6 +968,30 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = false;
             btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
             if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Tabs Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            tabContents.forEach(c => c.classList.add('hidden'));
+            
+            // Add active class
+            btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
+            btn.classList.remove('text-gray-400', 'border-transparent');
+            
+            // Show content
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+        });
+    });
+
         });
     }
 });
