@@ -68,9 +68,14 @@
                 <p>Nhấn nút bên phải để hệ thống đối chiếu nhanh <strong>Trang 1</strong> của 3 nguồn với CSDL hiện tại.</p>
                 <p class="mt-2 text-yellow-400 font-medium" id="checkUpdateResult">Trạng thái: Chưa kiểm tra.</p>
             </div>
-            <button id="btnCheckUpdate" class="bg-green-600 hover:bg-green-500 text-white font-medium py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
-                <i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Ngay
-            </button>
+                        <div class="flex items-center gap-2">
+                <button id="btnCheckUpdate" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Trang 1
+                </button>
+                <button id="btnRunSmartSync" style="display: none;" class="bg-green-600 hover:bg-green-500 text-white font-medium py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="zap" class="w-4 h-4"></i> Cập Nhật Nhanh (Smart Sync)
+                </button>
+            </div>
         </div>
         <p class="text-xs text-gray-500 italic">Tính năng này giúp bạn nắm bắt xem có phim nào vừa ra lò chưa được cập nhật không.</p>
     </div>
@@ -421,6 +426,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     checkUpdateResult.textContent = 'Trạng thái: ' + data.message;
                     if (data.total > 0) {
                         checkUpdateResult.className = "mt-2 text-green-400 font-bold";
+                        if(document.getElementById("btnRunSmartSync")) document.getElementById("btnRunSmartSync").style.display = "flex";
                     } else {
                         checkUpdateResult.className = "mt-2 text-gray-400 font-medium";
                     }
@@ -438,6 +444,80 @@ document.addEventListener('DOMContentLoaded', function() {
             if (typeof lucide !== 'undefined') lucide.createIcons();
         });
     }
+        // Smart Sync
+    const btnRunSmartSync = document.getElementById('btnRunSmartSync');
+    if (btnRunSmartSync) {
+        btnRunSmartSync.addEventListener('click', async () => {
+            btnRunSmartSync.disabled = true;
+            btnRunSmartSync.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang đồng bộ...';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            checkUpdateResult.textContent = 'Trạng thái: Đang chạy Smart Sync...';
+            checkUpdateResult.className = "mt-2 text-green-400 font-bold";
+            
+            const sources = ['kkphim', 'nguonc', 'vsmov'];
+            let totalUpdated = 0;
+            
+            for (let source of sources) {
+                logMessage(`<b>=== BẮT ĐẦU NGUỒN: ${source.toUpperCase()} ===</b>`, 'info');
+                let shouldStop = false;
+                let consecutive = 0;
+                
+                for (let page = 1; page <= 10; page++) {
+                    logMessage(`Đang xử lý Trang ${page} của ${source.toUpperCase()}...`, 'warn');
+                    try {
+                        const formData = new FormData();
+                        formData.append('action', 'smart_sync_source');
+                        formData.append('source', source);
+                        formData.append('page', page);
+                        formData.append('consecutive', consecutive);
+                        
+                        const res = await fetch(pluginPath, { method: 'POST', body: formData });
+                        const data = await res.json();
+                        
+                        if (data.status === 'success') {
+                            if (data.logs && data.logs.length > 0) {
+                                data.logs.forEach(log => {
+                                    let type = log.includes('Phát hiện') ? 'success' : (log.includes('Cập nhật') ? 'warn' : 'info');
+                                    logMessage(`[${source}] ${log}`, type);
+                                });
+                            }
+                            totalUpdated += data.updated;
+                            consecutive = data.consecutive;
+                            
+                            if (data.should_stop) {
+                                shouldStop = true;
+                                break;
+                            }
+                        } else {
+                            logMessage(`[${source}] Lỗi API nội bộ.`, 'error');
+                            break;
+                        }
+                    } catch (e) {
+                        logMessage(`[${source}] Lỗi mạng khi gọi trang ${page}.`, 'error');
+                        break;
+                    }
+                }
+                if (!shouldStop) {
+                    logMessage(`Đã quét tối đa 10 trang của ${source.toUpperCase()}. Chuyển nguồn...`, 'info');
+                }
+            }
+            
+            logMessage(`<b>HOÀN THÀNH SMART SYNC! TỔNG CỘNG CẬP NHẬT: ${totalUpdated} PHIM.</b>`, 'success');
+            checkUpdateResult.textContent = `Hoàn thành! Đã cập nhật ${totalUpdated} phim.`;
+            checkUpdateResult.className = "mt-2 text-green-400 font-bold";
+            
+            btnRunSmartSync.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> Hoàn Thành';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            
+            setTimeout(() => {
+                btnRunSmartSync.disabled = false;
+                btnRunSmartSync.innerHTML = '<i data-lucide="zap" class="w-4 h-4"></i> Cập Nhật Nhanh (Smart Sync)';
+                btnRunSmartSync.style.display = 'none';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }, 3000);
+        });
+    }
+
     // Crawl List
     document.getElementById('crawlListForm').addEventListener('submit', async (e) => {
         e.preventDefault();
