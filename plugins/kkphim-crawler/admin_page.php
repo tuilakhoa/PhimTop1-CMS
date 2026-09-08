@@ -301,6 +301,129 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gọi khi load trang
     loadFailedSlugs();
 
+    // Kiểm Tra Cập Nhật
+    const btnCheckUpdate = document.getElementById('btnCheckUpdate');
+    const btnRunSmartSync = document.getElementById('btnRunSmartSync');
+    const checkUpdateResult = document.getElementById('checkUpdateResult');
+    const smartSyncSource = document.getElementById('smartSyncSource');
+
+    if (btnCheckUpdate) {
+        btnCheckUpdate.addEventListener('click', async () => {
+            btnCheckUpdate.disabled = true;
+            const originalHtml = btnCheckUpdate.innerHTML;
+            btnCheckUpdate.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Kiểm Tra...';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            
+            checkUpdateResult.textContent = 'Trạng thái: Đang kiểm tra...';
+            checkUpdateResult.className = 'mt-2 text-yellow-400 font-medium';
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'check_new_movies');
+                formData.append('source', smartSyncSource.value);
+
+                const res = await fetch(pluginPath, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    checkUpdateResult.innerHTML = `Trạng thái: ${data.message}`;
+                    if (data.total > 0) {
+                        checkUpdateResult.className = 'mt-2 text-green-400 font-medium';
+                        btnRunSmartSync.style.display = 'inline-flex';
+                    } else {
+                        checkUpdateResult.className = 'mt-2 text-gray-400 font-medium';
+                        btnRunSmartSync.style.display = 'none';
+                    }
+                } else {
+                    checkUpdateResult.textContent = `Trạng thái: Lỗi: ${data.message}`;
+                    checkUpdateResult.className = 'mt-2 text-red-400 font-medium';
+                }
+            } catch (error) {
+                checkUpdateResult.textContent = `Trạng thái: Lỗi mạng: ${error.message}`;
+                checkUpdateResult.className = 'mt-2 text-red-400 font-medium';
+            }
+
+            btnCheckUpdate.disabled = false;
+            btnCheckUpdate.innerHTML = originalHtml;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    }
+
+    if (btnRunSmartSync) {
+        btnRunSmartSync.addEventListener('click', async () => {
+            btnRunSmartSync.disabled = true;
+            btnCheckUpdate.disabled = true;
+            smartSyncSource.disabled = true;
+            
+            const originalHtml = btnRunSmartSync.innerHTML;
+            btnRunSmartSync.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Sync...';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            
+            checkUpdateResult.textContent = 'Trạng thái: Đang thực hiện Smart Sync... (Xem chi tiết ở bảng Log bên dưới)';
+            checkUpdateResult.className = 'mt-2 text-blue-400 font-medium';
+
+            logMessage(`Bắt đầu chạy Smart Sync (Nguồn: ${smartSyncSource.options[smartSyncSource.selectedIndex].text})...`, 'info');
+
+            let page = 1;
+            let consecutive = 0;
+            let totalUpdated = 0;
+            let shouldStop = false;
+
+            while (!shouldStop && page <= 50) {
+                logMessage(`Đang Sync trang ${page}...`, 'warn');
+                try {
+                    const formData = new FormData();
+                    formData.append('action', 'smart_sync_page');
+                    formData.append('source', smartSyncSource.value);
+                    formData.append('page', page);
+                    formData.append('consecutive', consecutive);
+
+                    const res = await fetch(pluginPath, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    
+                    if (data.status === 'success') {
+                        if (data.logs && data.logs.length > 0) {
+                            data.logs.forEach(log => logMessage(log, 'info'));
+                        }
+                        
+                        totalUpdated += (data.updated || 0);
+                        consecutive = data.consecutive || 0;
+                        shouldStop = data.should_stop || false;
+                        
+                        if (shouldStop) {
+                            logMessage(`Hoàn tất Smart Sync! Không tìm thấy thêm phim mới/cập nhật nào sau ${page} trang.`, 'success');
+                            break;
+                        }
+                    } else {
+                        logMessage(`Lỗi khi sync trang ${page}: ${data.message}`, 'error');
+                        break;
+                    }
+                } catch (error) {
+                    logMessage(`Lỗi mạng khi sync trang ${page}: ${error.message}`, 'error');
+                    break;
+                }
+                
+                page++;
+            }
+
+            checkUpdateResult.textContent = `Trạng thái: Đã hoàn tất Smart Sync.`;
+            checkUpdateResult.className = 'mt-2 text-green-400 font-medium';
+            btnRunSmartSync.style.display = 'none';
+            
+            btnRunSmartSync.disabled = false;
+            btnCheckUpdate.disabled = false;
+            smartSyncSource.disabled = false;
+            btnRunSmartSync.innerHTML = originalHtml;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    }
+
     // Xử lý Recrawl phim lỗi
     document.getElementById('btnRecrawlFailed').addEventListener('click', async () => {
         if (failedSlugsList.length === 0) return;
