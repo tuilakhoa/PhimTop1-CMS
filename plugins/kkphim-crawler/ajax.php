@@ -388,6 +388,10 @@ if ($action === 'check_new_movies') {
                     
                     if (!$saved_modified) {
                         $new_count++;
+                    } elseif ($api_status && strtolower($api_status) !== strtolower($db_status)) {
+                        $new_count++;
+                    } elseif ($api_episode_current && $api_episode_current !== $db_episode_current) {
+                        $new_count++;
                     } elseif ($api_modified && $api_modified !== $saved_modified) {
                         $new_count++;
                     }
