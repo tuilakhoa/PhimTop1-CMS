@@ -390,10 +390,6 @@ if ($action === 'check_new_movies') {
                     
                     if (!$saved_modified) {
                         $new_count++;
-                    } elseif ($api_status && strtolower($api_status) !== strtolower($db_status)) {
-                        $new_count++;
-                    } elseif ($api_episode_current && $api_episode_current !== $db_episode_current) {
-                        $new_count++;
                     } elseif ($api_modified && $api_modified !== $saved_modified) {
                         $new_count++;
                     }
@@ -460,15 +456,9 @@ if ($action === 'smart_sync_source') {
             $db_episode_current = $dbMovie['episode_current'] ?? '';
             $db_status = $dbMovie['status'] ?? '';
             
-            if ($api_status && strtolower($api_status) !== strtolower($db_status)) {
+            if ($api_modified && $saved_modified && $api_modified !== $saved_modified) {
                 $needsUpdate = true;
-                $logs[] = "Cập nhật trạng thái ($db_status -> $api_status): $slug";
-            } elseif ($api_episode_current && $api_episode_current !== $db_episode_current) {
-                $needsUpdate = true;
-                $logs[] = "Cập nhật tập mới ($db_episode_current -> $api_episode_current): $slug";
-            } elseif ($api_modified && $saved_modified && $api_modified !== $saved_modified) {
-                $needsUpdate = true;
-                $logs[] = "Cập nhật link mới ($sourceName vừa ra thêm tập): $slug";
+                $logs[] = "Cập nhật tập/thông tin mới ($sourceName): $slug";
             }
         }
         
