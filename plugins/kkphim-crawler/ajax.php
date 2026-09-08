@@ -44,24 +44,15 @@ if ($action === 'save_source') {
 if ($action === 'get_page_slugs') {
     $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
     
-    $crawlers = [
-        new KKPhimCrawler('kkphim'),
-        new KKPhimCrawler('nguonc'),
-        new KKPhimCrawler('vsmov')
-    ];
-    
+    $dataAll = KKPhimCrawler::getLatestMoviesFromAllSources($page);
     $slugs = [];
     $seenSlugs = [];
-    
-    foreach ($crawlers as $c) {
-        $res = $c->getLatestMovies($page);
-        if ($res) {
-            $items = $res['data']['items'] ?? $res['items'] ?? [];
-            foreach ($items as $item) {
-                if (!empty($item['slug']) && !isset($seenSlugs[$item['slug']])) {
-                    $slugs[] = $item['slug'];
-                    $seenSlugs[$item['slug']] = true;
-                }
+    foreach ($dataAll as $sourceName => $data) {
+        $items = $data['data']['items'] ?? $data['items'] ?? [];
+        foreach ($items as $item) {
+            if (!empty($item['slug']) && !isset($seenSlugs[$item['slug']])) {
+                $slugs[] = $item['slug'];
+                $seenSlugs[$item['slug']] = true;
             }
         }
     }
@@ -351,247 +342,259 @@ if ($action === 'set_cron_batch_progress') {
 }
 
 if ($action === 'check_new_movies') {
-    $crawlers = [
-        new KKPhimCrawler('kkphim'),
-        new KKPhimCrawler('nguonc'),
-        new KKPhimCrawler('vsmov')
-    ];
+    $dataAll = KKPhimCrawler::getLatestMoviesFromAllSources(1);
     $repo = getMovieRepository();
-    $stats = [];
+    $syncDb = getCrawlerSyncDB();
+    $updates = [];
     $total_new = 0;
     
-    foreach ($crawlers as $index => $crawler) {
-        $sourceNames = ['KKPhim', 'Nguồn C', 'VsMov'];
-        $sourceName = $sourceNames[$index];
-        $data = $crawler->getLatestMovies(1);
-        $new_count = 0;
-        
-        if ($data) {
-            $sourceItems = $data['data']['items'] ?? $data['items'] ?? [];
-            foreach ($sourceItems as $item) {
-                if (empty($item['slug'])) continue;
-                $slug = $item['slug'];
-                $api_episode_current = $item['episode_current'] ?? '';
-                $api_status = $item['status'] ?? '';
-                
-                $api_modified = (string)($item['modified']['time'] ?? $item['modified'] ?? $item['updated_time'] ?? $item['time'] ?? '');
-                
-                $dbMovie = $repo->getMovieBySlug($slug);
-                if (!$dbMovie) {
-                    $new_count++;
-                } else {
-                    $db_episode_current = $dbMovie['episode_current'] ?? '';
-                    $db_status = $dbMovie['status'] ?? '';
-                    
-                    $syncDb = getCrawlerSyncDB();
-                    $stmt = $syncDb->prepare("SELECT modified FROM sync_meta WHERE slug = ? AND source = ?");
-                    $stmt->execute([$slug, $sourceName]);
-                    $saved_modified = $stmt->fetchColumn();
-                    
-                    if (!$saved_modified) {
-                        $new_count++;
-                    } elseif ($api_modified && $api_modified !== $saved_modified) {
-                        $new_count++;
-                    }
+    $slugMap = [];
+    foreach (['KKPhim', 'Nguồn C', 'VsMov'] as $sourceName) {
+        if (!isset($dataAll[$sourceName])) continue;
+        $data = $dataAll[$sourceName];
+        $sourceItems = $data['data']['items'] ?? $data['items'] ?? [];
+        foreach ($sourceItems as $item) {
+            if (empty($item['slug'])) continue;
+            $slug = $item['slug'];
+            $api_modified = (string)($item['modified']['time'] ?? $item['modified'] ?? $item['updated_time'] ?? $item['time'] ?? '');
+            if (!isset($slugMap[$slug])) $slugMap[$slug] = [];
+            $slugMap[$slug][$sourceName] = $api_modified;
+        }
+    }
+    
+    foreach ($slugMap as $slug => $sources) {
+        $dbMovie = $repo->getMovieBySlug($slug);
+        $needsUpdate = false;
+        if (!$dbMovie) {
+            $needsUpdate = true;
+        } else {
+            foreach ($sources as $sourceName => $api_modified) {
+                $stmt = $syncDb->prepare("SELECT modified FROM sync_meta WHERE slug = ? AND source = ?");
+                $stmt->execute([$slug, $sourceName]);
+                $saved_modified = $stmt->fetchColumn();
+                if (!$saved_modified || ($api_modified && $api_modified !== $saved_modified)) {
+                    $needsUpdate = true;
+                    break;
                 }
             }
         }
-        $stats[] = "$sourceName: $new_count cập nhật";
-        $total_new += $new_count;
+        if ($needsUpdate) {
+            $total_new++;
+            $updates[] = $slug;
+        }
+    }
+    
+    $message = "Tìm thấy $total_new phim cần cập nhật ở Trang 1.";
+    if ($total_new > 0) {
+        $message .= " (" . implode(', ', array_slice($updates, 0, 5)) . (count($updates) > 5 ? "..." : "") . ")";
     }
     
     echo json_encode([
         'status' => 'success', 
         'total' => $total_new,
-        'message' => 'Tìm thấy ' . $total_new . ' phim/tập phim mới ở Trang 1. (' . implode(', ', $stats) . ')'
+        'message' => $message,
+        'updates' => $updates
     ]);
     exit;
 }
-
-if ($action === 'smart_sync_source') {
-    $sourceName = $_POST['source'] ?? 'kkphim';
+if ($action === 'smart_sync_page') {
     $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
     $consecutive = isset($_POST['consecutive']) ? (int)$_POST['consecutive'] : 0;
-    $max_consecutive = 30;
+    $max_consecutive = 24; // If an entire page is up to date, we can stop
     
-    $crawler = new KKPhimCrawler($sourceName);
-    $repo = getMovieRepository();
-    
-    $data = $crawler->getLatestMovies($page);
-    if (!$data) {
+    $dataAll = KKPhimCrawler::getLatestMoviesFromAllSources($page);
+    if (empty($dataAll)) {
         echo json_encode(['status' => 'success', 'logs' => ["Lỗi kết nối hoặc không có dữ liệu ở trang $page."], 'should_stop' => true, 'updated' => 0, 'consecutive' => $consecutive]);
         exit;
     }
     
-    $sourceItems = $data['data']['items'] ?? $data['items'] ?? [];
-    if (empty($sourceItems)) {
-        echo json_encode(['status' => 'success', 'logs' => ["Không còn phim nào ở trang $page."], 'should_stop' => true, 'updated' => 0, 'consecutive' => $consecutive]);
-        exit;
+    $slugMap = [];
+    foreach (['KKPhim', 'Nguồn C', 'VsMov'] as $sourceName) {
+        if (!isset($dataAll[$sourceName])) continue;
+        $data = $dataAll[$sourceName];
+        $sourceItems = $data['data']['items'] ?? $data['items'] ?? [];
+        foreach ($sourceItems as $item) {
+            if (empty($item['slug'])) continue;
+            $slug = $item['slug'];
+            $api_modified = (string)($item['modified']['time'] ?? $item['modified'] ?? $item['updated_time'] ?? $item['time'] ?? '');
+            if (!isset($slugMap[$slug])) $slugMap[$slug] = [];
+            $slugMap[$slug][$sourceName] = $api_modified;
+        }
     }
     
+    $repo = getMovieRepository();
+    $syncDb = getCrawlerSyncDB();
+    $pdo = getPDO();
     $logs = [];
-    $updated = 0;
-    $should_stop = false;
+    $slugsToUpdate = [];
+    $slugModifiedMap = [];
     
-    foreach ($sourceItems as $item) {
-        if (empty($item['slug'])) continue;
-        $slug = $item['slug'];
-        
-        $api_episode_current = $item['episode_current'] ?? '';
-        $api_status = $item['status'] ?? '';
-        $api_modified = (string)($item['modified']['time'] ?? $item['modified'] ?? $item['updated_time'] ?? $item['time'] ?? '');
-        
+    foreach ($slugMap as $slug => $sources) {
         $dbMovie = $repo->getMovieBySlug($slug);
         $needsUpdate = false;
-        
-        $syncDb = getCrawlerSyncDB();
-        $stmt = $syncDb->prepare("SELECT modified FROM sync_meta WHERE slug = ? AND source = ?");
-        $stmt->execute([$slug, $sourceName]);
-        $saved_modified = $stmt->fetchColumn();
         
         if (!$dbMovie) {
             $needsUpdate = true;
             $logs[] = "Phát hiện phim mới: $slug";
         } else {
-            $db_episode_current = $dbMovie['episode_current'] ?? '';
-            $db_status = $dbMovie['status'] ?? '';
-            
-            if ($api_modified && $saved_modified && $api_modified !== $saved_modified) {
-                $needsUpdate = true;
-                $logs[] = "Cập nhật tập/thông tin mới ($sourceName): $slug";
+            foreach ($sources as $sourceName => $api_modified) {
+                $stmt = $syncDb->prepare("SELECT modified FROM sync_meta WHERE slug = ? AND source = ?");
+                $stmt->execute([$slug, $sourceName]);
+                $saved_modified = $stmt->fetchColumn();
+                
+                if (!$saved_modified || ($api_modified && $api_modified !== $saved_modified)) {
+                    $needsUpdate = true;
+                    $logs[] = "Cập nhật tập/thông tin mới từ $sourceName: $slug";
+                    break;
+                }
             }
         }
         
         if ($needsUpdate) {
+            $slugsToUpdate[] = $slug;
+            $slugModifiedMap[$slug] = $sources;
             $consecutive = 0;
-            // Fetch and save
-            $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
-            $pdo = getPDO();
-    if ($fullData && !empty($fullData['movie'])) {
-        if (KKPhimCrawler::isMovieBlockedByCategoriesOrCountries($fullData['movie'], $pdo)) {
-            $logs[] = "-> Bỏ qua phim vì bị chặn: $slug";
-            continue; // Skip this movie because it belongs to a blocked category or country
-        }
-    }
-            if ($fullData['movie']) {
-                $movie = $fullData['movie'];
-                $episodesList = $fullData['episodes'];
-                $peoplesData = $fullData['peoples'];
-                $imagesData = $fullData['images'];
-                $keywordsData = $fullData['keywords'];
-                
-                $domainPrefix = $movie['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
-                $thumbUrl = $movie['thumb_url'] ?? '';
-                if (!preg_match('/^http/', $thumbUrl)) $thumbUrl = rtrim($domainPrefix, '/') . '/' . ltrim($thumbUrl, '/');
-                $posterUrl = $movie['poster_url'] ?? '';
-                if (!preg_match('/^http/', $posterUrl)) $posterUrl = rtrim($domainPrefix, '/') . '/' . ltrim($posterUrl, '/');
-                
-                $tempThumb = $thumbUrl;
-                $thumbUrl = $posterUrl;
-                $posterUrl = $tempThumb;
-                
-                $actor = isset($movie['actor']) && is_array($movie['actor']) ? implode(', ', $movie['actor']) : '';
-                $director = isset($movie['director']) && is_array($movie['director']) ? implode(', ', $movie['director']) : '';
-                
-                $movieId = $dbMovie ? $dbMovie['id'] : ($movie['_id'] ?? uniqid());
-
-                $movieData = [
-                    'id' => $movieId,
-                    'name' => $movie['name'] ?? '',
-                    'origin_name' => $movie['origin_name'] ?? '',
-                    'slug' => $movie['slug'],
-                    'thumb_url' => $thumbUrl,
-                    'poster_url' => $posterUrl,
-                    'trailer_url' => $movie['trailer_url'] ?? '',
-                    'tmdb_vote' => (isset($movie['tmdb']) && is_array($movie['tmdb'])) ? ($movie['tmdb']['vote_average'] ?? 0) : 0,
-                    'imdb_vote' => (isset($movie['imdb']) && is_array($movie['imdb'])) ? ($movie['imdb']['vote_average'] ?? 0) : 0,
-                    'year' => $movie['year'] ?? 0,
-                    'type' => $movie['type'] ?? '',
-                    'status' => $movie['status'] ?? '',
-                    'episode_current' => $movie['episode_current'] ?? '',
-                    'quality' => $movie['quality'] ?? '',
-                    'lang' => $movie['lang'] ?? '',
-                    'chieu_rap' => !empty($movie['chieurap']) ? 1 : 0,
-                    'content' => $movie['content'] ?? '',
-                    'actor' => $actor,
-                    'director' => $director,
-                    'categories_json' => json_encode($movie['category'] ?? []),
-                    'countries_json' => json_encode($movie['country'] ?? []),
-                    'view' => $dbMovie ? ($dbMovie['view'] ?? 0) : ($movie['view'] ?? 0),
-                    'time' => $movie['time'] ?? '',
-                    'peoples_json' => json_encode($peoplesData ?: []),
-                    'images_json' => json_encode($imagesData ?: []),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ];
-                
-                $repo->saveMovie($movieData);
-                
-                $catRepo = getCategoryRepository();
-                if (isset($movie['category']) && is_array($movie['category'])) {
-                    foreach ($movie['category'] as $c) {
-                        if (!empty($c['slug']) && !empty($c['name'])) $catRepo->saveCategory($c['slug'], $c['name'], 'genre');
-                    }
-                }
-                if (isset($movie['country']) && is_array($movie['country'])) {
-                    foreach ($movie['country'] as $c) {
-                        if (!empty($c['slug']) && !empty($c['name'])) $catRepo->saveCategory($c['slug'], $c['name'], 'country');
-                    }
-                }
-                
-                if (!empty($keywordsData)) {
-                    $keywords = [];
-                    foreach ($keywordsData as $kw) {
-                        if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
-                    }
-                    if (!empty($keywords)) {
-                        $keywordString = implode(', ', $keywords);
-                        $seoRepo = getSeoRepository();
-                        $seoData = $seoRepo->getSeoMetadata('movie', $movie['slug']);
-                        if (!$seoData) {
-                            $seoData = [
-                                'type' => 'movie', 'item_id' => $movie['slug'], 'seo_title' => $movieData['name'],
-                                'seo_desc' => mb_substr(strip_tags($movieData['content']), 0, 160), 'seo_keywords' => $keywordString
-                            ];
-                        } else {
-                            $seoData['seo_keywords'] = $keywordString;
-                        }
-                        $seoRepo->saveSeoMetadata($seoData);
-                    }
-                }
-
-                $pdo = getPDO();
-                if ($pdo) {
-                    $stmtDel = $pdo->prepare("DELETE FROM episodes WHERE movie_slug = ?");
-                    $stmtDel->execute([$movie['slug']]);
-                    
-                    $sqlEp = "INSERT INTO episodes (movie_slug, server_name, name, slug, filename, embed_url, m3u8_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                    $stmtIns = $pdo->prepare($sqlEp);
-                    
-                    foreach ($episodesList as $server) {
-                        $sName = $server['server_name'] ?? 'Server 1';
-                        $epData = $server['server_data'] ?? [];
-                        foreach ($epData as $ep) {
-                            $stmtIns->execute([$movie['slug'], $sName, $ep['name'] ?? '', $ep['slug'] ?? '', $ep['filename'] ?? '', $ep['link_embed'] ?? '', $ep['link_m3u8'] ?? '']);
-                        }
-                    }
-                }
-                $logs[] = "-> Đã lưu phim: $slug";
-                $updated++;
-                if ($api_modified) {
-                    $stmtSync = $syncDb->prepare("INSERT INTO sync_meta (slug, source, modified) VALUES (?, ?, ?) ON CONFLICT(slug, source) DO UPDATE SET modified = excluded.modified");
-                    $stmtSync->execute([$slug, $sourceName, $api_modified]);
-                }
-            } else {
-                $logs[] = "-> Lỗi không lấy được chi tiết phim: $slug";
-            }
         } else {
             $consecutive++;
-            if ($consecutive >= $max_consecutive) {
-                $logs[] = "Đã chạm ngưỡng $max_consecutive phim liên tiếp không có cập nhật mới. Dừng quét nguồn này.";
-                $should_stop = true;
-                break;
+        }
+    }
+    
+    $should_stop = ($consecutive >= $max_consecutive);
+    $updated = 0;
+    
+    if (!empty($slugsToUpdate)) {
+        // Chunk slugs to avoid overwhelming the server with too many multi-curl handles
+        $chunks = array_chunk($slugsToUpdate, 5);
+        foreach ($chunks as $chunkSlugs) {
+            $multiResults = KKPhimCrawler::fetchMultipleMoviesFromAllSources($chunkSlugs);
+            
+            foreach ($multiResults as $slug => $fullData) {
+                if ($fullData && !empty($fullData['movie'])) {
+                    if (KKPhimCrawler::isMovieBlockedByCategoriesOrCountries($fullData['movie'], $pdo)) {
+                        $logs[] = "-> Bỏ qua phim vì bị chặn: $slug";
+                        continue;
+                    }
+                    
+                    $movie = $fullData['movie'];
+                    $episodesList = $fullData['episodes'];
+                    $peoplesData = $fullData['peoples'];
+                    $imagesData = $fullData['images'];
+                    $keywordsData = $fullData['keywords'];
+                    
+                    $domainPrefix = $movie['APP_DOMAIN_CDN_IMAGE'] ?? 'https://phimimg.com/';
+                    $thumbUrl = $movie['thumb_url'] ?? '';
+                    if (!preg_match('/^http/', $thumbUrl)) $thumbUrl = rtrim($domainPrefix, '/') . '/' . ltrim($thumbUrl, '/');
+                    $posterUrl = $movie['poster_url'] ?? '';
+                    if (!preg_match('/^http/', $posterUrl)) $posterUrl = rtrim($domainPrefix, '/') . '/' . ltrim($posterUrl, '/');
+                    
+                    $tempThumb = $thumbUrl;
+                    $thumbUrl = $posterUrl;
+                    $posterUrl = $tempThumb;
+                    
+                    $actor = isset($movie['actor']) && is_array($movie['actor']) ? implode(', ', $movie['actor']) : '';
+                    $director = isset($movie['director']) && is_array($movie['director']) ? implode(', ', $movie['director']) : '';
+                    
+                    $dbMovie = $repo->getMovieBySlug($slug);
+                    $movieId = $dbMovie ? $dbMovie['id'] : ($movie['_id'] ?? uniqid());
+
+                    $movieData = [
+                        'id' => $movieId,
+                        'name' => $movie['name'] ?? '',
+                        'origin_name' => $movie['origin_name'] ?? '',
+                        'slug' => $movie['slug'],
+                        'thumb_url' => $thumbUrl,
+                        'poster_url' => $posterUrl,
+                        'trailer_url' => $movie['trailer_url'] ?? '',
+                        'tmdb_vote' => (isset($movie['tmdb']) && is_array($movie['tmdb'])) ? ($movie['tmdb']['vote_average'] ?? 0) : 0,
+                        'imdb_vote' => (isset($movie['imdb']) && is_array($movie['imdb'])) ? ($movie['imdb']['vote_average'] ?? 0) : 0,
+                        'year' => $movie['year'] ?? 0,
+                        'type' => $movie['type'] ?? '',
+                        'status' => $movie['status'] ?? '',
+                        'episode_current' => $movie['episode_current'] ?? '',
+                        'quality' => $movie['quality'] ?? '',
+                        'lang' => $movie['lang'] ?? '',
+                        'chieu_rap' => !empty($movie['chieurap']) ? 1 : 0,
+                        'content' => $movie['content'] ?? '',
+                        'actor' => $actor,
+                        'director' => $director,
+                        'categories_json' => json_encode($movie['category'] ?? []),
+                        'countries_json' => json_encode($movie['country'] ?? []),
+                        'view' => $dbMovie ? ($dbMovie['view'] ?? 0) : ($movie['view'] ?? 0),
+                        'time' => $movie['time'] ?? '',
+                        'peoples_json' => json_encode($peoplesData ?: []),
+                        'images_json' => json_encode($imagesData ?: []),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    
+                    $repo->saveMovie($movieData);
+                    
+                    $catRepo = getCategoryRepository();
+                    if (isset($movie['category']) && is_array($movie['category'])) {
+                        foreach ($movie['category'] as $c) {
+                            if (!empty($c['slug']) && !empty($c['name'])) $catRepo->saveCategory($c['slug'], $c['name'], 'genre');
+                        }
+                    }
+                    if (isset($movie['country']) && is_array($movie['country'])) {
+                        foreach ($movie['country'] as $c) {
+                            if (!empty($c['slug']) && !empty($c['name'])) $catRepo->saveCategory($c['slug'], $c['name'], 'country');
+                        }
+                    }
+                    
+                    if (!empty($keywordsData)) {
+                        $keywords = [];
+                        foreach ($keywordsData as $kw) {
+                            if (!empty($kw['name'])) $keywords[] = trim($kw['name']);
+                        }
+                        if (!empty($keywords)) {
+                            $keywordString = implode(', ', $keywords);
+                            $seoRepo = getSeoRepository();
+                            $seoData = $seoRepo->getSeoMetadata('movie', $movie['slug']);
+                            if (!$seoData) {
+                                $seoData = [
+                                    'type' => 'movie', 'item_id' => $movie['slug'], 'seo_title' => $movieData['name'],
+                                    'seo_desc' => mb_substr(strip_tags($movieData['content']), 0, 160), 'seo_keywords' => $keywordString
+                                ];
+                            } else {
+                                $seoData['seo_keywords'] = $keywordString;
+                            }
+                            $seoRepo->saveSeoMetadata($seoData);
+                        }
+                    }
+
+                    if ($pdo) {
+                        $stmtDel = $pdo->prepare("DELETE FROM episodes WHERE movie_slug = ?");
+                        $stmtDel->execute([$movie['slug']]);
+                        
+                        $sqlEp = "INSERT INTO episodes (movie_slug, server_name, name, slug, filename, embed_url, m3u8_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        $stmtIns = $pdo->prepare($sqlEp);
+                        
+                        foreach ($episodesList as $server) {
+                            $sName = $server['server_name'] ?? 'Server 1';
+                            $epData = $server['server_data'] ?? [];
+                            foreach ($epData as $ep) {
+                                $stmtIns->execute([$movie['slug'], $sName, $ep['name'] ?? '', $ep['slug'] ?? '', $ep['filename'] ?? '', $ep['link_embed'] ?? '', $ep['link_m3u8'] ?? '']);
+                            }
+                        }
+                    }
+                    $logs[] = "-> Đã lưu phim: $slug";
+                    $updated++;
+                    
+                    // Mark sources as updated in sync_meta
+                    if (isset($slugModifiedMap[$slug])) {
+                        $stmtSync = $syncDb->prepare("INSERT OR REPLACE INTO sync_meta (slug, source, modified) VALUES (?, ?, ?)");
+                        foreach ($slugModifiedMap[$slug] as $sName => $aModified) {
+                            if ($aModified) $stmtSync->execute([$slug, $sName, $aModified]);
+                        }
+                    }
+                } else {
+                    $logs[] = "-> Lỗi không lấy được chi tiết phim: $slug";
+                }
             }
         }
+    }
+    
+    if ($should_stop) {
+        $logs[] = "Đã chạm ngưỡng $max_consecutive phim không có cập nhật. Hệ thống dừng quét sớm.";
     }
     
     echo json_encode([
