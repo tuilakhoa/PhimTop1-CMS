@@ -27,16 +27,16 @@
     <!-- Panel Kiểm Tra Cập Nhật Kỹ Lưỡng -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg  mb-6">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="bell-ring" class="text-green-400"></i> Theo Dõi Phim Mới (Trang 1)
+            <i data-lucide="bell-ring" class="text-green-400"></i> Phát Hiện Phim Mới
         </h3>
         <div class="flex items-center justify-between mb-4 flex-wrap gap-4">
             <div class="text-gray-300 text-sm flex-1">
-                <p>Nhấn nút bên phải để hệ thống đối chiếu kỹ lưỡng <strong>Trang 1</strong> của 3 nguồn với CSDL hiện tại.</p>
+                <p>Nhấn nút bên phải để hệ thống đối chiếu các bộ phim vừa được cập nhật trên các nguồn với CSDL hiện tại.</p>
                 <p class="mt-2 text-yellow-400 font-medium" id="checkUpdateResult">Trạng thái: Chưa kiểm tra.</p>
             </div>
                         <div class="flex items-center gap-2">
                 <button id="btnCheckUpdate" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Trang 1
+                    <i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Cập Nhật
                 </button>
                 <button id="btnRunSmartSync" style="display: none;" class="bg-green-600 hover:bg-green-500 text-white font-medium py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="zap" class="w-4 h-4"></i> Cập Nhật Kỹ Lưỡng (Smart Sync)

@@ -384,7 +384,7 @@ if ($action === 'check_new_movies') {
         }
     }
     
-    $message = "Tìm thấy $total_new phim cần cập nhật ở Trang 1.";
+    $message = "Tìm thấy $total_new phim cần cập nhật.";
     if ($total_new > 0) {
         $message .= " (" . implode(', ', array_slice($updates, 0, 5)) . (count($updates) > 5 ? "..." : "") . ")";
     }
