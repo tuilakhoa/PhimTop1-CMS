@@ -124,9 +124,11 @@ if ($action === 'crawl_single') {
     }
     
     $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
+    $pdo = getPDO();
     if ($fullData && !empty($fullData['movie'])) {
         if (KKPhimCrawler::isMovieBlockedByCategoriesOrCountries($fullData['movie'], $pdo)) {
-            return false; // Skip this movie because it belongs to a blocked category or country
+            echo json_encode(['status' => 'error', 'message' => 'Phim bị chặn theo thể loại/quốc gia']);
+            exit;
         }
     }
     
@@ -468,9 +470,11 @@ if ($action === 'smart_sync_source') {
             $consecutive = 0;
             // Fetch and save
             $fullData = KKPhimCrawler::fetchMovieFromAllSources($slug);
+            $pdo = getPDO();
     if ($fullData && !empty($fullData['movie'])) {
         if (KKPhimCrawler::isMovieBlockedByCategoriesOrCountries($fullData['movie'], $pdo)) {
-            return false; // Skip this movie because it belongs to a blocked category or country
+            $logs[] = "-> Bỏ qua phim vì bị chặn: $slug";
+            continue; // Skip this movie because it belongs to a blocked category or country
         }
     }
             if ($fullData['movie']) {
