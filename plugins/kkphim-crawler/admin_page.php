@@ -501,8 +501,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnRunSmartSync = document.getElementById('btnRunSmartSync');
     if (btnRunSmartSync) {
         btnRunSmartSync.addEventListener('click', async () => {
-            if (!confirm('Bạn có chắc chắn muốn chạy Cập Nhật Kỹ Lưỡng Siêu Tốc (Gộp 3 nguồn đồng thời)?
-Tiến trình sẽ quét song song bằng Multi-cURL.')) return;
+            if (!confirm('Bạn có chắc chắn muốn chạy Cập Nhật Kỹ Lưỡng Siêu Tốc (Gộp 3 nguồn đồng thời)?\nTiến trình sẽ quét song song bằng Multi-cURL.')) return;
             btnRunSmartSync.disabled = true;
             btnRunSmartSync.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang đồng bộ...';
             if (typeof lucide !== 'undefined') lucide.createIcons();
