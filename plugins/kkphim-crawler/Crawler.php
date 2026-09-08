@@ -129,12 +129,17 @@ class KKPhimCrawler {
         return empty($error) && file_exists($savePath) && filesize($savePath) > 0;
     }
 
-    public static function getLatestMoviesFromAllSources($page = 1) {
-        $urls = [
-            'KKPhim' => "https://phimapi.com/v1/api/danh-sach?page={$page}",
-            'Nguồn C' => "https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page={$page}",
-            'VsMov' => "https://vsmov.com/api/danh-sach/phim-moi-cap-nhat?page={$page}"
-        ];
+    public static function getLatestMoviesFromAllSources($page = 1, $sourceFilter = 'all') {
+        $urls = [];
+        if ($sourceFilter === 'all' || $sourceFilter === 'kkphim') {
+            $urls['KKPhim'] = "https://phimapi.com/v1/api/danh-sach?page={$page}";
+        }
+        if ($sourceFilter === 'all' || $sourceFilter === 'nguonc') {
+            $urls['Nguồn C'] = "https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page={$page}";
+        }
+        if ($sourceFilter === 'all' || $sourceFilter === 'vsmov') {
+            $urls['VsMov'] = "https://vsmov.com/api/danh-sach/phim-moi-cap-nhat?page={$page}";
+        }
         $multi = curl_multi_init();
         $channels = [];
         foreach ($urls as $sourceName => $url) {

@@ -35,6 +35,12 @@
                 <p class="mt-2 text-yellow-400 font-medium" id="checkUpdateResult">Trạng thái: Chưa kiểm tra.</p>
             </div>
                         <div class="flex items-center gap-2">
+                <select id="smartSyncSource" class="bg-gray-700 text-white border border-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none">
+                    <option value="all">Tất cả (Gộp 3 Nguồn)</option>
+                    <option value="kkphim">Chỉ KKPhim</option>
+                    <option value="nguonc">Chỉ Nguồn C</option>
+                    <option value="vsmov">Chỉ VsMov</option>
+                </select>
                 <button id="btnCheckUpdate" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Cập Nhật
                 </button>
@@ -471,6 +477,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const formData = new FormData();
                 formData.append('action', 'check_new_movies');
+                formData.append('source', document.getElementById('smartSyncSource').value);
                 const res = await fetch(pluginPath, { method: 'POST', body: formData });
                 const data = await res.json();
                 
@@ -515,10 +522,12 @@ document.addEventListener('DOMContentLoaded', function() {
             logMessage(`<b>=== BẮT ĐẦU SMART SYNC SIÊU TỐC ===</b>`, 'info');
                 
             for (let page = 1; page <= 10; page++) {
-                logMessage(`Đang quét Trang ${page} (Gộp 3 Nguồn Cùng Lúc)...`, 'warn');
+                let srcName = document.getElementById('smartSyncSource').options[document.getElementById('smartSyncSource').selectedIndex].text;
+                logMessage(`Đang quét Trang ${page} (${srcName})...`, 'warn');
                 try {
                     const formData = new FormData();
                     formData.append('action', 'smart_sync_page');
+                    formData.append('source', document.getElementById('smartSyncSource').value);
                     formData.append('page', page);
                     formData.append('consecutive', consecutive);
                     
@@ -591,6 +600,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const pData = new FormData();
                 pData.append('action', 'get_page_slugs');
+                pData.append('source', e.target.source.value);
                 pData.append('page', page);
                 
                 const pRes = await fetch(pluginPath, { method: 'POST', body: pData });

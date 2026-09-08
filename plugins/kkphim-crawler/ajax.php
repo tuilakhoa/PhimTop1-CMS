@@ -44,7 +44,8 @@ if ($action === 'save_source') {
 if ($action === 'get_page_slugs') {
     $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
     
-    $dataAll = KKPhimCrawler::getLatestMoviesFromAllSources($page);
+    $sourceFilter = isset($_POST['source']) ? $_POST['source'] : 'all';
+    $dataAll = KKPhimCrawler::getLatestMoviesFromAllSources($page, $sourceFilter);
     $slugs = [];
     $seenSlugs = [];
     foreach ($dataAll as $sourceName => $data) {
@@ -342,7 +343,8 @@ if ($action === 'set_cron_batch_progress') {
 }
 
 if ($action === 'check_new_movies') {
-    $dataAll = KKPhimCrawler::getLatestMoviesFromAllSources(1);
+    $sourceFilter = isset($_POST['source']) ? $_POST['source'] : 'all';
+    $dataAll = KKPhimCrawler::getLatestMoviesFromAllSources(1, $sourceFilter);
     $repo = getMovieRepository();
     $syncDb = getCrawlerSyncDB();
     $updates = [];
@@ -402,7 +404,8 @@ if ($action === 'smart_sync_page') {
     $consecutive = isset($_POST['consecutive']) ? (int)$_POST['consecutive'] : 0;
     $max_consecutive = 24; // If an entire page is up to date, we can stop
     
-    $dataAll = KKPhimCrawler::getLatestMoviesFromAllSources($page);
+    $sourceFilter = isset($_POST['source']) ? $_POST['source'] : 'all';
+    $dataAll = KKPhimCrawler::getLatestMoviesFromAllSources($page, $sourceFilter);
     if (empty($dataAll)) {
         echo json_encode(['status' => 'success', 'logs' => ["Lỗi kết nối hoặc không có dữ liệu ở trang $page."], 'should_stop' => true, 'updated' => 0, 'consecutive' => $consecutive]);
         exit;
