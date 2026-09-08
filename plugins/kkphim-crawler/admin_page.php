@@ -501,6 +501,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnRunSmartSync = document.getElementById('btnRunSmartSync');
     if (btnRunSmartSync) {
         btnRunSmartSync.addEventListener('click', async () => {
+            if (!confirm('Bạn có chắc chắn muốn chạy Cập Nhật Kỹ Lưỡng Siêu Tốc (Gộp 3 nguồn đồng thời)?
+Tiến trình sẽ quét song song bằng Multi-cURL.')) return;
             btnRunSmartSync.disabled = true;
             btnRunSmartSync.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang đồng bộ...';
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -508,51 +510,45 @@ document.addEventListener('DOMContentLoaded', function() {
             checkUpdateResult.textContent = 'Trạng thái: Đang chạy Smart Sync...';
             checkUpdateResult.className = "mt-2 text-green-400 font-bold";
             
-            const sources = ['kkphim', 'nguonc', 'vsmov'];
             let totalUpdated = 0;
+            let consecutive = 0;
             
-            for (let source of sources) {
-                logMessage(`<b>=== BẮT ĐẦU NGUỒN: ${source.toUpperCase()} ===</b>`, 'info');
-                let shouldStop = false;
-                let consecutive = 0;
+            logMessage(`<b>=== BẮT ĐẦU SMART SYNC SIÊU TỐC ===</b>`, 'info');
                 
-                for (let page = 1; page <= 10; page++) {
-                    logMessage(`Đang xử lý Trang ${page} của ${source.toUpperCase()}...`, 'warn');
-                    try {
-                        const formData = new FormData();
-                        formData.append('action', 'smart_sync_source');
-                        formData.append('source', source);
-                        formData.append('page', page);
-                        formData.append('consecutive', consecutive);
+            for (let page = 1; page <= 10; page++) {
+                logMessage(`Đang quét Trang ${page} (Gộp 3 Nguồn Cùng Lúc)...`, 'warn');
+                try {
+                    const formData = new FormData();
+                    formData.append('action', 'smart_sync_page');
+                    formData.append('page', page);
+                    formData.append('consecutive', consecutive);
+                    
+                    const res = await fetch(pluginPath, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    
+                    if (data.status === 'success') {
+                        if (data.logs && data.logs.length > 0) {
+                            data.logs.forEach(log => {
+                                let type = log.includes('Phát hiện') ? 'success' : (log.includes('Cập nhật') ? 'warn' : 'info');
+                                if (log.includes('Bỏ qua')) type = 'info';
+                                if (log.includes('Lỗi')) type = 'error';
+                                logMessage(`${log}`, type);
+                            });
+                        }
+                        totalUpdated += data.updated;
+                        consecutive = data.consecutive;
                         
-                        const res = await fetch(pluginPath, { method: 'POST', body: formData });
-                        const data = await res.json();
-                        
-                        if (data.status === 'success') {
-                            if (data.logs && data.logs.length > 0) {
-                                data.logs.forEach(log => {
-                                    let type = log.includes('Phát hiện') ? 'success' : (log.includes('Cập nhật') ? 'warn' : 'info');
-                                    logMessage(`[${source}] ${log}`, type);
-                                });
-                            }
-                            totalUpdated += data.updated;
-                            consecutive = data.consecutive;
-                            
-                            if (data.should_stop) {
-                                shouldStop = true;
-                                break;
-                            }
-                        } else {
-                            logMessage(`[${source}] Lỗi API nội bộ.`, 'error');
+                        if (data.should_stop) {
+                            logMessage(`Toàn bộ phim từ trang này trở về trước đều đã up-to-date. Dừng sớm.`, 'info');
                             break;
                         }
-                    } catch (e) {
-                        logMessage(`[${source}] Lỗi mạng khi gọi trang ${page}.`, 'error');
+                    } else {
+                        logMessage(`Lỗi máy chủ: ${data.message}`, 'error');
                         break;
                     }
-                }
-                if (!shouldStop) {
-                    logMessage(`Đã quét tối đa 10 trang của ${source.toUpperCase()}. Chuyển nguồn...`, 'info');
+                } catch (e) {
+                    logMessage(`Lỗi mạng (timeout) khi gọi trang ${page}.`, 'error');
+                    break;
                 }
             }
             
@@ -562,14 +558,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             btnRunSmartSync.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> Hoàn Thành';
             if (typeof lucide !== 'undefined') lucide.createIcons();
-
             
             setTimeout(() => {
                 btnRunSmartSync.disabled = false;
                 btnRunSmartSync.innerHTML = '<i data-lucide="zap" class="w-4 h-4"></i> Cập Nhật Kỹ Lưỡng (Smart Sync)';
                 btnRunSmartSync.style.display = 'none';
                 if (typeof lucide !== 'undefined') lucide.createIcons();
-
             }, 3000);
         });
     }
@@ -591,13 +585,11 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Crawl...';
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
-
         logMessage(`Bắt đầu crawl từ trang ${fromPage} đến ${toPage}...`, 'info');
 
         for (let page = fromPage; page <= toPage; page++) {
             logMessage(`Đang lấy danh sách phim trang ${page}...`, 'warn');
             try {
-                // 1. Get slugs for this page
                 const pData = new FormData();
                 pData.append('action', 'get_page_slugs');
                 pData.append('page', page);
@@ -611,9 +603,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const slugs = pJson.slugs || [];
-                logMessage(`Trang ${page} có ${slugs.length} phim. Bắt đầu fetch từng phim...`, 'info');
+                logMessage(`Trang ${page} có ${slugs.length} phim. Bắt đầu fetch...`, 'info');
 
-                // 2. Fetch each movie in sequence
                 for (let i = 0; i < slugs.length; i++) {
                     const slug = slugs[i];
                     const mData = new FormData();
@@ -643,7 +634,6 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Bắt đầu Crawl';
         if (typeof lucide !== 'undefined') lucide.createIcons();
-
     });
 
     // Crawl Keyword
@@ -662,11 +652,9 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Tìm...';
             if (typeof lucide !== 'undefined') lucide.createIcons();
 
-
             logMessage(`Đang tìm kiếm phim với từ khóa: <b>${keyword}</b>...`, 'info');
 
             try {
-                // 1. Get slugs for this keyword
                 const pData = new FormData();
                 pData.append('action', 'crawl_keyword');
                 pData.append('keyword', keyword);
@@ -680,14 +668,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     btn.disabled = false;
                     btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
                     if (typeof lucide !== 'undefined') lucide.createIcons();
-
                     return;
                 }
 
                 const slugs = pJson.slugs || [];
                 logMessage(`Tìm thấy ${slugs.length} phim. Bắt đầu tải...`, 'info');
 
-                // 2. Fetch each movie in sequence
                 for (let i = 0; i < slugs.length; i++) {
                     const slug = slugs[i];
                     const mData = new FormData();
@@ -716,7 +702,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = false;
             btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
             if (typeof lucide !== 'undefined') lucide.createIcons();
-
         });
     }
 });
