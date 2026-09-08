@@ -1,4 +1,6 @@
 <?php
+set_time_limit(0);
+ini_set('max_execution_time', 0);
 session_start();
 if (!isset($_SESSION['admin'])) {
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
@@ -511,8 +513,8 @@ if ($action === 'smart_sync_source') {
                     'thumb_url' => $thumbUrl,
                     'poster_url' => $posterUrl,
                     'trailer_url' => $movie['trailer_url'] ?? '',
-                    'tmdb_vote' => $movie['tmdb']['vote_average'] ?? 0,
-                    'imdb_vote' => $movie['imdb']['vote_average'] ?? 0,
+                    'tmdb_vote' => (isset($movie['tmdb']) && is_array($movie['tmdb'])) ? ($movie['tmdb']['vote_average'] ?? 0) : 0,
+                    'imdb_vote' => (isset($movie['imdb']) && is_array($movie['imdb'])) ? ($movie['imdb']['vote_average'] ?? 0) : 0,
                     'year' => $movie['year'] ?? 0,
                     'type' => $movie['type'] ?? '',
                     'status' => $movie['status'] ?? '',
