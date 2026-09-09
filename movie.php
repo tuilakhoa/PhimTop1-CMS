@@ -119,19 +119,7 @@ if (!empty($episodes)) {
     $videoUrl = $currentEp['link_m3u8'] ?? $currentEp['link_embed'] ?? '';
     $isM3U8 = strpos($videoUrl, '.m3u8') !== false;
     
-    // Update SEO for watch page (since it's merged)
-    if (isset($currentEp) && $currentEp) {
-        $epName = $currentEp['name'] ?? '';
-        $isFull = (strtolower($epName) === 'full' || strtolower($epName) === 'tập full');
-        
-        if (!$isFull && !empty($epName)) {
-             $pageTitle = 'Xem phim ' . ($movie['name'] ?? $movie['title'] ?? '') . ' Tập ' . $epName . ' - ' . ($settings['siteName'] ?? 'PhimTop1');
-             $pageDesc = 'Xem phim ' . ($movie['name'] ?? '') . ' Tập ' . $epName . ' Vietsub, Thuyết minh chất lượng cao. ' . $pageDesc;
-        } else {
-             $pageTitle = 'Xem phim ' . ($movie['name'] ?? $movie['title'] ?? '') . ' Full HD - ' . ($settings['siteName'] ?? 'PhimTop1');
-             $pageDesc = 'Xem phim ' . ($movie['name'] ?? '') . ' Full HD Vietsub, Thuyết minh chất lượng cao. ' . $pageDesc;
-        }
-    }
+    // Không ghi đè tiêu đề thành Xem phim để tránh trùng lặp SEO với trang watch.php
 }
 
 // Apply SEO Overrides if they exist (highest priority)

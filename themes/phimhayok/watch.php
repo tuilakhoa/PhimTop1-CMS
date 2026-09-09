@@ -131,7 +131,7 @@ if (isset($_SESSION['user'])) {
                 <div class="flex items-center text-gray-400 text-sm">
                     <span class="mr-4 flex items-center">
                         <i data-lucide="film" class="w-4 h-4 mr-1"></i>
-                        Đang xem: <strong class="text-white ml-1 font-medium">Tập <?= htmlspecialchars($currentEp['name']) ?></strong>
+                        Đang xem: <strong class="text-white ml-1 font-medium"><?= stripos($currentEp['name'] ?? '', 'Tập') !== false || stripos($currentEp['name'] ?? '', 'Tap') !== false || strtolower($currentEp['name'] ?? '') === 'full' ? htmlspecialchars($currentEp['name']) : 'Tập ' . htmlspecialchars($currentEp['name']) ?></strong>
                     </span>
                     <span class="flex items-center">
                         <i data-lucide="eye" class="w-4 h-4 mr-1"></i>
@@ -736,7 +736,7 @@ function fetchPublicRooms() {
                 <div class="flex items-center justify-between bg-[#1a1a1a] rounded-lg p-3 border border-white/5">
                     <div>
                         <div class="text-phim-yellow font-mono font-bold text-sm">${room.room_code}</div>
-                        <div class="text-xs text-gray-400">Host: ${room.creator_name} - Tập ${room.episode_name}</div>
+                        <div class="text-xs text-gray-400">Host: ${room.creator_name} - ${room.episode_name.toLowerCase().includes('tập') || room.episode_name.toLowerCase().includes('tap') || room.episode_name.toLowerCase() === 'full' ? room.episode_name : 'Tập ' + room.episode_name}</div>
                     </div>
                     <button onclick="joinWatchParty('${room.room_code}')" class="px-3 py-1.5 bg-[#222] hover:bg-[#333] text-white text-xs font-bold rounded-lg  border border-white/5">
                         Tham gia
