@@ -8,218 +8,153 @@
 
 <!-- Tabs Navigation -->
 <div class="flex border-b border-admin-border mb-6 gap-2 overflow-x-auto custom-scrollbar pb-2">
-    <button class="tab-btn active px-4 py-2 text-admin-primary font-medium border-b-2 border-admin-primary whitespace-nowrap" data-tab="tab-auto">
-        <i data-lucide="zap" class="w-4 h-4 inline-block mr-1"></i> Tự Động (Smart Sync)
+    <button class="tab-btn active px-4 py-2 text-admin-primary font-medium border-b-2 border-admin-primary whitespace-nowrap" data-tab="tab-kkphim">
+        <i data-lucide="server" class="w-4 h-4 inline-block mr-1"></i> KKPhim
     </button>
-    <button class="tab-btn px-4 py-2 text-gray-400 font-medium hover:text-white border-b-2 border-transparent transition-colors whitespace-nowrap" data-tab="tab-manual">
-        <i data-lucide="mouse-pointer-click" class="w-4 h-4 inline-block mr-1"></i> Crawl Thủ Công
+    <button class="tab-btn px-4 py-2 text-gray-400 font-medium hover:text-white border-b-2 border-transparent transition-colors whitespace-nowrap" data-tab="tab-nguonc">
+        <i data-lucide="server" class="w-4 h-4 inline-block mr-1"></i> Nguồn C
     </button>
-    <button class="tab-btn px-4 py-2 text-gray-400 font-medium hover:text-white border-b-2 border-transparent transition-colors whitespace-nowrap" data-tab="tab-mass">
-        <i data-lucide="layers" class="w-4 h-4 inline-block mr-1"></i> Mass & Batch Crawl
+    <button class="tab-btn px-4 py-2 text-gray-400 font-medium hover:text-white border-b-2 border-transparent transition-colors whitespace-nowrap" data-tab="tab-vsmov">
+        <i data-lucide="server" class="w-4 h-4 inline-block mr-1"></i> VsMov
     </button>
-    <button class="tab-btn px-4 py-2 text-gray-400 font-medium hover:text-white border-b-2 border-transparent transition-colors whitespace-nowrap" data-tab="tab-failed">
-        <i data-lucide="alert-triangle" class="w-4 h-4 inline-block mr-1"></i> Phim Lỗi
+    <button class="tab-btn px-4 py-2 text-gray-400 font-medium hover:text-white border-b-2 border-transparent transition-colors whitespace-nowrap" data-tab="tab-config">
+        <i data-lucide="settings" class="w-4 h-4 inline-block mr-1"></i> Cấu Hình & Cron
     </button>
 </div>
 
-<!-- Tab 1: Tự Động -->
-<div id="tab-auto" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Panel Kiểm Tra Cập Nhật Kỹ Lưỡng -->
-    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg  mb-6">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="bell-ring" class="text-green-400"></i> Phát Hiện Phim Mới
-        </h3>
-        <div class="flex items-center justify-between mb-4 flex-wrap gap-4">
-            <div class="text-gray-300 text-sm flex-1">
-                <p>Nhấn nút bên phải để hệ thống đối chiếu các bộ phim vừa được cập nhật trên các nguồn với CSDL hiện tại.</p>
-                <p class="mt-2 text-yellow-400 font-medium" id="checkUpdateResult">Trạng thái: Chưa kiểm tra.</p>
-            </div>
-                        <div class="flex items-center gap-2">
-                <select id="smartSyncSource" class="bg-gray-700 text-white border border-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none">
-                    <option value="all">Tất cả (Gộp 3 Nguồn)</option>
-                    <option value="kkphim">Chỉ KKPhim</option>
-                    <option value="nguonc">Chỉ Nguồn C</option>
-                    <option value="vsmov">Chỉ VsMov</option>
-                </select>
-                <button id="btnCheckUpdate" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra Cập Nhật
-                </button>
-                <button id="btnRunSmartSync" style="display: none;" class="bg-green-600 hover:bg-green-500 text-white font-medium py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="zap" class="w-4 h-4"></i> Cập Nhật Kỹ Lưỡng (Smart Sync)
-                </button>
-            </div>
-        </div>
-        <p class="text-xs text-gray-500 italic">Tính năng này giúp bạn nắm bắt xem có phim nào vừa ra lò chưa được cập nhật không.</p>
-    </div>
-    <!-- Panel Cron Job -->
+<?php 
+$sources = [
+    'kkphim' => 'KKPhim',
+    'nguonc' => 'Nguồn C',
+    'vsmov'  => 'VsMov'
+];
+
+foreach ($sources as $sourceKey => $sourceName): 
+?>
+<!-- Tab <?= $sourceName ?> -->
+<div id="tab-<?= $sourceKey ?>" class="tab-content <?= $sourceKey === 'kkphim' ? '' : 'hidden' ?> grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Panel Smart Sync -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="clock" class="text-admin-primary"></i> Thiết lập Cron Job Tự Động
+            <i data-lucide="zap" class="text-green-400"></i> Smart Sync (<?= $sourceName ?>)
         </h3>
-        <div class="text-gray-300 text-sm space-y-2 mb-4">
-            <p>Hệ thống tự động crawl phim mới nhất từ <code class="bg-black/50 px-1 py-0.5 rounded text-green-400">cả 3 nguồn (KKPhim, Nguồn C, VsMov)</code>.</p>
-            <p>Hệ thống cũng tự nhận biết phim nào đã full hoặc có tập mới để tiến hành cập nhật lại.</p>
-            <p>Sử dụng lệnh sau để chạy Cron qua CLI (Khuyên dùng):</p>
-            <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-green-400">php <?= __DIR__ ?>/cron.php</code>
-            <p class="mt-2">Hoặc thiết lập cron truy cập qua Web (nếu không có SSH):</p>
-            <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-green-400"><?= (isset($_SERVER["HTTPS"]) ? "https://" : "http://") . $_SERVER["HTTP_HOST"] . "/plugins/kkphim-crawler/cron.php?key=kkphim_cron" ?></code>
+        <p class="text-gray-300 text-sm mb-4">Tự động phát hiện các phim mới/cập nhật trên <?= $sourceName ?> và đồng bộ về hệ thống.</p>
+        <p class="mb-4 text-yellow-400 font-medium text-sm" id="checkResult_<?= $sourceKey ?>">Trạng thái: Chưa kiểm tra.</p>
+        
+        <div class="flex gap-2">
+            <button class="btn-check-update bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2" data-source="<?= $sourceKey ?>">
+                <i data-lucide="radar" class="w-4 h-4"></i> Kiểm Tra
+            </button>
+            <button class="btn-run-smart-sync bg-green-600 hover:bg-green-500 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 hidden" data-source="<?= $sourceKey ?>">
+                <i data-lucide="play" class="w-4 h-4"></i> Bắt đầu Sync
+            </button>
         </div>
     </div>
-</div>
 
-<!-- Tab 2: Thủ Công -->
-<div id="tab-manual" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Panel Crawl Danh Sách -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="list-video" class="text-admin-primary"></i> Crawl Danh Sách Phim Mới
+            <i data-lucide="list-video" class="text-admin-primary"></i> Crawl Theo Trang (<?= $sourceName ?>)
         </h3>
-        
-        <form id="crawlListForm" class="space-y-4">
+        <form class="crawl-list-form space-y-4" data-source="<?= $sourceKey ?>">
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Từ Trang</label>
-                    <input type="number" name="from_page" value="1" min="1" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-admin-primary transition-colors">
+                    <input type="number" name="from_page" value="1" min="1" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Đến Trang</label>
-                    <input type="number" name="to_page" value="1" min="1" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-admin-primary transition-colors">
+                    <input type="number" name="to_page" value="1" min="1" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white">
                 </div>
             </div>
             <div class="flex items-center gap-2 mb-2">
-                <input type="checkbox" id="fetch_images" name="fetch_images" class="rounded border-gray-600 bg-gray-700 text-admin-primary focus:ring-admin-primary">
-                <label for="fetch_images" class="text-sm text-gray-300">Tải & lưu ảnh (Thumb/Poster) về server cục bộ</label>
+                <input type="checkbox" name="fetch_images" class="rounded border-gray-600 bg-gray-700 text-admin-primary focus:ring-admin-primary">
+                <label class="text-sm text-gray-300">Tải & lưu ảnh (Thumb/Poster)</label>
             </div>
-            
-            <button type="submit" class="w-full bg-admin-primary hover:bg-admin-primary/90 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+            <button type="submit" class="w-full bg-admin-primary hover:bg-admin-primary/90 text-white font-medium py-2.5 px-4 rounded-lg flex justify-center items-center gap-2">
                 <i data-lucide="play" class="w-4 h-4"></i> Bắt đầu Crawl
             </button>
         </form>
     </div>
-    <!-- Panel Crawl Theo Từ Khóa -->
-    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
+
+    <!-- Panel Crawl Từ Khóa -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg lg:col-span-2">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="search" class="text-blue-400"></i> Crawl Phim Theo Từ Khóa
+            <i data-lucide="search" class="text-admin-primary"></i> Tìm & Crawl (<?= $sourceName ?>)
         </h3>
-        
-        <form id="crawlKeywordForm" class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Từ Khóa</label>
-                    <input type="text" name="keyword" placeholder="Nhập tên phim..." class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400 transition-colors" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Số Lượng</label>
-                    <input type="number" name="limit" value="10" min="1" max="100" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400 transition-colors">
-                </div>
+        <form class="crawl-keyword-form flex gap-4 items-end" data-source="<?= $sourceKey ?>">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-400 mb-1">Từ khóa (Tên phim...)</label>
+                <input type="text" name="keyword" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white" placeholder="Ví dụ: One Piece">
             </div>
-            
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
-                <i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl
+            <div class="w-24">
+                <label class="block text-sm font-medium text-gray-400 mb-1">Giới hạn</label>
+                <input type="number" name="limit" value="10" min="1" max="100" class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white">
+            </div>
+            <button type="submit" class="bg-admin-primary hover:bg-admin-primary/90 text-white font-medium py-2.5 px-4 rounded-lg flex items-center gap-2 h-[42px]">
+                <i data-lucide="search" class="w-4 h-4"></i> Tìm & Crawl
             </button>
         </form>
     </div>
-    <!-- Panel Crawl 1 Phim -->
+</div>
+<?php endforeach; ?>
+
+<!-- Tab Cấu Hình & Cron -->
+<div id="tab-config" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Phim Lỗi -->
+    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="text-red-400"></i> Phim Lỗi (<span id="failedCount">0</span>)
+            </h3>
+            <button id="btnRecrawlFailed" disabled class="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-medium py-1.5 px-3 rounded-lg flex items-center gap-1 transition-colors">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Thử Crawl Lại
+            </button>
+        </div>
+        <p class="text-gray-400 text-sm mb-4">Danh sách các slug phim bị lỗi trong quá trình crawl tự động. Bấm thử crawl lại để hệ thống lấy lại dữ liệu.</p>
+    </div>
+
+    <!-- Cron Job -->
     <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="file-search" class="text-admin-primary"></i> Crawl Chi Tiết 1 Phim
+            <i data-lucide="clock" class="text-admin-primary"></i> Hướng Dẫn Cài Đặt Cron
         </h3>
-        
-        <form id="crawlSingleForm" class="space-y-4">
+        <div class="text-gray-300 text-sm space-y-3">
+            <p>Hệ thống tự động đồng bộ tập mới và phim mới bằng Smart Sync.</p>
             <div>
-                <label class="block text-sm font-medium text-gray-400 mb-1">Slug của phim</label>
-                <input type="text" name="movie_slug" placeholder="vd: lightyear-canh-sat-vu-tru" required class="w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-admin-primary transition-colors">
+                <p class="font-bold text-white mb-1">1. Chạy tất cả các nguồn:</p>
+                <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-green-400 break-all">php <?= __DIR__ ?>/cron.php</code>
             </div>
-            
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
-                <i data-lucide="download-cloud" class="w-4 h-4"></i> Crawl Phim Này
-            </button>
-        </form>
-    </div>
-</div>
-</div>
-
-<!-- Tab 3: Mass & Batch -->
-<div id="tab-mass" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Panel Cron Batch (Crawl 20 trang mỗi lần) -->
-    <?php
-    $cronBatchFile = __DIR__ . '/cron_batch_progress.txt';
-    $cronBatchPage = file_exists($cronBatchFile) ? (int)trim(file_get_contents($cronBatchFile)) : 1;
-    ?>
-    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="list-ordered" class="text-purple-400"></i> Cron Crawl Luân Phiên (20 Trang)
-        </h3>
-        <div class="text-gray-300 text-sm space-y-2 mb-4">
-            <p>Cron job đặc biệt giúp crawl dần dữ liệu phim cũ, <strong>mỗi lần chạy sẽ tự động crawl 20 trang</strong> và ghi nhớ tiến độ.</p>
-            <div class="bg-black/40 p-3 rounded-lg border border-purple-500/30 flex flex-col sm:flex-row justify-between items-center my-3 gap-3">
-                <span>Trang hiện hành (sẽ crawl tiếp theo):</span>
-                <div class="flex items-center gap-2">
-                    <input type="number" id="inputCronBatchProgress" value="<?= $cronBatchPage ?>" min="1" class="w-24 bg-black/50 border border-admin-border rounded-lg px-2 py-1 text-white text-center font-bold text-lg focus:outline-none focus:border-purple-500 transition-colors">
-                    <button id="btnSetCronBatch" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg text-sm transition-colors">Lưu lại</button>
-                </div>
+            <div>
+                <p class="font-bold text-white mb-1">2. Chạy từng nguồn riêng (ví dụ KKPhim):</p>
+                <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-green-400 break-all">php <?= __DIR__ ?>/cron.php kkphim</code>
             </div>
-            <p>Cú pháp chạy CLI (cron):</p>
-            <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-purple-400">php <?= __DIR__ ?>/cron_batch.php</code>
-            <p class="mt-2">Hoặc chạy qua Web Cron (Cpanel/DirectAdmin):</p>
-            <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-purple-400"><?= (isset($_SERVER["HTTPS"]) ? "https://" : "http://") . $_SERVER["HTTP_HOST"] . "/plugins/kkphim-crawler/cron_batch.php?key=kkphim_cron" ?></code>
-        </div>
-        <div class="flex gap-2">
-            <button id="btnResetCronBatch" class="bg-red-600/80 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm">
-                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset về Trang 1
-            </button>
+            <div>
+                <p class="font-bold text-white mb-1">3. Cron qua URL (nếu không có SSH):</p>
+                <code class="block w-full bg-black/50 border border-admin-border rounded-lg px-4 py-2 text-green-400 break-all"><?= (isset($_SERVER["HTTPS"]) ? "https://" : "http://") . $_SERVER["HTTP_HOST"] . "/plugins/kkphim-crawler/cron.php?key=kkphim_cron&source=kkphim" ?></code>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Tab 4: Failed -->
-<div id="tab-failed" class="tab-content hidden grid grid-cols-1 gap-6">
-    <!-- Panel Phim Lỗi (Failed Movies) -->
-    <div class="bg-admin-panel rounded-xl border border-admin-border p-6 shadow-lg ">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <i data-lucide="alert-triangle" class="text-yellow-400"></i> Quản Lý Phim Lỗi Mạng
+<!-- Logger Bắt Buộc Có -->
+<div class="bg-black/90 rounded-xl border border-admin-border p-4 shadow-lg flex flex-col h-[400px]">
+    <div class="flex justify-between items-center mb-2 pb-2 border-b border-gray-800">
+        <h3 class="text-sm font-bold text-gray-400 flex items-center gap-2">
+            <i data-lucide="terminal" class="w-4 h-4"></i> Tiến Trình Crawl
         </h3>
-        <div class="flex items-center justify-between mb-4">
-            <div class="text-gray-300 text-sm">
-                Số phim crawl lỗi cần tải lại: <strong id="failedCount" class="text-yellow-400 text-lg">0</strong> phim
-            </div>
-            <button id="btnRecrawlFailed" class="bg-yellow-600 hover:bg-yellow-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Crawl Lại Phim Lỗi
-            </button>
-        </div>
-        <p class="text-xs text-gray-400 italic">Tính năng này giúp bạn thử tải lại những phim bị lỗi từ quá trình "Crawl Hàng Loạt". Khi tải thành công, số lượng sẽ tự động giảm.</p>
+        <button onclick="document.getElementById('crawlLog').innerHTML=''" class="text-xs text-gray-500 hover:text-white transition-colors">Xóa Log</button>
     </div>
-</div>
-
-<!-- Output Log Area -->
-<div class="mt-6 bg-black/80 rounded-xl border border-admin-border overflow-hidden flex flex-col" style="height: 450px;">
-    <div class="flex items-center justify-between px-4 py-3 border-b border-admin-border bg-admin-panel">
-        <h3 class="text-sm font-bold text-gray-300 flex items-center gap-2">
-            <i data-lucide="terminal" class="w-4 h-4 text-green-400"></i> Tiến Trình Crawl
-        </h3>
-        <button id="clearLogBtn" class="text-xs text-gray-500 hover:text-white transition-colors bg-gray-800 px-2 py-1 rounded">Xóa Log</button>
-    </div>
-    <div id="crawlLog" class="p-4 flex-1 font-mono text-sm space-y-1 text-gray-300 custom-scrollbar" style="overflow-y: auto; max-height: calc(450px - 50px);">
+    <div id="crawlLog" class="flex-1 overflow-y-auto custom-scrollbar font-mono text-sm space-y-1 p-2 bg-black rounded">
         <div class="text-gray-500 italic">Sẵn sàng...</div>
     </div>
 </div>
 
 <style>
-/* Tùy chỉnh thanh cuộn cho đẹp mắt */
-.custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0.3);
-    border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.2);
-    border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.4);
-}
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 </style>
 
 <script>
@@ -230,18 +165,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Remove active classes
             tabBtns.forEach(b => {
                 b.classList.remove('active', 'text-admin-primary', 'border-admin-primary');
                 b.classList.add('text-gray-400', 'border-transparent');
             });
             tabContents.forEach(c => c.classList.add('hidden'));
             
-            // Add active class
             btn.classList.add('active', 'text-admin-primary', 'border-admin-primary');
             btn.classList.remove('text-gray-400', 'border-transparent');
             
-            // Show content
             const targetId = btn.getAttribute('data-tab');
             const targetEl = document.getElementById(targetId);
             if(targetEl) targetEl.classList.remove('hidden');
@@ -249,10 +181,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
-
     const logEl = document.getElementById('crawlLog');
-    const MAX_LOG_LINES = 200; // Giới hạn số dòng để tránh đơ trình duyệt
-    
+    const pluginPath = '/plugins/kkphim-crawler/ajax.php';
+    let failedSlugsList = [];
+
     function logMessage(msg, type = 'info') {
         const div = document.createElement('div');
         const time = new Date().toLocaleTimeString();
@@ -264,24 +196,9 @@ document.addEventListener('DOMContentLoaded', function() {
         div.className = colorClass;
         div.innerHTML = `<span class="text-gray-600">[${time}]</span> ${msg}`;
         logEl.appendChild(div);
-        
-        // Xóa bớt log cũ nếu vượt quá giới hạn
-        while (logEl.children.length > MAX_LOG_LINES) {
-            logEl.removeChild(logEl.firstChild);
-        }
-        
-        // Tự động cuộn xuống dưới cùng
         logEl.scrollTop = logEl.scrollHeight;
     }
 
-    document.getElementById('clearLogBtn').addEventListener('click', () => {
-        logEl.innerHTML = '';
-    });
-
-    const pluginPath = '/plugins/kkphim-crawler/ajax.php';
-    let failedSlugsList = [];
-
-    // Tải danh sách phim lỗi
     async function loadFailedSlugs() {
         try {
             const formData = new FormData();
@@ -289,369 +206,268 @@ document.addEventListener('DOMContentLoaded', function() {
             const res = await fetch(pluginPath, { method: 'POST', body: formData });
             const data = await res.json();
             if (data.status === 'success') {
-                failedSlugsList = data.slugs;
+                failedSlugsList = data.slugs || [];
                 document.getElementById('failedCount').textContent = failedSlugsList.length;
                 document.getElementById('btnRecrawlFailed').disabled = failedSlugsList.length === 0;
             }
-        } catch (e) {
-            console.error('Cannot load failed slugs', e);
-        }
+        } catch (e) { console.error(e); }
     }
-    
-    // Gọi khi load trang
     loadFailedSlugs();
 
-    // Kiểm Tra Cập Nhật
-    const btnCheckUpdate = document.getElementById('btnCheckUpdate');
-    const btnRunSmartSync = document.getElementById('btnRunSmartSync');
-    const checkUpdateResult = document.getElementById('checkUpdateResult');
-    const smartSyncSource = document.getElementById('smartSyncSource');
-
-    if (btnCheckUpdate) {
-        btnCheckUpdate.addEventListener('click', async () => {
-            btnCheckUpdate.disabled = true;
-            const originalHtml = btnCheckUpdate.innerHTML;
-            btnCheckUpdate.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Kiểm Tra...';
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+    // Check Update
+    document.querySelectorAll('.btn-check-update').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const source = btn.getAttribute('data-source');
+            const resLabel = document.getElementById('checkResult_' + source);
+            const syncBtn = btn.parentElement.querySelector('.btn-run-smart-sync');
             
-            checkUpdateResult.textContent = 'Trạng thái: Đang kiểm tra...';
-            checkUpdateResult.className = 'mt-2 text-yellow-400 font-medium';
-
+            btn.disabled = true;
+            resLabel.className = 'mb-4 text-yellow-400 font-medium text-sm';
+            resLabel.textContent = 'Trạng thái: Đang kiểm tra...';
+            
             try {
-                const formData = new FormData();
-                formData.append('action', 'check_new_movies');
-                formData.append('source', smartSyncSource.value);
-
-                const res = await fetch(pluginPath, {
-                    method: 'POST',
-                    body: formData
-                });
+                const fd = new FormData();
+                fd.append('action', 'check_new_movies');
+                fd.append('source', source);
+                
+                const res = await fetch(pluginPath, { method: 'POST', body: fd });
                 const data = await res.json();
                 
                 if (data.status === 'success') {
-                    checkUpdateResult.innerHTML = `Trạng thái: ${data.message}`;
+                    resLabel.textContent = `Trạng thái: ${data.message}`;
                     if (data.total > 0) {
-                        checkUpdateResult.className = 'mt-2 text-green-400 font-medium';
-                        btnRunSmartSync.style.display = 'inline-flex';
+                        resLabel.className = 'mb-4 text-green-400 font-medium text-sm';
+                        syncBtn.classList.remove('hidden');
                     } else {
-                        checkUpdateResult.className = 'mt-2 text-gray-400 font-medium';
-                        btnRunSmartSync.style.display = 'none';
+                        resLabel.className = 'mb-4 text-gray-400 font-medium text-sm';
+                        syncBtn.classList.add('hidden');
                     }
                 } else {
-                    checkUpdateResult.textContent = `Trạng thái: Lỗi: ${data.message}`;
-                    checkUpdateResult.className = 'mt-2 text-red-400 font-medium';
+                    resLabel.textContent = `Trạng thái: Lỗi: ${data.message}`;
+                    resLabel.className = 'mb-4 text-red-400 font-medium text-sm';
                 }
-            } catch (error) {
-                checkUpdateResult.textContent = `Trạng thái: Lỗi mạng: ${error.message}`;
-                checkUpdateResult.className = 'mt-2 text-red-400 font-medium';
+            } catch (err) {
+                resLabel.textContent = `Trạng thái: Lỗi kết nối: ${err.message}`;
+                resLabel.className = 'mb-4 text-red-400 font-medium text-sm';
             }
-
-            btnCheckUpdate.disabled = false;
-            btnCheckUpdate.innerHTML = originalHtml;
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            btn.disabled = false;
         });
-    }
+    });
 
-    if (btnRunSmartSync) {
-        btnRunSmartSync.addEventListener('click', async () => {
-            btnRunSmartSync.disabled = true;
-            btnCheckUpdate.disabled = true;
-            smartSyncSource.disabled = true;
+    // Run Smart Sync
+    document.querySelectorAll('.btn-run-smart-sync').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const source = btn.getAttribute('data-source');
+            const resLabel = document.getElementById('checkResult_' + source);
             
-            const originalHtml = btnRunSmartSync.innerHTML;
-            btnRunSmartSync.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Sync...';
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            resLabel.textContent = 'Trạng thái: Đang Sync...';
+            logMessage(`Bắt đầu chạy Smart Sync cho nguồn ${source}...`, 'info');
             
-            checkUpdateResult.textContent = 'Trạng thái: Đang thực hiện Smart Sync... (Xem chi tiết ở bảng Log bên dưới)';
-            checkUpdateResult.className = 'mt-2 text-blue-400 font-medium';
-
-            logMessage(`Bắt đầu chạy Smart Sync (Nguồn: ${smartSyncSource.options[smartSyncSource.selectedIndex].text})...`, 'info');
-
             let page = 1;
             let consecutive = 0;
-            let totalUpdated = 0;
             let shouldStop = false;
-
+            
             while (!shouldStop && page <= 50) {
-                logMessage(`Đang Sync trang ${page}...`, 'warn');
+                logMessage(`[${source}] Đang Sync trang ${page}...`, 'warn');
                 try {
-                    const formData = new FormData();
-                    formData.append('action', 'smart_sync_page');
-                    formData.append('source', smartSyncSource.value);
-                    formData.append('page', page);
-                    formData.append('consecutive', consecutive);
-
-                    const res = await fetch(pluginPath, {
-                        method: 'POST',
-                        body: formData
-                    });
+                    const fd = new FormData();
+                    fd.append('action', 'smart_sync_page');
+                    fd.append('source', source);
+                    fd.append('page', page);
+                    fd.append('consecutive', consecutive);
+                    
+                    const res = await fetch(pluginPath, { method: 'POST', body: fd });
                     const data = await res.json();
                     
                     if (data.status === 'success') {
-                        if (data.logs && data.logs.length > 0) {
-                            data.logs.forEach(log => logMessage(log, 'info'));
-                        }
-                        
-                        totalUpdated += (data.updated || 0);
+                        if (data.logs) data.logs.forEach(l => logMessage(l, 'info'));
                         consecutive = data.consecutive || 0;
                         shouldStop = data.should_stop || false;
-                        
                         if (shouldStop) {
-                            logMessage(`Hoàn tất Smart Sync! Không tìm thấy thêm phim mới/cập nhật nào sau ${page} trang.`, 'success');
+                            logMessage(`Hoàn tất Smart Sync ${source}!`, 'success');
                             break;
                         }
                     } else {
-                        logMessage(`Lỗi khi sync trang ${page}: ${data.message}`, 'error');
+                        logMessage(`Lỗi Sync: ${data.message}`, 'error');
                         break;
                     }
-                } catch (error) {
-                    logMessage(`Lỗi mạng khi sync trang ${page}: ${error.message}`, 'error');
+                } catch (e) {
+                    logMessage(`Lỗi mạng Sync: ${e.message}`, 'error');
                     break;
                 }
-                
                 page++;
             }
-
-            checkUpdateResult.textContent = `Trạng thái: Đã hoàn tất Smart Sync.`;
-            checkUpdateResult.className = 'mt-2 text-green-400 font-medium';
-            btnRunSmartSync.style.display = 'none';
             
-            btnRunSmartSync.disabled = false;
-            btnCheckUpdate.disabled = false;
-            smartSyncSource.disabled = false;
-            btnRunSmartSync.innerHTML = originalHtml;
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            resLabel.textContent = 'Trạng thái: Đã hoàn tất Smart Sync.';
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+            btn.classList.add('hidden');
         });
-    }
-
-    // Xử lý Recrawl phim lỗi
-    document.getElementById('btnRecrawlFailed').addEventListener('click', async () => {
-        if (failedSlugsList.length === 0) return;
-        
-        const btn = document.getElementById('btnRecrawlFailed');
-        btn.disabled = true;
-        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang tải lại...';
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-
-
-        logMessage(`Bắt đầu thử tải lại ${failedSlugsList.length} phim lỗi...`, 'warn');
-        
-        let successCount = 0;
-        let failCount = 0;
-        
-        // Copy mảng để loop
-        const slugsToProcess = [...failedSlugsList];
-
-        for (let i = 0; i < slugsToProcess.length; i++) {
-            const slug = slugsToProcess[i];
-            const mData = new FormData();
-            mData.append('action', 'crawl_single');
-            mData.append('slug', slug);
-            mData.append('fetch_images', document.getElementById('fetch_images')?.checked ? '1' : '0'); // Nếu có
-            
-            try {
-                const mRes = await fetch(pluginPath, { method: 'POST', body: mData });
-                const mJson = await mRes.json();
-                
-                if (mJson.status === 'success') {
-                    logMessage(`[Phim Lỗi - ${i+1}/${slugsToProcess.length}] Tải thành công: <b>${mJson.movie_name}</b>`, 'success');
-                    successCount++;
-                    
-                    // Xóa khỏi file log lỗi
-                    const rData = new FormData();
-                    rData.append('action', 'remove_failed_slug');
-                    rData.append('slug', slug);
-                    await fetch(pluginPath, { method: 'POST', body: rData });
-                    
-                    // Cập nhật mảng và UI
-                    failedSlugsList = failedSlugsList.filter(s => s !== slug);
-                    document.getElementById('failedCount').textContent = failedSlugsList.length;
-                } else {
-                    logMessage(`[Phim Lỗi - ${i+1}/${slugsToProcess.length}] Vẫn lỗi (${slug}): ${mJson.message}`, 'error');
-                    failCount++;
-                }
-            } catch (e) {
-                logMessage(`[Phim Lỗi - ${i+1}/${slugsToProcess.length}] Lỗi mạng (${slug})`, 'error');
-                failCount++;
-            }
-        }
-        
-        logMessage(`<b>Hoàn thành tải lại! Thành công: ${successCount}, Lỗi: ${failCount}</b>`, 'info');
-        
-        btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Crawl Lại Phim Lỗi';
-        btn.disabled = failedSlugsList.length === 0;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-
-    });
-
-    // Crawl Single Movie
-    document.getElementById('crawlSingleForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const slug = e.target.movie_slug.value.trim();
-        if (!slug) return;
-        
-        logMessage(`Đang lấy dữ liệu cho slug: <b>${slug}</b>...`, 'info');
-        
-        try {
-            const formData = new FormData();
-            formData.append('action', 'crawl_single');
-            formData.append('slug', slug);
-            formData.append('fetch_images', document.getElementById('fetch_images').checked ? '1' : '0');
-
-            const res = await fetch(pluginPath, {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            
-            if (data.status === 'success') {
-                logMessage(`Thành công: Đã crawl phim <b>${data.movie_name}</b>`, 'success');
-            } else {
-                logMessage(`Lỗi: ${data.message}`, 'error');
-            }
-        } catch (error) {
-            logMessage(`Đã xảy ra lỗi mạng: ${error.message}`, 'error');
-        }
     });
 
     // Crawl List
-    document.getElementById('crawlListForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fromPage = parseInt(e.target.from_page.value);
-        const toPage = parseInt(e.target.to_page.value);
-        const fetchImages = document.getElementById('fetch_images').checked ? '1' : '0';
-        
-        if (fromPage > toPage) {
-            logMessage("Trang bắt đầu phải nhỏ hơn hoặc bằng trang kết thúc!", "error");
-            return;
-        }
-
-        const btn = e.target.querySelector('button');
-        btn.disabled = true;
-        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Crawl...';
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-
-        logMessage(`Bắt đầu crawl từ trang ${fromPage} đến ${toPage}...`, 'info');
-
-        for (let page = fromPage; page <= toPage; page++) {
-            logMessage(`Đang lấy danh sách phim trang ${page}...`, 'warn');
-            try {
-                const pData = new FormData();
-                pData.append('action', 'get_page_slugs');
-                pData.append('source', e.target.source.value);
-                pData.append('page', page);
-                
-                const pRes = await fetch(pluginPath, { method: 'POST', body: pData });
-                const pJson = await pRes.json();
-                
-                if (pJson.status !== 'success') {
-                    logMessage(`Lỗi trang ${page}: ${pJson.message}`, 'error');
-                    continue;
-                }
-
-                const slugs = pJson.slugs || [];
-                logMessage(`Trang ${page} có ${slugs.length} phim. Bắt đầu fetch...`, 'info');
-
-                for (let i = 0; i < slugs.length; i++) {
-                    const slug = slugs[i];
-                    const mData = new FormData();
-                    mData.append('action', 'crawl_single');
-                    mData.append('slug', slug);
-                    mData.append('fetch_images', fetchImages);
-                    
-                    try {
-                        const mRes = await fetch(pluginPath, { method: 'POST', body: mData });
-                        const mJson = await mRes.json();
-                        
-                        if (mJson.status === 'success') {
-                            logMessage(`[Trang ${page} - ${i+1}/${slugs.length}] Đã lưu: <b>${mJson.movie_name}</b>`, 'success');
-                        } else {
-                            logMessage(`[Trang ${page} - ${i+1}/${slugs.length}] Lỗi (${slug}): ${mJson.message}`, 'error');
-                        }
-                    } catch (e) {
-                        logMessage(`[Trang ${page} - ${i+1}/${slugs.length}] Lỗi mạng (${slug})`, 'error');
-                    }
-                }
-            } catch (err) {
-                logMessage(`Lỗi kết nối khi crawl trang ${page}: ${err.message}`, 'error');
+    document.querySelectorAll('.crawl-list-form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const source = form.getAttribute('data-source');
+            const fromPage = parseInt(form.from_page.value);
+            const toPage = parseInt(form.to_page.value);
+            const fetchImages = form.fetch_images.checked ? '1' : '0';
+            const btn = form.querySelector('button[type="submit"]');
+            
+            if (fromPage > toPage) {
+                logMessage("Trang bắt đầu phải <= trang kết thúc", "error");
+                return;
             }
-        }
-        
-        logMessage('<b>Hoàn thành tiến trình crawl danh sách!</b>', 'success');
-        btn.disabled = false;
-        btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Bắt đầu Crawl';
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+            
+            btn.disabled = true;
+            logMessage(`Bắt đầu Crawl ${source} từ trang ${fromPage} đến ${toPage}...`, 'info');
+            
+            for (let p = fromPage; p <= toPage; p++) {
+                logMessage(`Đang tải danh sách phim trang ${p} từ ${source}...`, 'warn');
+                try {
+                    const pData = new FormData();
+                    pData.append('action', 'get_page_slugs');
+                    pData.append('source', source);
+                    pData.append('page', p);
+                    
+                    const pRes = await fetch(pluginPath, { method: 'POST', body: pData });
+                    const pJson = await pRes.json();
+                    
+                    if (pJson.status !== 'success') {
+                        logMessage(`Lỗi trang ${p}: ${pJson.message}`, 'error');
+                        continue;
+                    }
+                    
+                    const slugs = pJson.slugs || [];
+                    logMessage(`Trang ${p} có ${slugs.length} phim. Bắt đầu fetch chi tiết...`, 'info');
+                    
+                    for (let i = 0; i < slugs.length; i++) {
+                        const slug = slugs[i];
+                        const mData = new FormData();
+                        mData.append('action', 'crawl_single');
+                        mData.append('slug', slug);
+                        mData.append('fetch_images', fetchImages);
+                        
+                        try {
+                            const mRes = await fetch(pluginPath, { method: 'POST', body: mData });
+                            const mJson = await mRes.json();
+                            if (mJson.status === 'success') {
+                                logMessage(`[Trang ${p} - ${i+1}/${slugs.length}] Đã lưu: <b>${mJson.movie_name}</b>`, 'success');
+                            } else {
+                                logMessage(`[Trang ${p} - ${i+1}/${slugs.length}] Lỗi (${slug}): ${mJson.message}`, 'error');
+                            }
+                        } catch (e) {
+                            logMessage(`[Trang ${p} - ${i+1}/${slugs.length}] Lỗi mạng (${slug})`, 'error');
+                        }
+                    }
+                } catch (e) {
+                    logMessage(`Lỗi kết nối trang ${p}: ${e.message}`, 'error');
+                }
+            }
+            logMessage(`Hoàn thành Crawl danh sách từ ${source}!`, 'success');
+            btn.disabled = false;
+        });
     });
 
     // Crawl Keyword
-    const crawlKeywordForm = document.getElementById('crawlKeywordForm');
-    if (crawlKeywordForm) {
-        crawlKeywordForm.addEventListener('submit', async (e) => {
+    document.querySelectorAll('.crawl-keyword-form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const keyword = e.target.keyword.value.trim();
-            const limit = parseInt(e.target.limit.value) || 10;
-            const fetchImages = document.getElementById('fetch_images')?.checked ? '1' : '0';
+            const source = form.getAttribute('data-source');
+            const keyword = form.keyword.value.trim();
+            const limit = parseInt(form.limit.value) || 10;
+            const btn = form.querySelector('button[type="submit"]');
             
             if (!keyword) return;
-
-            const btn = e.target.querySelector('button');
             btn.disabled = true;
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang Tìm...';
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-
-            logMessage(`Đang tìm kiếm phim với từ khóa: <b>${keyword}</b>...`, 'info');
-
-            try {
-                const pData = new FormData();
-                pData.append('action', 'crawl_keyword');
-                pData.append('keyword', keyword);
-                pData.append('limit', limit);
-                
-                const pRes = await fetch(pluginPath, { method: 'POST', body: pData });
-                const pJson = await pRes.json();
-                
-                if (pJson.status !== 'success') {
-                    logMessage(`Lỗi tìm kiếm: ${pJson.message}`, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
-                    if (typeof lucide !== 'undefined') lucide.createIcons();
-                    return;
-                }
-
-                const slugs = pJson.slugs || [];
-                logMessage(`Tìm thấy ${slugs.length} phim. Bắt đầu tải...`, 'info');
-
-                for (let i = 0; i < slugs.length; i++) {
-                    const slug = slugs[i];
-                    const mData = new FormData();
-                    mData.append('action', 'crawl_single');
-                    mData.append('slug', slug);
-                    mData.append('fetch_images', fetchImages);
-                    
-                    try {
-                        const mRes = await fetch(pluginPath, { method: 'POST', body: mData });
-                        const mJson = await mRes.json();
-                        
-                        if (mJson.status === 'success') {
-                            logMessage(`[Từ khóa - ${i+1}/${slugs.length}] Đã lưu: <b>${mJson.movie_name}</b>`, 'success');
-                        } else {
-                            logMessage(`[Từ khóa - ${i+1}/${slugs.length}] Lỗi (${slug}): ${mJson.message}`, 'error');
-                        }
-                    } catch (e) {
-                        logMessage(`[Từ khóa - ${i+1}/${slugs.length}] Lỗi mạng (${slug})`, 'error');
-                    }
-                }
-                logMessage('<b>Hoàn thành tải phim theo từ khóa!</b>', 'success');
-            } catch (err) {
-                logMessage(`Lỗi kết nối: ${err.message}`, 'error');
-            }
+            logMessage(`Đang tìm "${keyword}" trên ${source}...`, 'info');
             
+            try {
+                const fd = new FormData();
+                fd.append('action', 'crawl_keyword');
+                fd.append('source', source);
+                fd.append('keyword', keyword);
+                fd.append('limit', limit);
+                
+                const res = await fetch(pluginPath, { method: 'POST', body: fd });
+                const data = await res.json();
+                
+                if (data.status !== 'success') {
+                    logMessage(`Lỗi tìm kiếm: ${data.message}`, 'error');
+                } else {
+                    const slugs = data.slugs || [];
+                    logMessage(`Tìm thấy ${slugs.length} phim. Bắt đầu tải...`, 'info');
+                    for (let i = 0; i < slugs.length; i++) {
+                        const slug = slugs[i];
+                        const mData = new FormData();
+                        mData.append('action', 'crawl_single');
+                        mData.append('slug', slug);
+                        mData.append('fetch_images', '0');
+                        
+                        try {
+                            const mRes = await fetch(pluginPath, { method: 'POST', body: mData });
+                            const mJson = await mRes.json();
+                            if (mJson.status === 'success') {
+                                logMessage(`[Từ khóa - ${i+1}/${slugs.length}] Đã lưu: <b>${mJson.movie_name}</b>`, 'success');
+                            } else {
+                                logMessage(`[Từ khóa - ${i+1}/${slugs.length}] Lỗi (${slug}): ${mJson.message}`, 'error');
+                            }
+                        } catch (e) {
+                            logMessage(`[Từ khóa - ${i+1}/${slugs.length}] Lỗi mạng (${slug})`, 'error');
+                        }
+                    }
+                    logMessage(`Hoàn thành tải phim theo từ khóa từ ${source}!`, 'success');
+                }
+            } catch (e) {
+                logMessage(`Lỗi kết nối: ${e.message}`, 'error');
+            }
             btn.disabled = false;
-            btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Tìm & Crawl';
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    });
+
+    // Recrawl failed
+    const btnRecrawlFailed = document.getElementById('btnRecrawlFailed');
+    if (btnRecrawlFailed) {
+        btnRecrawlFailed.addEventListener('click', async () => {
+            if (failedSlugsList.length === 0) return;
+            btnRecrawlFailed.disabled = true;
+            logMessage(`Thử tải lại ${failedSlugsList.length} phim lỗi...`, 'warn');
+            
+            const slugsToProcess = [...failedSlugsList];
+            for (let i = 0; i < slugsToProcess.length; i++) {
+                const slug = slugsToProcess[i];
+                const mData = new FormData();
+                mData.append('action', 'crawl_single');
+                mData.append('slug', slug);
+                mData.append('fetch_images', '0');
+                
+                try {
+                    const mRes = await fetch(pluginPath, { method: 'POST', body: mData });
+                    const mJson = await mRes.json();
+                    
+                    if (mJson.status === 'success') {
+                        logMessage(`[Phim Lỗi - ${i+1}/${slugsToProcess.length}] Tải thành công: <b>${mJson.movie_name}</b>`, 'success');
+                        const rData = new FormData();
+                        rData.append('action', 'remove_failed_slug');
+                        rData.append('slug', slug);
+                        await fetch(pluginPath, { method: 'POST', body: rData });
+                        
+                        failedSlugsList = failedSlugsList.filter(s => s !== slug);
+                        document.getElementById('failedCount').textContent = failedSlugsList.length;
+                    } else {
+                        logMessage(`[Phim Lỗi - ${i+1}/${slugsToProcess.length}] Vẫn lỗi (${slug}): ${mJson.message}`, 'error');
+                    }
+                } catch (e) {
+                    logMessage(`[Phim Lỗi - ${i+1}/${slugsToProcess.length}] Lỗi mạng (${slug})`, 'error');
+                }
+            }
+            logMessage('Hoàn thành tải lại phim lỗi!', 'success');
+            btnRecrawlFailed.disabled = failedSlugsList.length === 0;
         });
     }
 });
 </script>
-
 </div>

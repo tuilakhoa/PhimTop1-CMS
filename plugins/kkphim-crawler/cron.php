@@ -23,21 +23,14 @@ function log_cron($msg) {
 
 log_cron("Bắt đầu chạy cron cập nhật phim (Smart Crawl - Max 10 Pages)");
 
-$crawlers = [
-    new KKPhimCrawler('kkphim'),
-    new KKPhimCrawler('nguonc'),
-    new KKPhimCrawler('vsmov')
-];
 
-$max_pages = 10;
-$max_consecutive_no_updates = 30;
-
-$repo = getMovieRepository();
-$updated = 0;
-$skipped = 0;
-
+$reqSource = isset($_GET['source']) ? $_GET['source'] : (isset($argv[1]) ? $argv[1] : 'all');
+$crawlers = [];
+$sourceNames = [];
+if ($reqSource === 'kkphim' || $reqSource === 'all') { $crawlers[] = new KKPhimCrawler('kkphim'); $sourceNames[] = 'KKPhim'; }
+if ($reqSource === 'nguonc' || $reqSource === 'all') { $crawlers[] = new KKPhimCrawler('nguonc'); $sourceNames[] = 'Nguồn C'; }
+if ($reqSource === 'vsmov' || $reqSource === 'all') { $crawlers[] = new KKPhimCrawler('vsmov'); $sourceNames[] = 'VsMov'; }
 foreach ($crawlers as $index => $crawler) {
-    $sourceNames = ['KKPhim', 'Nguồn C', 'VsMov'];
     $currentSource = $sourceNames[$index] ?? "Nguồn $index";
     log_cron("--- Bắt đầu quét nguồn: $currentSource ---");
     
