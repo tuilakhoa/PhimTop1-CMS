@@ -53,7 +53,7 @@ dependencies:
   flutter_background: any
   flutter_local_notifications: ^22.3.0
   home_widget: any
-  intl: any
+  intl: 0.20.3
   connectivity_plus: ^7.3.1
   day_night_switcher: ^0.2.0+1
   miniplayer: ^1.0.1
