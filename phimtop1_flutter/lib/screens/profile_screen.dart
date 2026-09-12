@@ -167,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text("https://phimtop1.com/donate.php", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber)),
+                            child: const Text("https://phimtop1.com/donate", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber)),
                           )
                         ],
                       ),
