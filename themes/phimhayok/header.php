@@ -215,9 +215,12 @@ if ($pdo) {
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white flex items-center transition-colors">
                         <i data-lucide="film" class="w-4 h-4 mr-1.5"></i> Phim lẻ
                     </a>
-                    <button onclick="openGlobalWatchParty()" class="text-phim-yellow hover:text-yellow-400 flex items-center transition-colors font-bold">
+                    <button onclick="openGlobalWatchParty()" class="text-[#fcc526] hover:text-yellow-400 flex items-center transition-colors font-bold">
                         <i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Xem Chung
                     </button>
+                    <a href="/donate.php" class="text-[#fcc526] hover:text-yellow-400 flex items-center transition-colors font-bold px-3 py-1.5 bg-[#fcc526]/10 rounded-lg border border-[#fcc526]/20">
+                        <i data-lucide="coffee" class="w-4 h-4 mr-1.5"></i> Ủng Hộ
+                    </a>
                     <?php do_action('theme_header_menu'); ?>
                     
                     <!-- Dropdowns -->
@@ -324,7 +327,8 @@ if ($pdo) {
                 <div class="flex flex-col space-y-3 font-medium text-gray-300">
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white block py-1">Phim Lẻ</a>
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white block py-1">Phim Bộ</a>
-                    <button onclick="openGlobalWatchParty()" class="text-phim-yellow hover:text-yellow-400 block py-1 text-left flex items-center"><i data-lucide="users" class="w-4 h-4 mr-2"></i> Xem Chung</button>
+                    <button onclick="openGlobalWatchParty()" class="text-[#fcc526] hover:text-yellow-400 block py-1 text-left flex items-center"><i data-lucide="users" class="w-4 h-4 mr-2"></i> Xem Chung</button>
+                    <a href="/donate.php" class="text-[#fcc526] hover:text-yellow-400 block py-1 font-bold flex items-center"><i data-lucide="coffee" class="w-4 h-4 mr-2"></i> Ủng Hộ PhimTop1</a>
                     
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer hover:text-white py-1 list-none [&::-webkit-details-marker]:hidden">
