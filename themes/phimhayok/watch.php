@@ -104,6 +104,23 @@ if (isset($_SESSION['user'])) {
                                 player.once('canplay', () => { player.currentTime = startTime; });
                             }
                         }
+
+                        // Thêm phím tắt tua lên và tua về
+                        document.addEventListener('keydown', function(e) {
+                            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+                            
+                            if (e.key === 'ArrowRight') {
+                                if (video && video.duration) {
+                                    video.currentTime = Math.min(video.currentTime + 10, video.duration);
+                                    e.preventDefault();
+                                }
+                            } else if (e.key === 'ArrowLeft') {
+                                if (video && video.currentTime) {
+                                    video.currentTime = Math.max(video.currentTime - 10, 0);
+                                    e.preventDefault();
+                                }
+                            }
+                        });
                     });
                 </script>
             <?php elseif (!empty($currentEp['link_embed'])): ?>
@@ -175,9 +192,9 @@ if (isset($_SESSION['user'])) {
                     </div>
                     <!-- Server tabs -->
                     <?php if (count($episodes) > 1): ?>
-                    <div class="flex flex-wrap gap-2 mb-4 border-b border-gray-800 pb-4">
+                    <div class="flex flex-nowrap overflow-x-auto gap-2 mb-4 border-b border-gray-800 pb-4 custom-scrollbar snap-x">
                         <?php foreach ($episodes as $sIdx => $server): ?>
-                            <button onclick="switchServerTab(<?= $sIdx ?>)" id="server-btn-<?= $sIdx ?>" class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors <?= $sIdx === $currentServerIndex ? 'bg-red-600 text-white shadow-md' : 'bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] border border-gray-800' ?>">
+                            <button onclick="switchServerTab(<?= $sIdx ?>)" id="server-btn-<?= $sIdx ?>" class="shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-lg transition-colors <?= $sIdx === $currentServerIndex ? 'bg-red-600 text-white shadow-md' : 'bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] border border-gray-800' ?>">
                                 <i data-lucide="server" class="w-3.5 h-3.5 inline-block mr-1"></i>
                                 <?= htmlspecialchars($server['server_name'] ?? 'Server ' . ($sIdx + 1)) ?>
                             </button>
@@ -215,11 +232,11 @@ if (isset($_SESSION['user'])) {
                             
                             const buttons = document.querySelectorAll('[id^="server-btn-"]');
                             buttons.forEach(btn => {
-                                btn.className = "px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] border border-gray-800";
+                                btn.className = "shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] border border-gray-800";
                             });
                             const activeBtn = document.getElementById('server-btn-' + index);
                             if (activeBtn) {
-                                activeBtn.className = "px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-red-600 text-white shadow-md";
+                                activeBtn.className = "shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-red-600 text-white shadow-md";
                             }
                         }
                         document.addEventListener('DOMContentLoaded', function() {
@@ -278,6 +295,146 @@ if (isset($_SESSION['user'])) {
                     </div>
                 </div>
             </div>
+
+            <!-- Comments Section -->
+            <div id="comments-section" data-slug="<?= htmlspecialchars($slug) ?>">
+                <div class="bg-[#141414] rounded-xl p-5 md:p-6 border border-gray-900">
+                    <h3 class="text-lg font-bold text-white flex items-center uppercase tracking-wider mb-5 border-b border-gray-800 pb-3">
+                        <i data-lucide="message-square" class="w-5 h-5 mr-2 text-red-600"></i> Bình luận (<span id="comment-count">0</span>)
+                    </h3>
+                    
+                    <div class="bg-[#202020] rounded-xl p-4 border border-gray-700 focus-within:border-gray-500 transition-colors shadow-inner">
+                        <input type="text" id="comment-name" class="w-full bg-transparent text-white text-sm outline-none mb-3 pb-3 border-b border-gray-800 hidden" placeholder="Nhập tên của bạn...">
+                        <textarea id="comment-content" rows="2" class="w-full bg-transparent text-white text-sm outline-none resize-none placeholder-gray-500" placeholder="Chia sẻ cảm nghĩ của bạn về bộ phim này..."></textarea>
+                        <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-800">
+                            <label class="flex items-center text-gray-400 text-sm cursor-pointer hover:text-white transition-colors select-none">
+                                <input type="checkbox" id="comment-anon" checked class="mr-2 rounded border-gray-600 bg-gray-700 text-red-600 focus:ring-red-600"> Ẩn danh
+                            </label>
+                            <button id="btn-submit-comment" class="bg-white hover:bg-gray-200 text-black font-bold px-5 py-2 rounded-lg text-sm flex items-center transition-colors shadow">
+                                Gửi <i data-lucide="send" class="w-4 h-4 ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="comments-list" class="mt-8 space-y-6">
+                        <div class="text-center text-gray-500 text-sm py-4">Đang tải bình luận...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var anonCheckbox = document.getElementById('comment-anon');
+                var nameInput = document.getElementById('comment-name');
+                var contentInput = document.getElementById('comment-content');
+                var submitBtn = document.getElementById('btn-submit-comment');
+                var commentsList = document.getElementById('comments-list');
+                var countSpan = document.getElementById('comment-count');
+                var movieSlug = '<?= htmlspecialchars($slug) ?>';
+                var currentUser = <?= json_encode($_SESSION['user']['name'] ?? '') ?>;
+                var isAdmin = <?= isset($_SESSION['admin']) ? 'true' : 'false' ?>;
+                
+                if (anonCheckbox) {
+                    anonCheckbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            nameInput.classList.add('hidden');
+                        } else {
+                            nameInput.classList.remove('hidden');
+                            nameInput.focus();
+                        }
+                    });
+                }
+                
+                window.deleteComment = function(id) {
+                    if(confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
+                        fetch('/api/comments.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({action: 'delete', id: id})
+                        })
+                        .then(res => res.json())
+                        .then(res => {
+                            if(res.success) fetchComments();
+                            else alert(res.message);
+                        });
+                    }
+                };
+                
+                function fetchComments() {
+                    fetch('/api/comments.php?slug=' + movieSlug)
+                        .then(res => res.json())
+                        .then(res => {
+                            if (res.success) {
+                                if(countSpan) countSpan.textContent = res.data.length;
+                                if (res.data.length === 0) {
+                                    if(commentsList) commentsList.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">Chưa có bình luận nào. Hãy là người đầu tiên!</div>';
+                                    return;
+                                }
+                                
+                                var html = '';
+                                res.data.forEach(c => {
+                                    var deleteBtn = '';
+                                    if (isAdmin || (currentUser && currentUser === c.user_name)) {
+                                        deleteBtn = `<button onclick="deleteComment(${c.id})" class="text-red-500 text-xs ml-3 hover:underline font-medium">Xóa</button>`;
+                                    }
+                                    
+                                    html += `
+                                        <div class="flex gap-4">
+                                            <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center shrink-0 border border-gray-700">
+                                                <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                                            </div>
+                                            <div class="flex-1 bg-[#202020] p-4 rounded-xl rounded-tl-none border border-gray-800/50">
+                                                <div class="flex items-baseline mb-2 border-b border-gray-800 pb-2">
+                                                    <span class="font-bold text-gray-200 text-sm mr-2">${c.user_name}</span>
+                                                    <span class="text-xs text-gray-500">${c.time_ago}</span>
+                                                    ${deleteBtn}
+                                                </div>
+                                                <p class="text-sm text-gray-300 leading-relaxed">${c.content}</p>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                                if(commentsList) commentsList.innerHTML = html;
+                                if(typeof lucide !== 'undefined') lucide.createIcons();
+                            }
+                        });
+                }
+                
+                if (submitBtn) {
+                    submitBtn.addEventListener('click', function() {
+                        var content = contentInput.value.trim();
+                        var isAnon = anonCheckbox.checked;
+                        var name = isAnon ? '' : nameInput.value.trim();
+                        
+                        if (!content) return alert('Vui lòng nhập nội dung bình luận!');
+                        if (!isAnon && !name) return alert('Vui lòng nhập tên của bạn!');
+                        
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = 'Đang gửi...';
+                        
+                        fetch('/api/comments.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({slug: movieSlug, name: name, content: content, anonymous: isAnon})
+                        })
+                        .then(res => res.json())
+                        .then(res => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = 'Gửi <i data-lucide="send" class="w-4 h-4 ml-2"></i>';
+                            if(typeof lucide !== 'undefined') lucide.createIcons();
+                            if (res.success) {
+                                contentInput.value = '';
+                                fetchComments();
+                            } else {
+                                alert(res.message);
+                            }
+                        });
+                    });
+                }
+                
+                fetchComments();
+            });
+            </script>
         </div>
         
         <!-- Sidebar Column (Right) -->
@@ -565,18 +722,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function reportMovieError() {
-    <?php if (!isset($_SESSION['user']) && !isset($_SESSION['admin'])): ?>
-        Swal.fire({
-            title: 'Yêu cầu đăng nhập',
-            text: 'Bạn cần đăng nhập để gửi báo lỗi!',
-            icon: 'warning',
-            background: '#111',
-            color: '#fff',
-            confirmButtonColor: '#eab308'
-        });
-        return;
-    <?php endif; ?>
-
     Swal.fire({
         title: 'Báo lỗi phim',
         html: `
