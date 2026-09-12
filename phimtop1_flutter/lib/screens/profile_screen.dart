@@ -134,7 +134,96 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+              // Nút Donate
+              GestureDetector(
+                onTap: () {
+                  // TODO: Open webview or launch URL to /donate.php
+                  // Since webview might require external packages, url_launcher is better.
+                  // For now we'll just show a dialog with the info if url_launcher is not available, or use the app's WebView/browser if available.
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      backgroundColor: dialogBg,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      title: Row(
+                        children: [
+                          const Icon(Icons.coffee, color: Colors.amber),
+                          const SizedBox(width: 8),
+                          Text("Ủng hộ PhimTop1", style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "PhimTop1 hoàn toàn miễn phí. Hãy ủng hộ chúng mình 1 ly cafe để duy trì server nhé!\n\nBạn có thể truy cập trang web để xem mã QR quét trực tiếp:",
+                            style: TextStyle(color: textColor),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text("https://phimtop1.com/donate.php", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber)),
+                          )
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text("Đóng", style: TextStyle(color: Colors.amber)),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.amber.shade700, Colors.amber.shade400],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.amber.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.coffee, color: Colors.white, size: 28),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Ủng hộ PhimTop1", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text("Mời team phát triển 1 ly cà phê nhé!", style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
               _buildMenuGroup([
                 MenuRowTile(icon: Icons.storefront, title: "Cửa hàng vật phẩm", onTap: () => context.push('/shop'), iconColor: Colors.amber, textColor: textColor, hintColor: hintColor),
                 MenuRowTile(icon: Icons.link, title: "Liên kết Google", onTap: () async {
