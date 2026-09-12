@@ -248,6 +248,11 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_settings') {
         }
     }
     
+    
+    if (isset($_POST['bankId'])) $updates['bankId'] = $_POST['bankId'];
+    if (isset($_POST['bankAccount'])) $updates['bankAccount'] = $_POST['bankAccount'];
+    if (isset($_POST['bankAccountName'])) $updates['bankAccountName'] = $_POST['bankAccountName'];
+    
     updateSettings($updates);
     $settings = getSettings();
     

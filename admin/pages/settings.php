@@ -23,6 +23,9 @@
         <button type="button" onclick="switchTab('smtp')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="smtp">
             <i data-lucide="mail" class="w-4 h-4 inline-block mr-2"></i>SMTP (Gửi Email)
         </button>
+        <button type="button" onclick="switchTab('payment')" class="tab-btn inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-tab="payment">
+            <i data-lucide="credit-card" class="w-4 h-4 inline-block mr-2"></i>Thanh Toán & Donate
+        </button>
     </nav>
 </div>
 
@@ -276,7 +279,53 @@ service cloud.firestore {
         </div>
     </div>
 
+
+    <!-- Tab Payment -->
+    <div id="tab-payment" class="tab-content hidden animate-fade-in">
+        <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-800 pb-2">Cấu Hình Ngân Hàng (Donate)</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Ngân Hàng (Mã BIN VietQR)</label>
+                <select name="bankId" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none">
+                    <option value="970436" <?= ($settings['bankId'] ?? '') == '970436' ? 'selected' : '' ?>>Vietcombank (VCB)</option>
+                    <option value="970415" <?= ($settings['bankId'] ?? '') == '970415' ? 'selected' : '' ?>>VietinBank (CTG)</option>
+                    <option value="970418" <?= ($settings['bankId'] ?? '') == '970418' ? 'selected' : '' ?>>BIDV</option>
+                    <option value="970405" <?= ($settings['bankId'] ?? '') == '970405' ? 'selected' : '' ?>>Agribank</option>
+                    <option value="970407" <?= ($settings['bankId'] ?? '') == '970407' ? 'selected' : '' ?>>Techcombank (TCB)</option>
+                    <option value="970422" <?= ($settings['bankId'] ?? '') == '970422' ? 'selected' : '' ?>>MBBank (MB)</option>
+                    <option value="970403" <?= ($settings['bankId'] ?? '') == '970403' ? 'selected' : '' ?>>Sacombank (STB)</option>
+                    <option value="970416" <?= ($settings['bankId'] ?? '') == '970416' ? 'selected' : '' ?>>ACB</option>
+                    <option value="970432" <?= ($settings['bankId'] ?? '') == '970432' ? 'selected' : '' ?>>VPBank</option>
+                    <option value="970423" <?= ($settings['bankId'] ?? '') == '970423' ? 'selected' : '' ?>>TPBank</option>
+                    <option value="970454" <?= ($settings['bankId'] ?? '') == '970454' ? 'selected' : '' ?>>VietCapitalBank</option>
+                    <option value="970425" <?= ($settings['bankId'] ?? '') == '970425' ? 'selected' : '' ?>>AnBinhBank (ABB)</option>
+                    <option value="970427" <?= ($settings['bankId'] ?? '') == '970427' ? 'selected' : '' ?>>VietABank (VAB)</option>
+                    <option value="970429" <?= ($settings['bankId'] ?? '') == '970429' ? 'selected' : '' ?>>SCB</option>
+                    <option value="970431" <?= ($settings['bankId'] ?? '') == '970431' ? 'selected' : '' ?>>Eximbank (EIB)</option>
+                    <option value="970441" <?= ($settings['bankId'] ?? '') == '970441' ? 'selected' : '' ?>>VIB</option>
+                    <option value="970443" <?= ($settings['bankId'] ?? '') == '970443' ? 'selected' : '' ?>>SHB</option>
+                    <option value="970448" <?= ($settings['bankId'] ?? '') == '970448' ? 'selected' : '' ?>>OCB</option>
+                    <option value="970449" <?= ($settings['bankId'] ?? '') == '970449' ? 'selected' : '' ?>>LienVietPostBank (LPB)</option>
+                    <option value="970428" <?= ($settings['bankId'] ?? '') == '970428' ? 'selected' : '' ?>>NamABank (NAB)</option>
+                    <option value="970414" <?= ($settings['bankId'] ?? '') == '970414' ? 'selected' : '' ?>>OceanBank</option>
+                    <option value="970409" <?= ($settings['bankId'] ?? '') == '970409' ? 'selected' : '' ?>>BacABank (BAB)</option>
+                </select>
+                <p class="text-xs text-gray-500 mt-1">Chọn ngân hàng của bạn</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Số Tài Khoản</label>
+                <input type="text" name="bankAccount" value="<?= htmlspecialchars($settings['bankAccount'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none" placeholder="VD: 0123456789">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Tên Chủ Tài Khoản</label>
+                <input type="text" name="bankAccountName" value="<?= htmlspecialchars($settings['bankAccountName'] ?? '') ?>" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none" placeholder="VD: NGUYEN VAN A">
+            </div>
+        </div>
+    </div>
+
     <div class="mt-8 pt-6 border-t border-gray-800">
+
         <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-6 rounded-lg transition-all shadow-lg shadow-red-600/20 flex items-center transform hover:-translate-y-0.5">
             <i data-lucide="save" class="w-4 h-4 mr-2"></i> Lưu Cấu Hình
         </button>

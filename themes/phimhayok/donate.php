@@ -65,10 +65,10 @@
         <?php endif; ?>
         
         const txCode = type + ' <?= $userPrefix ?>';
-        // Sử dụng VietQR API (Thay stk và bank_id bằng thông tin thật của admin)
-        const bankId = '970436'; // Vietcombank
-        const accountNo = '0123456789';
-        const accountName = 'ADMIN_PHIMTOP1';
+        // Sử dụng VietQR API
+        const bankId = '<?= $settings['bankId'] ?? '970436' ?>'; 
+        const accountNo = '<?= $settings['bankAccount'] ?? '0123456789' ?>';
+        const accountName = '<?= $settings['bankAccountName'] ?? 'ADMIN_PHIMTOP1' ?>';
         
         const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.jpg?amount=${amount}&addInfo=${encodeURIComponent(txCode)}&accountName=${accountName}`;
         
