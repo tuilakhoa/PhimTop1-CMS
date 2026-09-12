@@ -63,7 +63,10 @@ if ($user && ($user['password'] === $password || password_verify($password, $use
             'name' => $user['name'],
             'email' => $user['email'],
             'avatar' => getAbsoluteUrl($user['avatar']),
-            'active_frame' => getAbsoluteUrl($user['active_frame_url'] ?? null)
+            'active_frame' => getAbsoluteUrl($user['active_frame_url'] ?? null),
+            'is_vip' => (isset($user['is_vip']) && $user['is_vip'] == 1) ? true : false,
+            'vip_until' => $user['vip_until'] ?? null,
+            'total_donated' => $user['total_donated'] ?? 0
         ]
     ]);
 } else {

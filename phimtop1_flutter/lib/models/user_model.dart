@@ -2,17 +2,23 @@ class User {
   final String id;
   final String name;
   final String email;
-  final String? avatar;
+  final String avatar;
   final String? activeFrame;
-  int coins;
+  final int coins;
+  final bool isVip;
+  final String? vipUntil;
+  final int totalDonated;
 
   User.fromJson(Map<String, dynamic> json)
       : id = json['id']?.toString() ?? '',
         name = json['name'] ?? '',
         email = json['email'] ?? '',
-        avatar = json['avatar'],
+        avatar = json['avatar'] ?? '',
         activeFrame = json['active_frame'],
-        coins = int.tryParse(json['coins']?.toString() ?? '0') ?? 0;
+        coins = int.tryParse(json['coins']?.toString() ?? '0') ?? 0,
+        isVip = json['is_vip'] == true || json['is_vip'] == 1,
+        vipUntil = json['vip_until'],
+        totalDonated = int.tryParse(json['total_donated']?.toString() ?? '0') ?? 0;
 
   User copyWith({
     String? id,
@@ -21,6 +27,9 @@ class User {
     String? avatar,
     String? activeFrame,
     int? coins,
+    bool? isVip,
+    String? vipUntil,
+    int? totalDonated,
   }) {
     return User.fromJson({
       'id': id ?? this.id,
@@ -29,6 +38,9 @@ class User {
       'avatar': avatar ?? this.avatar,
       'active_frame': activeFrame ?? this.activeFrame,
       'coins': coins ?? this.coins,
+      'is_vip': isVip ?? this.isVip,
+      'vip_until': vipUntil ?? this.vipUntil,
+      'total_donated': totalDonated ?? this.totalDonated,
     });
   }
 }

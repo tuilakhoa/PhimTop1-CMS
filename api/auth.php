@@ -100,7 +100,10 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user'] = [
                 'email' => $user['email'],
                 'name' => $user['name'],
-                'avatar' => $user['avatar']
+                'avatar' => $user['avatar'],
+                'is_vip' => (isset($user['is_vip']) && $user['is_vip'] == 1) ? true : false,
+                'vip_until' => $user['vip_until'] ?? null,
+                'total_donated' => $user['total_donated'] ?? 0
             ];
             if (($user['role'] ?? 'user') === 'admin') {
                 $_SESSION['admin'] = $user['email'];
