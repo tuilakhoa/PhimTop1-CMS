@@ -21,7 +21,7 @@
                 <li class="flex items-start text-sm text-gray-300"><i data-lucide="check" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Không giới hạn bất cứ tính năng nào</li>
             </ul>
 
-            <button onclick="showBankQr(20000, 'Donate')" class="w-full py-3 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-xl transition-colors shadow-lg">
+            <button onclick="showBankQr(0, 'Donate')" class="w-full py-3 bg-[#fcc526] hover:bg-yellow-500 text-black font-bold rounded-xl transition-colors shadow-lg">
                 Ủng hộ ngay
             </button>
         </div>
@@ -70,13 +70,15 @@
         const accountNo = '<?= $settings['bankAccount'] ?? '0123456789' ?>';
         const accountName = '<?= $settings['bankAccountName'] ?? 'ADMIN_PHIMTOP1' ?>';
         
-        const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.jpg?amount=${amount}&addInfo=${encodeURIComponent(txCode)}&accountName=${accountName}`;
+        const qrUrl = amount > 0 
+            ? `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.jpg?amount=${amount}&addInfo=${encodeURIComponent(txCode)}&accountName=${accountName}`
+            : `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.jpg?addInfo=${encodeURIComponent(txCode)}&accountName=${accountName}`;
         
         document.getElementById('vietqr-img').src = qrUrl;
         // Cho donate tùy tâm, QR code có thể không cố định số tiền nếu không set amount, 
         // nhưng API vietqr cần amount hoặc người dùng có thể tự nhập. 
         // Mình set tạm 20k làm mặc định.
-        document.getElementById('qr-amount').innerText = 'Tùy tâm (Ví dụ: 20.000đ)';
+        document.getElementById('qr-amount').innerText = amount > 0 ? (new Intl.NumberFormat('vi-VN').format(amount) + 'đ') : 'Tùy tâm';
         document.getElementById('qr-content').innerText = txCode;
         
         const modal = document.getElementById('qr-modal');
