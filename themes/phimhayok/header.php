@@ -218,6 +218,9 @@ if ($pdo) {
                     <button onclick="openGlobalWatchParty()" class="text-[#fcc526] hover:text-yellow-400 flex items-center transition-colors font-bold">
                         <i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Xem Chung
                     </button>
+                    <a href="https://api.phimtop1.asia/cms" target="_blank" class="text-blue-400 hover:text-blue-300 flex items-center transition-colors font-bold px-3 py-1.5 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                        <i data-lucide="layers" class="w-4 h-4 mr-1.5"></i> API & CMS
+                    </a>
                     <a href="/donate" class="text-[#fcc526] hover:text-yellow-400 flex items-center transition-colors font-bold px-3 py-1.5 bg-[#fcc526]/10 rounded-lg border border-[#fcc526]/20">
                         <i data-lucide="coffee" class="w-4 h-4 mr-1.5"></i> Ủng Hộ
                     </a>
@@ -328,6 +331,7 @@ if ($pdo) {
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-white block py-1">Phim Lẻ</a>
                     <a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-white block py-1">Phim Bộ</a>
                     <button onclick="openGlobalWatchParty()" class="text-[#fcc526] hover:text-yellow-400 block py-1 text-left flex items-center"><i data-lucide="users" class="w-4 h-4 mr-2"></i> Xem Chung</button>
+                    <a href="https://api.phimtop1.asia/cms" target="_blank" class="text-blue-400 hover:text-blue-300 block py-1 font-bold flex items-center"><i data-lucide="layers" class="w-4 h-4 mr-2"></i> API & CMS</a>
                     <a href="/donate" class="text-[#fcc526] hover:text-yellow-400 block py-1 font-bold flex items-center"><i data-lucide="coffee" class="w-4 h-4 mr-2"></i> Ủng Hộ PhimTop1</a>
                     
                     <details class="group">
