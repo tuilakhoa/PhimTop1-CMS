@@ -47,8 +47,20 @@ function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category 
         else if ($slug === 'hoat-hinh') $where[] = "m.type = 'hoathinh'";
         else if ($slug === 'tv-shows') $where[] = "m.type = 'tvshows'";
     } else if ($type === 'the-loai' && $slug) {
-        $where[] = "m.categories_json LIKE ?";
+        $where[] = "(m.categories_json LIKE ? OR (m.categories_json LIKE ? AND m.categories_json NOT LIKE '%"slug"%'))";
         $params[] = '%"slug":"' . $slug . '"%';
+        // Also support NguonC format which only has name without slug
+        // Determine the category name from slug roughly
+        $pdo2 = getPDO();
+        $stmtCat = $pdo2->prepare("SELECT name FROM categories WHERE slug = ? LIMIT 1");
+        $stmtCat->execute([$slug]);
+        $catName = $stmtCat->fetchColumn();
+        if ($catName) {
+            $params[] = '%"name":"' . $catName . '"%';
+        } else {
+            // Fallback
+            $params[] = '%"name":"' . str_replace('-', ' ', $slug) . '"%';
+        }
     } else if ($type === 'quoc-gia' && $slug) {
         $where[] = "m.countries_json LIKE ?";
         $params[] = '%"slug":"' . $slug . '"%';
