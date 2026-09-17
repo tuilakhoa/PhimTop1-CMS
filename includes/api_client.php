@@ -47,8 +47,8 @@ function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category 
         else if ($slug === 'hoat-hinh') $where[] = "m.type = 'hoathinh'";
         else if ($slug === 'tv-shows') $where[] = "m.type = 'tvshows'";
     } else if ($type === 'the-loai' && $slug) {
-        $where[] = "(m.categories_json LIKE ? OR (m.categories_json LIKE ? AND m.categories_json NOT LIKE '%"slug"%'))";
-        $params[] = '%"slug":"' . $slug . '"%';
+        $where[] = "(m.categories_json LIKE ? OR (m.categories_json LIKE ? AND m.categories_json NOT LIKE '%\"slug\"%'))";
+        $params[] = '%\"slug\":"' . $slug . '"%';
         // Also support NguonC format which only has name without slug
         // Determine the category name from slug roughly
         $pdo2 = getPDO();
@@ -63,7 +63,7 @@ function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category 
         }
     } else if ($type === 'quoc-gia' && $slug) {
         $where[] = "m.countries_json LIKE ?";
-        $params[] = '%"slug":"' . $slug . '"%';
+        $params[] = '%\"slug\":"' . $slug . '"%';
     }
     
     if ($year) {
