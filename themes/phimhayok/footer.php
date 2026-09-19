@@ -300,7 +300,7 @@
 
 <!-- AI Chatbot Floating Widget -->
 <div id="ai-chatbot-container" class="fixed bottom-6 right-6 z-50 flex flex-col items-end hidden">
-    <div class="bg-[#1a1a1a] border border-gray-800 rounded-2xl shadow-2xl w-[350px] mb-4 overflow-hidden flex flex-col h-[500px] transition-all transform origin-bottom-right scale-0" id="ai-chat-window">
+    <div class="bg-[#1a1a1a] border border-gray-800 rounded-2xl shadow-2xl w-[450px] mb-4 overflow-hidden flex flex-col h-[600px] transition-all transform origin-bottom-right scale-0" id="ai-chat-window">
         <!-- Header -->
         <div class="bg-gradient-to-r from-cyan-600 to-blue-600 p-4 flex justify-between items-center text-white">
             <div class="flex items-center gap-2">
@@ -362,6 +362,15 @@ function toggleAiChat() {
     }
 }
 
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+
 async function handleAiChatSubmit(e) {
     e.preventDefault();
     const input = document.getElementById('ai-chat-input');
@@ -369,7 +378,7 @@ async function handleAiChatSubmit(e) {
     if (!msg) return;
 
     input.value = '';
-    appendChatMessage(msg, 'user');
+    appendChatMessage(escapeHtml(msg), 'user');
 
     // Show loading
     const loadingId = appendChatMessage('...', 'ai', true);
@@ -382,11 +391,8 @@ async function handleAiChatSubmit(e) {
 
         if (data.status === 'success') {
             appendChatMessage(data.reply, 'ai');
-            if (data.movies && data.movies.length > 0) {
-                appendMovieCards(data.movies);
-            }
         } else {
-            appendChatMessage("Xin lỗi, hệ thống AI đang gặp sự cố: " + (data.message || 'Unknown'), 'ai');
+            appendChatMessage("Xin lỗi, hệ thống AI đang gặp sự cố: " + escapeHtml(data.message || 'Unknown'), 'ai');
         }
     } catch (error) {
         removeChatMessage(loadingId);
@@ -406,7 +412,7 @@ function appendChatMessage(text, role, isLoading = false) {
     
     if (role === 'ai') {
         avatar = `<div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center shrink-0"><i data-lucide="bot" class="w-4 h-4 text-white"></i></div>`;
-        bubbleClass = 'bg-[#1f1f1f] border border-gray-800 rounded-2xl rounded-tl-none text-gray-300';
+        bubbleClass = 'bg-[#1f1f1f] border border-gray-800 rounded-2xl rounded-tl-none text-gray-300 w-full';
     } else {
         avatar = `<div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-white"></i></div>`;
         bubbleClass = 'bg-cyan-600 rounded-2xl rounded-tr-none text-white';
@@ -414,7 +420,7 @@ function appendChatMessage(text, role, isLoading = false) {
 
     div.innerHTML = `
         ${avatar}
-        <div class="${bubbleClass} p-3 text-sm shadow-sm max-w-[80%]">
+        <div class="${bubbleClass} p-3 text-sm shadow-sm ${role === 'user' ? 'max-w-[80%]' : 'max-w-[90%]'}">
             ${isLoading ? '<div class="flex gap-1 items-center h-5"><div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div><div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div></div>' : text}
         </div>
     `;
@@ -427,37 +433,6 @@ function appendChatMessage(text, role, isLoading = false) {
 function removeChatMessage(id) {
     const el = document.getElementById(id);
     if (el) el.remove();
-}
-
-function appendMovieCards(movies) {
-    const msgArea = document.getElementById('ai-chat-messages');
-    
-    const wrapper = document.createElement('div');
-    wrapper.className = 'flex overflow-x-auto gap-3 pb-2 custom-scrollbar snap-x';
-    
-    let html = '';
-    movies.forEach(m => {
-        html += `
-            <a href="/phim/${m.slug}" class="shrink-0 w-32 group snap-start block">
-                <div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden mb-1">
-                    <img src="${m.thumb_url}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                    ${m.tmdb_vote ? `<div class="absolute top-1 right-1 bg-yellow-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center"><i data-lucide="star" class="w-2.5 h-2.5 mr-0.5"></i>${m.tmdb_vote}</div>` : ''}
-                </div>
-                <h4 class="text-white text-xs font-medium truncate">${m.name}</h4>
-                <p class="text-gray-400 text-[10px] truncate">${m.year || ''}</p>
-            </a>
-        `;
-    });
-    wrapper.innerHTML = html;
-    
-    const div = document.createElement('div');
-    div.className = 'flex gap-2 pl-10'; // align with ai bubble
-    div.appendChild(wrapper);
-    
-    msgArea.appendChild(div);
-    if(window.lucide) window.lucide.createIcons();
-    msgArea.scrollTo({ top: msgArea.scrollHeight, behavior: 'smooth' });
 }
 
 // Show AI button on load

@@ -1,0 +1,59 @@
+--- /home/khoa/PhimTop1-CMS/api/v1/ai_chat.php
++++ /home/khoa/PhimTop1-CMS/api/v1/ai_chat.php
+@@ -107,15 +107,24 @@
+     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+     
+     $reply = "";
++    $isApp = isset($_GET['is_app']) && $_GET['is_app'] == 1;
++    
+     if (count($results) > 0) {
+-        $reply = "<p>Dạ, em tìm thấy <b>" . count($results) . " phim</b> ";
++        $reply = $isApp ? "Dạ, em tìm thấy " . count($results) . " phim " : "<p>Dạ, em tìm thấy <b>" . count($results) . " phim</b> ";
+         if ($category) $reply .= mb_convert_case($category, MB_CASE_TITLE, "UTF-8") . " ";
+         if ($country) $reply .= "của " . mb_convert_case($country, MB_CASE_TITLE, "UTF-8") . " ";
+         if ($year) $reply .= "năm $year ";
+         if ($isTopRated) $reply .= "có điểm đánh giá cao ";
+         if ($isNewest) $reply .= "mới nhất ";
+-        if ($searchKeyword) $reply .= "liên quan tới \"<b>$searchKeyword</b>\" ";
+-        $reply .= "cho anh/chị đây ạ:</p>";
++        
++        if ($searchKeyword) {
++            $reply .= $isApp ? "liên quan tới \"$searchKeyword\" " : "liên quan tới \"<b>$searchKeyword</b>\" ";
++        }
++        $reply .= $isApp ? "cho anh/chị đây ạ:\n\n" : "cho anh/chị đây ạ:</p>";
+         
+-        $reply .= "<div style='display:flex; flex-direction:column; gap:10px; margin-top:10px;'>";
++        if (!$isApp) {
++            $reply .= "<div style='display:flex; flex-direction:column; gap:10px; margin-top:10px;'>";
++        }
++        
+         foreach ($results as $m) {
+             $actors = isset($m['actors_json']) ? implode(", ", json_decode($m['actors_json'], true) ?? []) : 'Đang cập nhật';
+             if(empty($actors)) $actors = 'Đang cập nhật';
+@@ -123,11 +132,19 @@
+             
+             $content = !empty($m['content']) ? mb_strimwidth(strip_tags($m['content']), 0, 150, "...") : 'Đang cập nhật';
+             
+-            $reply .= "<div style='background:#111; padding:10px; border-radius:8px; border:1px solid #333;'>";
+-            $reply .= "<h4 style='margin:0; color:#06b6d4;'><a href='/phim/{$m['slug']}' target='_blank' style='color:#06b6d4; text-decoration:none;'>{$m['name']} ({$m['year']})</a></h4>";
+-            $reply .= "<p style='margin:5px 0 0 0; font-size:12px; color:#aaa;'>⭐ <b>$vote</b> | 🎭 <b>Diễn viên:</b> $actors</p>";
+-            $reply .= "<p style='margin:5px 0 0 0; font-size:12px; color:#888;'>$content</p>";
+-            $reply .= "<div style='margin-top:8px;'><a href='/phim/{$m['slug']}' target='_blank' style='display:inline-block; padding:4px 12px; background:#06b6d4; color:#fff; border-radius:4px; font-size:12px; text-decoration:none;'>▶ Xem phim ngay</a></div>";
+-            $reply .= "</div>";
++            if ($isApp) {
++                $reply .= "• {$m['name']} ({$m['year']})\n  ⭐ $vote | 🎭 Diễn viên: $actors\n  Nội dung: $content\n\n";
++            } else {
++                $reply .= "<div style='background:#111; padding:10px; border-radius:8px; border:1px solid #333;'>";
++                $reply .= "<h4 style='margin:0; color:#06b6d4;'><a href='/phim/{$m['slug']}' target='_blank' style='color:#06b6d4; text-decoration:none;'>{$m['name']} ({$m['year']})</a></h4>";
++                $reply .= "<p style='margin:5px 0 0 0; font-size:12px; color:#aaa;'>⭐ <b>$vote</b> | 🎭 <b>Diễn viên:</b> $actors</p>";
++                $reply .= "<p style='margin:5px 0 0 0; font-size:12px; color:#888;'>$content</p>";
++                $reply .= "<div style='margin-top:8px;'><a href='/phim/{$m['slug']}' target='_blank' style='display:inline-block; padding:4px 12px; background:#06b6d4; color:#fff; border-radius:4px; font-size:12px; text-decoration:none;'>▶ Xem phim ngay</a></div>";
++                $reply .= "</div>";
++            }
+         }
+-        $reply .= "</div>";
++        
++        if (!$isApp) {
++            $reply .= "</div>";
++        }
+ 

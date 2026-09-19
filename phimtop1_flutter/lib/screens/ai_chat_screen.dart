@@ -40,7 +40,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
     _scrollToBottom();
 
     try {
-      final response = await _dio.get('api/v1/ai_chat.php', queryParameters: {'q': text});
+      final response = await _dio.get('api/v1/ai_chat.php', queryParameters: {'q': text, 'is_app': '1'});
       final data = response.data;
       
       setState(() {
