@@ -48,7 +48,7 @@ class AuthProvider with ChangeNotifier {
     try {
       final coins = await cmsApi.getCoins(token!);
       if (coins != null) {
-        user!.coins = coins;
+        user = user!.copyWith(coins: coins);
         notifyListeners();
       }
     } catch (e) {}
