@@ -57,11 +57,31 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
   final TextEditingController _episodeSearchController = TextEditingController();
   String _episodeSearchQuery = "";
   bool _isContentExpanded = false;
+  StreamSubscription? _completedSub;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    
+    _completedSub = _player.stream.completed.listen((completed) {
+      if (!mounted || !completed) return;
+      final provider = context.read<DetailProvider>();
+      if (provider.episodes.isNotEmpty) {
+        final serverData = provider.episodes[provider.currentServerIndex].serverData;
+        if (provider.currentEpisodeIndex < serverData.length - 1) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Tự động phát tập ${serverData[provider.currentEpisodeIndex + 1].name}'), 
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          provider.changeEpisode(provider.currentEpisodeIndex + 1, provider.currentServerIndex);
+          _watchMovie(provider);
+        }
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<DetailProvider>();
       final token = context.read<AuthProvider>().token;
@@ -80,6 +100,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _historySyncTimer?.cancel();
+    _completedSub?.cancel();
     if (_videoController != null && _isPlayingInline) {
       final token = context.read<AuthProvider>().token;
       if (token != null) {

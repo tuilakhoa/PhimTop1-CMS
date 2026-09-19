@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'tv_dashboard_screen.dart';
@@ -41,22 +42,33 @@ class MainScreen extends StatelessWidget {
     }
 
     return Scaffold(
+      extendBody: true, // Allow content to scroll behind the bottom nav bar
       body: child,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 0.5)),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _calculateSelectedIndex(context) > 4 ? 0 : _calculateSelectedIndex(context),
-          onTap: (int index) => _onItemTapped(index, context),
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
-            BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: 'BXH'),
-            BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Khám phá'),
-            BottomNavigationBarItem(icon: Icon(Icons.animation), label: 'Hoạt hình'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
-          ],
+      bottomNavigationBar: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
+              border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1), width: 0.5)),
+            ),
+            child: BottomNavigationBar(
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              currentIndex: _calculateSelectedIndex(context) > 4 ? 0 : _calculateSelectedIndex(context),
+              onTap: (int index) => _onItemTapped(index, context),
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: Colors.amber,
+              unselectedItemColor: Colors.white54,
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
+                BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: 'BXH'),
+                BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Khám phá'),
+                BottomNavigationBarItem(icon: Icon(Icons.animation), label: 'Hoạt hình'),
+                BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
+              ],
+            ),
+          ),
         ),
       ),
     );
