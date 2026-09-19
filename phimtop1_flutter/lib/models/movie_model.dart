@@ -35,7 +35,7 @@ class MovieItem {
         posterUrl = json['poster_url'],
         year = int.tryParse(json['year']?.toString() ?? ''),
         view = int.tryParse(json['view']?.toString() ?? '0'),
-        category = (json['category'] as List?)?.map((e) => CategoryDto.fromJson(e)).toList();
+        category = json['category'] is List ? (json['category'] as List).map((e) => CategoryDto.fromJson(e)).toList() : [];
 }
 
 class MovieDetailData {
@@ -48,9 +48,9 @@ class MovieDetailData {
   MovieDetailData.fromJson(Map<String, dynamic> json)
       : domain = json['domain'] ?? '',
         movie = json['movie'] != null ? MovieDetail.fromJson(json['movie']) : null,
-        episodes = (json['episodes'] as List?)?.map((e) => Episode.fromJson(e)).toList(),
+        episodes = json['episodes'] is List ? (json['episodes'] as List).map((e) => Episode.fromJson(e)).toList() : [],
         images = json['images'] != null ? MovieImages.fromJson(json['images']) : null,
-        peoples = (json['peoples'] as List?)?.map((e) => PersonItem.fromJson(e)).toList();
+        peoples = json['peoples'] is List ? (json['peoples'] as List).map((e) => PersonItem.fromJson(e)).toList() : [];
 }
 
 class PersonItem {
@@ -86,7 +86,7 @@ class MovieDetail {
         posterUrl = json['poster_url'],
         year = int.tryParse(json['year']?.toString() ?? ''),
         content = json['content'],
-        actor = (json['actor'] as List?)?.map((e) => e.toString()).toList(),
+        actor = json['actor'] is List ? (json['actor'] as List).map((e) => e.toString()).toList() : (json['actor'] != null && json['actor'].toString().isNotEmpty ? [json['actor'].toString()] : []),
         time = json['time'],
         episodeCurrent = json['episode_current'];
 }
@@ -113,7 +113,7 @@ class Episode {
 
   Episode.fromJson(Map<String, dynamic> json)
       : serverName = json['server_name'] ?? '',
-        serverData = (json['server_data'] as List?)?.map((e) => ServerData.fromJson(e)).toList() ?? [];
+        serverData = json['server_data'] is List ? (json['server_data'] as List).map((e) => ServerData.fromJson(e)).toList() : [];
 }
 
 class ServerData {
