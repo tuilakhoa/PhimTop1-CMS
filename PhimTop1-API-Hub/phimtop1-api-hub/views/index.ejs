@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhimTop1 API - Nguồn Phim Miễn Phí</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #0f1115; color: #a1a1aa; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .card { background-color: #181a1f; border: 1px solid #272a30; }
+        .highlight { color: #f43f5e; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navbar -->
+    <nav class="border-b border-[#272a30] bg-[#121418] px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-6">
+            <div class="text-2xl font-black text-white flex items-center gap-2">
+                <i data-lucide="clapperboard" class="text-rose-500 w-8 h-8"></i>
+                PhimTop1<span class="text-rose-500">API</span>
+            </div>
+            <div class="hidden md:flex gap-6 font-medium text-sm text-gray-300 ml-4">
+                <a href="#" class="hover:text-white transition">Thể Loại</a>
+                <a href="#" class="hover:text-white transition">Quốc Gia</a>
+                <a href="#" class="hover:text-white transition">Tài liệu API</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative hidden sm:block">
+                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500"></i>
+                <input type="text" placeholder="Tìm kiếm phim..." class="bg-[#181a1f] border border-[#272a30] text-sm rounded-full pl-9 pr-4 py-2 text-white focus:outline-none focus:border-rose-500 w-64">
+            </div>
+            <button class="bg-[#181a1f] hover:bg-[#272a30] border border-[#272a30] text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition">
+                <i data-lucide="message-square" class="w-4 h-4"></i> Yêu cầu phim
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <!-- Card 1 -->
+            <div class="card p-6 rounded-2xl relative overflow-hidden group hover:border-gray-600 transition">
+                <div class="absolute right-0 top-0 opacity-5 group-hover:opacity-10 transition">
+                    <i data-lucide="database" class="w-48 h-48 -mt-8 -mr-8"></i>
+                </div>
+                <div class="flex items-center gap-2 text-rose-500 font-bold text-sm mb-3">
+                    <i data-lucide="film" class="w-4 h-4"></i> KHO PHIM KHỔNG LỒ
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Hàng chục ngàn bộ phim</h2>
+                <p class="text-sm text-gray-400 mb-6">Cập nhật liên tục từ bom tấn mới ra rạp đến series kinh điển, tổng hợp từ nhiều nguồn uy tín.</p>
+                <div class="flex gap-4">
+                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> Hôm nay: <span class="text-white font-bold">~200</span></div>
+                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-rose-500"></div> Tổng: <span class="text-white font-bold"><%= totalMovies.toLocaleString() %></span></div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card p-6 rounded-2xl relative overflow-hidden group hover:border-gray-600 transition">
+                <div class="absolute right-0 top-0 opacity-5 group-hover:opacity-10 transition">
+                    <i data-lucide="zap" class="w-48 h-48 -mt-8 -mr-8"></i>
+                </div>
+                <div class="flex items-center gap-2 text-blue-400 font-bold text-sm mb-3">
+                    <i data-lucide="server" class="w-4 h-4"></i> API & CRAWLER
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Tiết kiệm tối đa cho Webmaster</h2>
+                <p class="text-sm text-gray-400 mb-6">Không cần tốn tài nguyên cào phim, tích hợp API RESTful chuẩn Ophim dễ dàng chỉ trong 5 phút.</p>
+                <div class="flex gap-3">
+                    <span class="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-xs font-bold border border-indigo-500/20">API RESTful</span>
+                    <span class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-xs font-bold border border-green-500/20">100% Miễn Phí</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Latest Movies List -->
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="clock" class="w-5 h-5 text-rose-500"></i> VỪA CẬP NHẬT
+        </h3>
+        <div class="card rounded-xl overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs uppercase bg-[#121418] text-gray-400 border-b border-[#272a30]">
+                    <tr>
+                        <th class="px-6 py-4">Thông tin</th>
+                        <th class="px-6 py-4">Năm</th>
+                        <th class="px-6 py-4">Tình trạng</th>
+                        <th class="px-6 py-4">Định dạng</th>
+                        <th class="px-6 py-4">Cập nhật</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(recentMovies && recentMovies.length > 0) { %>
+                        <% recentMovies.forEach(movie => { %>
+                            <tr class="border-b border-[#272a30] hover:bg-white/5 transition">
+                                <td class="px-6 py-4 flex items-center gap-4">
+                                    <img src="<%= movie.thumb_url || 'https://via.placeholder.com/50x75' %>" class="w-12 h-16 object-cover rounded shadow-lg" alt="<%= movie.name %>">
+                                    <div>
+                                        <div class="font-bold text-white text-base hover:text-rose-400 cursor-pointer transition"><%= movie.name %></div>
+                                        <div class="text-xs text-gray-500"><%= movie.origin_name || movie.slug %></div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4"><%= movie.year || 'N/A' %></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs border border-green-500/30 text-green-400 bg-green-500/10"><%= movie.status || 'Hoàn tất' %></span></td>
+                                <td class="px-6 py-4"><%= movie.type === 'series' ? 'Phim Bộ' : 'Phim Lẻ' %></td>
+                                <td class="px-6 py-4 text-rose-400 font-mono text-xs"><%= new Date(movie.modified || Date.now()).toLocaleString() %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">Chưa có dữ liệu phim nào. Hãy cấu hình Database.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="border-t border-[#272a30] mt-12 py-8 text-center text-sm">
+        &copy; 2026 PhimTop1 API Hub. Built with Node.js
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

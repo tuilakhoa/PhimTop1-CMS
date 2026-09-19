@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Tài Liệu API - PhimTop1 API</title>
+    <meta name="description" content="Hướng dẫn sử dụng PhimTop1 API. Cung cấp API miễn phí trả về dữ liệu định dạng JSON và XML giúp các Webmaster cập nhật kho phim tự động.">
+    <meta name="keywords" content="tài liệu api phim, hướng dẫn api phim, api phim json, api phim xml, documentation phimtop1">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://api.phimtop1.asia/api-document">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Tài Liệu API - PhimTop1 API">
+    <meta property="og:description" content="Hướng dẫn sử dụng PhimTop1 API. Cung cấp API phim định dạng JSON/XML miễn phí.">
+    <meta property="og:url" content="https://api.phimtop1.asia/api-document">
+    <meta property="og:site_name" content="PhimTop1 API">
+
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #121418; color: #a1a1aa; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+        .bg-card { background-color: #181a20; }
+        .border-card { border-color: #272a30; }
+        .text-kk-red { color: #f43f5e; }
+        .bg-kk-red { background-color: #f43f5e; }
+        .text-kk-blue { color: #38bdf8; }
+        .section-title { border-left: 4px solid #f43f5e; padding-left: 10px; font-weight: bold; color: white; font-size: 1.25rem; margin-bottom: 1.5rem; }
+        pre { background-color: #0b0c0f !important; border: 1px solid #272a30; border-radius: 8px; padding: 1rem; overflow-x: auto; color: #d1d5db; font-family: monospace; font-size: 13px; }
+        .endpoint-badge { background-color: #f43f5e; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; font-family: monospace; }
+        .endpoint-url { font-family: monospace; color: #38bdf8; background-color: #1e2128; padding: 2px 8px; border-radius: 4px; font-size: 14px; }
+    </style>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+    <meta name="msvalidate.01" content="3272BDE866C77FFFE8499EB05F224A6B" />
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="border-b border-card bg-[#0b0c0f] sticky top-0 z-50">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-2">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center gap-6">
+                    <a href="/" class="flex items-center gap-2 font-black text-2xl tracking-tighter hover:opacity-80 transition">
+                        <i data-lucide="clapperboard" class="w-7 h-7 text-orange-500"></i>
+                        <span class="text-orange-500">PhimTop1<span class="text-kk-blue">API</span></span>
+                    </a>
+                    <nav class="hidden md:flex items-center gap-6 text-sm font-bold text-gray-300 ml-4">
+                        <div class="relative group">
+                            <a href="#" class="hover:text-white transition py-4 flex items-center gap-1">Thể Loại <i data-lucide="chevron-down" class="w-3 h-3"></i></a>
+                            <div class="absolute left-0 top-full -mt-2 w-[600px] bg-[#111319]/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-5 grid grid-cols-4 gap-x-2 gap-y-1.5 max-h-[65vh] overflow-y-auto custom-scrollbar">
+                                <% if(locals.globalGenres) { 
+                                    const sorted = [...globalGenres].sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+                                    sorted.forEach(g => { %>
+                                    <a href="/the-loai/<%= g.slug %>" class="text-gray-400 hover:text-white hover:bg-white/10 text-[13px] py-2 px-3 rounded-lg transition-all capitalize truncate font-medium"><%= g.name %></a>
+                                <% }) } %>
+                            </div>
+                        </div>
+                        <div class="relative group">
+                            <a href="#" class="hover:text-white transition py-4 flex items-center gap-1">Quốc Gia <i data-lucide="chevron-down" class="w-3 h-3"></i></a>
+                            <div class="absolute left-0 top-full -mt-2 w-[600px] bg-[#111319]/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-5 grid grid-cols-4 gap-x-2 gap-y-1.5 max-h-[65vh] overflow-y-auto custom-scrollbar">
+                                <% if(locals.globalCountries) { 
+                                    const sorted = [...globalCountries].sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+                                    sorted.forEach(c => { %>
+                                    <a href="/quoc-gia/<%= c.slug %>" class="text-gray-400 hover:text-white hover:bg-white/10 text-[13px] py-2 px-3 rounded-lg transition-all capitalize truncate font-medium"><%= c.name %></a>
+                                <% }) } %>
+                            </div>
+                        </div>
+                        <div class="relative group">
+                            <a href="#" class="hover:text-white transition py-4 flex items-center gap-1">Danh Sách <i data-lucide="chevron-down" class="w-3 h-3"></i></a>
+                            <div class="absolute left-0 top-full -mt-2 w-48 bg-[#181a20] border border-[#272a30] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col p-2">
+                                <a href="/danh-sach/phim-le" class="text-gray-400 hover:text-white hover:bg-gray-800 text-sm py-2 px-3 rounded transition">Phim Lẻ</a>
+                                <a href="/danh-sach/phim-bo" class="text-gray-400 hover:text-white hover:bg-gray-800 text-sm py-2 px-3 rounded transition">Phim Bộ</a>
+                                <a href="/danh-sach/hoat-hinh" class="text-gray-400 hover:text-white hover:bg-gray-800 text-sm py-2 px-3 rounded transition">Hoạt Hình</a>
+                                <a href="/danh-sach/tvshows" class="text-gray-400 hover:text-white hover:bg-gray-800 text-sm py-2 px-3 rounded transition">TV Shows</a>
+                            </div>
+                        </div>
+                        <a href="/api-document" class="hover:text-white transition py-4 flex items-center gap-1 ml-4 border-l border-gray-800 pl-6 text-kk-blue">
+                            <i data-lucide="book-open" class="w-4 h-4"></i> Tài liệu API
+                        </a>
+                        <a href="/cms" class="hover:text-white transition py-4 flex items-center gap-1 text-kk-red">
+                            <i data-lucide="download" class="w-4 h-4"></i> Tải CMS
+                        </a>
+                    </nav>
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-400 hover:text-white">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="hidden lg:flex items-center gap-4">
+                    <form action="/search" method="GET" class="relative">
+                        <input type="text" name="keyword" placeholder="Tìm kiếm phim..." value="" class="bg-[#1e2128] border border-gray-700 text-sm rounded-md pl-9 pr-4 py-1.5 text-white focus:outline-none focus:border-gray-500 w-56">
+                        <button type="submit" class="absolute left-3 top-2"><i data-lucide="search" class="w-4 h-4 text-gray-500"></i></button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="flex lg:hidden mt-2 pb-2">
+                <form action="/search" method="GET" class="relative w-full">
+                    <input type="text" name="keyword" placeholder="Tìm kiếm phim..." value="" class="w-full bg-[#1e2128] border border-gray-700 text-sm rounded-md pl-9 pr-4 py-2 text-white focus:outline-none focus:border-gray-500">
+                    <button type="submit" class="absolute left-3 top-2.5"><i data-lucide="search" class="w-4 h-4 text-gray-500"></i></button>
+                </form>
+            </div>
+        </div>
+    
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-[#0b0c0f] border-b border-[#272a30] p-4 shadow-2xl z-50 overflow-y-auto max-h-[80vh]">
+            
+            <a href="/api-document" class="flex items-center gap-2 font-bold text-white mb-4 bg-[#181a20] p-3 rounded-lg border border-gray-800 transition active:bg-gray-800">
+                <i data-lucide="file-code" class="w-5 h-5 text-kk-red"></i> Tài liệu API
+            </a>
+            
+            <div class="mb-4">
+                <button onclick="document.getElementById('mobile-genre-list').classList.toggle('hidden')" class="w-full font-bold text-gray-300 flex items-center justify-between uppercase text-xs tracking-wider bg-[#181a20] p-3 rounded-lg border border-gray-800 transition active:bg-gray-800">
+                    <span class="flex items-center gap-2"><i data-lucide="film" class="w-4 h-4 text-kk-blue"></i> Thể Loại</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </button>
+                <div id="mobile-genre-list" class="hidden grid grid-cols-2 gap-3 p-4 mt-2 bg-[#0b0c0f] rounded-lg border border-[#272a30] max-h-[300px] overflow-y-auto custom-scrollbar">
+                    <% if(locals.globalGenres) { 
+                            const sorted = [...globalGenres].sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+                            sorted.forEach(g => { %>
+                        <a href="/the-loai/<%= g.slug %>" class="text-gray-400 text-[13px] hover:text-white truncate capitalize"><%= g.name %></a>
+                    <% }) } %>
+                </div>
+            </div>
+            
+            <div class="mb-2">
+                <button onclick="document.getElementById('mobile-list-list').classList.toggle('hidden')" class="w-full font-bold text-gray-300 flex items-center justify-between uppercase text-xs tracking-wider bg-[#181a20] p-3 rounded-lg border border-gray-800 transition active:bg-gray-800">
+                    <span class="flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-orange-400"></i> Danh Sách</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </button>
+                <div id="mobile-list-list" class="hidden flex flex-col gap-3 p-4 mt-2 bg-[#0b0c0f] rounded-lg border border-[#272a30]">
+                    <a href="/danh-sach/series" class="text-gray-400 text-[13px] hover:text-white">Phim Bộ</a>
+                    <a href="/danh-sach/single" class="text-gray-400 text-[13px] hover:text-white">Phim Lẻ</a>
+                    <a href="/danh-sach/hoathinh" class="text-gray-400 text-[13px] hover:text-white">Hoạt Hình</a>
+                    <a href="/danh-sach/tvshows" class="text-gray-400 text-[13px] hover:text-white">TV Shows</a>
+                </div>
+            </div>
+            <div class="mb-2">
+                <button onclick="document.getElementById('mobile-country-list').classList.toggle('hidden')" class="w-full font-bold text-gray-300 flex items-center justify-between uppercase text-xs tracking-wider bg-[#181a20] p-3 rounded-lg border border-gray-800 transition active:bg-gray-800">
+                    <span class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4 text-purple-400"></i> Quốc Gia</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </button>
+                <div id="mobile-country-list" class="hidden grid grid-cols-2 gap-3 p-4 mt-2 bg-[#0b0c0f] rounded-lg border border-[#272a30] max-h-[300px] overflow-y-auto custom-scrollbar">
+                    <% if(locals.globalCountries) { 
+                            const sorted = [...globalCountries].sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+                            sorted.forEach(c => { %>
+                        <a href="/quoc-gia/<%= c.slug %>" class="text-gray-400 text-[13px] hover:text-white truncate capitalize"><%= c.name %></a>
+                    <% }) } %>
+                </div>
+            </div>
+            
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-[1440px] mx-auto px-4 sm:px-6 py-10 w-full flex flex-col md:flex-row gap-8">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 shrink-0 hidden md:block">
+        <div class="sticky top-[90px] bg-card border border-card rounded-xl p-4">
+            <h3 class="font-bold mb-3 px-3 uppercase text-[11px] tracking-wider text-gray-400">Mục lục API</h3>
+            <ul class="space-y-1 flex flex-col">
+                <li><a href="#api-intro" class="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-[#2b313d] rounded-lg transition-colors"><i data-lucide="book" class="w-4 h-4 inline-block align-text-bottom mr-2"></i> Giới thiệu</a></li>
+                <li><a href="#api-list" class="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-[#2b313d] rounded-lg transition-colors"><i data-lucide="list" class="w-4 h-4 inline-block align-text-bottom mr-2"></i> Danh Sách Phim Mới</a></li>
+                <li><a href="#api-detail" class="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-[#2b313d] rounded-lg transition-colors"><i data-lucide="info" class="w-4 h-4 inline-block align-text-bottom mr-2"></i> Chi Tiết Phim</a></li>
+                <li><a href="#api-genre" class="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-[#2b313d] rounded-lg transition-colors"><i data-lucide="tags" class="w-4 h-4 inline-block align-text-bottom mr-2"></i> Thể Loại Phim</a></li>
+                <li><a href="#api-country" class="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-[#2b313d] rounded-lg transition-colors"><i data-lucide="globe-2" class="w-4 h-4 inline-block align-text-bottom mr-2"></i> Quốc Gia Phim</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+        
+        <div id="api-intro" class="bg-card border border-card rounded-xl p-6 md:p-10 mb-8 scroll-mt-[90px]">
+            <div class="section-title">Giới thiệu API PhimTop1</div>
+            <p class="text-gray-400 leading-relaxed mb-4">
+                Chào mừng bạn đến với tài liệu API của PhimTop1. Chúng tôi cung cấp API miễn phí (RESTful) trả về dữ liệu định dạng JSON và XML, giúp các Webmaster dễ dàng tích hợp và cập nhật kho phim tự động vào website của mình.
+            </p>
+            <div class="flex items-center gap-3 bg-[#0b0c0f] p-4 rounded border border-[#272a30]">
+                <i data-lucide="globe" class="text-blue-400 w-5 h-5"></i>
+                <span class="text-gray-300 font-bold">Base URL:</span>
+                <span class="endpoint-url">https://api.phimtop1.asia</span>
+            </div>
+        </div>
+
+        <div id="api-list" class="bg-card border border-card rounded-xl p-6 md:p-10 mb-8 scroll-mt-[90px]">
+            <div class="section-title flex items-center gap-3">
+                1. API Lấy Danh Sách Phim Mới <span class="endpoint-badge">GET</span>
+            </div>
+            <p class="text-gray-400 mb-4">Endpoint này trả về danh sách các bộ phim được cập nhật mới nhất trên hệ thống, có hỗ trợ phân trang.</p>
+            
+            <div class="flex items-center gap-3 mb-6">
+                <span class="endpoint-url w-full">/api/danh-sach?page=1</span>
+            </div>
+
+            <h3 class="text-white font-bold mb-2">Query Parameters:</h3>
+            <table class="w-full text-sm text-left mb-6 border border-[#272a30]">
+                <thead class="bg-[#0b0c0f] border-b border-[#272a30] text-gray-300">
+                    <tr>
+                        <th class="px-4 py-2">Tham số</th>
+                        <th class="px-4 py-2">Kiểu</th>
+                        <th class="px-4 py-2">Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-400">
+                    <tr>
+                        <td class="px-4 py-2 border-b border-[#272a30] font-mono">page</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">Integer</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">Số trang cần lấy (Mặc định: 1)</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 border-b border-[#272a30] font-mono text-kk-blue">format</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">String</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">Định dạng trả về: <b>json</b> (mặc định) hoặc <b>xml</b></td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 border-b border-[#272a30] font-mono">type</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">String</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">Lọc theo định dạng (VD: series, single, hoathinh, tvshows)</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 border-b border-[#272a30] font-mono">category</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">String</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">Lọc theo slug thể loại (VD: hanh-dong)</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 border-b border-[#272a30] font-mono">country</td>
+                        <td class="px-4 py-2">String</td>
+                        <td class="px-4 py-2">Lọc theo slug quốc gia (VD: han-quoc)</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 border-b border-[#272a30] font-mono">actor</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">String</td>
+                        <td class="px-4 py-2 border-b border-[#272a30]">Lọc theo tên diễn viên (VD: chau-tinh-tri)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="text-white font-bold mb-2">Cấu trúc JSON trả về (Response):</h3>
+            <div class="bg-[#0b0c0f] border border-[#272a30] rounded-xl p-4 mb-8 overflow-x-auto custom-scrollbar">
+            <pre><code>{
+  "status": true,
+  "data": {
+    "items": [
+      {
+        "name": "Tên Phim",
+        "slug": "ten-phim",
+        "year": 2026,
+        "origin_name": "Original Name",
+        "status": "completed",
+        "type": "series",
+        "thumb_url": "https://...",
+        "episode_current": "Hoàn Tất (24/24)",
+        "modified": "2026-09-12T12:00:00Z"
+      }
+    ],
+    "pagination": {
+      "totalItems": 10500,
+      "totalItemsPerPage": 24,
+      "currentPage": 1,
+      "totalPages": 438
+    }
+  }
+}</code></pre>
+            </div>
+            <h3 class="text-white font-bold mt-8 mb-4">Code mẫu tích hợp (Lấy Danh Sách):</h3>
+            <div class="bg-card border border-[#272a30] rounded-xl overflow-hidden shadow-lg mb-4">
+                <div class="flex overflow-x-auto border-b border-[#272a30] bg-[#0b0c0f] hide-scrollbar">
+                    <button onclick="switchTab(event, 'list', 'bash')" class="tab-list-btn px-4 py-2.5 text-sm font-bold text-white border-b-2 border-kk-red whitespace-nowrap">cURL</button>
+                    <button onclick="switchTab(event, 'list', 'nodejs')" class="tab-list-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">Node.js</button>
+                    <button onclick="switchTab(event, 'list', 'php')" class="tab-list-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">PHP (JSON)</button>
+                    <button onclick="switchTab(event, 'list', 'php-xml')" class="tab-list-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">PHP (XML)</button>
+                    <button onclick="switchTab(event, 'list', 'python')" class="tab-list-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">Python</button>
+                    <button onclick="switchTab(event, 'list', 'go')" class="tab-list-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">Go</button>
+                </div>
+                <div class="p-4 bg-[#181a20]">
+                    <div id="tab-list-bash" class="tab-list-content block">
+                        <pre><code>curl --request GET   --url 'https://api.phimtop1.asia/api/danh-sach?page=1'   --header 'Accept: application/json'</code></pre>
+                    </div>
+                    <div id="tab-list-nodejs" class="tab-list-content hidden">
+                        <pre><code>const axios = require('axios');
+
+axios.get('https://api.phimtop1.asia/api/danh-sach', { params: { page: 1 } })
+  .then(response => console.log(response.data))
+  .catch(error => console.error(error));</code></pre>
+                    </div>
+                    <div id="tab-list-php" class="tab-list-content hidden">
+                        <pre><code>&lt;?php
+ = "https://api.phimtop1.asia/api/danh-sach?page=1";
+ = file_get_contents();
+ = json_decode(, true);
+print_r();
+?&gt;</code></pre>
+                    </div>
+                    <div id="tab-list-php-xml" class="tab-list-content hidden">
+                        <pre><code>&lt;?php
+$url = "https://api.phimtop1.asia/api/danh-sach?page=1&format=xml";
+$response = file_get_contents($url);
+// Parse XML thành Object
+$xml = simplexml_load_string($response);
+print_r($xml);
+?&gt;</code></pre>
+                    </div>
+                    
+                    <div id="tab-list-python" class="tab-list-content hidden">
+                        <pre><code>import requests
+
+url = "https://api.phimtop1.asia/api/danh-sach"
+querystring = {"page": "1"}
+response = requests.get(url, params=querystring)
+print(response.json())</code></pre>
+                    </div>
+                    <div id="tab-list-go" class="tab-list-content hidden">
+                        <pre><code>package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+)
+
+func main() {
+	res, _ := http.Get("https://api.phimtop1.asia/api/danh-sach?page=1")
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+	fmt.Println(string(body))
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+        <div id="api-detail" class="bg-card border border-card rounded-xl p-6 md:p-10 mb-8 scroll-mt-[90px]">
+            <div class="section-title flex items-center gap-3">
+                2. API Lấy Chi Tiết Phim <span class="endpoint-badge">GET</span>
+            </div>
+            <p class="text-gray-400 mb-4">Endpoint này trả về toàn bộ thông tin chi tiết của một bộ phim cụ thể (bao gồm cả danh sách Server và link M3U8).</p>
+            
+            <div class="flex items-center gap-3 mb-6">
+                <span class="endpoint-url w-full">/api/phim/:slug</span>
+            </div>
+
+            <h3 class="text-white font-bold mb-2">Path Parameters:</h3>
+            <table class="w-full text-sm text-left mb-6 border border-[#272a30]">
+                <thead class="bg-[#0b0c0f] border-b border-[#272a30] text-gray-300">
+                    <tr>
+                        <th class="px-4 py-2">Tham số</th>
+                        <th class="px-4 py-2">Kiểu</th>
+                        <th class="px-4 py-2">Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-400">
+                    <tr>
+                        <td class="px-4 py-2 font-mono">slug</td>
+                        <td class="px-4 py-2">String</td>
+                        <td class="px-4 py-2">Đường dẫn tĩnh của phim (Ví dụ: dau-pha-thuong-khung)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="text-white font-bold mb-2">Cấu trúc JSON trả về (Response):</h3>
+            <div class="bg-[#0b0c0f] border border-[#272a30] rounded-xl p-4 mb-8 overflow-x-auto custom-scrollbar">
+            <pre><code>{
+  "status": true,
+  "msg": "",
+  "movie": {
+    "id": 123,
+    "name": "Đấu Phá Thương Khung",
+    "slug": "dau-pha-thuong-khung",
+    "content": "Nội dung chi tiết phim...",
+    "actor": "Tiêu Viêm, Huân Nhi...",
+    "categories": [{"id":"...","name":"Hành Động","slug":"hanh-dong"}],
+    "countries": [{"id":"...","name":"Trung Quốc","slug":"trung-quoc"}]
+  },
+  "episodes": [
+    {
+      "server_name": "VIP #1",
+      "server_data": [
+        {
+          "name": "Tập 1",
+          "slug": "tap-1",
+          "filename": "",
+          "link_embed": "https://.../embed",
+          "link_m3u8": "https://.../master.m3u8"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+            </div>
+            <h3 class="text-white font-bold mt-8 mb-4">Code mẫu tích hợp (Lấy Chi Tiết):</h3>
+            <div class="bg-card border border-[#272a30] rounded-xl overflow-hidden shadow-lg mb-4">
+                <div class="flex overflow-x-auto border-b border-[#272a30] bg-[#0b0c0f] hide-scrollbar">
+                    <button onclick="switchTab(event, 'detail', 'bash')" class="tab-detail-btn px-4 py-2.5 text-sm font-bold text-white border-b-2 border-kk-red whitespace-nowrap">cURL</button>
+                    <button onclick="switchTab(event, 'detail', 'nodejs')" class="tab-detail-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">Node.js</button>
+                    <button onclick="switchTab(event, 'detail', 'php')" class="tab-detail-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">PHP (JSON)</button>
+                    <button onclick="switchTab(event, 'detail', 'php-xml')" class="tab-detail-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">PHP (XML)</button>
+                    <button onclick="switchTab(event, 'detail', 'python')" class="tab-detail-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">Python</button>
+                    <button onclick="switchTab(event, 'detail', 'go')" class="tab-detail-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">Go</button>
+                </div>
+                <div class="p-4 bg-[#181a20]">
+                    <div id="tab-detail-bash" class="tab-detail-content block">
+                        <pre><code>curl --request GET   --url 'https://api.phimtop1.asia/api/phim/dau-pha-thuong-khung'   --header 'Accept: application/json'</code></pre>
+                    </div>
+                    <div id="tab-detail-nodejs" class="tab-detail-content hidden">
+                        <pre><code>const axios = require('axios');
+
+axios.get('https://api.phimtop1.asia/api/phim/dau-pha-thuong-khung')
+  .then(response => console.log(response.data))
+  .catch(error => console.error(error));</code></pre>
+                    </div>
+                    <div id="tab-detail-php" class="tab-detail-content hidden">
+                        <pre><code>&lt;?php
+ = "https://api.phimtop1.asia/api/phim/dau-pha-thuong-khung";
+ = file_get_contents();
+ = json_decode(, true);
+print_r();
+?&gt;</code></pre>
+                    </div>
+                    <div id="tab-detail-php-xml" class="tab-detail-content hidden">
+                        <pre><code>&lt;?php
+$url = "https://api.phimtop1.asia/api/phim/dau-pha-thuong-khung?format=xml";
+$response = file_get_contents($url);
+$xml = simplexml_load_string($response);
+print_r($xml);
+?&gt;</code></pre>
+                    </div>
+                    <div id="tab-detail-python" class="tab-detail-content hidden">
+                        <pre><code>import requests
+
+url = "https://api.phimtop1.asia/api/phim/dau-pha-thuong-khung"
+response = requests.get(url)
+print(response.json())</code></pre>
+                    </div>
+                    <div id="tab-detail-go" class="tab-detail-content hidden">
+                        <pre><code>package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+)
+
+func main() {
+	res, _ := http.Get("https://api.phimtop1.asia/api/phim/dau-pha-thuong-khung")
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+	fmt.Println(string(body))
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+        <!-- API Lấy Danh Sách Thể Loại -->
+        <div id="api-genre" class="bg-card border border-card rounded-xl p-6 md:p-10 mb-8 scroll-mt-[90px]">
+            <div class="section-title flex items-center gap-3">
+                3. API Lấy Danh Sách Thể Loại <span class="endpoint-badge">GET</span>
+            </div>
+            <p class="text-gray-400 mb-4">Endpoint này trả về danh sách toàn bộ các thể loại phim hiện có trên hệ thống.</p>
+            
+            <div class="flex items-center gap-3 mb-6">
+                <span class="endpoint-url w-full">/api/the-loai</span>
+            </div>
+
+            <h3 class="text-white font-bold mb-2">Response (JSON):</h3>
+            <pre><code class="language-json">{
+  "status": true,
+  "data": {
+    "items": [
+      {
+        "name": "Hành Động",
+        "slug": "hanh-dong"
+      },
+      {
+        "name": "Tình Cảm",
+        "slug": "tinh-cam"
+      }
+    ]
+  }
+}</code></pre>
+            
+            <!-- Code Mẫu Tích Hợp API Thể Loại -->
+            <div class="mt-8 border border-[#272a30] rounded-xl overflow-hidden bg-[#0b0c0f]">
+                <div class="bg-[#181a20] px-4 py-3 border-b border-[#272a30] flex flex-wrap gap-2 items-center overflow-x-auto custom-scrollbar">
+                    <span class="text-gray-400 text-sm font-semibold mr-2 shrink-0"><i data-lucide="code" class="w-4 h-4 inline-block align-text-bottom mr-1"></i> Code Mẫu:</span>
+                    <button onclick="switchTab(event, 'cat', 'bash')" class="tab-cat-btn px-3 py-1.5 text-xs font-bold rounded-md bg-[#2b313d] text-white transition-colors shrink-0">cURL</button>
+                    <button onclick="switchTab(event, 'cat', 'nodejs')" class="tab-cat-btn px-3 py-1.5 text-xs font-bold rounded-md bg-transparent text-gray-400 hover:text-white transition-colors shrink-0">Node.js</button>
+                    <button onclick="switchTab(event, 'cat', 'php')" class="tab-cat-btn px-3 py-1.5 text-xs font-bold rounded-md bg-transparent text-gray-400 hover:text-white transition-colors shrink-0">PHP</button>
+                    <button onclick="switchTab(event, 'cat', 'python')" class="tab-cat-btn px-3 py-1.5 text-xs font-bold rounded-md bg-transparent text-gray-400 hover:text-white transition-colors shrink-0">Python</button>
+                </div>
+                <div class="p-4">
+                    <div id="tab-cat-bash" class="tab-cat-content block">
+                        <pre><code>curl --request GET   --url 'https://api.phimtop1.asia/api/the-loai'   --header 'Accept: application/json'</code></pre>
+                    </div>
+                    <div id="tab-cat-nodejs" class="tab-cat-content hidden">
+                        <pre><code>const axios = require('axios');
+
+axios.get('https://api.phimtop1.asia/api/the-loai')
+  .then(response => console.log(response.data))
+  .catch(error => console.error(error));</code></pre>
+                    </div>
+                    <div id="tab-cat-php" class="tab-cat-content hidden">
+                        <pre><code>&lt;?php
+ = file_get_contents('https://api.phimtop1.asia/api/the-loai');
+ = json_decode(, true);
+print_r();
+?&gt;</code></pre>
+                    </div>
+                    <div id="tab-cat-python" class="tab-cat-content hidden">
+                        <pre><code>import requests
+
+url = "https://api.phimtop1.asia/api/the-loai"
+response = requests.get(url)
+print(response.json())</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Lấy Danh Sách Quốc Gia -->
+        <div id="api-country" class="bg-card border border-card rounded-xl p-6 md:p-10 mb-8 scroll-mt-[90px]">
+            <div class="section-title flex items-center gap-3">
+                4. API Lấy Danh Sách Quốc Gia <span class="endpoint-badge">GET</span>
+            </div>
+            <p class="text-gray-400 mb-4">Endpoint này trả về danh sách toàn bộ các quốc gia hiện có trên hệ thống.</p>
+            
+            <div class="flex items-center gap-3 mb-6">
+                <span class="endpoint-url w-full">/api/quoc-gia</span>
+            </div>
+
+            <h3 class="text-white font-bold mb-2">Response (JSON):</h3>
+            <pre><code class="language-json">{
+  "status": true,
+  "data": {
+    "items": [
+      {
+        "name": "Hàn Quốc",
+        "slug": "han-quoc"
+      },
+      {
+        "name": "Trung Quốc",
+        "slug": "trung-quoc"
+      }
+    ]
+  }
+}</code></pre>
+            
+            <h3 class="text-white font-bold mt-8 mb-4">Code mẫu tích hợp (Lấy Danh Sách Quốc Gia):</h3>
+            <div class="bg-card border border-[#272a30] rounded-xl overflow-hidden shadow-lg mb-4">
+                <div class="flex overflow-x-auto border-b border-[#272a30] bg-[#0b0c0f] hide-scrollbar">
+                    <button onclick="switchTab(event, 'country', 'bash')" class="tab-country-btn px-4 py-2.5 text-sm font-bold text-white border-b-2 border-kk-red whitespace-nowrap">cURL</button>
+                    <button onclick="switchTab(event, 'country', 'nodejs')" class="tab-country-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">Node.js</button>
+                    <button onclick="switchTab(event, 'country', 'php')" class="tab-country-btn px-4 py-2.5 text-sm font-bold text-gray-500 hover:text-white border-b-2 border-transparent whitespace-nowrap transition">PHP</button>
+                </div>
+                <div class="p-4 bg-[#181a20]">
+                    <div id="tab-country-bash" class="tab-country-content block">
+                        <pre><code>curl --request GET   --url 'https://api.phimtop1.asia/api/quoc-gia'   --header 'Accept: application/json'</code></pre>
+                    </div>
+                    <div id="tab-country-nodejs" class="tab-country-content hidden">
+                        <pre><code>const axios = require('axios');
+
+axios.get('https://api.phimtop1.asia/api/quoc-gia')
+  .then(response => console.log(response.data))
+  .catch(error => console.error(error));</code></pre>
+                    </div>
+                    <div id="tab-country-php" class="tab-country-content hidden">
+                        <pre><code>&lt;?php
+$url = "https://api.phimtop1.asia/api/quoc-gia";
+$response = file_get_contents($url);
+echo $response;
+?&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script>
+        function switchTab(event, type, tabId) {
+            document.querySelectorAll('.tab-' + type + '-content').forEach(el => {
+                el.classList.remove('block'); el.classList.add('hidden');
+            });
+            document.querySelectorAll('.tab-' + type + '-btn').forEach(el => {
+                el.classList.remove('text-white', 'border-kk-red');
+                el.classList.add('text-gray-500', 'border-transparent');
+            });
+            document.getElementById('tab-' + type + '-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + type + '-' + tabId).classList.add('block');
+            const btn = event.currentTarget;
+            btn.classList.remove('text-gray-500', 'border-transparent');
+            btn.classList.add('text-white', 'border-kk-red');
+        }
+    </script>
+    </div>
+    </main>
+
+    <footer class="bg-[#0b0c0f] border-t border-card mt-auto text-gray-400">
+        <div class="max-w-[1440px] mx-auto px-4 py-10 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Về chúng tôi -->
+                <div class="space-y-4">
+                    <a href="/" class="flex items-center gap-2 font-black text-2xl tracking-tighter hover:opacity-80 transition inline-block">
+                        <i data-lucide="clapperboard" class="w-7 h-7 text-orange-500 inline-block align-middle"></i>
+                        <span class="text-orange-500">PhimTop1<span class="text-kk-blue">API</span></span>
+                    </a>
+                    <p class="text-sm leading-relaxed text-gray-500">
+                        PhimTop1 API Hub cung cấp nền tảng dữ liệu phim đa định dạng JSON/XML tốc độ cao, miễn phí và không giới hạn băng thông dành cho Developer & Webmaster.
+                    </p>
+                    <div class="inline-block px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700/50 mt-2 hover:bg-gray-800 transition">
+                        <a href="https://phimtop1.asia/" target="_blank" class="text-sm flex items-center gap-2 font-bold text-gray-300 hover:text-white">
+                            <i data-lucide="monitor-play" class="w-4 h-4 text-orange-500"></i> Xem phim trực tuyến tại PhimTop1.asia
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Liên kết nhanh -->
+                <div class="md:pl-12">
+                    <h3 class="text-white font-bold mb-4 uppercase text-xs tracking-wider">Liên kết hệ thống</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/" class="hover:text-kk-blue transition flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3"></i> Trang chủ API</a></li>
+                        <li><a href="/api-document" class="hover:text-kk-blue transition flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3"></i> Tài liệu hướng dẫn</a></li>
+                        <li><a href="/cms" class="hover:text-kk-blue transition flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3"></i> Mã nguồn CMS Mẫu</a></li>
+                        <li><a href="https://phimtop1.asia/" target="_blank" class="hover:text-kk-blue transition flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3"></i> PhimTop1.asia</a></li>
+                    </ul>
+                </div>
+
+                <!-- Hỗ trợ -->
+                <div>
+                    <h3 class="text-white font-bold mb-4 uppercase text-xs tracking-wider">Trợ giúp & Hỗ trợ</h3>
+                    <p class="text-sm text-gray-500 mb-4">Gặp lỗi hoặc cần yêu cầu thêm phim? Hãy liên hệ với chúng tôi.</p>
+                    <div class="flex flex-col gap-3">
+                        <a href="https://t.me/" target="_blank" class="w-fit text-sm font-bold border border-[#0088cc]/50 hover:bg-[#0088cc]/10 text-gray-300 hover:text-white px-5 py-2 rounded-lg flex items-center gap-2 transition">
+                            <i data-lucide="send" class="w-4 h-4 text-[#0088cc]"></i> Cộng đồng Telegram
+                        </a>
+                        <button class="w-fit text-sm font-bold border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white px-5 py-2 rounded-lg flex items-center gap-2 transition">
+                            <i data-lucide="mail" class="w-4 h-4 text-orange-500"></i> Yêu cầu cập nhật phim
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-10 pt-6 border-t border-gray-800/50 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-600">
+                <p>&copy; 2026 PhimTop1 API Hub. Vận hành bởi PhimTop1.asia.</p>
+                <p>Designed with <i data-lucide="heart" class="w-3 h-3 inline text-red-500"></i> for Developers.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Add Copy Button to all PRE blocks
+        document.querySelectorAll('pre').forEach(pre => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative group';
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+            
+            const btn = document.createElement('button');
+            btn.className = 'absolute top-3 right-3 bg-[#2b313d] hover:bg-[#38bdf8] hover:text-white text-gray-400 px-2 py-1 rounded transition-all opacity-0 group-hover:opacity-100 flex items-center gap-1.5 text-xs font-bold border border-[#272a30] shadow-xl z-10';
+            
+            const copyIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+            const checkIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+            
+            btn.innerHTML = copyIcon + '<span>Copy</span>';
+            
+            btn.onclick = () => {
+                const code = pre.innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    btn.innerHTML = checkIcon + '<span>Copied!</span>';
+                    btn.classList.replace('bg-[#2b313d]', 'bg-green-600');
+                    btn.classList.replace('hover:bg-[#38bdf8]', 'hover:bg-green-500');
+                    btn.classList.replace('text-gray-400', 'text-white');
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = copyIcon + '<span>Copy</span>';
+                        btn.classList.replace('bg-green-600', 'bg-[#2b313d]');
+                        btn.classList.replace('hover:bg-green-500', 'hover:bg-[#38bdf8]');
+                        btn.classList.replace('text-white', 'text-gray-400');
+                    }, 2000);
+                });
+            };
+            
+            wrapper.appendChild(btn);
+        });
+
+    </script>
+
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

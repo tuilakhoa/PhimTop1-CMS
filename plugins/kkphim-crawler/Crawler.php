@@ -301,11 +301,15 @@ class KKPhimCrawler {
                     if (isset($server['items']) && !isset($server['server_data'])) {
                         $server['server_data'] = [];
                         foreach ($server['items'] as $epItem) {
+                            $embed = $epItem['embed'] ?? ($epItem['link_embed'] ?? '');
+                            if (strpos($embed, 'upload18.') !== false || strpos($embed, 'xhub.network') !== false || strpos($embed, 'topxx') !== false || strpos($embed, 'avdbapi') !== false) {
+                                return ['movie' => null];
+                            }
                             $server['server_data'][] = [
                                 'name' => $epItem['name'] ?? '',
                                 'slug' => $epItem['slug'] ?? '',
                                 'filename' => $epItem['name'] ?? '',
-                                'link_embed' => $epItem['embed'] ?? ($epItem['link_embed'] ?? ''),
+                                'link_embed' => $embed,
                                 'link_m3u8' => $epItem['m3u8'] ?? ($epItem['link_m3u8'] ?? '')
                             ];
                         }
@@ -328,6 +332,12 @@ class KKPhimCrawler {
             $keywordsData = ($kwRes && isset($kwRes['data']['keywords'])) ? $kwRes['data']['keywords'] : [];
         }
         
+        if (!empty($mainMovie['thumb_url']) && (strpos($mainMovie['thumb_url'], 'upload18') !== false || strpos($mainMovie['thumb_url'], 'topxx') !== false || strpos($mainMovie['thumb_url'], 'avdbapi') !== false)) {
+            return ['movie' => null];
+        }
+        if (!empty($mainMovie['poster_url']) && (strpos($mainMovie['poster_url'], 'upload18') !== false || strpos($mainMovie['poster_url'], 'topxx') !== false || strpos($mainMovie['poster_url'], 'avdbapi') !== false)) {
+            return ['movie' => null];
+        }
         return [
             'movie' => $mainMovie,
             'episodes' => $episodes,
@@ -343,7 +353,12 @@ class KKPhimCrawler {
         $slugsToCheck = [];
         if (!empty($movie['category'])) {
             foreach ($movie['category'] as $cat) {
-                if (!empty($cat['slug'])) $slugsToCheck[] = $cat['slug'];
+                if (!empty($cat['slug'])) {
+                    if (strpos($cat['slug'], 'phim-18') !== false || strpos($cat['slug'], 'adult') !== false) {
+                        return true;
+                    }
+                    $slugsToCheck[] = $cat['slug'];
+                }
             }
         }
         if (!empty($movie['country'])) {

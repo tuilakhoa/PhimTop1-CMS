@@ -1,0 +1,191 @@
+<?php
+// API Fetch Helper
+require_once __DIR__ . '/cache_manager.php';
+
+function fetchApiFilms($type, $slug = '', $page = 1, $keyword = '', $category = '', $country = '', $year = '', $sort = '') {
+    return fetchLocalFilms($type, $slug, $page, $keyword, $category, $country, $year, $sort);
+}
+
+function fetchApiMovieDetail($slug) {
+    return fetchLocalMovieDetail($slug);
+}
+
+function getYearsList() {
+    $pdo = getPDO();
+    if (!$pdo) return [];
+    $stmt = $pdo->query("SELECT DISTINCT year FROM movies WHERE year > 0 ORDER BY year DESC");
+    $years = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $result = [];
+    foreach ($years as $y) {
+        $result[] = ['name' => (string)$y, 'slug' => (string)$y];
+    }
+    return $result;
+}
+
+function fetchLocalFilms($type, $slug = '', $page = 1, $keyword = '', $category = '', $country = '', $year = '', $sort = '') {
+    // 1. Khởi tạo Redis cache
+    $cacheKey = "api_films_" . md5(serialize([$type, $slug, $page, $keyword, $category, $country, $year, $sort]));
+    $redis = null;
+    if (class_exists('Redis')) {
+        try {
+            $redis = new Redis();
+            $redis->connect('127.0.0.1', 6379);
+            $cached = $redis->get($cacheKey);
+            if ($cached) return json_decode($cached, true);
+        } catch (Exception $e) { $redis = null; }
+    }
+    
+    $pdo = getPDO();
+    if (!$pdo) return null;
+    $limit = 24;
+    $offset = ($page - 1) * $limit;
+    
+    $where = ["1=1"];
+    $params = [];
+    $join = "";
+    
+    // 2. Tối ưu Full-Text Search thay vì LIKE
+    if ($keyword) {
+        // Tìm chính xác bằng Full-Text. 
+        // Bọc ngoặc kép để tìm nguyên cụm tên diễn viên/phim (phrase search)
+        $where[] = "MATCH(m.name, m.origin_name, m.slug, m.actor, m.director) AGAINST(? IN BOOLEAN MODE)";
+        $params[] = '"' . $keyword . '"';
+    }
+    
+    if ($type === 'danh-sach' && $slug) {
+        if ($slug === 'phim-le') $where[] = "m.type = 'single'";
+        else if ($slug === 'phim-bo') $where[] = "m.type = 'series'";
+        else if ($slug === 'hoat-hinh') $where[] = "m.type = 'hoathinh'";
+        else if ($slug === 'tv-shows') $where[] = "m.type = 'tvshows'";
+    } else if ($type === 'the-loai' && $slug) {
+        $where[] = "m.categories_json LIKE ?";
+        $params[] = '%"slug":"' . $slug . '"%';
+    } else if ($type === 'quoc-gia' && $slug) {
+        $where[] = "m.countries_json LIKE ?";
+        $params[] = '%"slug":"' . $slug . '"%';
+    }
+    
+    if ($year) {
+        $where[] = "m.year = ?";
+        $params[] = $year;
+    }
+
+    
+    $whereClause = implode(' AND ', $where);
+    
+    $countSql = "SELECT COUNT(DISTINCT m.id) FROM movies m $join WHERE $whereClause";
+    $stmt = $pdo->prepare($countSql);
+    $stmt->execute($params);
+    $totalItems = $stmt->fetchColumn();
+    $totalPages = ceil($totalItems / $limit);
+    
+    $orderBy = "m.updated_at DESC";
+    if ($sort === 'imdb_vote-desc') {
+        $orderBy = "m.imdb_vote DESC, m.updated_at DESC";
+    } else if ($sort === 'tmdb_vote-desc') {
+        $orderBy = "m.tmdb_vote DESC, m.updated_at DESC";
+    } else if ($sort === 'year-desc') {
+        $orderBy = "m.year DESC, m.updated_at DESC";
+    } else if ($sort === 'year-asc') {
+        $orderBy = "m.year ASC, m.updated_at DESC";
+    } else if ($sort === 'modified.time-asc') {
+        $orderBy = "m.updated_at ASC";
+    }
+    
+    $sql = "SELECT DISTINCT m.* FROM movies m $join WHERE $whereClause ORDER BY $orderBy LIMIT $limit OFFSET $offset";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    foreach ($items as &$item) {
+        if (!empty($item['categories_json'])) {
+            $item['category'] = json_decode($item['categories_json'], true);
+        } else {
+            $item['category'] = [];
+        }
+        if (!empty($item['countries_json'])) {
+            $item['country'] = json_decode($item['countries_json'], true);
+        } else {
+            $item['country'] = [];
+        }
+    }
+    
+    $resultData = [
+        'items' => $items,
+        'titlePage' => 'Danh Sách Phim',
+        'domain' => '',
+        'seoOnPage' => [],
+        'params' => [],
+        'pagination' => [
+            'totalPages' => $totalPages,
+            'currentPage' => $page
+        ]
+    ];
+    
+    // Lưu vào Redis Cache trong 10 phút (600 giây)
+    if ($redis) {
+        $redis->setex($cacheKey, 600, json_encode($resultData));
+    }
+    
+    return $resultData;
+}
+
+function fetchLocalMovieDetail($slug) {
+    $pdo = getPDO();
+    if (!$pdo) return null;
+    
+    $stmt = $pdo->prepare("SELECT * FROM movies WHERE slug = ?");
+    $stmt->execute([$slug]);
+    $movie = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$movie) return null;
+    
+    if (!empty($movie['categories_json'])) {
+        $movie['category'] = json_decode($movie['categories_json'], true);
+    } else {
+        $movie['category'] = [];
+    }
+    
+    if (!empty($movie['countries_json'])) {
+        $movie['country'] = json_decode($movie['countries_json'], true);
+    } else {
+        $movie['country'] = [];
+    }
+    
+    $stmtEp = $pdo->prepare("SELECT * FROM episodes WHERE movie_slug = ? ORDER BY id ASC");
+    $stmtEp->execute([$slug]);
+    $eps = $stmtEp->fetchAll(PDO::FETCH_ASSOC);
+    
+    $episodes = [];
+    foreach ($eps as $ep) {
+        $serverName = $ep['server_name'];
+        if (!isset($episodes[$serverName])) {
+            $episodes[$serverName] = [
+                'server_name' => $serverName,
+                'server_data' => []
+            ];
+        }
+        $episodes[$serverName]['server_data'][] = [
+            'name' => $ep['name'],
+            'slug' => $ep['slug'],
+            'filename' => $ep['filename'],
+            'link_embed' => $ep['embed_url'],
+            'link_m3u8' => $ep['m3u8_url']
+        ];
+    }
+    
+    // Fetch SEO metadata for keywords
+    $stmtSeo = $pdo->prepare("SELECT seo_keywords FROM seo_metadata WHERE item_id = ? AND type = 'movie'");
+    $stmtSeo->execute([$slug]);
+    $seoRow = $stmtSeo->fetch(PDO::FETCH_ASSOC);
+    if ($seoRow && !empty($seoRow['seo_keywords'])) {
+        $movie['seo_keywords'] = $seoRow['seo_keywords'];
+    }
+    
+    return [
+        'movie' => $movie,
+        'episodes' => array_values($episodes),
+        'seoOnPage' => [],
+        'domain' => ''
+    ];
+}

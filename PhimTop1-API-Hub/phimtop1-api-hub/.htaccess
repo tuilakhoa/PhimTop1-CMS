@@ -1,0 +1,18 @@
+# =========================================================================
+# Cấu hình dành cho Shared Hosting cPanel (sử dụng Phusion Passenger)
+# Bỏ comment (xóa dấu #) ở 3 dòng dưới nếu bạn chạy trên hosting cPanel.
+# =========================================================================
+# PassengerAppType node
+# PassengerStartupFile server.js
+# PassengerAppRoot /home/khoa/PhimTop1-API-Hub
+
+
+# =========================================================================
+# Cấu hình chuyển tiếp (Reverse Proxy) bằng mod_rewrite
+# Dùng khi bạn chỉ muốn dùng .htaccess để proxy vào port 3000
+# (Yêu cầu Apache phải bật mod_proxy và mod_rewrite)
+# =========================================================================
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
+</IfModule>

@@ -1,0 +1,173 @@
+const fs = require('fs');
+
+const sidebar = `
+    <aside class="w-64 border-r border-card bg-card flex flex-col shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-card">
+            <h1 class="text-xl font-bold text-white tracking-tight">PhimTop1<span class="text-cyan-400">Admin</span></h1>
+        </div>
+        <nav class="flex-1 py-4 px-3 flex flex-col gap-1">
+            <a href="/admin" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Tổng quan
+            </a>
+            <a href="/admin/themes" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">
+                <i data-lucide="palette" class="w-5 h-5"></i> Quản lý Themes
+            </a>
+            <a href="/admin/settings" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">
+                <i data-lucide="settings" class="w-5 h-5"></i> Cấu hình chung
+            </a>
+            <a href="/admin/account" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">
+                <i data-lucide="user" class="w-5 h-5"></i> Đổi mật khẩu
+            </a>
+        </nav>
+        <div class="p-4 border-t border-card">
+            <a href="/admin/logout" class="flex items-center gap-3 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Đăng xuất
+            </a>
+        </div>
+    </aside>
+`;
+
+const head = `
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - {TITLE}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+        .bg-card { background-color: #161b22; }
+        .border-card { border-color: #30363d; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+`;
+
+// -- 1. Theme Edit --
+let themeEdit = head.replace('{TITLE}', 'Sửa Theme') + sidebar.replace('href="/admin/themes" class="flex', 'href="/admin/themes" class="bg-cyan-500/10 text-cyan-400 flex') + `
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header class="h-16 border-b border-card flex items-center px-8 justify-between shrink-0">
+            <h2 class="text-lg font-medium text-white">Chỉnh sửa Theme: <%= theme.name %></h2>
+        </header>
+        <div class="p-8">
+            <div class="bg-card border border-card rounded-xl p-6 mb-8 max-w-3xl">
+                <form action="/admin/themes/<%= theme.id %>/edit" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Tên Theme</label>
+                        <input type="text" name="name" value="<%= theme.name %>" class="w-full bg-[#0d1117] border border-card rounded p-2 text-white outline-none focus:border-cyan-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Link Ảnh (Preview)</label>
+                        <input type="text" name="image_url" value="<%= theme.image_url %>" class="w-full bg-[#0d1117] border border-card rounded p-2 text-white outline-none focus:border-cyan-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Link Tải (Download)</label>
+                        <input type="text" name="download_url" value="<%= theme.download_url %>" class="w-full bg-[#0d1117] border border-card rounded p-2 text-white outline-none focus:border-cyan-500" required>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm text-gray-400 mb-1">Đánh giá (VD: 4.8)</label>
+                            <input type="number" step="0.1" name="rating" value="<%= theme.rating %>" class="w-full bg-[#0d1117] border border-card rounded p-2 text-white outline-none focus:border-cyan-500" required>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm text-gray-400 mb-1">Loại</label>
+                            <select name="type" class="w-full bg-[#0d1117] border border-card rounded p-2 text-white outline-none focus:border-cyan-500">
+                                <option value="free" <%= theme.type === 'free' ? 'selected' : '' %>>Miễn phí</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm text-gray-400 mb-1">Mô tả</label>
+                        <textarea name="description" rows="3" class="w-full bg-[#0d1117] border border-card rounded p-2 text-white outline-none focus:border-cyan-500" required><%= theme.description %></textarea>
+                    </div>
+                    <div class="md:col-span-2 flex justify-end gap-3 mt-4">
+                        <a href="/admin/themes" class="px-6 py-2 rounded text-gray-400 hover:text-white transition border border-card">Hủy</a>
+                        <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-6 rounded transition">Cập nhật</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
+`;
+
+// -- 2. Settings --
+let settings = head.replace('{TITLE}', 'Cấu hình hệ thống') + sidebar.replace('href="/admin/settings" class="flex', 'href="/admin/settings" class="bg-cyan-500/10 text-cyan-400 flex') + `
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header class="h-16 border-b border-card flex items-center px-8 justify-between shrink-0">
+            <h2 class="text-lg font-medium text-white">Cấu hình chung (SEO & Mạng Xã Hội)</h2>
+        </header>
+        <div class="p-8">
+            <div class="bg-card border border-card rounded-xl p-6 max-w-3xl">
+                <form action="/admin/settings" method="POST" class="flex flex-col gap-5">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Tiêu đề Web (Title)</label>
+                        <input type="text" name="site_title" value="<%= settings.site_title %>" class="w-full bg-[#0d1117] border border-card rounded p-2.5 text-white outline-none focus:border-cyan-500" placeholder="VD: PhimTop1 API - Web xem phim">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Mô tả Web (Description - SEO)</label>
+                        <textarea name="site_description" rows="3" class="w-full bg-[#0d1117] border border-card rounded p-2.5 text-white outline-none focus:border-cyan-500"><%= settings.site_description %></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Link Telegram (Hỗ trợ)</label>
+                        <input type="text" name="telegram_link" value="<%= settings.telegram_link %>" class="w-full bg-[#0d1117] border border-card rounded p-2.5 text-white outline-none focus:border-cyan-500">
+                    </div>
+                    <div class="text-right mt-4">
+                        <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2.5 px-8 rounded transition">Lưu cấu hình</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
+`;
+
+// -- 3. Account --
+let account = head.replace('{TITLE}', 'Đổi mật khẩu') + sidebar.replace('href="/admin/account" class="flex', 'href="/admin/account" class="bg-cyan-500/10 text-cyan-400 flex') + `
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header class="h-16 border-b border-card flex items-center px-8 justify-between shrink-0">
+            <h2 class="text-lg font-medium text-white">Bảo mật tài khoản</h2>
+        </header>
+        <div class="p-8">
+            <div class="bg-card border border-card rounded-xl p-6 max-w-md">
+                <% if (error) { %>
+                    <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded mb-4 text-sm"><%= error %></div>
+                <% } %>
+                <% if (success) { %>
+                    <div class="bg-green-500/10 border border-green-500/50 text-green-400 p-3 rounded mb-4 text-sm"><%= success %></div>
+                <% } %>
+                <form action="/admin/account" method="POST" class="flex flex-col gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Mật khẩu hiện tại</label>
+                        <input type="password" name="old_password" class="w-full bg-[#0d1117] border border-card rounded p-2.5 text-white outline-none focus:border-cyan-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Mật khẩu mới</label>
+                        <input type="password" name="new_password" class="w-full bg-[#0d1117] border border-card rounded p-2.5 text-white outline-none focus:border-cyan-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Xác nhận mật khẩu mới</label>
+                        <input type="password" name="confirm_password" class="w-full bg-[#0d1117] border border-card rounded p-2.5 text-white outline-none focus:border-cyan-500" required>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2.5 rounded transition">Đổi mật khẩu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
+`;
+
+fs.writeFileSync('views/admin/theme_edit.ejs', themeEdit);
+fs.writeFileSync('views/admin/settings.ejs', settings);
+fs.writeFileSync('views/admin/account.ejs', account);
+console.log("Created all new admin views");

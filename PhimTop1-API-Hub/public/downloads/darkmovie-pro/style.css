@@ -1,0 +1,64 @@
+/*
+Theme Name: PhimTop1 Theme
+Author: PhimTop1
+Description: Theme WordPress tối giản dành cho PhimTop1 CMS, tương thích với WP Crawler Plugin.
+Version: 1.0
+*/
+body { 
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; 
+    background: #0d1117; 
+    color: #c9d1d9; 
+    margin: 0; 
+    padding: 0; 
+}
+header {
+    background: #161b22;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #30363d;
+}
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+.movie-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+    gap: 24px; 
+}
+.movie-item { 
+    background: #161b22; 
+    padding: 16px; 
+    border-radius: 12px; 
+    text-align: center;
+    border: 1px solid #30363d;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.movie-item:hover {
+    transform: translateY(-5px);
+    border-color: #38bdf8;
+}
+.movie-item img { 
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: 8px; 
+    margin-bottom: 12px;
+}
+.movie-item h3 { 
+    font-size: 16px; 
+    margin: 0 0 8px 0; 
+    color: #fff;
+}
+a { color: #38bdf8; text-decoration: none; }
+a:hover { color: #7dd3fc; }
+.meta-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}

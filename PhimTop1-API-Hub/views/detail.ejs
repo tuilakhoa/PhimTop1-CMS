@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <% 
+        let rawContent = movie.content ? movie.content.replace(/<[^>]+>/g, '').substring(0, 160) + '...' : 'Xem phim ' + movie.name + ' mới nhất tại PhimTop1.';
+        let detailTitle = movie.name + ' (' + (movie.year || '2026') + ') - PhimTop1 API';
+        let detailUrl = 'https://api.phimtop1.asia/phim/' + movie.slug;
+    %>
+    <title><%= detailTitle %></title>
+    <meta name="description" content="<%= rawContent %>">
+    <meta name="keywords" content="<%= movie.name %>, <%= movie.origin_name %>, xem phim <%= movie.name %>, api phim <%= movie.slug %>">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="<%= detailUrl %>">
+    <!-- Open Graph -->
+    <meta property="og:type" content="video.movie">
+    <meta property="og:title" content="<%= detailTitle %>">
+    <meta property="og:description" content="<%= rawContent %>">
+    <meta property="og:image" content="<%= movie.thumb_url || movie.poster_url %>">
+    <meta property="og:url" content="<%= detailUrl %>">
+    <meta property="og:site_name" content="PhimTop1 API">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= detailTitle %>">
+    <meta name="twitter:description" content="<%= rawContent %>">
+    <meta name="twitter:image" content="<%= movie.thumb_url || movie.poster_url %>">
+
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #121418; color: #a1a1aa; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+        .bg-card { background-color: #181a20; }
+        .border-card { border-color: #272a30; }
+        .text-kk-red { color: #f43f5e; }
+        .bg-kk-red { background-color: #f43f5e; }
+        .text-kk-blue { color: #38bdf8; }
+        .section-title { border-left: 4px solid #f43f5e; padding-left: 10px; font-weight: bold; color: white; font-size: 1.25rem; margin-bottom: 1rem; }
+    </style>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+    <meta name="msvalidate.01" content="3272BDE866C77FFFE8499EB05F224A6B" />
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="border-b border-card bg-[#0b0c0f] sticky top-0 z-50">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-2">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center gap-6">
+                    <a href="/" class="flex items-center gap-2 font-black text-2xl tracking-tighter hover:opacity-80 transition">
+                        <i data-lucide="clapperboard" class="w-7 h-7 text-orange-500"></i>
+                        <span class="text-orange-500">PhimTop1<span class="text-kk-blue">API</span></span>
+                    </a>
+                    <nav class="hidden md:flex items-center gap-6 text-sm font-bold text-gray-300 ml-4">
+                        <div class="relative group">
+                            <a href="#" class="hover:text-white transition py-4 flex items-center gap-1">Thể Loại <i data-lucide="chevron-down" class="w-3 h-3"></i></a>
+                            <div class="absolute left-0 top-full -mt-2 w-[600px] bg-[#111319]/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-5 grid grid-cols-4 gap-x-2 gap-y-1.5 max-h-[65vh] overflow-y-auto custom-scrollbar">
+                                <% if(locals.globalGenres) { 
+                                    const sorted = [...globalGenres].sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+                                    sorted.forEach(g => { %>
+                                    <a href="/the-loai/<%= g.slug %>" class="text-gray-400 hover:text-white hover:bg-white/10 text-[13px] py-2 px-3 rounded-lg transition-all capitalize truncate font-medium"><%= g.name %></a>
+                                <% }) } %>
+                            </div>
+                        </div>
+                        <div class="relative group">
+                            <a href="#" class="hover:text-white transition py-4 flex items-center gap-1">Quốc Gia <i data-lucide="chevron-down" class="w-3 h-3"></i></a>
+                            <div class="absolute left-0 top-full -mt-2 w-[600px] bg-[#111319]/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-5 grid grid-cols-4 gap-x-2 gap-y-1.5 max-h-[65vh] overflow-y-auto custom-scrollbar">
+                                <% if(locals.globalCountries) { 
+                                    const sorted = [...globalCountries].sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+                                    sorted.forEach(c => { %>
+                                    <a href="/quoc-gia/<%= c.slug %>" class="text-gray-400 hover:text-white hover:bg-white/10 text-[13px] py-2 px-3 rounded-lg transition-all capitalize truncate font-medium"><%= c.name %></a>
+                                <% }) } %>
+                            </div>
+                        </div>
+                        <div class="relative group">
+                            <a href="#" class="hover:text-white transition py-4 flex items-center gap-1">Danh Sách <i data-lucide="chevron-down" class="w-3 h-3"></i></a>
+                            <div class="absolute left-0 top-full -mt-2 w-48 bg-[#181a20] border border-[#272a30] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col p-2">
+                                <a href="/danh-sach/phim-le" class="text-gray-400 hover:text-white hover:bg-gray-800 text-sm py-2 px-3 rounded transition">Phim Lẻ</a>
+                                <a href="/danh-sach/phim-bo" class="text-gray-400 hover:text-white hover:bg-gray-800 text-sm py-2 px-3 rounded transition">Phim Bộ</a>
+                                <a href="/danh-sach/hoat-hinh" class="text-gray-400 hover:text-white hover:bg-gray-800 text-sm py-2 px-3 rounded transition">Hoạt Hình</a>
+                                <a href="/danh-sach/tvshows" class="text-gray-400 hover:text-white hover:bg-gray-800 text-sm py-2 px-3 rounded transition">TV Shows</a>
+                            </div>
+                        </div>
+                        <a href="/api-document" class="hover:text-white transition py-4 flex items-center gap-1 ml-4 border-l border-gray-800 pl-6 text-kk-blue">
+                            <i data-lucide="book-open" class="w-4 h-4"></i> Tài liệu API
+                        </a>
+                        <a href="/cms" class="hover:text-white transition py-4 flex items-center gap-1 text-kk-red">
+                            <i data-lucide="download" class="w-4 h-4"></i> Tải CMS
+                        </a>
+                    </nav>
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-400 hover:text-white">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="hidden lg:flex items-center gap-4">
+                    <form action="/search" method="GET" class="relative">
+                        <input type="text" name="keyword" placeholder="Tìm kiếm phim..." value="<%= typeof keyword !== 'undefined' ? keyword : '' %>" class="bg-[#1e2128] border border-gray-700 text-sm rounded-md pl-9 pr-4 py-1.5 text-white focus:outline-none focus:border-gray-500 w-56">
+                        <button type="submit" class="absolute left-3 top-2"><i data-lucide="search" class="w-4 h-4 text-gray-500"></i></button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Mobile Search Bar (visible only on small screens) -->
+            <div class="flex lg:hidden mt-2 pb-2">
+                <form action="/search" method="GET" class="relative w-full">
+                    <input type="text" name="keyword" placeholder="Tìm kiếm phim..." value="<%= typeof keyword !== 'undefined' ? keyword : '' %>" class="w-full bg-[#1e2128] border border-gray-700 text-sm rounded-md pl-9 pr-4 py-2 text-white focus:outline-none focus:border-gray-500">
+                    <button type="submit" class="absolute left-3 top-2.5"><i data-lucide="search" class="w-4 h-4 text-gray-500"></i></button>
+                </form>
+            </div>
+        </div>
+    
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-[#0b0c0f] border-b border-[#272a30] p-4 shadow-2xl z-50 overflow-y-auto max-h-[80vh]">
+            
+            <a href="/api-document" class="flex items-center gap-2 font-bold text-white mb-4 bg-[#181a20] p-3 rounded-lg border border-gray-800 transition active:bg-gray-800">
+                <i data-lucide="file-code" class="w-5 h-5 text-kk-red"></i> Tài liệu API
+            </a>
+            
+            <div class="mb-4">
+                <button onclick="document.getElementById('mobile-genre-list').classList.toggle('hidden')" class="w-full font-bold text-gray-300 flex items-center justify-between uppercase text-xs tracking-wider bg-[#181a20] p-3 rounded-lg border border-gray-800 transition active:bg-gray-800">
+                    <span class="flex items-center gap-2"><i data-lucide="film" class="w-4 h-4 text-kk-blue"></i> Thể Loại</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </button>
+                <div id="mobile-genre-list" class="hidden grid grid-cols-2 gap-3 p-4 mt-2 bg-[#0b0c0f] rounded-lg border border-[#272a30] max-h-[300px] overflow-y-auto custom-scrollbar">
+                    <% if(locals.globalGenres) { 
+                        const sorted = [...globalGenres].sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+                        sorted.forEach(g => { %>
+                        <a href="/the-loai/<%= g.slug %>" class="text-gray-400 text-[13px] hover:text-white truncate capitalize"><%= g.name %></a>
+                    <% }) } %>
+                </div>
+            </div>
+            
+            <div class="mb-2">
+                <button onclick="document.getElementById('mobile-list-list').classList.toggle('hidden')" class="w-full font-bold text-gray-300 flex items-center justify-between uppercase text-xs tracking-wider bg-[#181a20] p-3 rounded-lg border border-gray-800 transition active:bg-gray-800">
+                    <span class="flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-orange-400"></i> Danh Sách</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </button>
+                <div id="mobile-list-list" class="hidden flex flex-col gap-3 p-4 mt-2 bg-[#0b0c0f] rounded-lg border border-[#272a30]">
+                    <a href="/danh-sach/series" class="text-gray-400 text-[13px] hover:text-white">Phim Bộ</a>
+                    <a href="/danh-sach/single" class="text-gray-400 text-[13px] hover:text-white">Phim Lẻ</a>
+                    <a href="/danh-sach/hoathinh" class="text-gray-400 text-[13px] hover:text-white">Hoạt Hình</a>
+                    <a href="/danh-sach/tvshows" class="text-gray-400 text-[13px] hover:text-white">TV Shows</a>
+                </div>
+            </div>
+            <div class="mb-2">
+                <button onclick="document.getElementById('mobile-country-list').classList.toggle('hidden')" class="w-full font-bold text-gray-300 flex items-center justify-between uppercase text-xs tracking-wider bg-[#181a20] p-3 rounded-lg border border-gray-800 transition active:bg-gray-800">
+                    <span class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4 text-purple-400"></i> Quốc Gia</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </button>
+                <div id="mobile-country-list" class="hidden grid grid-cols-2 gap-3 p-4 mt-2 bg-[#0b0c0f] rounded-lg border border-[#272a30] max-h-[300px] overflow-y-auto custom-scrollbar">
+                    <% if(locals.globalCountries) { 
+                        const sorted = [...globalCountries].sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+                        sorted.forEach(c => { %>
+                        <a href="/quoc-gia/<%= c.slug %>" class="text-gray-400 text-[13px] hover:text-white truncate capitalize"><%= c.name %></a>
+                    <% }) } %>
+                </div>
+            </div>
+            
+        </div>
+    </header>
+
+    <% 
+        let categories = [];
+        let countries = [];
+        try { categories = JSON.parse(movie.categories_json || '[]'); } catch(e){}
+        try { countries = JSON.parse(movie.countries_json || '[]'); } catch(e){}
+        
+        let actors = [];
+        if (movie.actor) {
+            actors = movie.actor.split(',').map(a => a.trim()).filter(a => a);
+        }
+    %>
+
+    <main class="flex-grow max-w-[1440px] mx-auto px-4 sm:px-6 py-6 w-full">
+        
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 text-[13px] text-gray-500 mb-6">
+            <a href="/" class="flex items-center gap-1 hover:text-white transition"><i data-lucide="home" class="w-3 h-3"></i> Trang chủ</a>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            <span class="hover:text-white cursor-pointer transition"><%= movie.type === 'series' ? 'Phim Bộ' : 'Phim Lẻ' %></span>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            <span class="hover:text-white cursor-pointer transition"><%= movie.year || 'N/A' %></span>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            <span class="text-gray-300"><%= movie.name %></span>
+        </div>
+
+        <!-- Top Section -->
+        <div class="flex flex-col md:flex-row gap-8 mb-10">
+            
+            <!-- Poster -->
+            <div class="w-full md:w-[300px] flex-shrink-0">
+                <div class="rounded-lg overflow-hidden relative shadow-lg">
+                    <img src="<%= movie.thumb_url %>" class="w-full h-auto object-cover aspect-[2/3]" alt="<%= movie.name %>" onerror="this.src='https://via.placeholder.com/300x450'">
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="watchMovie('<%= movie.slug %>')" class="flex-1 bg-kk-red hover:bg-rose-600 text-white font-bold py-2.5 rounded text-sm flex justify-center items-center gap-2 transition cursor-pointer">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> Xem Phim
+                    </button>
+                    <a href="#sources-section" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2.5 px-4 rounded text-sm flex items-center gap-2 transition">
+                        <i data-lucide="link" class="w-4 h-4"></i> Nguồn
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Details -->
+            <div class="w-full flex-grow">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white mb-1"><%= movie.name %></h1>
+                        <h2 class="text-base text-gray-400"><%= movie.origin_name %></h2>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-2">
+                        <a href="/api/phim/<%= movie.slug %>" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-700 hover:bg-gray-800 text-xs text-gray-300 transition">
+                            <i data-lucide="code-2" class="w-3 h-3"></i> API
+                        </a>
+                        <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-blue-900/50 hover:bg-blue-900/20 text-xs text-blue-400 transition bg-blue-900/10">
+                            <i data-lucide="database" class="w-3 h-3"></i> TMDb
+                        </button>
+                        <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-yellow-700/50 hover:bg-yellow-700/20 text-xs text-yellow-500 transition bg-yellow-900/10">
+                            <i data-lucide="film" class="w-3 h-3"></i> IMDb
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-6 mt-4 text-[11px] font-bold uppercase">
+                    <span class="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded"><%= movie.type %></span>
+                    <span class="px-3 py-1 bg-gray-800 text-gray-300 rounded"><%= movie.year || 'N/A' %></span>
+                    <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded"><%= movie.lang || 'N/A' %></span>
+                    <span class="px-3 py-1 bg-yellow-500/20 text-yellow-500 rounded"><%= movie.quality || 'HD' %></span>
+                </div>
+
+                <!-- Info Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    
+                    <!-- Thể loại -->
+                    <div class="bg-card border border-card rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3 text-xs font-bold text-gray-400">
+                            <span class="flex items-center gap-1.5"><i data-lucide="tag" class="w-3 h-3 text-blue-400"></i> Thể loại</span>
+                            <span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px]"><%= categories.length %></span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <% if (categories.length > 0) { %>
+                                <% categories.slice(0,4).forEach(c => { %>
+                                    <span class="px-2 py-1 bg-[#1e2128] border border-gray-700 rounded text-[11px] text-gray-300"><%= c.name %></span>
+                                <% }) %>
+                            <% } else { %><span class="text-xs text-gray-500">Đang cập nhật</span><% } %>
+                        </div>
+                    </div>
+
+                    <!-- Quốc gia -->
+                    <div class="bg-card border border-card rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3 text-xs font-bold text-gray-400">
+                            <span class="flex items-center gap-1.5"><i data-lucide="globe" class="w-3 h-3 text-purple-400"></i> Quốc gia</span>
+                            <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-[10px]"><%= countries.length %></span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <% if (countries.length > 0) { %>
+                                <% countries.slice(0,3).forEach(c => { %>
+                                    <span class="px-2 py-1 bg-[#1e2128] border border-gray-700 rounded text-[11px] text-gray-300"><%= c.name %></span>
+                                <% }) %>
+                            <% } else { %><span class="text-xs text-gray-500">Đang cập nhật</span><% } %>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin chung -->
+                    <div class="bg-card border border-card rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3 text-xs font-bold text-gray-400">
+                            <span class="flex items-center gap-1.5"><i data-lucide="info" class="w-3 h-3 text-green-400"></i> Thông tin</span>
+                            <span class="px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 text-[10px]"><%= (movie.status === 'ongoing' ? 'Đang chiếu' : (movie.status === 'completed' ? 'Hoàn tất' : (movie.status === 'trailer' ? 'Trailer' : movie.status))) || 'N/A' %></span>
+                        </div>
+                        <div class="text-xs text-gray-400 space-y-1">
+                            <div>Thời lượng: <strong class="text-gray-200"><%= movie.time || 'N/A' %></strong></div>
+                            <div>Tập hiện tại: <strong class="text-gray-200"><%= movie.episode_current || 'N/A' %></strong></div>
+                        </div>
+                    </div>
+
+                    <!-- TMDb / IMDb -->
+                    <div class="bg-card border border-card rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3 text-xs font-bold text-gray-400">
+                            <span class="flex items-center gap-1.5"><i data-lucide="star" class="w-3 h-3 text-blue-400"></i> TMDb</span>
+                            <span class="px-1.5 py-0.5 rounded bg-blue-900/40 text-blue-400 text-[10px]">tv</span>
+                        </div>
+                        <div class="text-xs text-gray-400 space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg font-bold text-blue-400"><%= movie.tmdb_vote || 'N/A' %></span>
+                                <span>/ 10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actors Row -->
+                <% if(actors.length > 0) { %>
+                <div class="bg-card border border-card rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="flex items-center gap-2 text-xs font-bold text-yellow-500"><i data-lucide="users" class="w-4 h-4"></i> CAST</span>
+                        <span class="text-[10px] bg-yellow-900/30 text-yellow-500 px-2 py-0.5 rounded-full">Acting</span>
+                    </div>
+                    <div class="flex overflow-x-auto gap-3 pb-2 custom-scrollbar">
+                        <% actors.forEach(actor => { %>
+                            <div class="flex-shrink-0 w-24 bg-[#111316] border border-gray-800 rounded-lg p-3 flex flex-col items-center justify-center hover:border-gray-600 transition">
+                                <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 font-bold text-lg mb-2">
+                                    <%= actor.charAt(0).toUpperCase() %>
+                                </div>
+                                <div class="text-[11px] font-bold text-white text-center leading-tight line-clamp-2"><%= actor %></div>
+                                <div class="text-[10px] text-gray-500 mt-1">Acting</div>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Lower Section (Content & Images) -->
+        <div class="border-t border-card pt-8 mt-8">
+            
+            <div class="section-title">Nội dung phim</div>
+            <p class="text-sm text-gray-500 mb-4">Tên khác: <span class="text-gray-400"><%= movie.origin_name %></span></p>
+            <div class="text-[15px] leading-relaxed text-gray-300 mb-10">
+                <%- movie.content || 'Nội dung đang được cập nhật...' %>
+            </div>
+
+            <% 
+                let images = [];
+                try { images = JSON.parse(movie.images_json || '[]'); } catch(e){}
+            %>
+            <% if(images.length > 0) { %>
+                <div class="section-title flex items-end gap-2">
+                    Hình ảnh <span class="text-sm text-gray-500 font-normal">(<%= images.length %> ảnh)</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                    <% images.slice(0,4).forEach(img => { %>
+                        <div class="rounded-lg overflow-hidden border border-gray-800 aspect-video">
+                            <img src="<%= img.url || img %>" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+
+        </div>
+
+    
+        <!-- Episode List Section -->
+        <% if (typeof episodesGrouped !== 'undefined' && episodesGrouped.length > 0) { %>
+            <div class="mt-12 w-full" id="sources-section">
+                <h2 class="text-2xl font-bold text-white mb-6 border-l-4 border-kk-red pl-4">Danh Sách Tập Phim (Sources)</h2>
+                
+                <% episodesGrouped.forEach((server, index) => { 
+                    const serverData = Array.isArray(server.server_data) ? server.server_data : [];
+                %>
+                    <div class="bg-card border border-[#272a30] rounded-xl overflow-hidden shadow-lg mb-6">
+                        <div class="bg-[#181a20] px-6 py-4 border-b border-[#272a30] flex items-center justify-between cursor-pointer" onclick="document.getElementById('server-<%= index %>').classList.toggle('hidden')">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="server" class="w-5 h-5 text-kk-red"></i>
+                                <h3 class="text-lg font-bold text-white uppercase"><%= server.server_name %></h3>
+                            </div>
+                            <span class="text-xs text-gray-500 bg-[#0b0c0f] px-3 py-1 rounded-full border border-gray-800"><%= serverData.length %> tập</span>
+                        </div>
+                        <div id="server-<%= index %>" class="p-6">
+                            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                                <% serverData.forEach(ep => { %>
+                                    <a href="<%= ep.link_embed || '#' %>" target="_blank" class="bg-[#0b0c0f] hover:bg-kk-red text-gray-300 hover:text-white border border-[#272a30] hover:border-kk-red rounded transition text-center py-2 px-2 text-sm font-medium">
+                                        <%= ep.name %>
+                                    </a>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+        
+        </main>
+
+    <footer class="bg-[#0b0c0f] border-t border-card mt-auto text-gray-400">
+        <div class="max-w-[1440px] mx-auto px-4 py-10 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Về chúng tôi -->
+                <div class="space-y-4">
+                    <a href="/" class="flex items-center gap-2 font-black text-2xl tracking-tighter hover:opacity-80 transition inline-block">
+                        <i data-lucide="clapperboard" class="w-7 h-7 text-orange-500 inline-block align-middle"></i>
+                        <span class="text-orange-500">PhimTop1<span class="text-kk-blue">API</span></span>
+                    </a>
+                    <p class="text-sm leading-relaxed text-gray-500">
+                        PhimTop1 API Hub cung cấp nền tảng dữ liệu phim đa định dạng JSON/XML tốc độ cao, miễn phí và không giới hạn băng thông dành cho Developer & Webmaster.
+                    </p>
+                    <div class="inline-block px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700/50 mt-2 hover:bg-gray-800 transition">
+                        <a href="https://phimtop1.asia/" target="_blank" class="text-sm flex items-center gap-2 font-bold text-gray-300 hover:text-white">
+                            <i data-lucide="monitor-play" class="w-4 h-4 text-orange-500"></i> Xem phim trực tuyến tại PhimTop1.asia
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Liên kết nhanh -->
+                <div class="md:pl-12">
+                    <h3 class="text-white font-bold mb-4 uppercase text-xs tracking-wider">Liên kết hệ thống</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/" class="hover:text-kk-blue transition flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3"></i> Trang chủ API</a></li>
+                        <li><a href="/api-document" class="hover:text-kk-blue transition flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3"></i> Tài liệu hướng dẫn</a></li>
+                        <li><a href="/cms" class="hover:text-kk-blue transition flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3"></i> Mã nguồn CMS Mẫu</a></li>
+                        <li><a href="https://phimtop1.asia/" target="_blank" class="hover:text-kk-blue transition flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3"></i> PhimTop1.asia</a></li>
+                    </ul>
+                </div>
+
+                <!-- Hỗ trợ -->
+                <div>
+                    <h3 class="text-white font-bold mb-4 uppercase text-xs tracking-wider">Trợ giúp & Hỗ trợ</h3>
+                    <p class="text-sm text-gray-500 mb-4">Gặp lỗi hoặc cần yêu cầu thêm phim? Hãy liên hệ với chúng tôi.</p>
+                    <div class="flex flex-col gap-3">
+                        <a href="https://t.me/" target="_blank" class="w-fit text-sm font-bold border border-[#0088cc]/50 hover:bg-[#0088cc]/10 text-gray-300 hover:text-white px-5 py-2 rounded-lg flex items-center gap-2 transition">
+                            <i data-lucide="send" class="w-4 h-4 text-[#0088cc]"></i> Cộng đồng Telegram
+                        </a>
+                        <button class="w-fit text-sm font-bold border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white px-5 py-2 rounded-lg flex items-center gap-2 transition">
+                            <i data-lucide="mail" class="w-4 h-4 text-orange-500"></i> Yêu cầu cập nhật phim
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-10 pt-6 border-t border-gray-800/50 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-600">
+                <p>&copy; 2026 PhimTop1 API Hub. Vận hành bởi PhimTop1.asia.</p>
+                <p>Designed with <i data-lucide="heart" class="w-3 h-3 inline text-red-500"></i> for Developers.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        
+        async function watchMovie(slug) {
+            try {
+                const btn = document.querySelector('button[onclick^="watchMovie"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></i> Đang tải...';
+                
+                const res = await fetch('/api/phim/' + slug);
+                const data = await res.json();
+                
+                if (data.status && data.episodes && data.episodes.length > 0 && data.episodes[0].server_data.length > 0) {
+                    const embedUrl = data.episodes[0].server_data[0].link_embed;
+                    if (embedUrl) {
+                        window.open(embedUrl, '_blank');
+                    } else {
+                        alert('Chưa có link xem phim (Embed URL) cho tập này.');
+                    }
+                } else {
+                    alert('Phim này hiện tại chưa cập nhật tập nào!');
+                }
+                btn.innerHTML = originalText;
+                lucide.createIcons();
+            } catch (err) {
+                alert('Lỗi tải dữ liệu phim!');
+                console.error(err);
+            }
+        }
+    </script>
+
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

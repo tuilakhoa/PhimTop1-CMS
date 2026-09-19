@@ -45,7 +45,6 @@ dependencies:
   firebase_analytics: any
   simple_pip_mode: any
   network_info_plus: ^8.2.1
-  speech_to_text: any
   package_info_plus: any
   url_launcher: any
   path_provider: any
