@@ -1,8 +1,8 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
-const { MeiliSearch } = require('meilisearch');
+const { Meilisearch } = require('meilisearch');
 
-const client = new MeiliSearch({
+const client = new Meilisearch({
   host: process.env.MEILI_HOST || 'http://127.0.0.1:7700',
   apiKey: process.env.MEILI_MASTER_KEY || 'masterKey123'
 });
