@@ -347,10 +347,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTextLogo(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          "PHIM",
-          style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
+        const Text(
+          "Phim",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         Text(
           "TOP1",
@@ -429,6 +430,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/ai-chat'),
+        backgroundColor: Colors.cyan[600],
+        child: const Icon(Icons.smart_toy, color: Colors.white),
       ),
     );
   }

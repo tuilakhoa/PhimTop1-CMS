@@ -38,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _autoClearDays = 0;
   bool _minimizeToTray = false;
   String _biometricLabel = "Sinh trắc học";
+  bool _autoPlayNext = true;
 
   @override
   void initState() {
@@ -110,6 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _autoClearDays = prefs.getInt('auto_clear_cache_days') ?? 0;
         _minimizeToTray = prefs.getBool('minimize_to_tray_on_close') ?? false;
         _biometricLabel = bioType;
+        _autoPlayNext = prefs.getBool('auto_play_next_episode') ?? true;
       });
     }
   }
@@ -214,6 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
@@ -483,7 +486,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.policy_outlined,
               iconColor: Colors.teal,
               textColor: textColor,
-              title: "Điều khoản & Chính sách",
+              title: "Trung tâm Hỗ trợ",
               onTap: () {
                 context.push('/policy');
               },
@@ -579,7 +582,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thiết bị không hỗ trợ Sinh trắc học')));
                     }
                   } catch (e) {
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng REBUILD app (thay đổi native code): $e')));
+                    String msg = 'Lỗi không xác định';
+                    if (e.toString().contains('noCredentialsSet')) {
+                      msg = 'Vui lòng cài đặt Sinh trắc học (vân tay/khuôn mặt) trên thiết bị trước';
+                    } else {
+                      msg = 'Lỗi Sinh trắc học: $e';
+                    }
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
                   }
                 } else {
                   final prefs = await SharedPreferences.getInstance();
@@ -607,7 +616,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thiết bị không hỗ trợ Sinh trắc học')));
                       }
                     } catch (e) {
-                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng REBUILD app (thay đổi native code): $e')));
+                      String msg = 'Lỗi không xác định';
+                      if (e.toString().contains('noCredentialsSet')) {
+                        msg = 'Vui lòng cài đặt Sinh trắc học (vân tay/khuôn mặt) trên thiết bị trước';
+                      } else {
+                        msg = 'Lỗi Sinh trắc học: $e';
+                      }
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
                     }
                   } else {
                     final prefs = await SharedPreferences.getInstance();
@@ -641,7 +656,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thiết bị không hỗ trợ Sinh trắc học')));
                     }
                   } catch (e) {
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng REBUILD app (thay đổi native code): $e')));
+                    String msg = 'Lỗi không xác định';
+                    if (e.toString().contains('noCredentialsSet')) {
+                      msg = 'Vui lòng cài đặt Sinh trắc học (vân tay/khuôn mặt) trên thiết bị trước';
+                    } else {
+                      msg = 'Lỗi Sinh trắc học: $e';
+                    }
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
                   }
                 } else {
                   final prefs = await SharedPreferences.getInstance();
@@ -669,7 +690,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thiết bị không hỗ trợ Sinh trắc học')));
                       }
                     } catch (e) {
-                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng REBUILD app (thay đổi native code): $e')));
+                      String msg = 'Lỗi không xác định';
+                      if (e.toString().contains('noCredentialsSet')) {
+                        msg = 'Vui lòng cài đặt Sinh trắc học (vân tay/khuôn mặt) trên thiết bị trước';
+                      } else {
+                        msg = 'Lỗi Sinh trắc học: $e';
+                      }
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
                     }
                   } else {
                     final prefs = await SharedPreferences.getInstance();
@@ -700,6 +727,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
               ),
+            MenuRowTile(
+              icon: Icons.skip_next_outlined,
+              iconColor: Colors.green,
+              textColor: textColor,
+              title: "Chuyển tập tự động",
+              subtitle: "Tự động phát tập tiếp theo",
+              trailing: Switch(
+                value: _autoPlayNext,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (val) async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('auto_play_next_episode', val);
+                  setState(() { _autoPlayNext = val; });
+                },
+              ),
+            ),
             MenuRowTile(
               icon: Icons.cleaning_services_outlined,
               iconColor: Colors.deepOrange,

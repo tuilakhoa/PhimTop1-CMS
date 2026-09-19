@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($pdo) {
         $stmt = $pdo->prepare("DELETE FROM user_follows WHERE user_email = ?");
         $stmt->execute([$userEmail]);
-        header('Location: /bookmark.php?cleared=1');
+        header('Location: /follows.php?cleared=1');
         exit;
     }
 }
@@ -47,7 +47,7 @@ include "themes/{$settings['theme']}/header.php";
             <i data-lucide="bookmark" class="w-8 h-8 mr-3 text-red-500"></i> Phim Đang Theo Dõi
         </h1>
         <?php if (!empty($bookmarkItems)): ?>
-        <form method="POST" action="/bookmark.php" onsubmit="return confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử xem phim không? Hành động này không thể hoàn tác.');">
+        <form method="POST" action="/follows.php" onsubmit="return confirm('Bạn có chắc chắn muốn xóa toàn bộ danh sách theo dõi không? Hành động này không thể hoàn tác.');">
             <input type="hidden" name="action" value="clear_follows">
             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors">
                 <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Xóa Lịch Sử

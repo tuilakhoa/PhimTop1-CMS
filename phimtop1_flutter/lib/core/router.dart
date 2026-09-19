@@ -17,7 +17,7 @@ import '../screens/settings_screen.dart';
 import '../screens/terms_screen.dart';
 import '../screens/register_screen.dart';
 import '../screens/forgot_password_screen.dart';
-import '../screens/policy_screen.dart';
+import '../screens/support_screen.dart';
 import '../screens/watch_movie_screen.dart';
 import '../screens/playlist_screen.dart';
 import '../screens/onboarding_screen.dart';
@@ -27,6 +27,7 @@ import '../screens/app_lock_screen.dart';
 import '../screens/appearance_settings_screen.dart';
 import '../screens/download_settings_screen.dart';
 import '../screens/shop_screen.dart';
+import '../screens/ai_chat_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -148,7 +149,7 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
     GoRoute(
       path: '/policy',
       parentNavigatorKey: _rootNavigatorKey,
-      builder: (BuildContext context, GoRouterState state) => const PolicyScreen(),
+      builder: (BuildContext context, GoRouterState state) => const SupportScreen(),
     ),
     GoRoute(
       path: '/follow',
@@ -209,6 +210,11 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
       path: '/shop',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (BuildContext context, GoRouterState state) => const ShopScreen(),
+    ),
+    GoRoute(
+      path: '/ai-chat',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (BuildContext context, GoRouterState state) => const AIChatScreen(),
     ),
   ],
 );

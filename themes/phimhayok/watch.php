@@ -158,17 +158,17 @@ if (isset($_SESSION['user'])) {
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
-                <button onclick="toggleTheaterMode()" class="flex items-center px-4 py-2 bg-[#1a1a1a] hover:bg-[#252525] text-gray-300 hover:text-white text-sm font-medium rounded border border-gray-800">
-                    <i data-lucide="monitor" class="w-4 h-4 mr-2 text-cyan-400"></i> Theater
+                <button onclick="toggleTheaterMode()" class="group flex items-center px-4 py-2.5 bg-[#202020] hover:bg-cyan-500/10 text-gray-300 hover:text-cyan-400 text-sm font-semibold rounded-xl border border-gray-800 hover:border-cyan-500/30 transition-all duration-300 shadow-sm">
+                    <i data-lucide="monitor" class="w-4 h-4 mr-2 text-cyan-400 group-hover:scale-110 transition-transform"></i> Chế độ Rạp
                 </button>
-                <button onclick="toggleWatchPartyDialog()" class="flex items-center px-4 py-2 bg-phim-yellow hover:bg-yellow-400 text-black text-sm font-bold rounded  shadow-[0_0_10px_rgba(234,179,8,0.3)]">
-                    <i data-lucide="users" class="w-4 h-4 mr-2"></i> Xem Chung
+                <button onclick="toggleWatchPartyDialog()" class="group flex items-center px-4 py-2.5 bg-gradient-to-r from-[#fcc526] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#d97706] text-black text-sm font-bold rounded-xl border border-transparent shadow-[0_4px_15px_rgba(252,197,38,0.25)] hover:shadow-[0_6px_20px_rgba(252,197,38,0.4)] transition-all duration-300 transform hover:-translate-y-0.5">
+                    <i data-lucide="users" class="w-4 h-4 mr-2 group-hover:scale-110 transition-transform"></i> Xem Chung
                 </button>
-                <button onclick="reportMovieError()" class="flex items-center px-4 py-2 bg-[#1a1a1a] hover:bg-[#252525] text-gray-300 hover:text-white text-sm font-medium rounded  border border-gray-800">
-                    <i data-lucide="flag" class="w-4 h-4 mr-2 text-red-500"></i> Báo lỗi
+                <button onclick="reportMovieError()" class="group flex items-center px-4 py-2.5 bg-[#202020] hover:bg-red-500/10 text-gray-300 hover:text-red-500 text-sm font-semibold rounded-xl border border-gray-800 hover:border-red-500/30 transition-all duration-300 shadow-sm">
+                    <i data-lucide="flag" class="w-4 h-4 mr-2 text-red-500 group-hover:scale-110 transition-transform"></i> Báo lỗi
                 </button>
-                <div class="px-4 py-2 bg-red-600/10 border border-red-600/30 text-red-500 rounded text-sm font-medium flex items-center">
-                    <i data-lucide="server" class="w-4 h-4 mr-2"></i>
+                <div class="px-4 py-2.5 bg-red-600/10 border border-red-600/20 text-red-500 rounded-xl text-sm font-semibold flex items-center shadow-sm">
+                    <i data-lucide="server" class="w-4 h-4 mr-2 animate-pulse"></i>
                     Server: <?= htmlspecialchars($episodes[$currentServerIndex]['server_name'] ?? 'HLS/Embed') ?>
                 </div>
             </div>
@@ -1039,3 +1039,82 @@ function startWpSync() {
 </script>
 
 <?php include __DIR__ . '/footer.php'; ?>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.server-content-panel').forEach((panel, sIdx) => {
+        const grid = panel.querySelector('.grid');
+        if (!grid) return;
+        const eps = Array.from(grid.querySelectorAll('a'));
+        const chunkSize = 100;
+        if (eps.length > chunkSize) {
+            // Setup chunks
+            const chunksCount = Math.ceil(eps.length / chunkSize);
+            let activeChunk = 0;
+            
+            // Find which chunk contains the active episode
+            eps.forEach((ep, i) => {
+                if (ep.classList.contains('bg-red-600')) {
+                    activeChunk = Math.floor(i / chunkSize);
+                }
+            });
+
+            // Create chunk tabs container
+            const tabsContainer = document.createElement('div');
+            tabsContainer.className = 'flex flex-nowrap overflow-x-auto gap-2 mb-4 pb-2 custom-scrollbar snap-x chunk-tabs-container';
+            
+            for (let i = 0; i < chunksCount; i++) {
+                const btn = document.createElement('button');
+                const start = i * chunkSize + 1;
+                const end = Math.min((i + 1) * chunkSize, eps.length);
+                btn.innerText = start + ' - ' + end;
+                btn.className = 'shrink-0 px-3 py-1 text-sm rounded-lg transition-colors ' + (i === activeChunk ? 'bg-red-600 text-white' : 'bg-[#1a1a1a] text-gray-400 border border-gray-800');
+                btn.onclick = (e) => {
+                    // Update tabs UI
+                    tabsContainer.querySelectorAll('button').forEach(b => {
+                        b.className = 'shrink-0 px-3 py-1 text-sm rounded-lg transition-colors bg-[#1a1a1a] text-gray-400 border border-gray-800';
+                    });
+                    btn.className = 'shrink-0 px-3 py-1 text-sm rounded-lg transition-colors bg-red-600 text-white';
+                    
+                    // Show only eps in this chunk
+                    eps.forEach((ep, idx) => {
+                        if (idx >= i * chunkSize && idx < (i + 1) * chunkSize) {
+                            ep.style.display = 'flex';
+                        } else {
+                            ep.style.display = 'none';
+                        }
+                    });
+                };
+                tabsContainer.appendChild(btn);
+            }
+            
+            // Insert tabs before the grid container
+            panel.insertBefore(tabsContainer, panel.querySelector('.grid'));
+            
+            // Trigger first click to show initial chunk
+            tabsContainer.querySelectorAll('button')[activeChunk].click();
+            
+            // Search integration: if searching, show all matching and hide tabs
+            const searchInput = document.getElementById('search-episode');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const q = this.value.toLowerCase().trim();
+                    if (q === '') {
+                        tabsContainer.style.display = 'flex';
+                        tabsContainer.querySelector('button.bg-red-600').click(); // restore chunk
+                    } else {
+                        tabsContainer.style.display = 'none';
+                        eps.forEach(ep => {
+                            if (ep.textContent.toLowerCase().includes(q)) {
+                                ep.style.display = 'flex';
+                            } else {
+                                ep.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    });
+});
+</script>

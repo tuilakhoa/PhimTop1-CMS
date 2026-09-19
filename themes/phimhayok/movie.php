@@ -603,3 +603,47 @@ if (!empty($_GET['party'])) {
     }
 </script>
 <?php include __DIR__ . '/footer.php'; ?>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.server-content-panel').forEach((panel) => {
+        const grid = panel.querySelector('.grid');
+        if (!grid) return;
+        const eps = Array.from(grid.querySelectorAll('a'));
+        const chunkSize = 100;
+        if (eps.length > chunkSize) {
+            const chunksCount = Math.ceil(eps.length / chunkSize);
+            let activeChunk = 0; // default to first chunk
+
+            const tabsContainer = document.createElement('div');
+            tabsContainer.className = 'flex flex-nowrap overflow-x-auto gap-2 mb-4 pb-2 custom-scrollbar snap-x chunk-tabs-container';
+            
+            for (let i = 0; i < chunksCount; i++) {
+                const btn = document.createElement('button');
+                const start = i * chunkSize + 1;
+                const end = Math.min((i + 1) * chunkSize, eps.length);
+                btn.innerText = start + ' - ' + end;
+                btn.className = 'shrink-0 px-3 py-1 text-sm rounded-lg transition-colors ' + (i === activeChunk ? 'bg-red-600 text-white' : 'bg-[#1a1a1a] text-gray-400 border border-gray-800');
+                btn.onclick = (e) => {
+                    tabsContainer.querySelectorAll('button').forEach(b => {
+                        b.className = 'shrink-0 px-3 py-1 text-sm rounded-lg transition-colors bg-[#1a1a1a] text-gray-400 border border-gray-800';
+                    });
+                    btn.className = 'shrink-0 px-3 py-1 text-sm rounded-lg transition-colors bg-red-600 text-white';
+                    
+                    eps.forEach((ep, idx) => {
+                        if (idx >= i * chunkSize && idx < (i + 1) * chunkSize) {
+                            ep.style.display = 'flex';
+                        } else {
+                            ep.style.display = 'none';
+                        }
+                    });
+                };
+                tabsContainer.appendChild(btn);
+            }
+            
+            panel.insertBefore(tabsContainer, panel.querySelector('.grid'));
+            tabsContainer.querySelectorAll('button')[activeChunk].click();
+        }
+    });
+});
+</script>

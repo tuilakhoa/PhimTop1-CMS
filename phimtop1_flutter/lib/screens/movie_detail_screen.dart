@@ -43,6 +43,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
   bool _isVideoInitialized = false;
   Timer? _historySyncTimer;
 
+  int _currentChunkIndex = 0;
+
   bool _hasAutoPlayed = false;
   Color get _textColor => Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87;
   Color get _subtitleColor => Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54;
@@ -515,29 +517,72 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
                             _episodeSearchQuery.isEmpty || e.value.name.toLowerCase().contains(_episodeSearchQuery)
                           ).toList();
                           
-                          return GridView.builder(
-                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 120,
-                              childAspectRatio: 2.2,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                            ),
-                            itemCount: filteredEps.length,
-                            itemBuilder: (context, i) {
-                              final index = filteredEps[i].key;
-                              final ep = filteredEps[i].value;
-                              
-                              double progress = 0;
-                              if (provider.historyMatch != null && provider.historyMatch!.episodeSlug == ep.slug && provider.historyMatch!.duration > 0) {
-                                progress = provider.historyMatch!.currentTime / provider.historyMatch!.duration;
-                                if (progress > 1.0) progress = 1.0;
-                              }
-                              
-                              return Focus(
-                                child: Builder(
-                                  builder: (context) {
-                                    final hasFocus = Focus.of(context).hasFocus;
-                                    return InkWell(
+                          final int chunkSize = 100;
+                          final bool isLongSeries = filteredEps.length > chunkSize && _episodeSearchQuery.isEmpty;
+                          
+                          final int totalChunks = isLongSeries ? (filteredEps.length / chunkSize).ceil() : 1;
+                          final displayedEps = isLongSeries 
+                              ? filteredEps.skip(_currentChunkIndex * chunkSize).take(chunkSize).toList() 
+                              : filteredEps;
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (isLongSeries)
+                                Container(
+                                  height: 40,
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: totalChunks,
+                                    itemBuilder: (context, index) {
+                                      final start = index * chunkSize + 1;
+                                      final end = (index + 1) * chunkSize > filteredEps.length ? filteredEps.length : (index + 1) * chunkSize;
+                                      final isSelected = _currentChunkIndex == index;
+                                      
+                                      return Padding(
+                                        padding: const EdgeInsets.only(right: 8.0),
+                                        child: ChoiceChip(
+                                          label: Text('$start - $end'),
+                                          selected: isSelected,
+                                          onSelected: (selected) {
+                                            if (selected) setState(() => _currentChunkIndex = index);
+                                          },
+                                          selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                                          labelStyle: TextStyle(
+                                            color: isSelected ? Theme.of(context).primaryColor : _textColor,
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                          ),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              Expanded(
+                                child: GridView.builder(
+                                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 120,
+                                    childAspectRatio: 2.2,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                  ),
+                                  itemCount: displayedEps.length,
+                                  itemBuilder: (context, i) {
+                                    final index = displayedEps[i].key;
+                                    final ep = displayedEps[i].value;
+                                    
+                                    double progress = 0;
+                                    if (provider.historyMatch != null && provider.historyMatch!.episodeSlug == ep.slug && provider.historyMatch!.duration > 0) {
+                                      progress = provider.historyMatch!.currentTime / provider.historyMatch!.duration;
+                                      if (progress > 1.0) progress = 1.0;
+                                    }
+                                    
+                                    return Focus(
+                                      child: Builder(
+                                        builder: (context) {
+                                          final hasFocus = Focus.of(context).hasFocus;
+                                          return InkWell(
                                       onTap: () {
                                         provider.changeEpisode(index, provider.currentServerIndex);
                                         _watchMovie(provider);
@@ -591,9 +636,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
                                 ),
                               );
                             },
-                          );
+                                  ),
+                                ),
+                              ],
+                            );
                         }),
-                      )
+                      ),
                     ]
                   ],
                 ),

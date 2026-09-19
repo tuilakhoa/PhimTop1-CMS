@@ -42,11 +42,11 @@
                 <div>
                     <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Hỗ Trợ</h3>
                     <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-white ">Giới thiệu</a></li>
-                        <li><a href="#" class="hover:text-white ">Liên hệ</a></li>
-                        <li><a href="#" class="hover:text-white ">Điều khoản dịch vụ</a></li>
-                        <li><a href="#" class="hover:text-white ">Chính sách bảo mật</a></li>
-                        <li><a href="#" class="hover:text-white ">Khiếu nại bản quyền</a></li>
+                        <li><a href="/support.php?page=about" class="hover:text-white ">Giới thiệu</a></li>
+                        <li><a href="/support.php?page=contact" class="hover:text-white ">Liên hệ</a></li>
+                        <li><a href="/support.php?page=terms" class="hover:text-white ">Điều khoản dịch vụ</a></li>
+                        <li><a href="/support.php?page=privacy" class="hover:text-white ">Chính sách bảo mật</a></li>
+                        <li><a href="/support.php?page=dmca" class="hover:text-white ">Khiếu nại bản quyền</a></li>
                     </ul>
                 </div>
             </div>
@@ -297,6 +297,174 @@
     </script>
     <?php do_action('cms_footer'); ?>
 
+
+<!-- AI Chatbot Floating Widget -->
+<div id="ai-chatbot-container" class="fixed bottom-6 right-6 z-50 flex flex-col items-end hidden">
+    <div class="bg-[#1a1a1a] border border-gray-800 rounded-2xl shadow-2xl w-[350px] mb-4 overflow-hidden flex flex-col h-[500px] transition-all transform origin-bottom-right scale-0" id="ai-chat-window">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-cyan-600 to-blue-600 p-4 flex justify-between items-center text-white">
+            <div class="flex items-center gap-2">
+                <i data-lucide="bot" class="w-6 h-6"></i>
+                <span class="font-bold">Trợ lý AI PhimTop1</span>
+            </div>
+            <button onclick="toggleAiChat()" class="hover:text-gray-200 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        
+        <!-- Chat Area -->
+        <div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto bg-[#0a0a0a] flex flex-col gap-4">
+            <!-- Welcome message -->
+            <div class="flex gap-2">
+                <div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                </div>
+                <div class="bg-[#1f1f1f] border border-gray-800 rounded-2xl rounded-tl-none p-3 text-sm text-gray-300 shadow-sm">
+                    Xin chào! Em có thể giúp anh/chị tìm phim gì hôm nay? (VD: <i>"Tìm phim hành động Mỹ năm 2023 điểm cao"</i>)
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-3 border-t border-gray-800 bg-[#1a1a1a]">
+            <form id="ai-chat-form" class="relative" onsubmit="handleAiChatSubmit(event)">
+                <input type="text" id="ai-chat-input" placeholder="Nhập yêu cầu tìm phim..." class="w-full bg-[#2a2a2a] text-white border border-gray-700 rounded-full py-2.5 pl-4 pr-12 focus:outline-none focus:border-cyan-500 text-sm">
+                <button type="submit" class="absolute right-1 top-1 bottom-1 w-8 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center transition-colors">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Floating Button -->
+    <button onclick="toggleAiChat()" class="w-14 h-14 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full shadow-lg shadow-cyan-500/30 flex items-center justify-center text-white hover:scale-110 transition-transform focus:outline-none">
+        <i data-lucide="sparkles" class="w-6 h-6"></i>
+    </button>
+</div>
+
+<script>
+// Chatbot logic
+function toggleAiChat() {
+    const container = document.getElementById('ai-chatbot-container');
+    const win = document.getElementById('ai-chat-window');
+    
+    if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        // trigger reflow
+        void win.offsetWidth;
+        win.classList.remove('scale-0');
+        win.classList.add('scale-100');
+        document.getElementById('ai-chat-input').focus();
+    } else {
+        win.classList.remove('scale-100');
+        win.classList.add('scale-0');
+        setTimeout(() => container.classList.add('hidden'), 300);
+    }
+}
+
+async function handleAiChatSubmit(e) {
+    e.preventDefault();
+    const input = document.getElementById('ai-chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    input.value = '';
+    appendChatMessage(msg, 'user');
+
+    // Show loading
+    const loadingId = appendChatMessage('...', 'ai', true);
+
+    try {
+        const res = await fetch(`/api/v1/ai_chat.php?q=${encodeURIComponent(msg)}`);
+        const data = await res.json();
+        
+        removeChatMessage(loadingId);
+
+        if (data.status === 'success') {
+            appendChatMessage(data.reply, 'ai');
+            if (data.movies && data.movies.length > 0) {
+                appendMovieCards(data.movies);
+            }
+        } else {
+            appendChatMessage("Xin lỗi, hệ thống AI đang gặp sự cố: " + (data.message || 'Unknown'), 'ai');
+        }
+    } catch (error) {
+        removeChatMessage(loadingId);
+        appendChatMessage("Xin lỗi, không thể kết nối tới server.", 'ai');
+    }
+}
+
+function appendChatMessage(text, role, isLoading = false) {
+    const msgArea = document.getElementById('ai-chat-messages');
+    const id = 'msg-' + Date.now();
+    const div = document.createElement('div');
+    div.id = id;
+    div.className = 'flex gap-2 ' + (role === 'user' ? 'flex-row-reverse' : '');
+    
+    let avatar = '';
+    let bubbleClass = '';
+    
+    if (role === 'ai') {
+        avatar = `<div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center shrink-0"><i data-lucide="bot" class="w-4 h-4 text-white"></i></div>`;
+        bubbleClass = 'bg-[#1f1f1f] border border-gray-800 rounded-2xl rounded-tl-none text-gray-300';
+    } else {
+        avatar = `<div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-white"></i></div>`;
+        bubbleClass = 'bg-cyan-600 rounded-2xl rounded-tr-none text-white';
+    }
+
+    div.innerHTML = `
+        ${avatar}
+        <div class="${bubbleClass} p-3 text-sm shadow-sm max-w-[80%]">
+            ${isLoading ? '<div class="flex gap-1 items-center h-5"><div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div><div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div></div>' : text}
+        </div>
+    `;
+    msgArea.appendChild(div);
+    if(window.lucide) window.lucide.createIcons();
+    msgArea.scrollTo({ top: msgArea.scrollHeight, behavior: 'smooth' });
+    return id;
+}
+
+function removeChatMessage(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+}
+
+function appendMovieCards(movies) {
+    const msgArea = document.getElementById('ai-chat-messages');
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex overflow-x-auto gap-3 pb-2 custom-scrollbar snap-x';
+    
+    let html = '';
+    movies.forEach(m => {
+        html += `
+            <a href="/phim/${m.slug}" class="shrink-0 w-32 group snap-start block">
+                <div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden mb-1">
+                    <img src="${m.thumb_url}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    ${m.tmdb_vote ? `<div class="absolute top-1 right-1 bg-yellow-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center"><i data-lucide="star" class="w-2.5 h-2.5 mr-0.5"></i>${m.tmdb_vote}</div>` : ''}
+                </div>
+                <h4 class="text-white text-xs font-medium truncate">${m.name}</h4>
+                <p class="text-gray-400 text-[10px] truncate">${m.year || ''}</p>
+            </a>
+        `;
+    });
+    wrapper.innerHTML = html;
+    
+    const div = document.createElement('div');
+    div.className = 'flex gap-2 pl-10'; // align with ai bubble
+    div.appendChild(wrapper);
+    
+    msgArea.appendChild(div);
+    if(window.lucide) window.lucide.createIcons();
+    msgArea.scrollTo({ top: msgArea.scrollHeight, behavior: 'smooth' });
+}
+
+// Show AI button on load
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('ai-chatbot-container').classList.remove('hidden');
+});
+</script>
 
 </body>
 </html>

@@ -19,6 +19,7 @@ import '../services/mini_player_service.dart';
 import '../providers/auth_provider.dart';
 import '../api/cms_api.dart';
 import '../services/widget_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WatchMovieScreen extends StatefulWidget {
   final String m3u8Link;
@@ -61,6 +62,9 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> with WidgetsBinding
   Timer? _historySyncTimer;
 
   String? _token;
+  
+  double _currentSpeed = 1.0;
+  bool _isScreenLocked = false;
 
   @override
   void initState() {
@@ -173,9 +177,14 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> with WidgetsBinding
           if (dur > 0 && pos > 0 && (pos / dur >= 0.95)) {
             if (!autoPlayFired) {
                autoPlayFired = true;
-               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tự động chuyển tập...')));
-               Future.delayed(const Duration(seconds: 3), () {
-                 if (mounted) Navigator.pop(context, 'next_episode');
+               SharedPreferences.getInstance().then((prefs) {
+                 final autoPlayNext = prefs.getBool('auto_play_next_episode') ?? true;
+                 if (autoPlayNext) {
+                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tự động chuyển tập...')));
+                   Future.delayed(const Duration(seconds: 3), () {
+                     if (mounted) Navigator.pop(context, 'next_episode');
+                   });
+                 }
                });
             }
           }
@@ -441,6 +450,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> with WidgetsBinding
   void _showMobileActiveWatchPartyView() {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.grey[900],
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
@@ -594,6 +604,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> with WidgetsBinding
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.grey[900],
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
@@ -1073,6 +1084,33 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> with WidgetsBinding
 
   // Menu items moved to AppBar actions directly to avoid duplicate 3-dot menus
 
+  void _showSpeedDialog() {
+    final speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Tốc độ phát', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: speeds.map((speed) {
+            return ListTile(
+              title: Text('${speed}x', style: TextStyle(color: _currentSpeed == speed ? Theme.of(context).primaryColor : Colors.white)),
+              trailing: _currentSpeed == speed ? Icon(Icons.check, color: Theme.of(context).primaryColor) : null,
+              onTap: () {
+                setState(() {
+                  _currentSpeed = speed;
+                });
+                _player.setRate(speed);
+                Navigator.pop(context);
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isTv = _isTvMode(context);
@@ -1081,7 +1119,13 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> with WidgetsBinding
         normal: MaterialVideoControlsThemeData(
           seekBarThumbColor: Theme.of(context).primaryColor,
           seekBarPositionColor: Theme.of(context).primaryColor,
+          bottomButtonBarMargin: const EdgeInsets.only(left: 16, right: 16, bottom: 40),
           topButtonBar: [
+            const Spacer(),
+          ],
+          bottomButtonBar: [
+            const MaterialPlayOrPauseButton(),
+            const MaterialPositionIndicator(),
             const Spacer(),
             MaterialCustomButton(
               onPressed: () { SimplePip().enterPipMode(); },
@@ -1105,20 +1149,36 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> with WidgetsBinding
               icon: const Icon(Icons.fit_screen_rounded, color: Colors.white),
             ),
             MaterialCustomButton(
+              onPressed: () { _showSpeedDialog(); },
+              icon: const Icon(Icons.speed, color: Colors.white),
+            ),
+            MaterialCustomButton(
               onPressed: () { _showWatchPartyDialog(); },
               icon: Icon(_wpRoomCode != null ? Icons.group : Icons.group_add, color: Colors.white),
             ),
+            MaterialCustomButton(
+              onPressed: () { _showSpeedDialog(); },
+              icon: const Icon(Icons.speed, color: Colors.white),
+            ),
+            const MaterialFullscreenButton(),
           ],
         ),
         fullscreen: MaterialVideoControlsThemeData(
           seekBarThumbColor: Theme.of(context).primaryColor,
           seekBarPositionColor: Theme.of(context).primaryColor,
+          bottomButtonBarMargin: const EdgeInsets.only(left: 16, right: 16, bottom: 40),
           topButtonBar: [
+            const Spacer(),
+          ],
+          bottomButtonBar: [
+            const MaterialPlayOrPauseButton(),
+            const MaterialPositionIndicator(),
             const Spacer(),
             MaterialCustomButton(
               onPressed: () { SimplePip().enterPipMode(); },
               icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
             ),
+            const MaterialFullscreenButton(),
           ],
         ),
         child: Video(controller: _videoController),
@@ -1205,7 +1265,10 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> with WidgetsBinding
               ),
           ],
         ),
-        body: isTv ? tvLayout : playerWidget,
+        body: SafeArea(
+          bottom: true,
+          child: isTv ? tvLayout : playerWidget,
+        ),
       ),
     );
   }

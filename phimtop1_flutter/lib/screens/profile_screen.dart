@@ -71,7 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           final user = auth.user!;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 120),
             children: [
               Row(
                 children: [
@@ -191,6 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.grey[900],
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
