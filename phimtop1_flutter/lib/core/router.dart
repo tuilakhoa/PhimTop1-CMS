@@ -27,7 +27,6 @@ import '../screens/app_lock_screen.dart';
 import '../screens/appearance_settings_screen.dart';
 import '../screens/download_settings_screen.dart';
 import '../screens/shop_screen.dart';
-import '../screens/ai_chat_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -212,11 +211,6 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
       builder: (BuildContext context, GoRouterState state) => const ShopScreen(),
     ),
     GoRoute(
-      path: '/ai-chat',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (BuildContext context, GoRouterState state) => const AIChatScreen(),
-    ),
-  ],
 );
 }
 

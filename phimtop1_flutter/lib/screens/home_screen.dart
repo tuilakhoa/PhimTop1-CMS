@@ -431,11 +431,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/ai-chat'),
-        backgroundColor: Colors.cyan[600],
-        child: const Icon(Icons.smart_toy, color: Colors.white),
-      ),
     );
   }
 }

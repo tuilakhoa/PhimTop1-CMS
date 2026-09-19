@@ -252,12 +252,41 @@ app.get('/search', async (req, res) => {
         const limit = 36;
         const offset = (page - 1) * limit;
 
-        const [countRes] = await pool.query('SELECT COUNT(id) as total FROM movies WHERE name LIKE ? OR origin_name LIKE ?', [`%${keyword}%`, `%${keyword}%`]);
-        const [movies] = await pool.query('SELECT name, slug, year, origin_name, status, episode_current, type, thumb_url, updated_at, tmdb_vote, imdb_vote, countries_json FROM movies WHERE name LIKE ? OR origin_name LIKE ? ORDER BY updated_at DESC LIMIT ? OFFSET ?', [`%${keyword}%`, `%${keyword}%`, limit, offset]);
-        
+        let totalMovies = 0;
+        let movies = [];
         const taxonomies = await getDynamicTaxonomies();
+        
+        try {
+            // Attempt to search with Meilisearch
+            const { MeiliSearch } = require('meilisearch');
+            const client = new MeiliSearch({
+                host: process.env.MEILI_HOST || 'http://127.0.0.1:7700',
+                apiKey: process.env.MEILI_MASTER_KEY || 'masterKey123'
+            });
+            const index = client.index('movies');
+            const searchRes = await index.search(keyword, {
+                limit: limit,
+                offset: offset
+            });
+            
+            totalMovies = searchRes.estimatedTotalHits;
+            movies = searchRes.hits.map(h => ({
+                name: h.name, slug: h.id, year: h.year, origin_name: h.origin_name,
+                status: h.status, type: h.type, thumb_url: h.thumb_url, tmdb_vote: h.tmdb_vote,
+                // Meilisearch returns id as slug based on sync_meilisearch.js mapping
+                actor: h.actor
+            }));
+        } catch (meiliError) {
+            console.log('Meilisearch not available, falling back to MySQL search...');
+            // Fallback to MySQL
+            const [countRes] = await pool.query('SELECT COUNT(id) as total FROM movies WHERE name LIKE ? OR origin_name LIKE ? OR actor LIKE ?', [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`]);
+            const [sqlMovies] = await pool.query('SELECT name, slug, year, origin_name, status, episode_current, type, thumb_url, updated_at, tmdb_vote, imdb_vote, countries_json FROM movies WHERE name LIKE ? OR origin_name LIKE ? OR actor LIKE ? ORDER BY updated_at DESC LIMIT ? OFFSET ?', [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`, limit, offset]);
+            totalMovies = countRes[0].total;
+            movies = sqlMovies;
+        }
+        
         res.render('index', { 
-            totalMovies: countRes[0].total,
+            totalMovies: totalMovies,
             todayMovies: 0,
             movies: movies,
             page: page,
