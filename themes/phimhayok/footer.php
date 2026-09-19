@@ -60,8 +60,8 @@
                     </div>
                     <div>
                         <p class="text-gray-300 font-medium text-sm leading-relaxed">
-                            <span class="text-white font-bold text-base">Idol Trung Quốc bị truyền thông tẩy não thì khó trách,</span> nhưng chủ quyền dân tộc ta là tuyệt đối!
-                            <br class="hidden sm:block"/>Cảm thông không có nghĩa là mù quáng ủng hộ nghệ sĩ share "Đường lưỡi bò". <span class="text-red-400 font-bold tracking-wide">YÊU NƯỚC LÀ PHẢI RẠCH RÒI, QUỐC GIA LÀ TRÊN HẾT!</span>
+                            <span class="text-white font-bold text-base">Idol bị tẩy não thì khó trách, nhưng chủ quyền là tuyệt đối!</span>
+                            <br class="hidden sm:block"/>Cảm thông chứ không dung túng. Tuyệt đối NÓI KHÔNG với nghệ sĩ share "Đường lưỡi bò". <span class="text-red-400 font-bold tracking-wide">YÊU NƯỚC LÀ PHẢI RẠCH RÒI!</span>
                         </p>
                     </div>
                 </div>
