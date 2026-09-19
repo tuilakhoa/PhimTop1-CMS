@@ -292,13 +292,16 @@ if ($pdo) {
             <div class="flex items-center gap-4 shrink-0">
                 <form action="/search" method="GET" class="relative hidden md:block">
                     <input type="text" name="keyword" id="desktopSearchInput" placeholder="Tìm kiếm phim, diễn viên, đạo diễn..." 
-                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-16 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-transparent w-[300px] placeholder-gray-500 font-medium transition-all focus:w-[350px]">
-                    <button type="button" onclick="startVoiceSearch('desktopSearchInput')" class="absolute right-9 top-2.5 text-gray-400 hover:text-red-500 transition-colors" title="Tìm kiếm bằng giọng nói">
-                        <i data-lucide="mic" class="w-5 h-5"></i>
-                    </button>
-                    <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-white">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                    </button>
+                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-[72px] py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-transparent w-[300px] placeholder-gray-500 font-medium transition-all focus:w-[350px]">
+                    <div class="absolute right-3 top-0 h-full flex items-center gap-2">
+                        <button type="button" onclick="startVoiceSearch('desktopSearchInput')" class="text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center" title="Tìm kiếm bằng giọng nói">
+                            <i data-lucide="mic" class="w-[18px] h-[18px]"></i>
+                        </button>
+                        <div class="h-4 w-px bg-gray-700"></div>
+                        <button type="submit" class="text-gray-400 hover:text-white flex items-center justify-center">
+                            <i data-lucide="search" class="w-[18px] h-[18px]"></i>
+                        </button>
+                    </div>
                 </form>
 
                 <?php if (!empty($settings['appDownloadUrl']) || !empty($settings['appDownloadUrlTv']) || !empty($settings['appDownloadUrlWindows']) || !empty($settings['appDownloadUrlLinux']) || !empty($settings['appDownloadUrlFedora']) || !empty($settings['appDownloadUrlUbuntu'])): ?>
@@ -322,13 +325,16 @@ if ($pdo) {
                 <!-- Mobile Search Form -->
                 <form action="/search" method="GET" class="relative w-full">
                     <input type="text" name="keyword" id="mobileSearchInput" placeholder="Tìm kiếm phim, diễn viên..." 
-                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-16 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-gray-800 w-full placeholder-gray-500 font-medium">
-                    <button type="button" onclick="startVoiceSearch('mobileSearchInput')" class="absolute right-9 top-2.5 text-gray-400 hover:text-red-500 transition-colors" title="Tìm kiếm bằng giọng nói">
-                        <i data-lucide="mic" class="w-5 h-5"></i>
-                    </button>
-                    <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-white">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                    </button>
+                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-[72px] py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-gray-800 w-full placeholder-gray-500 font-medium">
+                    <div class="absolute right-3 top-0 h-full flex items-center gap-2">
+                        <button type="button" onclick="startVoiceSearch('mobileSearchInput')" class="text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center" title="Tìm kiếm bằng giọng nói">
+                            <i data-lucide="mic" class="w-[18px] h-[18px]"></i>
+                        </button>
+                        <div class="h-4 w-px bg-gray-700"></div>
+                        <button type="submit" class="text-gray-400 hover:text-white flex items-center justify-center">
+                            <i data-lucide="search" class="w-[18px] h-[18px]"></i>
+                        </button>
+                    </div>
                 </form>
 
                 <div class="flex flex-col space-y-3 font-medium text-gray-300">
