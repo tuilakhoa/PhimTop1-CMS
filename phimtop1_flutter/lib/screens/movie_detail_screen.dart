@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../widgets/report_error_dialog.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -41,6 +42,11 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
   late final Player _player = Player();
   late final VideoController _videoController = VideoController(_player);
   bool _isVideoInitialized = false;
+  
+  bool _isEmbed = false;
+  String _embedUrl = '';
+  late final WebViewController _webViewController;
+  
   Timer? _historySyncTimer;
 
   int _currentChunkIndex = 0;
@@ -149,6 +155,35 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
 
   Widget _buildInlinePlayer() {
     if (_isVideoInitialized) {
+      if (_isEmbed) {
+        return AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Stack(
+            children: [
+              WebViewWidget(controller: _webViewController),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  icon: const Icon(Icons.fullscreen, color: Colors.white, size: 30),
+                  onPressed: () {
+                    setState(() { _isPlayingInline = false; _isVideoInitialized = false; });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => WatchEmbedScreen(
+                          embedUrl: _embedUrl,
+                          title: context.read<DetailProvider>().movie?.name ?? "",
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      }
       return AspectRatio(
         aspectRatio: 16 / 9,
         child: MaterialVideoControlsTheme(
@@ -163,19 +198,25 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
               ),
               MaterialCustomButton(
                 onPressed: () {
-                  setState(() { _isPlayingInline = false; });
-                  MiniPlayerService().showMiniPlayer(
-                    context: context,
-                    controller: _videoController,
-                    movieSlug: widget.slug,
-                    episodeSlug: context.read<DetailProvider>().episodes[context.read<DetailProvider>().currentServerIndex].serverData[context.read<DetailProvider>().currentEpisodeIndex].slug,
-                    onExpand: () {
-                      Navigator.pushNamed(context, '/detail', arguments: widget.slug);
-                    },
-                    onClose: () {},
+                  _player.pause();
+                  setState(() { _isPlayingInline = false; _isVideoInitialized = false; });
+                  final provider = context.read<DetailProvider>();
+                  final episode = provider.episodes[provider.currentServerIndex].serverData[provider.currentEpisodeIndex];
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WatchMovieScreen(
+                        m3u8Link: episode.linkM3u8,
+                        title: provider.movie?.name ?? "",
+                        movieSlug: widget.slug,
+                        episodeName: episode.name,
+                        episodeSlug: episode.slug,
+                        thumbUrl: provider.movie?.thumbUrl ?? '',
+                      ),
+                    ),
                   );
                 },
-                icon: const Icon(Icons.fit_screen_rounded, color: Colors.white),
+                icon: const Icon(Icons.fullscreen, color: Colors.white),
               ),
             ],
           ),
@@ -230,18 +271,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
           }
 
           if (m3u8Link.isNotEmpty) {
-            setState(() { _isPlayingInline = true; });
+            setState(() { _isPlayingInline = true; _isEmbed = false; });
             _initInlinePlayer(m3u8Link, episode, provider);
           } else if (embedLink.isNotEmpty) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => WatchEmbedScreen(
-                  embedUrl: embedLink,
-                  title: provider.movie?.name ?? "",
-                ),
-              ),
-            );
+            setState(() { _isPlayingInline = true; _isEmbed = true; _embedUrl = embedLink; _isVideoInitialized = true; });
+            _webViewController = WebViewController()
+              ..setJavaScriptMode(JavaScriptMode.unrestricted)
+              ..setBackgroundColor(const Color(0x00000000))
+              ..loadRequest(Uri.parse(embedLink));
           }
         }
       }
@@ -369,6 +406,43 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> with WidgetsBindi
                       }
                     ),
                   ),
+                  if (movie.trailerUrl != null && movie.trailerUrl!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Builder(
+                      builder: (context) {
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => WatchEmbedScreen(
+                                  embedUrl: movie.trailerUrl!,
+                                  title: 'Trailer: ${movie.name}',
+                                ),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: _textColor.withOpacity(0.5)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.movie_filter_outlined, color: _textColor),
+                                const SizedBox(width: 8),
+                                Text("Xem Trailer", style: TextStyle(color: _textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                    ),
+                  ],
                 ],
               ),
             ),

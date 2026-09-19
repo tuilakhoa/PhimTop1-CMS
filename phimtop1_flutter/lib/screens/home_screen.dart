@@ -364,32 +364,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Consumer<HomeProvider>(
-          builder: (context, provider, child) {
-            if (provider.logoUrl.isNotEmpty) {
-              final logo = provider.logoUrl;
-              final fullUrl = logo.startsWith('http') ? logo : '${AppConfig.baseUrl}${logo.startsWith('/') ? '' : '/'}$logo';
-              return Image.network(
-                fullUrl,
-                height: 32,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => _buildTextLogo(context),
-              );
-            }
-            return _buildTextLogo(context);
-          },
-        ),
-        actions: [
-          const TvCastButton(),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              context.push('/search');
-            },
-          )
-        ],
-      ),
       body: Consumer<HomeProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
@@ -404,29 +378,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return RefreshIndicator(
             onRefresh: provider.fetchHomeData,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Featured Slider
-                  if (provider.featuredMovies.isNotEmpty) 
-                    FeaturedSlider(
-                      movies: provider.featuredMovies,
-                      domain: provider.domain,
-                    ),
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  snap: true,
+                  elevation: 0,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
+                  title: provider.logoUrl.isNotEmpty 
+                    ? Image.network(
+                        provider.logoUrl.startsWith('http') ? provider.logoUrl : '${AppConfig.baseUrl}${provider.logoUrl.startsWith('/') ? '' : '/'}${provider.logoUrl}',
+                        height: 32,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => _buildTextLogo(context),
+                      )
+                    : _buildTextLogo(context),
+                  actions: [
+                    const TvCastButton(),
+                    IconButton(
+                      icon: const Icon(Icons.search),
+                      onPressed: () {
+                        context.push('/search');
+                      },
+                    )
+                  ],
+                ),
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Featured Slider
+                      if (provider.featuredMovies.isNotEmpty) 
+                        FeaturedSlider(
+                          movies: provider.featuredMovies,
+                          domain: provider.domain,
+                        ),
 
-                  if (_history.isNotEmpty) _buildHistoryList(),
+                      if (_history.isNotEmpty) _buildHistoryList(),
 
-                  _buildHorizontalList("Phim Mới Cập Nhật", provider.normalMovies, provider.domain),
-                  _buildGridList("Bảng Xếp Hạng", provider.trendingMovies, provider.domain),
-                  if (provider.recommendedMovies.isNotEmpty) _buildLargeHorizontalList("Dành Riêng Cho Bạn", provider.recommendedMovies, provider.domain),
-                  _buildHorizontalList("Phim Bộ Mới Nhất", provider.phimBo, provider.domain),
-                  _buildGridList("Phim Lẻ Mới Nhất", provider.phimLe, provider.domain),
-                  _buildHorizontalList("TV Shows", provider.tvShows, provider.domain),
-                  _buildHorizontalList("Phim Hoạt Hình", provider.hoatHinh, provider.domain),
-                  const SizedBox(height: 32),
-                ],
-              ),
+                      _buildHorizontalList("Phim Mới Cập Nhật", provider.normalMovies, provider.domain),
+                      _buildGridList("Bảng Xếp Hạng", provider.trendingMovies, provider.domain),
+                      if (provider.recommendedMovies.isNotEmpty) _buildLargeHorizontalList("Dành Riêng Cho Bạn", provider.recommendedMovies, provider.domain),
+                      _buildHorizontalList("Phim Bộ Mới Nhất", provider.phimBo, provider.domain),
+                      _buildGridList("Phim Lẻ Mới Nhất", provider.phimLe, provider.domain),
+                      _buildHorizontalList("TV Shows", provider.tvShows, provider.domain),
+                      _buildHorizontalList("Phim Hoạt Hình", provider.hoatHinh, provider.domain),
+                      const SizedBox(height: 100),
+                    ],
+                  ),
+                ),
+              ],
             ),
           );
         },

@@ -42,31 +42,63 @@ class MainScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      extendBody: true, // Allow content to scroll behind the bottom nav bar
+      extendBody: true,
       body: child,
-      bottomNavigationBar: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
-              border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1), width: 0.5)),
-            ),
-            child: BottomNavigationBar(
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              currentIndex: _calculateSelectedIndex(context) > 4 ? 0 : _calculateSelectedIndex(context),
-              onTap: (int index) => _onItemTapped(index, context),
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: Colors.amber,
-              unselectedItemColor: Colors.white54,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
-                BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: 'BXH'),
-                BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Khám phá'),
-                BottomNavigationBarItem(icon: Icon(Icons.animation), label: 'Hoạt hình'),
-                BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
-              ],
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 10,
+                spreadRadius: 2,
+              )
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+                  border: Border.all(color: Colors.white.withOpacity(0.1), width: 0.5),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: NavigationBarTheme(
+                  data: NavigationBarThemeData(
+                    indicatorColor: Colors.amber.withOpacity(0.2),
+                    labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold);
+                      }
+                      return TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12);
+                    }),
+                    iconTheme: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return const IconThemeData(color: Colors.amber);
+                      }
+                      return IconThemeData(color: Colors.white.withOpacity(0.7));
+                    }),
+                  ),
+                  child: NavigationBar(
+                    height: 64,
+                    elevation: 0,
+                    backgroundColor: Colors.transparent,
+                    selectedIndex: _calculateSelectedIndex(context) > 4 ? 0 : _calculateSelectedIndex(context),
+                    onDestinationSelected: (int index) => _onItemTapped(index, context),
+                    destinations: const [
+                      NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Trang chủ'),
+                      NavigationDestination(icon: Icon(Icons.trending_up_outlined), selectedIcon: Icon(Icons.trending_up), label: 'BXH'),
+                      NavigationDestination(icon: Icon(Icons.explore_outlined), selectedIcon: Icon(Icons.explore), label: 'Khám phá'),
+                      NavigationDestination(icon: Icon(Icons.animation_outlined), selectedIcon: Icon(Icons.animation), label: 'Hoạt hình'),
+                      NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Cá nhân'),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),

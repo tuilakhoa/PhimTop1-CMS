@@ -1,6 +1,36 @@
     </main>
 
-
+    <!-- Hover Movie Modal -->
+    <div id="hover-movie-modal" class="fixed z-[100] hidden pointer-events-none transition-opacity duration-200 opacity-0 scale-95" style="width: 320px;">
+        <div class="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden">
+            <div class="relative w-full aspect-video bg-black">
+                <img id="hover-modal-img" src="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+                <div class="absolute bottom-2 left-3 flex gap-2">
+                    <span id="hover-modal-quality" class="bg-phim-yellow text-black text-[10px] font-bold px-2 py-0.5 rounded-sm"></span>
+                    <span id="hover-modal-lang" class="bg-gray-800 border border-gray-600 text-gray-200 text-[10px] px-2 py-0.5 rounded-sm"></span>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-900">
+                <h3 id="hover-modal-title" class="text-white font-bold text-lg leading-tight mb-1"></h3>
+                <p id="hover-modal-origin" class="text-gray-400 text-xs mb-3 truncate"></p>
+                
+                <div class="flex flex-wrap gap-2 mb-3 text-xs text-gray-300">
+                    <span id="hover-modal-year" class="font-medium"></span> • 
+                    <span id="hover-modal-time"></span>
+                </div>
+                
+                <p id="hover-modal-desc" class="text-gray-400 text-xs line-clamp-3 leading-relaxed"></p>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        #hover-movie-modal.show-modal {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
 
     <footer class="bg-black/50 backdrop-blur-xl border-t border-white/10 py-12 mt-10">
         <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-[1400px]">
@@ -52,8 +82,9 @@
             </div>
             <div class="border-t border-gray-900 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-gray-600">
                 <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($siteName ?? "PhimTop1") ?>. All rights reserved.</p>
-                <div class="mt-4 md:mt-0 flex space-x-4">
-                    <span class="text-red-500 font-bold hover:text-red-400 text-sm uppercase tracking-wide cursor-pointer transition-colors duration-300 drop-shadow-md">Hoàng Sa & Trường Sa là của Việt Nam! 🇻🇳</span>
+                <div class="mt-4 md:mt-0 flex flex-col items-center md:items-end text-center md:text-right space-y-1">
+                    <span class="text-gray-400 font-medium text-[11px] uppercase tracking-wider">Thần tượng là đam mê, nhưng chủ quyền là tuyệt đối. Nói KHÔNG với "Đường lưỡi bò"!</span>
+                    <span class="text-red-500 font-black hover:text-red-400 text-sm uppercase tracking-widest cursor-pointer transition-colors duration-300 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">Hoàng Sa & Trường Sa là của Việt Nam! 🇻🇳</span>
                 </div>
             </div>
         </div>
@@ -294,6 +325,138 @@
       } else {
           document.addEventListener('DOMContentLoaded', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
       }
+
+      // Hover Movie Modal Logic
+      document.addEventListener('DOMContentLoaded', function() {
+          const hoverModal = document.getElementById('hover-movie-modal');
+          const slugBase = '/<?= $settings["slugMovie"] ?? "phim" ?>/';
+          let hoverTimeout;
+          let activeSlug = null;
+          let currentTarget = null;
+          let abortController = null;
+
+          function positionModal(el) {
+              const rect = el.getBoundingClientRect();
+              const modalRect = hoverModal.getBoundingClientRect();
+              let top = rect.top + window.scrollY - 20;
+              let left = rect.left + window.scrollX + (rect.width / 2) - (320 / 2); // Center horizontally
+
+              // Prevent off-screen left/right
+              if (left < 10) left = 10;
+              if (left + 320 > window.innerWidth - 10) left = window.innerWidth - 320 - 10;
+
+              // Prevent off-screen bottom
+              if (top + modalRect.height > window.scrollY + window.innerHeight - 10) {
+                  top = rect.top + window.scrollY - modalRect.height - 10; // Show above
+              }
+
+              hoverModal.style.top = top + 'px';
+              hoverModal.style.left = left + 'px';
+          }
+
+          function showModal(data, el) {
+              if (activeSlug !== data.slug) return; // Prevent stale data
+              
+              document.getElementById('hover-modal-title').textContent = data.name;
+              document.getElementById('hover-modal-origin').textContent = data.origin_name || '';
+              document.getElementById('hover-modal-quality').textContent = data.quality || 'HD';
+              document.getElementById('hover-modal-lang').textContent = data.lang || 'Vietsub';
+              document.getElementById('hover-modal-year').textContent = data.year || new Date().getFullYear();
+              document.getElementById('hover-modal-time').textContent = data.time || '? phút';
+              
+              // Remove HTML tags for description
+              let desc = (data.content || '').replace(/<[^>]*>?/gm, '');
+              document.getElementById('hover-modal-desc').textContent = desc || 'Đang cập nhật...';
+              
+              document.getElementById('hover-modal-img').src = data.thumb_url || data.poster_url || '';
+              
+              hoverModal.classList.remove('hidden');
+              positionModal(el);
+              
+              // Trigger CSS transition
+              setTimeout(() => {
+                  if (activeSlug === data.slug) {
+                      hoverModal.classList.add('show-modal');
+                  }
+              }, 10);
+          }
+
+          function hideModal() {
+              activeSlug = null;
+              currentTarget = null;
+              hoverModal.classList.remove('show-modal');
+              if (abortController) {
+                  abortController.abort();
+                  abortController = null;
+              }
+              setTimeout(() => {
+                  if (!activeSlug) hoverModal.classList.add('hidden');
+              }, 200);
+          }
+
+          // Global event delegation for mouseenter/mouseleave
+          document.addEventListener('mouseover', function(e) {
+              const aTag = e.target.closest('a');
+              if (!aTag) return;
+              
+              const href = aTag.getAttribute('href');
+              if (href && href.startsWith(slugBase) && aTag.classList.contains('group')) {
+                  const slug = href.replace(slugBase, '').split('?')[0];
+                  if (!slug) return;
+                  
+                  if (activeSlug === slug) return; // Already showing for this movie
+                  
+                  clearTimeout(hoverTimeout);
+                  
+                  hoverTimeout = setTimeout(() => {
+                      activeSlug = slug;
+                      currentTarget = aTag;
+                      
+                      // Pre-position and show skeleton if needed, but let's just fetch
+                      if (abortController) abortController.abort();
+                      abortController = new AbortController();
+                      
+                      fetch('/api/v1/movie.php?slug=' + slug, { signal: abortController.signal })
+                          .then(res => res.json())
+                          .then(res => {
+                              if (res.status === 'success' && res.data && res.data.movie) {
+                                  showModal(res.data.movie, currentTarget);
+                              }
+                          })
+                          .catch(err => {
+                              if (err.name !== 'AbortError') console.error(err);
+                          });
+                  }, 500); // 500ms hover delay
+              }
+          });
+          
+          document.addEventListener('mouseout', function(e) {
+              const aTag = e.target.closest('a');
+              if (!aTag) return;
+              
+              const href = aTag.getAttribute('href');
+              if (href && href.startsWith(slugBase) && aTag.classList.contains('group')) {
+                  clearTimeout(hoverTimeout);
+                  
+                  // Check if moving to the modal itself
+                  if (e.relatedTarget && (e.relatedTarget.closest('#hover-movie-modal'))) {
+                      return; // Stay open if hovering the modal
+                  }
+                  
+                  hideModal();
+              }
+          });
+          
+          // Also hide modal if mouse leaves the modal
+          hoverModal.addEventListener('mouseleave', hideModal);
+          
+          // Ensure window resize/scroll doesn't keep modal misplaced
+          window.addEventListener('scroll', () => {
+              if (activeSlug && currentTarget) {
+                  positionModal(currentTarget);
+              }
+          }, { passive: true });
+      });
     </script>
     <?php do_action('cms_footer'); ?>
 

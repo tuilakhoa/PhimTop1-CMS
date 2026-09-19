@@ -76,6 +76,7 @@ class MovieDetail {
   final List<String>? actor;
   final String? time;
   final String? episodeCurrent;
+  final String? trailerUrl;
 
   MovieDetail.fromJson(Map<String, dynamic> json)
       : id = json['_id']?.toString(),
@@ -88,7 +89,8 @@ class MovieDetail {
         content = json['content'],
         actor = json['actor'] is List ? (json['actor'] as List).map((e) => e.toString()).toList() : (json['actor'] != null && json['actor'].toString().isNotEmpty ? [json['actor'].toString()] : []),
         time = json['time'],
-        episodeCurrent = json['episode_current'];
+        episodeCurrent = json['episode_current'],
+        trailerUrl = json['trailer_url'];
 }
 
 class MovieImageItem {

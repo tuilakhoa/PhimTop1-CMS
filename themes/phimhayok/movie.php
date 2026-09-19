@@ -148,6 +148,13 @@ if (!empty($_GET['party'])) {
                     </button>
                 <?php endif; ?>
                 
+                <?php if (!empty($movie['trailer_url'])): ?>
+                    <a href="<?= htmlspecialchars($movie['trailer_url']) ?>" target="_blank"
+                       class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-lg transition-transform hover:-translate-y-1 flex items-center shadow-lg border border-gray-700">
+                        <i data-lucide="film" class="w-5 h-5 mr-2 text-red-500"></i> Trailer
+                    </a>
+                <?php endif; ?>
+                
                 <button onclick="toggleFollowMovie()" id="follow-btn" class="px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors flex items-center border border-gray-700 shadow-lg">
                     <i data-lucide="bookmark" id="follow-icon" class="w-5 h-5 mr-2"></i> <span id="follow-text">Lưu phim</span>
                 </button>

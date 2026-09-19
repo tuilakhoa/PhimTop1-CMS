@@ -32,13 +32,10 @@ if (empty($keyword)) {
 }
 
 
-    // Fetch data from CMS helper
     $data = fetchApiFilms('search', '', $page, $keyword);
-
+    
     if ($data && !empty($data['items'])) {
-        $repo = getMovieRepository();
-        foreach ($data['items'] as $item) {
-        }
+        // Fallback to local database cache if upstream API fails is below
     } else if (!$data) {
         // Fallback to local database cache if upstream API fails
         $data = [
