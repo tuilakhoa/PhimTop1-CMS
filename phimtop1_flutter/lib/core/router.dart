@@ -210,7 +210,7 @@ GoRouter createRouter(bool hasAgreed, bool hasSeenOnboarding, bool hasAppLock) {
       parentNavigatorKey: _rootNavigatorKey,
       builder: (BuildContext context, GoRouterState state) => const ShopScreen(),
     ),
-    GoRoute(
+  ],
 );
 }
 
