@@ -50,41 +50,12 @@
                 </div>
             </div>
             
-            <!-- Patriotic Banner -->
-            <div class="mt-4 mb-8 border border-red-900/40 bg-gradient-to-r from-red-950/20 via-[#0a0000] to-red-950/20 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between shadow-[0_0_20px_rgba(220,38,38,0.08)] relative overflow-hidden group">
-                <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.8)] group-hover:bg-red-500 transition-colors"></div>
-                <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-red-900/10 to-transparent pointer-events-none"></div>
-                
-                <div class="flex items-center space-x-4 z-10 w-full md:w-auto">
-                    <div class="w-12 h-12 rounded-full bg-red-900/30 flex items-center justify-center shrink-0 border border-red-500/30 shadow-[inset_0_0_10px_rgba(220,38,38,0.2)]">
-                        <i data-lucide="shield-alert" class="w-6 h-6 text-red-500 animate-pulse"></i>
-                    </div>
-                    <div class="flex flex-col border-l-[3px] border-red-600/60 pl-4 py-1">
-                        <h4 class="text-white font-bold text-base md:text-lg tracking-wide mb-1.5 drop-shadow-sm">
-                            Idol bị tẩy não thì khó trách, nhưng <span class="text-red-500 font-black">chủ quyền là tuyệt đối!</span>
-                        </h4>
-                        <p class="text-gray-400 text-sm md:text-[15px] font-medium leading-relaxed mb-3">
-                            Cảm thông chứ không dung túng. Tuyệt đối <strong class="text-gray-200">NÓI KHÔNG</strong> với nghệ sĩ share "Đường lưỡi bò".
-                        </p>
-                        <div class="inline-flex items-center text-red-500 font-black uppercase text-[11px] md:text-xs tracking-widest bg-red-950/40 px-3 py-1.5 rounded-md border border-red-900/50 w-fit">
-                            <i data-lucide="flame" class="w-3.5 h-3.5 mr-1.5"></i>
-                            YÊU NƯỚC LÀ PHẢI RẠCH RÒI!
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-5 md:mt-0 ml-0 md:ml-6 shrink-0 text-center md:text-right z-10 w-full md:w-auto">
-                    <div class="text-red-600 font-black text-xl md:text-2xl tracking-[0.15em] drop-shadow-[0_0_12px_rgba(220,38,38,0.8)] uppercase">
-                        Hoàng Sa & Trường Sa
-                    </div>
-                    <div class="text-[#fcc526] font-black tracking-[0.25em] uppercase text-sm md:text-base mt-1 drop-shadow-[0_0_8px_rgba(252,197,38,0.5)]">
-                        Là Của Việt Nam! 🇻🇳
-                    </div>
-                </div>
-            </div>
-            
             <div class="border-t border-gray-900 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-gray-600">
                 <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($siteName ?? "PhimTop1") ?>. All rights reserved.</p>
+                <div class="mt-4 md:mt-0 flex flex-col items-center md:items-end text-center md:text-right space-y-1">
+                    <span class="text-gray-400 font-medium text-[11px] uppercase tracking-wider">Thần tượng là đam mê, nhưng chủ quyền là tuyệt đối. Nói KHÔNG với "Đường lưỡi bò"!</span>
+                    <span class="text-red-500 font-black hover:text-red-400 text-sm uppercase tracking-widest cursor-pointer transition-colors duration-300 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">Hoàng Sa & Trường Sa là của Việt Nam! 🇻🇳</span>
+                </div>
             </div>
         </div>
     </footer>
