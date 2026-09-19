@@ -291,8 +291,11 @@ if ($pdo) {
             <!-- Right: Search & Login -->
             <div class="flex items-center gap-4 shrink-0">
                 <form action="/search" method="GET" class="relative hidden md:block">
-                    <input type="text" name="keyword" placeholder="Tìm kiếm phim, diễn viên, đạo diễn..." 
-                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-transparent w-[300px] placeholder-gray-500 font-medium transition-all focus:w-[350px]">
+                    <input type="text" name="keyword" id="desktopSearchInput" placeholder="Tìm kiếm phim, diễn viên, đạo diễn..." 
+                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-16 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-transparent w-[300px] placeholder-gray-500 font-medium transition-all focus:w-[350px]">
+                    <button type="button" onclick="startVoiceSearch('desktopSearchInput')" class="absolute right-9 top-2.5 text-gray-400 hover:text-red-500 transition-colors" title="Tìm kiếm bằng giọng nói">
+                        <i data-lucide="mic" class="w-5 h-5"></i>
+                    </button>
                     <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-white">
                         <i data-lucide="search" class="w-5 h-5"></i>
                     </button>
@@ -318,8 +321,11 @@ if ($pdo) {
             <div class="px-4 py-4 space-y-4">
                 <!-- Mobile Search Form -->
                 <form action="/search" method="GET" class="relative w-full">
-                    <input type="text" name="keyword" placeholder="Tìm kiếm phim, diễn viên..." 
-                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-gray-800 w-full placeholder-gray-500 font-medium">
+                    <input type="text" name="keyword" id="mobileSearchInput" placeholder="Tìm kiếm phim, diễn viên..." 
+                        class="bg-[#1f1f1f] text-gray-200 text-sm rounded-full pl-5 pr-16 py-2.5 focus:outline-none focus:ring-1 focus:ring-gray-600 border border-gray-800 w-full placeholder-gray-500 font-medium">
+                    <button type="button" onclick="startVoiceSearch('mobileSearchInput')" class="absolute right-9 top-2.5 text-gray-400 hover:text-red-500 transition-colors" title="Tìm kiếm bằng giọng nói">
+                        <i data-lucide="mic" class="w-5 h-5"></i>
+                    </button>
                     <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-white">
                         <i data-lucide="search" class="w-5 h-5"></i>
                     </button>

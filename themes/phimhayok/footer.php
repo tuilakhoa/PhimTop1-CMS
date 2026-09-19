@@ -212,6 +212,40 @@
           }
       }
 
+      function startVoiceSearch(inputId) {
+          if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+              const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+              const recognition = new SpeechRecognition();
+              recognition.lang = 'vi-VN';
+              recognition.interimResults = false;
+              recognition.maxAlternatives = 1;
+              
+              const inputField = document.getElementById(inputId);
+              const form = inputField.closest('form');
+              
+              inputField.placeholder = "Đang nghe...";
+              
+              recognition.onresult = function(event) {
+                  const result = event.results[0][0].transcript;
+                  inputField.value = result;
+                  form.submit();
+              };
+              
+              recognition.onerror = function(event) {
+                  inputField.placeholder = "Lỗi nhận dạng: " + event.error;
+                  setTimeout(() => inputField.placeholder = "Tìm kiếm phim...", 2000);
+              };
+              
+              recognition.onend = function() {
+                  if(!inputField.value) inputField.placeholder = "Tìm kiếm phim...";
+              };
+              
+              recognition.start();
+          } else {
+              alert("Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói.");
+          }
+      }
+
       if (typeof lucide !== 'undefined') {
           lucide.createIcons();
       } else {
