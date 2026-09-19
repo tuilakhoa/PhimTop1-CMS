@@ -35,7 +35,7 @@
                         <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-red-500 ">Phim Lẻ</a></li>
                         <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-red-500 ">Phim Bộ</a></li>
                         <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-chieu-rap" class="hover:text-red-500 ">Phim Chiếu Rạp</a></li>
-                        <li><a href="/blacklist.php" class="text-red-500/80 hover:text-red-500 font-bold mt-2 inline-block border border-red-900/30 bg-red-900/10 px-2 py-1 rounded">Cảnh Báo Chủ Quyền</a></li>
+                        <li><a href="/blacklist.php" class="text-red-500 hover:text-red-400 font-bold pt-2 block">Cảnh Báo Chủ Quyền</a></li>
                     </ul>
                 </div>
                 <div>
@@ -67,7 +67,7 @@
                     </div>
                 </div>
                 
-                <div class="mt-5 md:mt-0 ml-0 md:ml-6 shrink-0 text-center md:text-right z-10 w-full md:w-auto bg-black/40 md:bg-transparent p-3 md:p-0 rounded-lg border border-red-900/30 md:border-none">
+                <div class="mt-5 md:mt-0 ml-0 md:ml-6 shrink-0 text-center md:text-right z-10 w-full md:w-auto">
                     <div class="text-red-600 font-black text-xl md:text-2xl tracking-[0.15em] drop-shadow-[0_0_12px_rgba(220,38,38,0.8)] uppercase">
                         Hoàng Sa & Trường Sa
                     </div>
