@@ -60,8 +60,8 @@
                     </div>
                     <div>
                         <p class="text-gray-300 font-medium text-sm leading-relaxed">
-                            <span class="text-white font-bold text-base">Đu idol Trung Quốc không sai,</span> nhưng chủ quyền dân tộc là tuyệt đối!
-                            <br class="hidden sm:block"/>Lỡ hâm mộ rồi mới biết idol share "Đường lưỡi bò"? <span class="text-red-400 font-bold tracking-wide">Quay đầu là bờ, dứt khoát UNSTAN!</span>
+                            <span class="text-white font-bold text-base">Đu idol Trung Quốc không sai,</span> nhưng chủ quyền dân tộc là vô giá!
+                            <br class="hidden sm:block"/>Biết idol share "Đường lưỡi bò" mà vẫn u mê bênh vực, rồi tự nhận là yêu nước? <span class="text-red-400 font-bold tracking-wide">YÊU NƯỚC LÀ KHÔNG THỎA HIỆP! Quốc gia luôn là trên hết!</span>
                         </p>
                     </div>
                 </div>
