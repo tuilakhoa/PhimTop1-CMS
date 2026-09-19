@@ -1,6 +1,8 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
+header('Cache-Control: no-cache, must-revalidate');
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 
 require_once __DIR__ . '/../../includes/db.php';
 
@@ -71,15 +73,25 @@ if (!$pdo) {
 }
 
 // Xóa các stop words để lấy keyword chính
-$stopWords = ['có phim', 'trinh thám', 'hành động', 'tình cảm', 'nào hay không', 'nào không', 'tìm cho tôi', 'tìm giúp', 'thể loại', 'phim', 'tên là', 'của', 'đóng', 'diễn viên', 'năm', 'đạo diễn', 'điểm', 'cao', 'hay', 'nhất', 'mới'];
+$stopWords = [
+    'nào hay không', 'tìm cho tôi', 'có phim nào', 'diễn viên', 'đạo diễn', 'thể loại', 
+    'nào không', 'tìm giúp', 'tên là', 'có phim', 'phim bộ', 'phim lẻ', 'chiếu rạp', 
+    'dài tập', 'nhiều tập', 'hoạt hình', 'điểm cao', 'hay nhất', 'đỉnh nhất', 'mới nhất', 
+    'gần đây', 'năm nay', 'những', 'muốn', 'xem', 'tìm', 'phim', 'nào', 'hay', 'không', 
+    'cho', 'tôi', 'giúp', 'của', 'về', 'đóng', 'có', 'là', 'năm', 'top', 'điểm'
+];
+if ($category) $stopWords[] = mb_strtolower($category, 'UTF-8');
+if ($country) $stopWords[] = mb_strtolower($country, 'UTF-8');
+
+// Sort by length descending to replace longer phrases first
+usort($stopWords, function($a, $b) { return mb_strlen($b, 'UTF-8') - mb_strlen($a, 'UTF-8'); });
+
 $keyword = $msgLower;
 foreach ($stopWords as $sw) {
-    $keyword = preg_replace('/\b' . preg_quote($sw, '/') . '\b/i', '', $keyword);
+    $keyword = preg_replace('/\b' . preg_quote($sw, '/') . '\b/iu', ' ', $keyword);
 }
 $keyword = trim(preg_replace('/\s+/', ' ', $keyword));
 
-// Nếu có category mà user hỏi "có phim trinh thám nào hay không" thì keyword sẽ rỗng
-// Nếu keyword dài hơn 2 ký tự, ta sẽ dùng keyword để search fulltext
 $searchKeyword = mb_strlen($keyword, 'UTF-8') > 1 ? $keyword : null;
 
 $query = "SELECT * FROM movies WHERE 1=1";
@@ -173,7 +185,10 @@ try {
     echo json_encode([
         'status' => 'success',
         'reply' => $reply,
-        'movies' => $isApp ? $results : [] // App dùng results để render horizontal list, Web ko cần
+        'movies' => $isApp ? $results : [],
+        'debug_query' => $query,
+        'debug_params' => $params,
+        'debug_keyword' => $searchKeyword
     ]);
 } catch (Exception $e) {
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
