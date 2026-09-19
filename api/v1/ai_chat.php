@@ -104,7 +104,7 @@ if ($type) {
 
 if ($searchKeyword) {
     // Search in multiple fields
-    $query .= " AND (name LIKE ? OR origin_name LIKE ? OR content LIKE ? OR actors_json LIKE ?)";
+    $query .= " AND (name LIKE ? OR origin_name LIKE ? OR content LIKE ? OR actor LIKE ?)";
     $params[] = '%' . $searchKeyword . '%';
     $params[] = '%' . $searchKeyword . '%';
     $params[] = '%' . $searchKeyword . '%';
@@ -139,27 +139,27 @@ try {
         $reply .= $isApp ? "cho anh/chị đây ạ:\n\n" : "cho anh/chị đây ạ:</p>";
         
         if (!$isApp) {
-            $reply .= "<div style='display:flex; flex-direction:column; gap:10px; margin-top:10px;'>";
+            $reply .= "<div style='display:flex; flex-direction:column; gap:12px; margin-top:12px;'>";
         }
         
         foreach ($results as $m) {
-            $actors = isset($m['actors_json']) ? implode(", ", json_decode($m['actors_json'], true) ?? []) : 'Đang cập nhật';
-            if(empty($actors)) $actors = 'Đang cập nhật';
+            $actors = !empty($m['actor']) ? $m['actor'] : 'Đang cập nhật';
             $vote = !empty($m['tmdb_vote']) ? $m['tmdb_vote'] : (!empty($m['imdb_vote']) ? $m['imdb_vote'] : 'N/A');
             
             $content = !empty($m['content']) ? mb_strimwidth(strip_tags($m['content']), 0, 150, "...") : 'Đang cập nhật';
             
             if ($isApp) {
-                // Flutter App sẽ render text (Và Movie Cards sẽ dc parse từ list $movies)
-                // Text ngắn gọn để ko bị rối UI chat
                 $reply .= "• {$m['name']} ({$m['year']})\n  ⭐ $vote | 🎭 Diễn viên: $actors\n\n";
             } else {
-                // Web hiển thị HTML Card xịn xò
-                $reply .= "<div style='background:#111; padding:10px; border-radius:8px; border:1px solid #333;'>";
-                $reply .= "<h4 style='margin:0; color:#06b6d4;'><a href='/phim/{$m['slug']}' target='_blank' style='color:#06b6d4; text-decoration:none;'>{$m['name']} ({$m['year']})</a></h4>";
-                $reply .= "<p style='margin:5px 0 0 0; font-size:12px; color:#aaa;'>⭐ <b>$vote</b> | 🎭 <b>Diễn viên:</b> $actors</p>";
-                $reply .= "<p style='margin:5px 0 0 0; font-size:12px; color:#888;'>$content</p>";
-                $reply .= "<div style='margin-top:8px;'><a href='/phim/{$m['slug']}' target='_blank' style='display:inline-block; padding:4px 12px; background:#06b6d4; color:#fff; border-radius:4px; font-size:12px; text-decoration:none;'>▶ Xem phim ngay</a></div>";
+                $reply .= "<div style='background: rgba(255, 255, 255, 0.05); padding:12px; border-radius:12px; border:1px solid rgba(255, 255, 255, 0.1); transition: all 0.2s;' onmouseover='this.style.background=\"rgba(255,255,255,0.1)\"' onmouseout='this.style.background=\"rgba(255,255,255,0.05)\"'>";
+                $reply .= "<div style='display:flex; gap:12px;'>";
+                $reply .= "<img src='{$m['thumb_url']}' style='width:60px; height:85px; border-radius:8px; object-fit:cover; flex-shrink:0;' loading='lazy'>";
+                $reply .= "<div>";
+                $reply .= "<h4 style='margin:0 0 4px 0; color:#22d3ee; font-size:15px;'><a href='/phim/{$m['slug']}' target='_blank' style='color:#22d3ee; text-decoration:none;'>{$m['name']} ({$m['year']})</a></h4>";
+                $reply .= "<p style='margin:0 0 6px 0; font-size:12px; color:#cbd5e1;'><span style='background:rgba(234,179,8,0.2); color:#fde047; padding:2px 6px; border-radius:4px; font-weight:bold;'>⭐ $vote</span> <span style='margin-left:8px;'>🎭 $actors</span></p>";
+                $reply .= "<p style='margin:0; font-size:12px; color:#94a3b8; line-height:1.4;'>$content</p>";
+                $reply .= "</div></div>";
+                $reply .= "<a href='/phim/{$m['slug']}' target='_blank' style='display:block; text-align:center; margin-top:10px; padding:8px 0; background:linear-gradient(to right, #06b6d4, #3b82f6); color:#fff; border-radius:6px; font-size:13px; font-weight:600; text-decoration:none;'>▶ Xem phim ngay</a>";
                 $reply .= "</div>";
             }
         }

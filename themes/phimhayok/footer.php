@@ -300,45 +300,63 @@
 
 <!-- AI Chatbot Floating Widget -->
 <div id="ai-chatbot-container" class="fixed bottom-6 right-6 z-50 flex flex-col items-end hidden">
-    <div class="bg-[#1a1a1a] border border-gray-800 rounded-2xl shadow-2xl w-[450px] mb-4 overflow-hidden flex flex-col h-[600px] transition-all transform origin-bottom-right scale-0" id="ai-chat-window">
+    <!-- Chat Window -->
+    <div class="bg-[#0f0f13]/90 backdrop-blur-2xl border border-gray-800/60 rounded-[24px] shadow-2xl shadow-cyan-500/10 w-[450px] mb-4 overflow-hidden flex flex-col h-[650px] transition-all duration-300 transform origin-bottom-right scale-0" id="ai-chat-window">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-cyan-600 to-blue-600 p-4 flex justify-between items-center text-white">
-            <div class="flex items-center gap-2">
-                <i data-lucide="bot" class="w-6 h-6"></i>
-                <span class="font-bold">Trợ lý AI PhimTop1</span>
+        <div class="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 border-b border-gray-800/50 p-4 flex justify-between items-center text-white backdrop-blur-md">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                        <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#0f0f13] rounded-full"></span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-md text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Trợ lý AI PhimTop1</h3>
+                    <p class="text-[11px] text-gray-400">Luôn sẵn sàng hỗ trợ</p>
+                </div>
             </div>
-            <button onclick="toggleAiChat()" class="hover:text-gray-200 transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
+            <button onclick="toggleAiChat()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-800/50 text-gray-400 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
             </button>
         </div>
         
         <!-- Chat Area -->
-        <div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto bg-[#0a0a0a] flex flex-col gap-4">
+        <div id="ai-chat-messages" class="flex-1 p-5 overflow-y-auto custom-scrollbar flex flex-col gap-5">
             <!-- Welcome message -->
-            <div class="flex gap-2">
-                <div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center shrink-0">
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shrink-0 shadow-lg">
                     <i data-lucide="bot" class="w-4 h-4 text-white"></i>
                 </div>
-                <div class="bg-[#1f1f1f] border border-gray-800 rounded-2xl rounded-tl-none p-3 text-sm text-gray-300 shadow-sm">
-                    Xin chào! Em có thể giúp anh/chị tìm phim gì hôm nay? (VD: <i>"Tìm phim hành động Mỹ năm 2023 điểm cao"</i>)
+                <div class="bg-gray-800/40 border border-gray-700/50 backdrop-blur-md rounded-2xl rounded-tl-none p-4 text-[14px] text-gray-200 shadow-sm">
+                    Xin chào! Em có thể giúp anh/chị tìm phim gì hôm nay? 
+                    <div class="mt-2 text-xs text-gray-400 italic bg-black/20 p-2 rounded-lg">VD: "Tìm phim hành động Mỹ năm 2023 có Tom Cruise đóng"</div>
                 </div>
             </div>
         </div>
 
         <!-- Input Area -->
-        <div class="p-3 border-t border-gray-800 bg-[#1a1a1a]">
-            <form id="ai-chat-form" class="relative" onsubmit="handleAiChatSubmit(event)">
-                <input type="text" id="ai-chat-input" placeholder="Nhập yêu cầu tìm phim..." class="w-full bg-[#2a2a2a] text-white border border-gray-700 rounded-full py-2.5 pl-4 pr-12 focus:outline-none focus:border-cyan-500 text-sm">
-                <button type="submit" class="absolute right-1 top-1 bottom-1 w-8 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center transition-colors">
-                    <i data-lucide="send" class="w-4 h-4"></i>
+        <div class="p-4 bg-gray-900/50 border-t border-gray-800/50 backdrop-blur-xl">
+            <form id="ai-chat-form" class="relative flex items-center" onsubmit="handleAiChatSubmit(event)">
+                <input type="text" id="ai-chat-input" placeholder="Hỏi AI bất kỳ phim gì..." class="w-full bg-[#1a1a20] text-gray-200 border border-gray-700/50 rounded-full py-3.5 pl-5 pr-14 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all text-[14px] placeholder-gray-500 shadow-inner">
+                <button type="submit" class="absolute right-1.5 w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 text-white flex items-center justify-center transition-all shadow-md shadow-cyan-500/20">
+                    <i data-lucide="send" class="w-4 h-4 ml-0.5"></i>
                 </button>
             </form>
+            <div class="text-center mt-2 text-[10px] text-gray-500">PhimTop1 AI Search Engine v2.0</div>
         </div>
     </div>
 
     <!-- Floating Button -->
-    <button onclick="toggleAiChat()" class="w-14 h-14 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full shadow-lg shadow-cyan-500/30 flex items-center justify-center text-white hover:scale-110 transition-transform focus:outline-none">
-        <i data-lucide="sparkles" class="w-6 h-6"></i>
+    <button onclick="toggleAiChat()" class="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center text-white hover:scale-110 transition-transform focus:outline-none relative group">
+        <i data-lucide="sparkles" class="w-7 h-7"></i>
+        <span class="absolute -top-1 -right-1 flex h-4 w-4">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-cyan-500 border-2 border-gray-900"></span>
+        </span>
+        <div class="absolute right-[75px] top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-1.5 px-3 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-gray-800">
+            Hỏi AI ngay!
+        </div>
     </button>
 </div>
 
@@ -405,23 +423,23 @@ function appendChatMessage(text, role, isLoading = false) {
     const id = 'msg-' + Date.now();
     const div = document.createElement('div');
     div.id = id;
-    div.className = 'flex gap-2 ' + (role === 'user' ? 'flex-row-reverse' : '');
+    div.className = 'flex gap-3 ' + (role === 'user' ? 'flex-row-reverse' : '');
     
     let avatar = '';
     let bubbleClass = '';
     
     if (role === 'ai') {
-        avatar = `<div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center shrink-0"><i data-lucide="bot" class="w-4 h-4 text-white"></i></div>`;
-        bubbleClass = 'bg-[#1f1f1f] border border-gray-800 rounded-2xl rounded-tl-none text-gray-300 w-full';
+        avatar = `<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shrink-0 shadow-lg mt-1"><i data-lucide="bot" class="w-4 h-4 text-white"></i></div>`;
+        bubbleClass = 'bg-gray-800/40 border border-gray-700/50 backdrop-blur-md rounded-2xl rounded-tl-none text-gray-200 w-full text-[14px] leading-relaxed';
     } else {
-        avatar = `<div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-white"></i></div>`;
-        bubbleClass = 'bg-cyan-600 rounded-2xl rounded-tr-none text-white';
+        avatar = `<div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center shrink-0 shadow-lg mt-1"><i data-lucide="user" class="w-4 h-4 text-white"></i></div>`;
+        bubbleClass = 'bg-gradient-to-tr from-cyan-600 to-blue-600 rounded-2xl rounded-tr-none text-white text-[14px] leading-relaxed shadow-md shadow-cyan-500/20';
     }
 
     div.innerHTML = `
         ${avatar}
-        <div class="${bubbleClass} p-3 text-sm shadow-sm ${role === 'user' ? 'max-w-[80%]' : 'max-w-[90%]'}">
-            ${isLoading ? '<div class="flex gap-1 items-center h-5"><div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div><div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div></div>' : text}
+        <div class="${bubbleClass} p-4 shadow-sm ${role === 'user' ? 'max-w-[85%]' : 'max-w-[95%]'}">
+            ${isLoading ? '<div class="flex gap-1.5 items-center h-5"><div class="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div><div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.15s"></div><div class="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style="animation-delay: 0.3s"></div></div>' : text}
         </div>
     `;
     msgArea.appendChild(div);
