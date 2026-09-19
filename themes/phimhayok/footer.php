@@ -212,37 +212,80 @@
           }
       }
 
+      let isVoiceListening = false;
+      let voiceRecognition = null;
+
       function startVoiceSearch(inputId) {
-          if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-              const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-              const recognition = new SpeechRecognition();
-              recognition.lang = 'vi-VN';
-              recognition.interimResults = false;
-              recognition.maxAlternatives = 1;
-              
-              const inputField = document.getElementById(inputId);
-              const form = inputField.closest('form');
-              
+          if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+              alert("Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói. Vui lòng thử lại trên Google Chrome hoặc Edge.");
+              return;
+          }
+
+          if (isVoiceListening && voiceRecognition) {
+              voiceRecognition.stop();
+              return;
+          }
+
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          voiceRecognition = new SpeechRecognition();
+          voiceRecognition.lang = 'vi-VN';
+          voiceRecognition.interimResults = false;
+          voiceRecognition.maxAlternatives = 1;
+          
+          const inputField = document.getElementById(inputId);
+          const form = inputField.closest('form');
+          const originalPlaceholder = inputField.getAttribute('data-original-placeholder') || inputField.placeholder;
+          inputField.setAttribute('data-original-placeholder', originalPlaceholder);
+          
+          const micBtn = form.querySelector('button[onclick*="startVoiceSearch"]');
+          
+          voiceRecognition.onstart = function() {
+              isVoiceListening = true;
               inputField.placeholder = "Đang nghe...";
-              
-              recognition.onresult = function(event) {
-                  const result = event.results[0][0].transcript;
-                  inputField.value = result;
-                  form.submit();
-              };
-              
-              recognition.onerror = function(event) {
-                  inputField.placeholder = "Lỗi nhận dạng: " + event.error;
-                  setTimeout(() => inputField.placeholder = "Tìm kiếm phim...", 2000);
-              };
-              
-              recognition.onend = function() {
-                  if(!inputField.value) inputField.placeholder = "Tìm kiếm phim...";
-              };
-              
-              recognition.start();
-          } else {
-              alert("Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói.");
+              inputField.value = "";
+              if (micBtn) {
+                  micBtn.classList.remove('text-gray-400');
+                  micBtn.classList.add('text-red-500', 'animate-pulse');
+              }
+          };
+          
+          voiceRecognition.onresult = function(event) {
+              const result = event.results[0][0].transcript;
+              // Remove trailing period sometimes added by speech recognition
+              inputField.value = result.replace(/\.$/, '');
+              form.submit();
+          };
+          
+          voiceRecognition.onerror = function(event) {
+              if (event.error === 'no-speech') {
+                  inputField.placeholder = "Không nghe thấy gì...";
+              } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                  inputField.placeholder = "Bị chặn Micro!";
+                  alert("Trình duyệt đã chặn Micro. Vui lòng cho phép quyền sử dụng Micro trên thanh địa chỉ để tiếp tục.");
+              } else {
+                  inputField.placeholder = "Lỗi: " + event.error;
+              }
+              setTimeout(() => {
+                  if (!isVoiceListening) inputField.placeholder = originalPlaceholder;
+              }, 3000);
+          };
+          
+          voiceRecognition.onend = function() {
+              isVoiceListening = false;
+              if (micBtn) {
+                  micBtn.classList.add('text-gray-400');
+                  micBtn.classList.remove('text-red-500', 'animate-pulse');
+              }
+              if(!inputField.value) {
+                  inputField.placeholder = originalPlaceholder;
+              }
+          };
+          
+          try {
+              voiceRecognition.start();
+          } catch(e) {
+              console.error(e);
+              isVoiceListening = false;
           }
       }
 
