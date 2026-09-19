@@ -59,11 +59,17 @@
                     <div class="w-12 h-12 rounded-full bg-red-900/30 flex items-center justify-center shrink-0 border border-red-500/30 shadow-[inset_0_0_10px_rgba(220,38,38,0.2)]">
                         <i data-lucide="shield-alert" class="w-6 h-6 text-red-500 animate-pulse"></i>
                     </div>
-                    <div>
-                        <p class="text-gray-300 font-medium text-sm leading-relaxed">
-                            <span class="text-white font-bold text-base">Idol bị tẩy não thì khó trách, nhưng chủ quyền là tuyệt đối!</span>
-                            <br class="hidden sm:block"/>Cảm thông chứ không dung túng. Tuyệt đối NÓI KHÔNG với nghệ sĩ share "Đường lưỡi bò". <span class="text-red-400 font-bold tracking-wide">YÊU NƯỚC LÀ PHẢI RẠCH RÒI!</span>
+                    <div class="flex flex-col border-l-[3px] border-red-600/60 pl-4 py-1">
+                        <h4 class="text-white font-bold text-base md:text-lg tracking-wide mb-1.5 drop-shadow-sm">
+                            Idol bị tẩy não thì khó trách, nhưng <span class="text-red-500 font-black">chủ quyền là tuyệt đối!</span>
+                        </h4>
+                        <p class="text-gray-400 text-sm md:text-[15px] font-medium leading-relaxed mb-3">
+                            Cảm thông chứ không dung túng. Tuyệt đối <strong class="text-gray-200">NÓI KHÔNG</strong> với nghệ sĩ share "Đường lưỡi bò".
                         </p>
+                        <div class="inline-flex items-center text-red-500 font-black uppercase text-[11px] md:text-xs tracking-widest bg-red-950/40 px-3 py-1.5 rounded-md border border-red-900/50 w-fit">
+                            <i data-lucide="flame" class="w-3.5 h-3.5 mr-1.5"></i>
+                            YÊU NƯỚC LÀ PHẢI RẠCH RÒI!
+                        </div>
                     </div>
                 </div>
                 
