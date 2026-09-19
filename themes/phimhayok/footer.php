@@ -35,6 +35,7 @@
                         <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-le" class="hover:text-red-500 ">Phim Lẻ</a></li>
                         <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-bo" class="hover:text-red-500 ">Phim Bộ</a></li>
                         <li><a href="/<?= $settings["slugList"] ?? "danh-sach" ?>/phim-chieu-rap" class="hover:text-red-500 ">Phim Chiếu Rạp</a></li>
+                        <li><a href="/blacklist.php" class="text-red-500/80 hover:text-red-500 font-bold mt-2 inline-block border border-red-900/30 bg-red-900/10 px-2 py-1 rounded">Cảnh Báo Chủ Quyền</a></li>
                     </ul>
                 </div>
                 <div>
