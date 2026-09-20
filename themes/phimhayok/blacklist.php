@@ -42,6 +42,84 @@
                     <p class="text-gray-500 text-xs mt-3 text-center italic">Thông tin sẽ được cộng đồng kiểm duyệt trước khi hiển thị công khai.</p>
                 </form>
             </div>
+            
+            <!-- Công Cụ Điều Tra Nhanh (Weibo) -->
+            <div class="bg-[#141414] border border-blue-900/50 rounded-2xl p-6 mt-6 shadow-2xl">
+                <h3 class="text-xl font-bold text-white mb-2 flex items-center">
+                    <i data-lucide="search" class="w-5 h-5 mr-2 text-blue-400"></i> Quét Nhanh Weibo
+                </h3>
+                <p class="text-gray-400 text-xs mb-4">Công cụ sẽ chui vào trang cá nhân của diễn viên trên Weibo để cày xới toàn bộ lịch sử bài đăng xem có "Đường lưỡi bò" không.</p>
+                
+                <div class="flex gap-2">
+                    <input type="text" id="investigateName" placeholder="Tên tiếng Trung (VD: 赵丽颖)" class="w-full bg-black border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                    <button id="investigateBtn" onclick="investigateActor()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap font-bold text-sm">
+                        Quét
+                    </button>
+                </div>
+                <div id="investigateResult" class="mt-4 p-3 bg-black border border-gray-800 rounded-lg text-sm hidden">
+                </div>
+            </div>
+            <script>
+            function investigateActor() {
+                const nameInput = document.getElementById('investigateName');
+                const name = nameInput.value.trim();
+                if (!name) {
+                    alert("Vui lòng nhập tên diễn viên (Tiếng Trung)!");
+                    return;
+                }
+                
+                const btn = document.getElementById('investigateBtn');
+                const resultBox = document.getElementById('investigateResult');
+                
+                btn.disabled = true;
+                btn.innerText = "Đang quét...";
+                resultBox.classList.remove('hidden');
+                resultBox.innerHTML = '<span class="text-yellow-400"><i class="animate-spin inline-block w-3 h-3 border-2 border-current border-t-transparent text-yellow-400 rounded-full mr-1"></i> Đang lục tìm toàn bộ lịch sử bài đăng của ' + name + '... Xin chờ vài chục giây.</span>';
+                
+                // Thêm số ngẫu nhiên để chống trình duyệt lưu Cache kết quả cũ
+                const noCache = '&_=' + new Date().getTime();
+                fetch('/api/weibo_bot_api.php?action=investigate&name=' + encodeURIComponent(name) + noCache)
+                    .then(res => res.text())
+                    .then(text => {
+                        btn.disabled = false;
+                        btn.innerText = "Quét";
+                        
+                        if (text.startsWith("RAW_ERROR:")) {
+                            resultBox.innerHTML = '<span class="text-red-400 font-mono text-xs break-all">❌ Lỗi BOT thô (RAW):<br>' + text.substring(10).replace(/</g, "&lt;") + '</span>';
+                            return;
+                        }
+                        
+                        let data;
+                        try {
+                            data = JSON.parse(text);
+                        } catch (e) {
+                            resultBox.innerHTML = '<span class="text-red-400 font-mono text-xs break-all">❌ Lỗi PHP thô (RAW):<br>' + text.replace(/</g, "&lt;") + '</span>';
+                            return;
+                        }
+                        
+                        if (data.error) {
+                            resultBox.innerHTML = '<span class="text-red-400">❌ ' + data.error + '</span>';
+                            return;
+                        }
+                        
+                        if (data.violations && data.violations.length > 0) {
+                            let html = '<span class="text-red-500 font-bold mb-2 block">⚠️ PHÁT HIỆN VI PHẠM: ' + data.actor + '</span>';
+                            data.violations.forEach(v => {
+                                html += '<div class="text-gray-300 mb-1">- Bài đăng chứa: <strong class="text-red-400">' + v.keyword + '</strong></div>';
+                                html += '<a href="' + v.link + '" target="_blank" class="text-blue-400 hover:underline inline-block mb-2 text-xs">Xem bằng chứng &rarr;</a>';
+                            });
+                            resultBox.innerHTML = html;
+                        } else {
+                            resultBox.innerHTML = '<span class="text-green-400">✅ <strong>' + data.actor + '</strong> trong sạch (Bot không tìm thấy dấu vết trên hệ thống tìm kiếm của Weibo).</span>';
+                        }
+                    })
+                    .catch(err => {
+                        btn.disabled = false;
+                        btn.innerText = "Quét";
+                        resultBox.innerHTML = '<span class="text-red-400">❌ Lỗi mạng hoặc máy chủ quá tải.</span>';
+                    });
+            }
+            </script>
         </div>
 
         <!-- Danh sách -->
