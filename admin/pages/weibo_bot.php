@@ -194,10 +194,23 @@ function investigateActor() {
     resultBox.innerHTML = '<span class="text-yellow-400"><i class="animate-spin inline-block w-3 h-3 border-2 border-current border-t-transparent text-yellow-400 rounded-full mr-1"></i> Đang lục tìm toàn bộ lịch sử bài đăng của ' + name + '... Xin chờ vài chục giây.</span>';
     
     fetch('/api/weibo_bot_api.php?action=investigate&name=' + encodeURIComponent(name))
-        .then(res => res.json())
-        .then(data => {
+        .then(res => res.text())
+        .then(text => {
             btn.disabled = false;
             btn.innerText = "Điều Tra";
+            
+            if (text.startsWith("RAW_ERROR:")) {
+                resultBox.innerHTML = '<span class="text-red-400 font-mono text-xs break-all">❌ Lỗi BOT thô (RAW):<br>' + text.substring(10).replace(/</g, "&lt;") + '</span>';
+                return;
+            }
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                resultBox.innerHTML = '<span class="text-red-400 font-mono text-xs break-all">❌ Lỗi PHP thô (RAW):<br>' + text.replace(/</g, "&lt;") + '</span>';
+                return;
+            }
             
             if (data.error) {
                 resultBox.innerHTML = '<span class="text-red-400">❌ ' + data.error + '</span>';
@@ -219,7 +232,7 @@ function investigateActor() {
         .catch(err => {
             btn.disabled = false;
             btn.innerText = "Điều Tra";
-            resultBox.innerHTML = '<span class="text-red-400">❌ Có lỗi xảy ra khi gọi API.</span>';
+            resultBox.innerHTML = '<span class="text-red-400">❌ Lỗi mạng hoặc máy chủ không phản hồi: ' + err + '</span>';
         });
 }
 </script>

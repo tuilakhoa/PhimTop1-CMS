@@ -93,7 +93,8 @@ elseif ($action == 'investigate') {
     $result = json_decode($output, true);
     
     if (json_last_error() !== JSON_ERROR_NONE) {
-        echo json_encode(['error' => 'Lỗi phản hồi từ Bot: ' . $output]);
+        // Trả về RAW output để JS hiển thị thẳng lên màn hình
+        echo "RAW_ERROR: " . $output;
         exit;
     }
     
