@@ -41,10 +41,27 @@ class GlobalWeiboScanner:
         except Exception:
             pass 
 
-    def save_results(self, results):
-        """Lưu danh sách vi phạm. File này chỉ chứa text nên chỉ tốn vài KB dung lượng VPS"""
-        with open("violators_result.json", 'w', encoding='utf-8') as f:
-            json.dump(results, f, ensure_ascii=False, indent=4)
+    def save_results(self, new_results):
+        """Lưu và nối thêm kết quả vi phạm (rất quan trọng khi chạy Cronjob để không mất dữ liệu cũ)"""
+        result_file = "violators_result.json"
+        existing_results = []
+        
+        # Đọc dữ liệu cũ nếu có
+        if os.path.exists(result_file):
+            try:
+                with open(result_file, 'r', encoding='utf-8') as f:
+                    existing_results = json.load(f)
+            except Exception:
+                pass
+                
+        # Gộp dữ liệu mới vào dữ liệu cũ
+        all_results = existing_results + new_results
+        
+        # Lọc trùng lặp (tránh 1 bài viết bị lưu 2 lần nếu 2 lần quét cách nhau quá gần)
+        unique_results = {item['post_id']: item for item in all_results}.values()
+        
+        with open(result_file, 'w', encoding='utf-8') as f:
+            json.dump(list(unique_results), f, ensure_ascii=False, indent=4)
 
     def load_config(self, path):
         with open(path, 'r', encoding='utf-8') as f:
