@@ -66,6 +66,7 @@ elseif ($action == 'results') {
     } else {
         echo json_encode([]);
     }
+}
 elseif ($action == 'investigate') {
     $name = $_GET['name'] ?? '';
     if (empty($name)) {
@@ -73,64 +74,52 @@ elseif ($action == 'investigate') {
         exit;
     }
     
-    $queue_file = __DIR__ . '/../weibo_scanner/task_queue.json';
-    $queue = json_decode(file_get_contents($queue_file), true);
+    $bot_dir = __DIR__ . '/../weibo_scanner';
+    $python_path = $bot_dir . '/venv/bin/python3';
+    $script_path = $bot_dir . '/investigate_actor.py';
     
-    $queue['investigate'] = [
-        'status' => 'pending',
-        'name' => $name,
-        'result' => null,
-        'timestamp' => time()
-    ];
+    // Mã hóa base64 để tránh lỗi escapeshellarg làm mất ký tự tiếng Trung trên một số máy chủ
+    $base64_name = base64_encode($name);
     
-    file_put_contents($queue_file, json_encode($queue, JSON_PRETTY_PRINT));
-    echo json_encode(['status' => 'queued', 'message' => 'Đã đưa yêu cầu điều tra vào hàng đợi. Cronjob sẽ xử lý ngay!']);
-}
-elseif ($action == 'check_investigate') {
-    $queue_file = __DIR__ . '/../weibo_scanner/task_queue.json';
-    $queue = json_decode(file_get_contents($queue_file), true);
+    // Thêm cd để Python có thể đọc đúng các file config.json nằm cùng thư mục
+    $cmd = "cd " . escapeshellarg($bot_dir) . " && " . escapeshellcmd($python_path) . " " . escapeshellarg($script_path) . " " . escapeshellarg($base64_name) . " 2>&1";
+    $output = shell_exec($cmd);
     
-    if ($queue['investigate']['status'] == 'completed') {
-        $result = $queue['investigate']['result'];
-        
-        // Nếu có vi phạm, tự động lưu vào DB
-        if (!isset($result['error']) && !empty($result['violations'])) {
-            $pdo = getPDO();
-            if ($pdo) {
-                $stmt = $pdo->prepare("SELECT id FROM actor_reports WHERE actor_name = ?");
-                $stmt->execute([$result['actor']]);
-                if (!$stmt->fetch()) {
-                    $evidence = "Điều tra nhanh phát hiện vi phạm từ khóa: " . $result['violations'][0]['keyword'];
-                    $insert = $pdo->prepare("INSERT INTO actor_reports (actor_name, evidence_text, evidence_url, status, reported_by) VALUES (?, ?, ?, 'approved', 'Weibo Scanner Bot')");
-                    $insert->execute([$result['actor'], $evidence, $result['violations'][0]['link']]);
-                }
+    if (!$output) {
+        echo json_encode(['error' => 'Lỗi thực thi Bot']);
+        exit;
+    }
+    
+    $result = json_decode($output, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        // Trả về RAW output để JS hiển thị thẳng lên màn hình
+        echo "RAW_ERROR: " . $output;
+        exit;
+    }
+    
+    // Nếu có vi phạm, tự động lưu vào DB
+    if (!isset($result['error']) && !empty($result['violations'])) {
+        $pdo = getPDO();
+        if ($pdo) {
+            $stmt = $pdo->prepare("SELECT id FROM actor_reports WHERE actor_name = ?");
+            $stmt->execute([$result['actor']]);
+            if (!$stmt->fetch()) {
+                $evidence = "Điều tra nhanh phát hiện vi phạm từ khóa: " . $result['violations'][0]['keyword'];
+                $insert = $pdo->prepare("INSERT INTO actor_reports (actor_name, evidence_text, evidence_url, status, reported_by) VALUES (?, ?, ?, 'approved', 'Weibo Scanner Bot')");
+                $insert->execute([$result['actor'], $evidence, $result['violations'][0]['link']]);
             }
         }
-        
-        // Trả kết quả cho Web và reset queue
-        echo json_encode($result);
-        $queue['investigate']['status'] = 'idle';
-        file_put_contents($queue_file, json_encode($queue, JSON_PRETTY_PRINT));
-    } 
-    else if ($queue['investigate']['status'] == 'error') {
-        echo json_encode(['error' => $queue['investigate']['result']]);
-        $queue['investigate']['status'] = 'idle';
-        file_put_contents($queue_file, json_encode($queue, JSON_PRETTY_PRINT));
     }
-    else {
-        echo json_encode(['status' => 'processing']);
-    }
+    
+    echo $output;
 }
 elseif ($action == 'start_bot') {
-    $queue_file = __DIR__ . '/../weibo_scanner/task_queue.json';
-    $queue = json_decode(file_get_contents($queue_file), true);
-    
-    $queue['scan'] = [
-        'status' => 'pending',
-        'timestamp' => time()
-    ];
-    
-    file_put_contents($queue_file, json_encode($queue, JSON_PRETTY_PRINT));
-    echo json_encode(["status" => "success", "message" => "Đã đưa lệnh quét vào hàng đợi. Cronjob sẽ xử lý!"]);
+    // Gọi thẳng python3 bên trong thư mục venv thay vì dùng lệnh source (bị lỗi trên một số Web Server)
+    $bot_dir = __DIR__ . '/../weibo_scanner';
+    // Dùng nohup để tránh lỗi treo PHP-FPM trên aaPanel khi gọi lệnh chạy ngầm
+    $cmd = "cd " . escapeshellarg($bot_dir) . " && nohup ./venv/bin/python3 weibo_scanner_bot.py > bot_log.txt 2>&1 &";
+    exec($cmd);
+    echo json_encode(["status" => "success", "message" => "Đã gửi lệnh chạy bot nền."]);
 }
 ?>

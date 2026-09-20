@@ -194,59 +194,45 @@ function investigateActor() {
     resultBox.innerHTML = '<span class="text-yellow-400"><i class="animate-spin inline-block w-3 h-3 border-2 border-current border-t-transparent text-yellow-400 rounded-full mr-1"></i> Đang lục tìm toàn bộ lịch sử bài đăng của ' + name + '... Xin chờ vài chục giây.</span>';
     
     fetch('/api/weibo_bot_api.php?action=investigate&name=' + encodeURIComponent(name))
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'queued') {
-                checkInvestigateQueue();
+        .then(res => res.text())
+        .then(text => {
+            btn.disabled = false;
+            btn.innerText = "Điều Tra";
+            
+            if (text.startsWith("RAW_ERROR:")) {
+                resultBox.innerHTML = '<span class="text-red-400 font-mono text-xs break-all">❌ Lỗi BOT thô (RAW):<br>' + text.substring(10).replace(/</g, "&lt;") + '</span>';
+                return;
+            }
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                resultBox.innerHTML = '<span class="text-red-400 font-mono text-xs break-all">❌ Lỗi PHP thô (RAW):<br>' + text.replace(/</g, "&lt;") + '</span>';
+                return;
+            }
+            
+            if (data.error) {
+                resultBox.innerHTML = '<span class="text-red-400">❌ ' + data.error + '</span>';
+                return;
+            }
+            
+            if (data.violations && data.violations.length > 0) {
+                let html = '<span class="text-red-500 font-bold mb-2 block">⚠️ PHÁT HIỆN VI PHẠM TỪ TÀI KHOẢN: ' + data.actor + '</span>';
+                data.violations.forEach(v => {
+                    html += '<div class="text-gray-300 mb-1">- Bài đăng chứa: <strong class="text-red-400">' + v.keyword + '</strong></div>';
+                    html += '<a href="' + v.link + '" target="_blank" class="text-blue-400 hover:underline inline-block mb-2 text-xs">Xem bằng chứng &rarr;</a>';
+                });
+                html += '<div class="text-green-400 mt-2 text-xs">Đã tự động đưa vào Danh Sách Đen. Vui lòng tải lại bảng kết quả!</div>';
+                resultBox.innerHTML = html;
             } else {
-                throw new Error("Không thể đưa vào hàng đợi");
+                resultBox.innerHTML = '<span class="text-green-400">✅ <strong>' + data.actor + '</strong> trong sạch! Không tìm thấy bất kỳ bài đăng nào chứa các từ khóa cấm trong lịch sử.</span>';
             }
         })
         .catch(err => {
             btn.disabled = false;
             btn.innerText = "Điều Tra";
-            resultBox.innerHTML = '<span class="text-red-400">❌ Lỗi đưa vào hàng đợi: ' + err + '</span>';
-        });
-}
-
-function checkInvestigateQueue() {
-    const btn = document.getElementById('investigateBtn');
-    const resultBox = document.getElementById('investigateResult');
-    
-    fetch('/api/weibo_bot_api.php?action=check_investigate')
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'processing') {
-                // Tiếp tục đợi và hỏi lại sau 3 giây
-                setTimeout(checkInvestigateQueue, 3000);
-            } 
-            else if (data.error) {
-                btn.disabled = false;
-                btn.innerText = "Điều Tra";
-                resultBox.innerHTML = '<span class="text-red-400">❌ Lỗi từ Bot: ' + data.error + '</span>';
-            }
-            else {
-                // Hoàn thành
-                btn.disabled = false;
-                btn.innerText = "Điều Tra";
-                
-                if (data.violations && data.violations.length > 0) {
-                    let html = '<span class="text-red-500 font-bold mb-2 block">⚠️ PHÁT HIỆN VI PHẠM TỪ TÀI KHOẢN: ' + data.actor + '</span>';
-                    data.violations.forEach(v => {
-                        html += '<div class="text-gray-300 mb-1">- Bài đăng chứa: <strong class="text-red-400">' + v.keyword + '</strong></div>';
-                        html += '<a href="' + v.link + '" target="_blank" class="text-blue-400 hover:underline inline-block mb-2 text-xs">Xem bằng chứng &rarr;</a>';
-                    });
-                    html += '<div class="text-green-400 mt-2 text-xs">Đã tự động đưa vào Danh Sách Đen. Vui lòng tải lại bảng kết quả!</div>';
-                    resultBox.innerHTML = html;
-                } else if (data.actor) {
-                    resultBox.innerHTML = '<span class="text-green-400">✅ <strong>' + data.actor + '</strong> trong sạch! Không tìm thấy bất kỳ bài đăng nào chứa các từ khóa cấm trong lịch sử.</span>';
-                }
-            }
-        })
-        .catch(err => {
-            btn.disabled = false;
-            btn.innerText = "Điều Tra";
-            resultBox.innerHTML = '<span class="text-red-400">❌ Lỗi mạng khi kiểm tra hàng đợi: ' + err + '</span>';
+            resultBox.innerHTML = '<span class="text-red-400">❌ Lỗi mạng hoặc máy chủ không phản hồi: ' + err + '</span>';
         });
 }
 </script>
