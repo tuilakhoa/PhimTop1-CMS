@@ -16,10 +16,13 @@ class GlobalWeiboScanner:
         self.load_config(config_path)
 
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
             'Accept': 'application/json, text/plain, */*',
             'Referer': 'https://m.weibo.cn/search',
-            'Cookie': 'XSRF-TOKEN=WOcFhzNDNK44pF7JaZb6Hrxy; SUB=_2A25Hqx88DeRhGeJO7lMZ9i7JyTqIHXVkyR70rDV8PUNbmtAbLUHGkW9Nd0QLTRf-BTndWzrEdkbXwP_IGpZ15jUi; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9Wh22bPgLNPq_XAJkrHCl8R25JpX5KzhUgL.FoB7SK2RSo5feoq2dJLoIXnLxKnLBo2LB-2LxKML1hnLB.BLxK-L1-eL1-qLxKqL12zLBKnLxK.LB.eLBK5LxKML1-eL12zLxKqL1KMLBK-LxKnL1K5LB.Bt; WBPSESS=9D3L543AEK5qYjmH81npxfaPlG5AeSumbACfNb9hkzMGPF7sFl8qkRMIaH5yS2R2OMr2CEEAVuSjL8C0xa2h9kIlVic-fpiBm0lXnqSgGERH6bjnLpRkPTaTU1ZszejLpMaos1pYsufrmGudUxGaGQ==; SCF=AkWGCbWjc8JziRqolrFc9d2V2-0R9Gj0cDDS68xtxIw4FLwfGEmuoHzG4qECaUpVoiD7C_Kka0NqGBMWE2u2CL4.; ALF=02_1792474220'
+            'X-Requested-With': 'XMLHttpRequest',
+            'MWeibo-Pwa': '1',
+            'X-XSRF-TOKEN': '7a9519',
+            'Cookie': '_T_WM=795a08b5d78a8ae1d6ecf47192a12001; SCF=AkWGCbWjc8JziRqolrFc9d2V2-0R9Gj0cDDS68xtxIw4QSTw9M-R_lvqWBxF2_qtq0wtdH1Ka5HwKUCsSpVGEFk.; SUB=_2A25Hqx89DeRhGeJO7lMZ9i7JyTqIHXVkyR71rDV6PUJbktANLXb3kW1Nd0QLTQ_6XknB6pcS7xC8yxoFZ2YbRtTf; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9Wh22bPgLNPq_XAJkrHCl8R25NHD95QXeh-p1hq7SKzcWs4Dqc_zi--Ri-zpi-8Wi--NiKnRi-i2i--fiKLhiKLsi--ciKyFi-2Ri--4i-ihi-27i--NiKLhiKyFi--ciK.Ni-2fi--RiK.7i-i2; SSOLoginState=1789882221; ALF=1792474221; WEIBOCN_FROM=1110006030; MLOGIN=1; XSRF-TOKEN=7a9519; M_WEIBOCN_PARAMS=launchid%3D10000360-page_H5%26lfid%3D100103type%253D1%2526t%253D10%2526q%253D%2523%25E8%25AE%25B8%25E5%25B5%25A9%25E5%2586%25AF%25E7%25A6%25A7%25E5%25AE%2598%25E5%25AE%25A3%25E7%25BB%2593%25E5%25A9%259A%2523%26luicode%3D20000174%26uicode%3D20000174; mweibo_short_token=134172b1d1'
         }
         self.update_status("sẵn sàng", "Sẵn sàng quét theo từ khóa...", 0, len(self.config.get('keywords', [])))
         print("="*60 + "\n")
