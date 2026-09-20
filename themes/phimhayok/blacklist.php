@@ -47,19 +47,27 @@
         <!-- Danh sách -->
         <div class="lg:col-span-2">
             <div class="bg-[#141414] border border-gray-800 rounded-2xl p-6 shadow-2xl">
-                <div class="flex items-center justify-between mb-6 border-b border-gray-800 pb-4">
-                    <h3 class="text-xl font-bold text-white flex items-center">
+                <div class="flex flex-col md:flex-row items-center justify-between mb-6 border-b border-gray-800 pb-4 gap-4">
+                    <h3 class="text-xl font-bold text-white flex items-center whitespace-nowrap">
                         <i data-lucide="list" class="w-5 h-5 mr-2 text-phim-yellow"></i> Danh Sách Tổng Hợp
                     </h3>
-                    <span class="text-gray-500 text-sm bg-black px-3 py-1 rounded-full border border-gray-800">
-                        <?= count($approved_reports ?? []) ?> nghệ sĩ
+                    
+                    <form method="GET" action="" class="w-full md:w-auto flex-1 md:max-w-xs flex gap-2">
+                        <input type="text" name="q" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" placeholder="Tìm diễn viên..." class="w-full bg-black border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 transition-colors">
+                        <button type="submit" class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg transition-colors">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                    
+                    <span class="text-gray-500 text-sm bg-black px-3 py-1 rounded-full border border-gray-800 whitespace-nowrap hidden md:inline-block">
+                        <?= $total_reports ?? count($approved_reports ?? []) ?> kết quả
                     </span>
                 </div>
                 
                 <?php if (empty($approved_reports)): ?>
                     <div class="text-center py-12 text-gray-500">
-                        <i data-lucide="shield-check" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
-                        <p>Chưa có dữ liệu nào được ghi nhận.</p>
+                        <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                        <p>Không tìm thấy nghệ sĩ nào phù hợp.</p>
                     </div>
                 <?php else: ?>
                     <div class="space-y-4">
@@ -92,6 +100,31 @@
                             </div>
                         <?php endforeach; ?>
                     </div>
+                    
+                    <!-- Phân Trang -->
+                    <?php if (isset($total_pages) && $total_pages > 1): ?>
+                    <div class="mt-8 flex justify-center items-center space-x-2">
+                        <?php 
+                        $search_query = !empty($_GET['q']) ? '&q=' . urlencode($_GET['q']) : '';
+                        
+                        if ($page > 1): ?>
+                            <a href="?p=<?= $page - 1 ?><?= $search_query ?>" class="px-3 py-2 bg-gray-900 border border-gray-800 hover:border-red-500 rounded text-gray-400 hover:text-white transition-colors">
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            </a>
+                        <?php endif; ?>
+                        
+                        <span class="px-4 py-2 text-sm text-gray-400">
+                            Trang <?= $page ?> / <?= $total_pages ?>
+                        </span>
+                        
+                        <?php if ($page < $total_pages): ?>
+                            <a href="?p=<?= $page + 1 ?><?= $search_query ?>" class="px-3 py-2 bg-gray-900 border border-gray-800 hover:border-red-500 rounded text-gray-400 hover:text-white transition-colors">
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+                    
                 <?php endif; ?>
             </div>
         </div>

@@ -34,13 +34,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$search = trim($_GET['q'] ?? '');
+$page = max(1, intval($_GET['p'] ?? 1));
+$limit = 12; // Số lượng nghệ sĩ mỗi trang
+$offset = ($page - 1) * $limit;
+
 $approved_reports = [];
+$total_reports = 0;
+$total_pages = 1;
+
 if ($pdo) {
-    $stmt = $pdo->query("SELECT * FROM actor_reports ORDER BY created_at DESC");
+    // Xây dựng câu truy vấn
+    $whereClause = "";
+    $params = [];
+    
+    if (!empty($search)) {
+        $whereClause = "WHERE actor_name LIKE ? OR evidence_text LIKE ?";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+    }
+    
+    // Đếm tổng số
+    $countStmt = $pdo->prepare("SELECT COUNT(*) FROM actor_reports $whereClause");
+    $countStmt->execute($params);
+    $total_reports = $countStmt->fetchColumn();
+    $total_pages = max(1, ceil($total_reports / $limit));
+    
+    // Lấy dữ liệu
+    $query = "SELECT * FROM actor_reports $whereClause ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
     $approved_reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Nếu chưa có dữ liệu, thêm một số dữ liệu mặc định phổ biến
-    if (empty($approved_reports)) {
+    // Nếu chưa có dữ liệu và không phải đang tìm kiếm, thêm một số dữ liệu mặc định phổ biến
+    if (empty($approved_reports) && empty($search) && $total_reports == 0) {
         $approved_reports = [
             ['actor_name' => 'Thành Long (Jackie Chan)', 'evidence_text' => 'Công khai ủng hộ đường lưỡi bò trên mạng xã hội Weibo.', 'status' => 'approved'],
             ['actor_name' => 'Dương Dương (Yang Yang)', 'evidence_text' => 'Chia sẻ hình ảnh đường lưỡi bò trên Weibo cá nhân năm 2016.', 'status' => 'approved'],
@@ -53,15 +80,9 @@ if ($pdo) {
             ['actor_name' => 'Dương Mịch (Yang Mi)', 'evidence_text' => 'Ủng hộ yêu sách đường lưỡi bò trên mạng xã hội Trung Quốc.', 'status' => 'approved'],
             ['actor_name' => 'Angelababy', 'evidence_text' => 'Share bản đồ có đường lưỡi bò trên trang Weibo cá nhân.', 'status' => 'approved'],
             ['actor_name' => 'Lý Hiện (Li Xian)', 'evidence_text' => 'Chia sẻ hình ảnh ủng hộ đường lưỡi bò.', 'status' => 'approved'],
-            ['actor_name' => 'Cúc Tịnh Y (Ju Jingyi)', 'evidence_text' => 'Đăng tải bài viết bảo vệ quan điểm đường lưỡi bò của Trung Quốc.', 'status' => 'approved'],
-            ['actor_name' => 'Hứa Khải (Xu Kai)', 'evidence_text' => 'Share bài viết ủng hộ bản đồ đường lưỡi bò trên Weibo.', 'status' => 'approved'],
-            ['actor_name' => 'Ngô Lỗi (Wu Lei)', 'evidence_text' => 'Chia sẻ thông điệp "Một điểm cũng không thể thiếu".', 'status' => 'approved'],
-            ['actor_name' => 'Trương Nghệ Hưng (Lay EXO)', 'evidence_text' => 'Tích cực chia sẻ hình ảnh và ủng hộ bản đồ có đường lưỡi bò.', 'status' => 'approved'],
-            ['actor_name' => 'Tống Thiến (Victoria f(x))', 'evidence_text' => 'Đăng bản đồ đường lưỡi bò lên Instagram và Weibo cá nhân.', 'status' => 'approved'],
-            ['actor_name' => 'Vương Hạc Đệ (Dylan Wang)', 'evidence_text' => 'Chia sẻ bài viết của truyền thông Trung Quốc chứa bản đồ đường lưỡi bò.', 'status' => 'approved'],
-            ['actor_name' => 'Triệu Lộ Tư (Zhao Lusi)', 'evidence_text' => 'Share bài viết "Trung Quốc một điểm không thể thiếu".', 'status' => 'approved'],
-            ['actor_name' => 'Bạch Lộc (Bai Lu)', 'evidence_text' => 'Chia sẻ thông điệp ủng hộ đường lưỡi bò trên Weibo.', 'status' => 'approved']
+            ['actor_name' => 'Cúc Tịnh Y (Ju Jingyi)', 'evidence_text' => 'Đăng tải bài viết bảo vệ quan điểm đường lưỡi bò của Trung Quốc.', 'status' => 'approved']
         ];
+        $total_pages = 1;
     }
 }
 
