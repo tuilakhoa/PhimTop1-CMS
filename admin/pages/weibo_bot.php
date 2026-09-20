@@ -42,7 +42,7 @@
                 <button onclick="loadResults()" class="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">Làm mới</button>
             </div>
             
-            <div class="overflow-y-auto max-h-[300px] custom-scrollbar flex-1">
+            <div class="overflow-y-auto max-h-[300px] custom-scrollbar flex-1 mb-6">
                 <table class="w-full text-sm text-left text-gray-300">
                     <thead class="text-xs text-gray-400 uppercase bg-gray-800/50 sticky top-0">
                         <tr>
@@ -58,6 +58,21 @@
                     </tbody>
                 </table>
             </div>
+
+            <hr class="border-gray-800 mb-4">
+            
+            <!-- Điều tra nhanh -->
+            <h3 class="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                <i data-lucide="search" class="w-5 h-5 text-yellow-500"></i> Điều Tra Nhanh Lịch Sử
+            </h3>
+            <p class="text-xs text-gray-400 mb-4">Kiểm tra xem một diễn viên cụ thể có từng chia sẻ các bài viết vi phạm chủ quyền trong quá khứ hay không.</p>
+            <div class="flex gap-2">
+                <input type="text" id="investigateName" placeholder="Nhập tên diễn viên (Tiếng Trung, VD: 赵丽颖)" class="flex-1 bg-gray-900 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                <button onclick="investigateActor()" id="investigateBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm whitespace-nowrap">
+                    Điều Tra
+                </button>
+            </div>
+            <div id="investigateResult" class="mt-3 text-sm hidden p-3 rounded bg-gray-900/50 border border-gray-800"></div>
         </div>
     </div>
 </div>
@@ -155,4 +170,50 @@ function loadResults() {
 // Chạy theo dõi tự động khi mở trang
 startMonitoring();
 loadResults();
+
+function investigateActor() {
+    const nameInput = document.getElementById('investigateName');
+    const name = nameInput.value.trim();
+    if (!name) {
+        alert("Vui lòng nhập tên diễn viên (Tiếng Trung)!");
+        return;
+    }
+    
+    const btn = document.getElementById('investigateBtn');
+    const resultBox = document.getElementById('investigateResult');
+    
+    btn.disabled = true;
+    btn.innerText = "Đang quét...";
+    resultBox.classList.remove('hidden');
+    resultBox.innerHTML = '<span class="text-yellow-400"><i class="animate-spin inline-block w-3 h-3 border-2 border-current border-t-transparent text-yellow-400 rounded-full mr-1"></i> Đang lục tìm toàn bộ lịch sử bài đăng của ' + name + '... Xin chờ vài chục giây.</span>';
+    
+    fetch('/api/weibo_bot_api.php?action=investigate&name=' + encodeURIComponent(name))
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerText = "Điều Tra";
+            
+            if (data.error) {
+                resultBox.innerHTML = '<span class="text-red-400">❌ ' + data.error + '</span>';
+                return;
+            }
+            
+            if (data.violations && data.violations.length > 0) {
+                let html = '<span class="text-red-500 font-bold mb-2 block">⚠️ PHÁT HIỆN VI PHẠM TỪ TÀI KHOẢN: ' + data.actor + '</span>';
+                data.violations.forEach(v => {
+                    html += '<div class="text-gray-300 mb-1">- Bài đăng chứa: <strong class="text-red-400">' + v.keyword + '</strong></div>';
+                    html += '<a href="' + v.link + '" target="_blank" class="text-blue-400 hover:underline inline-block mb-2 text-xs">Xem bằng chứng &rarr;</a>';
+                });
+                html += '<div class="text-green-400 mt-2 text-xs">Đã tự động đưa vào Danh Sách Đen. Vui lòng tải lại bảng kết quả!</div>';
+                resultBox.innerHTML = html;
+            } else {
+                resultBox.innerHTML = '<span class="text-green-400">✅ <strong>' + data.actor + '</strong> trong sạch! Không tìm thấy bất kỳ bài đăng nào chứa các từ khóa cấm trong lịch sử.</span>';
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerText = "Điều Tra";
+            resultBox.innerHTML = '<span class="text-red-400">❌ Có lỗi xảy ra khi gọi API.</span>';
+        });
+}
 </script>

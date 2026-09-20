@@ -67,6 +67,43 @@ elseif ($action == 'results') {
         echo json_encode([]);
     }
 }
+elseif ($action == 'investigate') {
+    $name = $_GET['name'] ?? '';
+    if (empty($name)) {
+        echo json_encode(['error' => 'Tên không hợp lệ']);
+        exit;
+    }
+    
+    $bot_dir = __DIR__ . '/../weibo_scanner';
+    $python_path = $bot_dir . '/venv/bin/python3';
+    $script_path = $bot_dir . '/investigate_actor.py';
+    
+    $cmd = escapeshellcmd($python_path) . " " . escapeshellarg($script_path) . " " . escapeshellarg($name);
+    $output = shell_exec($cmd);
+    
+    if (!$output) {
+        echo json_encode(['error' => 'Lỗi thực thi Bot']);
+        exit;
+    }
+    
+    $result = json_decode($output, true);
+    
+    // Nếu có vi phạm, tự động lưu vào DB
+    if (!isset($result['error']) && !empty($result['violations'])) {
+        $pdo = getPDO();
+        if ($pdo) {
+            $stmt = $pdo->prepare("SELECT id FROM actor_reports WHERE actor_name = ?");
+            $stmt->execute([$result['actor']]);
+            if (!$stmt->fetch()) {
+                $evidence = "Điều tra nhanh phát hiện vi phạm từ khóa: " . $result['violations'][0]['keyword'];
+                $insert = $pdo->prepare("INSERT INTO actor_reports (actor_name, evidence_text, evidence_url, status, reported_by) VALUES (?, ?, ?, 'approved', 'Weibo Scanner Bot')");
+                $insert->execute([$result['actor'], $evidence, $result['violations'][0]['link']]);
+            }
+        }
+    }
+    
+    echo $output;
+}
 elseif ($action == 'start_bot') {
     // Gọi thẳng python3 bên trong thư mục venv thay vì dùng lệnh source (bị lỗi trên một số Web Server)
     $bot_dir = __DIR__ . '/../weibo_scanner';
