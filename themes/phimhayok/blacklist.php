@@ -50,16 +50,50 @@
                 </h3>
                 <p class="text-gray-400 text-xs mb-4">Công cụ sẽ chui vào trang cá nhân của diễn viên trên Weibo để cày xới toàn bộ lịch sử bài đăng xem có "Đường lưỡi bò" không.</p>
                 
-                <div class="flex gap-2">
-                    <input type="text" id="investigateName" placeholder="Tên tiếng Trung (VD: 赵丽颖)" class="w-full bg-black border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors">
-                    <button id="investigateBtn" onclick="investigateActor()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap font-bold text-sm">
-                        Quét
-                    </button>
+                <div class="flex flex-col gap-3">
+                    <div class="flex gap-2">
+                        <input type="text" id="investigateName" placeholder="Tên tiếng Trung (VD: 赵丽颖)" class="w-full bg-black border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                        <button id="investigateBtn" onclick="investigateActor()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap font-bold text-sm">
+                            Quét Weibo
+                        </button>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="searchTiktok()" class="flex-1 bg-[#fe2c55] hover:bg-[#e62a4d] text-white px-3 py-2 rounded-lg transition-colors whitespace-nowrap font-bold text-xs flex items-center justify-center">
+                            <i data-lucide="video" class="w-3 h-3 mr-1"></i> Tìm TikTok
+                        </button>
+                        <button onclick="searchDouyin()" class="flex-1 bg-black hover:bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg transition-colors whitespace-nowrap font-bold text-xs flex items-center justify-center">
+                            <i data-lucide="music" class="w-3 h-3 mr-1"></i> Tìm Douyin
+                        </button>
+                    </div>
                 </div>
+                
                 <div id="investigateResult" class="mt-4 p-3 bg-black border border-gray-800 rounded-lg text-sm hidden">
                 </div>
             </div>
             <script>
+            function getSearchQuery() {
+                const name = document.getElementById('investigateName').value.trim();
+                if (!name) {
+                    alert("Vui lòng nhập tên diễn viên (Tiếng Trung) trước!");
+                    return null;
+                }
+                return name + ' 中国一点都不能少';
+            }
+
+            function searchTiktok() {
+                const query = getSearchQuery();
+                if (query) {
+                    window.open('https://www.tiktok.com/search?q=' + encodeURIComponent(query), '_blank');
+                }
+            }
+
+            function searchDouyin() {
+                const query = getSearchQuery();
+                if (query) {
+                    window.open('https://www.douyin.com/search/' + encodeURIComponent(query), '_blank');
+                }
+            }
             function investigateActor() {
                 const nameInput = document.getElementById('investigateName');
                 const name = nameInput.value.trim();
