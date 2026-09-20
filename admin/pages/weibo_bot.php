@@ -193,7 +193,9 @@ function investigateActor() {
     resultBox.classList.remove('hidden');
     resultBox.innerHTML = '<span class="text-yellow-400"><i class="animate-spin inline-block w-3 h-3 border-2 border-current border-t-transparent text-yellow-400 rounded-full mr-1"></i> Đang lục tìm toàn bộ lịch sử bài đăng của ' + name + '... Xin chờ vài chục giây.</span>';
     
-    fetch('/api/weibo_bot_api.php?action=investigate&name=' + encodeURIComponent(name))
+    // Thêm số ngẫu nhiên để chống trình duyệt lưu Cache kết quả cũ
+    const noCache = '&_=' + new Date().getTime();
+    fetch('/api/weibo_bot_api.php?action=investigate&name=' + encodeURIComponent(name) + noCache)
         .then(res => res.text())
         .then(text => {
             btn.disabled = false;
