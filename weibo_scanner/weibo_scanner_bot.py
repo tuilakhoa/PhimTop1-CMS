@@ -127,20 +127,26 @@ class GlobalWeiboScanner:
                     uid = str(post['user_id'])
                     is_verified = post['verified']
                     v_type = post['verified_type']
+                    reason = str(post.get('verified_reason', '')).lower()
                     
-                    # CHỈ LỌC NGHỆ SĨ / CA SĨ (Bỏ qua người thường và công ty)
+                    # CHỈ LỌC NGHỆ SĨ / CA SĨ (Bỏ qua người thường, công ty, và các KOL/Blogger)
                     if is_verified and v_type == 0:
-                        if uid not in found_uids:
-                            found_uids.add(uid)
-                            print(f"  -> ⚠️ [PHÁT HIỆN] Nghệ sĩ: {post['user_name']} (Lý do xác minh: {post['verified_reason']})")
-                            results.append({
-                                'uid': uid,
-                                'name': post['user_name'],
-                                'user_type': f"⭐ Nghệ sĩ ({post['verified_reason']})",
-                                'post_id': post['post_id'],
-                                'keyword_matched': keyword,
-                                'link': f"https://weibo.com/{uid}/{post['post_id']}"
-                            })
+                        # Các từ khóa định danh giới giải trí (Diễn viên, Ca sĩ, Nghệ sĩ, Thần tượng, Đạo diễn...)
+                        artist_keywords = ['演员', '歌手', '艺人', '明星', '音乐', '偶像', '练习生', '导演', '编剧', '影视', '戏剧', '演艺', '组合']
+                        is_true_artist = any(akw in reason for akw in artist_keywords)
+                        
+                        if is_true_artist:
+                            if uid not in found_uids:
+                                found_uids.add(uid)
+                                print(f"  -> ⚠️ [PHÁT HIỆN] Diễn viên/Ca sĩ: {post['user_name']} (Lý do xác minh: {post['verified_reason']})")
+                                results.append({
+                                    'uid': uid,
+                                    'name': post['user_name'],
+                                    'user_type': f"⭐ Nghệ sĩ ({post['verified_reason']})",
+                                    'post_id': post['post_id'],
+                                    'keyword_matched': keyword,
+                                    'link': f"https://weibo.com/{uid}/{post['post_id']}"
+                                })
                 
                 # Nghỉ 2 giây giữa mỗi trang tìm kiếm để tránh bị khóa IP
                 time.sleep(2)
