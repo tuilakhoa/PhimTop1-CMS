@@ -96,13 +96,51 @@ def main():
                 for mblog in mblogs:
                     if not mblog: continue
                     post_id = mblog.get('id')
-                    violations.append({
-                        'keyword': kw,
-                        'post_id': post_id,
-                        'link': f"https://weibo.com/{uid}/{post_id}",
-                        'text': mblog.get('text', '')[:100] + "..."
-                    })
-                    break # Chỉ cần tìm thấy 1 bài vi phạm cho từ khóa này là đủ bằng chứng
+                    text = mblog.get('text', '')
+                    
+                    # AI Verification
+                    is_violating = True
+                    ai_reason = "Không dùng AI"
+                    
+                    ai_provider = config.get('ai_provider', 'local')
+                    
+                    if text and ai_provider == 'local':
+                        prompt = f"Bạn là chuyên gia phân tích nội dung. Hãy xác định xem văn bản sau có thực sự mang ý nghĩa vi phạm chủ quyền lãnh thổ Việt Nam hay không, hay từ khóa '{kw}' được dùng trong ngữ cảnh bình thường.\nVăn bản: '{text}'\n\nChỉ trả về JSON: {{\"is_violating\": true/false, \"reason\": \"lý do\"}}"
+                        
+                        model_path = config.get('local_model_path', '')
+                        if model_path:
+                            try:
+                                import os
+                                from llama_cpp import Llama
+                                # Use a global instance to avoid reloading
+                                if 'global_llm' not in globals():
+                                    global global_llm
+                                    global_llm = Llama(model_path=model_path, n_ctx=1024, verbose=False)
+                                
+                                response = global_llm.create_chat_completion(
+                                    messages=[
+                                        {"role": "system", "content": "You are a content analyzer. Always return JSON with keys: is_violating (boolean) and reason (string)."},
+                                        {"role": "user", "content": prompt}
+                                    ],
+                                    response_format={"type": "json_object"},
+                                    temperature=0.1
+                                )
+                                ai_text = response['choices'][0]['message']['content']
+                                ai_data = json.loads(ai_text)
+                                is_violating = ai_data.get('is_violating', True)
+                                ai_reason = ai_data.get('reason', 'AI đã kiểm tra (Local Model)')
+                            except Exception as e:
+                                pass
+                            
+                    if is_violating:
+                        violations.append({
+                            'keyword': kw,
+                            'post_id': post_id,
+                            'link': f"https://weibo.com/{uid}/{post_id}",
+                            'text': text[:100] + "...",
+                            'ai_reason': ai_reason
+                        })
+                        break # Chỉ cần tìm thấy 1 bài vi phạm cho từ khóa này là đủ bằng chứng
         except:
             continue
 

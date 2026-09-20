@@ -2,6 +2,8 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
+require_once __DIR__ . '/../includes/db.php';
+
 // Trả về trạng thái hoạt động của Bot
 $action = isset($_GET['action']) ? $_GET['action'] : 'status';
 
@@ -39,7 +41,10 @@ elseif ($action == 'results') {
                     $stmt = $pdo->prepare("SELECT id FROM actor_reports WHERE actor_name = ?");
                     $stmt->execute([$item['name']]);
                     if (!$stmt->fetch()) {
-                        $evidence = "Tự động phát hiện vi phạm từ khóa: " . $item['keyword_matched'];
+                        $evidence = "Phát hiện từ khóa: " . $item['keyword_matched'];
+                        if (isset($item['ai_reason'])) {
+                            $evidence .= " | Lời bình AI: " . $item['ai_reason'];
+                        }
                         $insert = $pdo->prepare("INSERT INTO actor_reports (actor_name, evidence_text, evidence_url, status, reported_by) VALUES (?, ?, ?, 'approved', 'Weibo Scanner Bot')");
                         $insert->execute([$item['name'], $evidence, $item['link']]);
                     }
@@ -78,6 +83,22 @@ elseif ($action == 'investigate') {
     $python_path = $bot_dir . '/venv/bin/python3';
     $script_path = $bot_dir . '/investigate_actor.py';
     
+    // Đưa API Key từ hệ thống vào config.json của Bot
+    $settings = getSettings();
+    $config_path = $bot_dir . '/config.json';
+    if (file_exists($config_path)) {
+        $config = json_decode(file_get_contents($config_path), true);
+        if (isset($settings['geminiApiKey']) && !empty($settings['geminiApiKey'])) {
+            $config['gemini_api_key'] = $settings['geminiApiKey'];
+        }
+        if (isset($settings['openaiApiKey']) && !empty($settings['openaiApiKey'])) {
+            $config['openai_api_key'] = $settings['openaiApiKey'];
+        }
+        $config['ai_provider'] = $settings['aiProvider'] ?? 'gemini';
+        
+        file_put_contents($config_path, json_encode($config, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+    }
+    
     // Mã hóa base64 để tránh lỗi escapeshellarg làm mất ký tự tiếng Trung trên một số máy chủ
     $base64_name = base64_encode($name);
     
@@ -105,7 +126,10 @@ elseif ($action == 'investigate') {
             $stmt = $pdo->prepare("SELECT id FROM actor_reports WHERE actor_name = ?");
             $stmt->execute([$result['actor']]);
             if (!$stmt->fetch()) {
-                $evidence = "Điều tra nhanh phát hiện vi phạm từ khóa: " . $result['violations'][0]['keyword'];
+                $evidence = "Điều tra nhanh phát hiện từ khóa: " . $result['violations'][0]['keyword'];
+                if (isset($result['violations'][0]['ai_reason'])) {
+                    $evidence .= " | Lời bình AI: " . $result['violations'][0]['ai_reason'];
+                }
                 $insert = $pdo->prepare("INSERT INTO actor_reports (actor_name, evidence_text, evidence_url, status, reported_by) VALUES (?, ?, ?, 'approved', 'Weibo Scanner Bot')");
                 $insert->execute([$result['actor'], $evidence, $result['violations'][0]['link']]);
             }
@@ -115,8 +139,24 @@ elseif ($action == 'investigate') {
     echo $output;
 }
 elseif ($action == 'start_bot') {
-    // Gọi thẳng python3 bên trong thư mục venv thay vì dùng lệnh source (bị lỗi trên một số Web Server)
+    // Đưa API Key từ hệ thống vào config.json của Bot
+    $settings = getSettings();
     $bot_dir = __DIR__ . '/../weibo_scanner';
+    $config_path = $bot_dir . '/config.json';
+    if (file_exists($config_path)) {
+        $config = json_decode(file_get_contents($config_path), true);
+        if (isset($settings['geminiApiKey']) && !empty($settings['geminiApiKey'])) {
+            $config['gemini_api_key'] = $settings['geminiApiKey'];
+        }
+        if (isset($settings['openaiApiKey']) && !empty($settings['openaiApiKey'])) {
+            $config['openai_api_key'] = $settings['openaiApiKey'];
+        }
+        $config['ai_provider'] = $settings['aiProvider'] ?? 'gemini';
+        
+        file_put_contents($config_path, json_encode($config, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+    }
+    
+    // Gọi thẳng python3 bên trong thư mục venv thay vì dùng lệnh source (bị lỗi trên một số Web Server)
     // Dùng nohup để tránh lỗi treo PHP-FPM trên aaPanel khi gọi lệnh chạy ngầm
     $cmd = "cd " . escapeshellarg($bot_dir) . " && nohup ./venv/bin/python3 weibo_scanner_bot.py > bot_log.txt 2>&1 &";
     exec($cmd);

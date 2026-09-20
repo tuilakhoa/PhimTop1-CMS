@@ -137,17 +137,57 @@ class GlobalWeiboScanner:
                         is_true_artist = any(akw in reason for akw in artist_keywords)
                         
                         if is_true_artist:
-                            if uid not in found_uids:
-                                found_uids.add(uid)
-                                print(f"  -> ⚠️ [PHÁT HIỆN] Diễn viên/Ca sĩ: {post['user_name']} (Lý do xác minh: {post['verified_reason']})")
-                                results.append({
-                                    'uid': uid,
-                                    'name': post['user_name'],
-                                    'user_type': f"⭐ Nghệ sĩ ({post['verified_reason']})",
-                                    'post_id': post['post_id'],
-                                    'keyword_matched': keyword,
-                                    'link': f"https://weibo.com/{uid}/{post['post_id']}"
-                                })
+                            # AI Verification
+                            text = str(post.get('text', ''))
+                            is_violating = True
+                            ai_reason = "Không dùng AI (mặc định vi phạm do khớp từ khóa)"
+                            
+                            ai_provider = self.config.get('ai_provider', 'local')
+                            
+                            if text:
+                                prompt = f"Bạn là chuyên gia phân tích nội dung. Hãy xác định xem văn bản sau có thực sự mang ý nghĩa vi phạm chủ quyền lãnh thổ Việt Nam (ví dụ ủng hộ đường lưỡi bò, bản đồ sai lệch, v.v.) hay không, vì có thể từ khóa '{keyword}' được dùng trong ngữ cảnh khác.\nVăn bản: '{text}'\n\nChỉ trả về JSON định dạng: {{\"is_violating\": true/false, \"reason\": \"lý do ngắn gọn\"}}"
+                                
+                                if ai_provider == 'local':
+                                    model_path = self.config.get('local_model_path', '')
+                                    if model_path and os.path.exists(model_path):
+                                        try:
+                                            # Lazy load llama_cpp to avoid errors if not configured
+                                            from llama_cpp import Llama
+                                            if not hasattr(self, 'llm_instance'):
+                                                # Chỉ nạp model vào RAM 1 lần để quét được nhiều bài
+                                                self.llm_instance = Llama(model_path=model_path, n_ctx=1024, verbose=False)
+                                                
+                                            response = self.llm_instance.create_chat_completion(
+                                                messages=[
+                                                    {"role": "system", "content": "You are a content analyzer. Always return JSON with keys: is_violating (boolean) and reason (string)."},
+                                                    {"role": "user", "content": prompt}
+                                                ],
+                                                response_format={"type": "json_object"},
+                                                temperature=0.1
+                                            )
+                                            ai_text = response['choices'][0]['message']['content']
+                                            ai_data = json.loads(ai_text)
+                                            is_violating = ai_data.get('is_violating', True)
+                                            ai_reason = ai_data.get('reason', 'AI đã kiểm tra (Local Model)')
+                                        except Exception as e:
+                                            print(f"  [-] Lỗi Local AI check: {e}")
+                                            
+                            if is_violating:
+                                if uid not in found_uids:
+                                    found_uids.add(uid)
+                                    print(f"  -> ⚠️ [PHÁT HIỆN] Diễn viên/Ca sĩ: {post['user_name']} (Lý do xác minh: {post['verified_reason']})")
+                                    print(f"     -> Lý do AI: {ai_reason}")
+                                    results.append({
+                                        'uid': uid,
+                                        'name': post['user_name'],
+                                        'user_type': f"⭐ Nghệ sĩ ({post['verified_reason']})",
+                                        'post_id': post['post_id'],
+                                        'keyword_matched': keyword,
+                                        'link': f"https://weibo.com/{uid}/{post['post_id']}",
+                                        'ai_reason': ai_reason
+                                    })
+                            else:
+                                print(f"  -> ℹ️ [BỎ QUA] {post['user_name']}: Khớp từ khóa nhưng AI đánh giá không vi phạm ({ai_reason})")
                 
                 # Nghỉ 4 giây giữa mỗi trang tìm kiếm để tránh bị khóa IP và lỗi Timeout
                 time.sleep(4)
@@ -176,6 +216,8 @@ if __name__ == "__main__":
                 print(f"- Nghệ sĩ: {v['name']} (UID: {v['uid']})")
                 print(f"  Loại TK: {v['user_type']}")
                 print(f"  Từ khóa: Dính từ khóa '{v['keyword_matched']}'")
+                if 'ai_reason' in v:
+                    print(f"  Lý do  : {v['ai_reason']}")
                 print(f"  Link   : {v['link']}\n")
     else:
         print("[-] Vui lòng tạo file config.json")

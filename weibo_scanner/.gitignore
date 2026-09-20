@@ -1,0 +1,10 @@
+venv/
+models/
+*.gguf
+*.log
+*.txt
+__pycache__/
+.env
+status.json
+violators_result.json
+config.json
