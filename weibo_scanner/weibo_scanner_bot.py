@@ -1,180 +1,150 @@
 import requests
-from PIL import Image
-import imagehash
-import io
 import time
 import json
-import re
 import os
 from datetime import datetime
+import urllib.parse
 
-class AdvancedWeiboScanner:
+class GlobalWeiboScanner:
     def __init__(self, config_path="config.json", status_file="status.json"):
         self.status_file = status_file
-        self.update_status("khởi động", "Hệ thống đang tải cấu hình và ảnh mẫu...", 0, 0)
+        self.update_status("khởi động", "Hệ thống đang tải cấu hình...", 0, 0)
         
         print("\n" + "="*60)
-        print("🚀 KHỞI ĐỘNG HỆ THỐNG QUÉT WEIBO 🚀")
+        print("🚀 KHỞI ĐỘNG HỆ THỐNG QUÉT TOÀN MẠNG WEIBO (PHƯƠNG PHÁP 2) 🚀")
         print("="*60)
         self.load_config(config_path)
-        
-        regex_pattern = "|".join(map(re.escape, self.config['keywords']))
-        self.keyword_regex = re.compile(regex_pattern, re.IGNORECASE)
-        
-        self.reference_hashes = []
-        for img_path in self.config.get('reference_images', []):
-            if os.path.exists(img_path):
-                hash_val = imagehash.phash(Image.open(img_path))
-                self.reference_hashes.append(hash_val)
-                print(f"[+] Đã tải ảnh mẫu: {img_path}")
-            else:
-                print(f"[-] Cảnh báo: Không tìm thấy ảnh {img_path}")
 
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Referer': 'https://m.weibo.cn/search',
         }
-        self.update_status("sẵn sàng", "Hoàn tất nạp dữ liệu. Bắt đầu quét...", 0, len(self.config.get('target_uids', [])))
+        self.update_status("sẵn sàng", "Sẵn sàng quét theo từ khóa...", 0, len(self.config.get('keywords', [])))
         print("="*60 + "\n")
 
-    def update_status(self, state, message, current_step, total_steps, current_uid="", current_name=""):
-        """Ghi tiến trình ra file JSON để Admin Dashboard (PHP) có thể đọc được"""
+    def update_status(self, state, message, current_step, total_steps, current_keyword="", found_count=0):
         status_data = {
-            "state": state, # "khởi động", "đang quét", "hoàn thành", "lỗi"
+            "state": state,
             "message": message,
             "progress": f"{current_step}/{total_steps}",
             "percentage": int((current_step / total_steps * 100)) if total_steps > 0 else 0,
             "current_target": {
-                "uid": current_uid,
-                "name": current_name
+                "keyword": current_keyword,
+                "found_artists": found_count
             },
             "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         try:
             with open(self.status_file, 'w', encoding='utf-8') as f:
                 json.dump(status_data, f, ensure_ascii=False, indent=4)
-        except Exception as e:
-            pass # Bỏ qua lỗi ghi file nếu có
+        except Exception:
+            pass 
 
     def save_results(self, results):
-        """Lưu danh sách vi phạm ra file kết quả để CMS đọc"""
+        """Lưu danh sách vi phạm. File này chỉ chứa text nên chỉ tốn vài KB dung lượng VPS"""
         with open("violators_result.json", 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=4)
 
     def load_config(self, path):
         with open(path, 'r', encoding='utf-8') as f:
             self.config = json.load(f)
-        print(f"[+] Đã tải cấu hình: {len(self.config['keywords'])} từ khóa, {len(self.config['target_uids'])} tài khoản mục tiêu.")
+        print(f"[+] Đã tải cấu hình: {len(self.config['keywords'])} từ khóa.")
 
-    def fetch_user_info(self, uid):
-        url = f"https://m.weibo.cn/api/container/getIndex?type=uid&value={uid}"
+    def search_keyword(self, keyword, page=1):
+        """Sử dụng API tìm kiếm của Weibo để lấy bài viết theo từ khóa"""
+        encoded_kw = urllib.parse.quote(keyword)
+        url = f"https://m.weibo.cn/api/container/getIndex?containerid=100103type%3D1%26q%3D{encoded_kw}&page_type=searchall&page={page}"
         try:
-            res = requests.get(url, headers=self.headers, timeout=10)
-            data = res.json()
-            if data.get('ok') == 1:
-                user_info = data.get('data', {}).get('userInfo', {})
-                return {
-                    'name': user_info.get('screen_name', 'Không xác định'),
-                    'verified': user_info.get('verified', False),
-                    'verified_type': user_info.get('verified_type', -1),
-                    'verified_reason': user_info.get('verified_reason', 'Không có')
-                }
-            return None
-        except Exception:
-            return None
-
-    def fetch_posts(self, uid):
-        url = f"https://m.weibo.cn/api/container/getIndex?type=uid&value={uid}&containerid=107603{uid}"
-        try:
-            res = requests.get(url, headers=self.headers, timeout=10)
+            res = requests.get(url, headers=self.headers, timeout=15)
             data = res.json()
             posts = []
             if data.get('ok') == 1:
                 for card in data.get('data', {}).get('cards', []):
+                    # card_type == 9 là bài đăng thông thường
                     if card.get('card_type') == 9:
                         mblog = card.get('mblog', {})
-                        pic_urls = [p.get('large', {}).get('url') for p in mblog.get('pics', [])]
+                        user = mblog.get('user', {})
                         posts.append({
-                            'id': mblog.get('id'),
+                            'post_id': mblog.get('id'),
                             'text': mblog.get('text', ''),
-                            'pics': pic_urls
+                            'user_id': user.get('id'),
+                            'user_name': user.get('screen_name', ''),
+                            'verified': user.get('verified', False),
+                            'verified_type': user.get('verified_type', -1),
+                            'verified_reason': user.get('verified_reason', '')
                         })
             return posts
-        except Exception:
+        except Exception as e:
+            print(f"  [-] Lỗi kết nối khi tìm kiếm: {e}")
             return []
-
-    def check_images(self, image_url, cutoff=5):
-        if not self.reference_hashes: return False
-        try:
-            res = requests.get(image_url, headers=self.headers, timeout=10)
-            post_hash = imagehash.phash(Image.open(io.BytesIO(res.content)))
-            for ref_hash in self.reference_hashes:
-                if (ref_hash - post_hash) <= cutoff: return True 
-            return False
-        except Exception: return False
 
     def scan(self):
         results = []
-        uids = self.config.get('target_uids', [])
-        total = len(uids)
+        # Chống trùng lặp nghệ sĩ (nếu 1 người dùng nhiều từ khóa)
+        found_uids = set() 
         
-        for index, uid in enumerate(uids, 1):
-            self.update_status("đang quét", f"Đang lấy thông tin UID: {uid}", index, total, uid, "Đang xử lý...")
-            print(f"[{index}/{total}] TIẾN HÀNH QUÉT UID: {uid} ".ljust(60, "-"))
+        keywords = self.config.get('keywords', [])
+        total = len(keywords)
+        
+        for index, keyword in enumerate(keywords, 1):
+            print(f"[{index}/{total}] ĐANG TÌM KIẾM TRÊN TOÀN MẠNG: {keyword} ".ljust(60, "-"))
+            self.update_status("đang quét", f"Đang quét diện rộng từ khóa: {keyword}", index, total, keyword, len(results))
             
-            user_info = self.fetch_user_info(uid)
-            if not user_info:
-                print("  -> ❌ Không thể lấy thông tin. Bỏ qua.")
-                continue
+            # Quét 5 trang đầu tiên của kết quả tìm kiếm (Mỗi trang có khoảng 10 bài)
+            # Bạn có thể tăng số trang lên, nhưng quét nhiều sẽ dễ bị Weibo chặn API
+            for page in range(1, 6):
+                print(f"  -> Đang quét Trang {page}...")
+                posts = self.search_keyword(keyword, page)
                 
-            name = user_info['name']
-            is_verified = user_info['verified']
-            
-            self.update_status("đang quét", "Đang tải danh sách bài đăng...", index, total, uid, name)
-            print(f"  -> 🏷️  Tên: {name} | Đang tải bài đăng...")
-            
-            if not is_verified or user_info['verified_type'] != 0:
-                print("  -> ⏭️ Bỏ qua: Không phải Nghệ sĩ/Ca sĩ.")
-                continue
+                if not posts:
+                    break # Không còn kết quả
                 
-            posts = self.fetch_posts(uid)
-            self.update_status("đang quét", f"Đang phân tích {len(posts)} bài đăng...", index, total, uid, name)
-            
-            for post in posts:
-                reasons = []
+                for post in posts:
+                    uid = str(post['user_id'])
+                    is_verified = post['verified']
+                    v_type = post['verified_type']
+                    
+                    # CHỈ LỌC NGHỆ SĨ / CA SĨ (Bỏ qua người thường và công ty)
+                    if is_verified and v_type == 0:
+                        if uid not in found_uids:
+                            found_uids.add(uid)
+                            print(f"  -> ⚠️ [PHÁT HIỆN] Nghệ sĩ: {post['user_name']} (Lý do xác minh: {post['verified_reason']})")
+                            results.append({
+                                'uid': uid,
+                                'name': post['user_name'],
+                                'user_type': f"⭐ Nghệ sĩ ({post['verified_reason']})",
+                                'post_id': post['post_id'],
+                                'keyword_matched': keyword,
+                                'link': f"https://weibo.com/{uid}/{post['post_id']}"
+                            })
                 
-                found_keywords = self.keyword_regex.findall(post['text'])
-                if found_keywords:
-                    unique_keywords = list(set(found_keywords))
-                    reasons.append(f"Từ khóa: {', '.join(unique_keywords)}")
-                
-                if not found_keywords and post['pics']:
-                    for pic_url in post['pics']:
-                        if self.check_images(pic_url):
-                            reasons.append("Ảnh vi phạm")
-                            break
-                
-                if reasons:
-                    results.append({
-                        'uid': uid,
-                        'name': name,
-                        'post_id': post['id'],
-                        'reason': " | ".join(reasons),
-                        'link': f"https://weibo.com/{uid}/{post['id']}"
-                    })
+                # Nghỉ 2 giây giữa mỗi trang tìm kiếm để tránh bị khóa IP
+                time.sleep(2)
             
-            self.update_status("đang quét", f"Đang chờ để tránh giới hạn kết nối...", index, total, uid, name)
-            time.sleep(3) 
+            print(f"  -> ✅ Hoàn thành từ khóa. Nghỉ 5 giây trước khi sang từ khác...")
+            time.sleep(5) 
             
-        self.update_status("hoàn thành", f"Quét xong. Phát hiện {len(results)} vi phạm.", total, total)
+        self.update_status("hoàn thành", f"Quét xong. Phát hiện {len(results)} nghệ sĩ vi phạm.", total, total, "Hoàn tất", len(results))
         self.save_results(results)
         return results
 
 if __name__ == "__main__":
     if os.path.exists("config.json"):
-        scanner = AdvancedWeiboScanner("config.json")
+        scanner = GlobalWeiboScanner("config.json")
         violators = scanner.scan()
+        
         print("="*60)
-        print(f"🏆 TỔNG KẾT KẾT QUẢ (PHÁT HIỆN {len(violators)} VI PHẠM) 🏆")
+        print(f"🏆 TỔNG KẾT (PHÁT HIỆN {len(violators)} NGHỆ SĨ VI PHẠM) 🏆")
         print("="*60)
+        
+        if not violators:
+            print("Không tìm thấy nghệ sĩ nào từ các từ khóa này trong các kết quả tìm kiếm gần đây.")
+        else:
+            for v in violators:
+                print(f"- Nghệ sĩ: {v['name']} (UID: {v['uid']})")
+                print(f"  Loại TK: {v['user_type']}")
+                print(f"  Từ khóa: Dính từ khóa '{v['keyword_matched']}'")
+                print(f"  Link   : {v['link']}\n")
     else:
         print("[-] Vui lòng tạo file config.json")
