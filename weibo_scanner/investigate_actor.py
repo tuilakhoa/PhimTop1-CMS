@@ -102,7 +102,7 @@ def main():
         "violations": violations
     }
     
-    print(json.dumps(result, ensure_ascii=False))
+    print(json.dumps(result))
 
 if __name__ == '__main__':
     main()
