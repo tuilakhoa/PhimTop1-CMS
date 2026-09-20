@@ -107,7 +107,8 @@ elseif ($action == 'investigate') {
 elseif ($action == 'start_bot') {
     // Gọi thẳng python3 bên trong thư mục venv thay vì dùng lệnh source (bị lỗi trên một số Web Server)
     $bot_dir = __DIR__ . '/../weibo_scanner';
-    $cmd = "cd " . escapeshellarg($bot_dir) . " && ./venv/bin/python3 weibo_scanner_bot.py > bot_log.txt 2>&1 &";
+    // Dùng nohup để tránh lỗi treo PHP-FPM trên aaPanel khi gọi lệnh chạy ngầm
+    $cmd = "cd " . escapeshellarg($bot_dir) . " && nohup ./venv/bin/python3 weibo_scanner_bot.py > bot_log.txt 2>&1 &";
     exec($cmd);
     echo json_encode(["status" => "success", "message" => "Đã gửi lệnh chạy bot nền."]);
 }

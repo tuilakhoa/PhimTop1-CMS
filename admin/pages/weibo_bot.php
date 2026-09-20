@@ -83,19 +83,25 @@ let monitorInterval;
 function startBot() {
     if(!confirm("Bạn có chắc chắn muốn chạy Bot rà soát ngay bây giờ? Quá trình này có thể mất vài phút.")) return;
     
-    document.getElementById('startBotBtn').disabled = true;
-    document.getElementById('startBotBtn').classList.add('opacity-50');
+    const btn = document.getElementById('startBotBtn');
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    btn.innerHTML = '<i class="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent text-white rounded-full mr-2"></i> Đang khởi động...';
     
     fetch('/api/weibo_bot_api.php?action=start_bot')
         .then(res => res.json())
         .then(data => {
-            alert(data.message);
+            // Không dùng alert nữa vì gây khó chịu trên mobile
+            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 mr-2"></i> Đã chạy nền';
+            lucide.createIcons();
             startMonitoring();
         })
         .catch(err => {
             alert("Có lỗi xảy ra khi gọi Bot!");
-            document.getElementById('startBotBtn').disabled = false;
-            document.getElementById('startBotBtn').classList.remove('opacity-50');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = '<i data-lucide="play" class="w-4 h-4 mr-2"></i> Bắt đầu quét Weibo';
+            lucide.createIcons();
         });
 }
 
