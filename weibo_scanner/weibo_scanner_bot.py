@@ -149,28 +149,32 @@ class GlobalWeiboScanner:
                                 
                                 if ai_provider == 'local':
                                     model_path = self.config.get('local_model_path', '')
-                                    if model_path and os.path.exists(model_path):
-                                        try:
-                                            # Lazy load llama_cpp to avoid errors if not configured
-                                            from llama_cpp import Llama
-                                            if not hasattr(self, 'llm_instance'):
-                                                # Chỉ nạp model vào RAM 1 lần để quét được nhiều bài
-                                                self.llm_instance = Llama(model_path=model_path, n_ctx=1024, verbose=False)
-                                                
-                                            response = self.llm_instance.create_chat_completion(
-                                                messages=[
-                                                    {"role": "system", "content": "You are a content analyzer. Always return JSON with keys: is_violating (boolean) and reason (string)."},
-                                                    {"role": "user", "content": prompt}
-                                                ],
-                                                response_format={"type": "json_object"},
-                                                temperature=0.1
-                                            )
-                                            ai_text = response['choices'][0]['message']['content']
-                                            ai_data = json.loads(ai_text)
-                                            is_violating = ai_data.get('is_violating', True)
-                                            ai_reason = ai_data.get('reason', 'AI đã kiểm tra (Local Model)')
-                                        except Exception as e:
-                                            print(f"  [-] Lỗi Local AI check: {e}")
+                                    if model_path:
+                                        if not os.path.isabs(model_path):
+                                            model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), model_path)
+                                        
+                                        if os.path.exists(model_path):
+                                            try:
+                                                # Lazy load llama_cpp to avoid errors if not configured
+                                                from llama_cpp import Llama
+                                                if not hasattr(self, 'llm_instance'):
+                                                    # Chỉ nạp model vào RAM 1 lần để quét được nhiều bài
+                                                    self.llm_instance = Llama(model_path=model_path, n_ctx=1024, verbose=False)
+                                                    
+                                                response = self.llm_instance.create_chat_completion(
+                                                    messages=[
+                                                        {"role": "system", "content": "You are a content analyzer. Always return JSON with keys: is_violating (boolean) and reason (string)."},
+                                                        {"role": "user", "content": prompt}
+                                                    ],
+                                                    response_format={"type": "json_object"},
+                                                    temperature=0.1
+                                                )
+                                                ai_text = response['choices'][0]['message']['content']
+                                                ai_data = json.loads(ai_text)
+                                                is_violating = ai_data.get('is_violating', True)
+                                                ai_reason = ai_data.get('reason', 'AI đã kiểm tra (Local Model)')
+                                            except Exception as e:
+                                                print(f"  [-] Lỗi Local AI check: {e}")
                                             
                             if is_violating:
                                 if uid not in found_uids:

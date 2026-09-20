@@ -109,8 +109,10 @@ def main():
                         
                         model_path = config.get('local_model_path', '')
                         if model_path:
+                            import os
+                            if not os.path.isabs(model_path):
+                                model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), model_path)
                             try:
-                                import os
                                 from llama_cpp import Llama
                                 # Use a global instance to avoid reloading
                                 if 'global_llm' not in globals():
