@@ -19,6 +19,7 @@ class GlobalWeiboScanner:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'application/json, text/plain, */*',
             'Referer': 'https://m.weibo.cn/search',
+            'Cookie': 'XSRF-TOKEN=WOcFhzNDNK44pF7JaZb6Hrxy; SUB=_2A25Hqx88DeRhGeJO7lMZ9i7JyTqIHXVkyR70rDV8PUNbmtAbLUHGkW9Nd0QLTRf-BTndWzrEdkbXwP_IGpZ15jUi; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9Wh22bPgLNPq_XAJkrHCl8R25JpX5KzhUgL.FoB7SK2RSo5feoq2dJLoIXnLxKnLBo2LB-2LxKML1hnLB.BLxK-L1-eL1-qLxKqL12zLBKnLxK.LB.eLBK5LxKML1-eL12zLxKqL1KMLBK-LxKnL1K5LB.Bt; WBPSESS=9D3L543AEK5qYjmH81npxfaPlG5AeSumbACfNb9hkzMGPF7sFl8qkRMIaH5yS2R2OMr2CEEAVuSjL8C0xa2h9kIlVic-fpiBm0lXnqSgGERH6bjnLpRkPTaTU1ZszejLpMaos1pYsufrmGudUxGaGQ==; SCF=AkWGCbWjc8JziRqolrFc9d2V2-0R9Gj0cDDS68xtxIw4FLwfGEmuoHzG4qECaUpVoiD7C_Kka0NqGBMWE2u2CL4.; ALF=02_1792474220'
         }
         self.update_status("sẵn sàng", "Sẵn sàng quét theo từ khóa...", 0, len(self.config.get('keywords', [])))
         print("="*60 + "\n")
