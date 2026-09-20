@@ -77,7 +77,7 @@ class GlobalWeiboScanner:
         encoded_kw = urllib.parse.quote(keyword)
         url = f"https://m.weibo.cn/api/container/getIndex?containerid=100103type%3D1%26q%3D{encoded_kw}&page_type=searchall&page={page}"
         try:
-            res = requests.get(url, headers=self.headers, timeout=15)
+            res = requests.get(url, headers=self.headers, timeout=30)
             data = res.json()
             posts = []
             if data.get('ok') == 1:
@@ -112,16 +112,17 @@ class GlobalWeiboScanner:
             print(f"[{index}/{total}] ĐANG TÌM KIẾM TRÊN TOÀN MẠNG: {keyword} ".ljust(60, "-"))
             self.update_status("đang quét", f"Đang quét diện rộng từ khóa: {keyword}", index, total, keyword, len(results))
             
-            # Quét 5 trang đầu tiên của kết quả tìm kiếm (Mỗi trang có khoảng 10 bài)
-            for page in range(1, 6):
-                msg = f"Đang duyệt Trang {page}/5 (Từ khóa: {keyword})"
+            # Quét 50 trang đầu tiên của kết quả tìm kiếm để đào sâu vào quá khứ (Weibo giới hạn tối đa khoảng 50 trang)
+            for page in range(1, 51):
+                msg = f"Đang duyệt Trang {page}/50 (Từ khóa: {keyword})"
                 print(f"  -> {msg}...")
                 self.update_status("đang quét", msg, index, total, keyword, len(results))
                 
                 posts = self.search_keyword(keyword, page)
                 
                 if not posts:
-                    break # Không còn kết quả
+                    # Nếu Weibo trả về rỗng (đã chạm đáy kết quả), thì dừng quét từ khóa này
+                    break
                 
                 for post in posts:
                     uid = str(post['user_id'])
@@ -148,11 +149,12 @@ class GlobalWeiboScanner:
                                     'link': f"https://weibo.com/{uid}/{post['post_id']}"
                                 })
                 
-                # Nghỉ 2 giây giữa mỗi trang tìm kiếm để tránh bị khóa IP
-                time.sleep(2)
-            
-            print(f"  -> ✅ Hoàn thành từ khóa. Nghỉ 5 giây trước khi sang từ khác...")
-            time.sleep(5) 
+                # Nghỉ 4 giây giữa mỗi trang tìm kiếm để tránh bị khóa IP và lỗi Timeout
+                time.sleep(4)
+                
+            # Nghỉ 10 giây trước khi sang từ khóa tiếp theo
+            print("  -> ✅ Hoàn thành từ khóa. Nghỉ 10 giây trước khi sang từ khác...")
+            time.sleep(10) 
             
         self.update_status("hoàn thành", f"Quét xong. Phát hiện {len(results)} nghệ sĩ vi phạm.", total, total, "Hoàn tất", len(results))
         self.save_results(results)
