@@ -47,7 +47,22 @@ elseif ($action == 'results') {
             }
         }
         
-        echo $json;
+        // Trả về danh sách quét được lấy trực tiếp từ Database để hiển thị trên Admin
+        $db_results = [];
+        if ($pdo) {
+            $stmt = $pdo->query("SELECT * FROM actor_reports WHERE reported_by = 'Weibo Scanner Bot' ORDER BY created_at DESC LIMIT 50");
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                $db_results[] = [
+                    'name' => $row['actor_name'],
+                    'user_type' => 'Ghi nhận từ Database',
+                    'keyword_matched' => $row['evidence_text'],
+                    'link' => $row['evidence_url']
+                ];
+            }
+        }
+        
+        echo json_encode($db_results);
     } else {
         echo json_encode([]);
     }
