@@ -60,25 +60,60 @@
             </div>
 
             <hr class="border-gray-800 mb-4">
-            
             <!-- Điều tra nhanh -->
             <h3 class="text-lg font-semibold text-white mb-2 flex items-center gap-2">
                 <i data-lucide="search" class="w-5 h-5 text-yellow-500"></i> Điều Tra Nhanh Lịch Sử
             </h3>
             <p class="text-xs text-gray-400 mb-4">Kiểm tra xem một diễn viên cụ thể có từng chia sẻ các bài viết vi phạm chủ quyền trong quá khứ hay không.</p>
-            <div class="flex gap-2">
-                <input type="text" id="investigateName" placeholder="Nhập tên diễn viên (Tiếng Trung, VD: 赵丽颖)" class="flex-1 bg-gray-900 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                <button onclick="investigateActor()" id="investigateBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm whitespace-nowrap">
-                    Điều Tra
-                </button>
+            <div class="flex flex-col gap-3">
+                <div class="flex gap-2">
+                    <input type="text" id="investigateName" placeholder="Nhập tên diễn viên (Tiếng Trung, VD: 赵丽颖)" class="flex-1 bg-black/50 border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors">
+                    <button id="investigateBtn" onclick="investigateActor()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors whitespace-nowrap font-bold flex items-center shadow-lg shadow-blue-900/20">
+                        <i data-lucide="search" class="w-4 h-4 mr-2"></i> Điều Tra Weibo
+                    </button>
+                </div>
+                
+                <div class="flex gap-2 mt-2">
+                    <button onclick="searchTiktok()" class="flex-1 bg-[#fe2c55] hover:bg-[#e62a4d] text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap font-bold text-sm flex items-center justify-center shadow-lg shadow-red-900/20">
+                        <i data-lucide="video" class="w-4 h-4 mr-2"></i> Tìm bằng chứng trên TikTok
+                    </button>
+                    <button onclick="searchDouyin()" class="flex-1 bg-black hover:bg-gray-900 border border-gray-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap font-bold text-sm flex items-center justify-center shadow-lg">
+                        <i data-lucide="music" class="w-4 h-4 mr-2"></i> Tìm bằng chứng trên Douyin
+                    </button>
+                </div>
             </div>
-            <div id="investigateResult" class="mt-3 text-sm hidden p-3 rounded bg-gray-900/50 border border-gray-800"></div>
+            
+            <div id="investigateResult" class="mt-6 p-4 bg-black/50 border border-gray-800 rounded-xl text-sm hidden">
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-let monitorInterval;
+function getSearchQuery() {
+    const name = document.getElementById('investigateName').value.trim();
+    if (!name) {
+        alert("Vui lòng nhập tên diễn viên (Tiếng Trung) trước!");
+        return null;
+    }
+    return name + ' 中国一点都不能少';
+}
+
+function searchTiktok() {
+    const query = getSearchQuery();
+    if (query) {
+        window.open('https://www.tiktok.com/search?q=' + encodeURIComponent(query), '_blank');
+    }
+}
+
+function searchDouyin() {
+    const query = getSearchQuery();
+    if (query) {
+        window.open('https://www.douyin.com/search/' + encodeURIComponent(query), '_blank');
+    }
+}
+
+let monitorInterval = null;
 
 function startBot() {
     if(!confirm("Bạn có chắc chắn muốn chạy Bot rà soát ngay bây giờ? Quá trình này có thể mất vài phút.")) return;
