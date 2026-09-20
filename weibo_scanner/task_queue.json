@@ -1,0 +1,12 @@
+{
+  "investigate": {
+    "status": "idle",
+    "name": "",
+    "result": null,
+    "timestamp": 0
+  },
+  "scan": {
+    "status": "idle",
+    "timestamp": 0
+  }
+}
