@@ -78,8 +78,11 @@ elseif ($action == 'investigate') {
     $python_path = $bot_dir . '/venv/bin/python3';
     $script_path = $bot_dir . '/investigate_actor.py';
     
+    // Mã hóa base64 để tránh lỗi escapeshellarg làm mất ký tự tiếng Trung trên một số máy chủ
+    $base64_name = base64_encode($name);
+    
     // Thêm cd để Python có thể đọc đúng các file config.json nằm cùng thư mục
-    $cmd = "cd " . escapeshellarg($bot_dir) . " && " . escapeshellcmd($python_path) . " " . escapeshellarg($script_path) . " " . escapeshellarg($name) . " 2>&1";
+    $cmd = "cd " . escapeshellarg($bot_dir) . " && " . escapeshellcmd($python_path) . " " . escapeshellarg($script_path) . " " . escapeshellarg($base64_name) . " 2>&1";
     $output = shell_exec($cmd);
     
     if (!$output) {

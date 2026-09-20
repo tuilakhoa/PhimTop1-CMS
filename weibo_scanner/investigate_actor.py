@@ -21,7 +21,12 @@ def main():
         print(json.dumps({"error": "Vui lòng nhập tên diễn viên"}))
         return
         
-    actor_name = sys.argv[1]
+    actor_name_b64 = sys.argv[1]
+    import base64
+    try:
+        actor_name = base64.b64decode(actor_name_b64).decode('utf-8')
+    except:
+        actor_name = actor_name_b64
     
     with open('config.json', 'r', encoding='utf-8') as f:
         config = json.load(f)
