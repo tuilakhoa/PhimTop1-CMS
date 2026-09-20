@@ -78,7 +78,8 @@ elseif ($action == 'investigate') {
     $python_path = $bot_dir . '/venv/bin/python3';
     $script_path = $bot_dir . '/investigate_actor.py';
     
-    $cmd = escapeshellcmd($python_path) . " " . escapeshellarg($script_path) . " " . escapeshellarg($name);
+    // Thêm cd để Python có thể đọc đúng các file config.json nằm cùng thư mục
+    $cmd = "cd " . escapeshellarg($bot_dir) . " && " . escapeshellcmd($python_path) . " " . escapeshellarg($script_path) . " " . escapeshellarg($name) . " 2>&1";
     $output = shell_exec($cmd);
     
     if (!$output) {
@@ -87,6 +88,11 @@ elseif ($action == 'investigate') {
     }
     
     $result = json_decode($output, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo json_encode(['error' => 'Lỗi phản hồi từ Bot: ' . $output]);
+        exit;
+    }
     
     // Nếu có vi phạm, tự động lưu vào DB
     if (!isset($result['error']) && !empty($result['violations'])) {
