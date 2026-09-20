@@ -109,9 +109,11 @@ class GlobalWeiboScanner:
             self.update_status("đang quét", f"Đang quét diện rộng từ khóa: {keyword}", index, total, keyword, len(results))
             
             # Quét 5 trang đầu tiên của kết quả tìm kiếm (Mỗi trang có khoảng 10 bài)
-            # Bạn có thể tăng số trang lên, nhưng quét nhiều sẽ dễ bị Weibo chặn API
             for page in range(1, 6):
-                print(f"  -> Đang quét Trang {page}...")
+                msg = f"Đang duyệt Trang {page}/5 (Từ khóa: {keyword})"
+                print(f"  -> {msg}...")
+                self.update_status("đang quét", msg, index, total, keyword, len(results))
+                
                 posts = self.search_keyword(keyword, page)
                 
                 if not posts:
