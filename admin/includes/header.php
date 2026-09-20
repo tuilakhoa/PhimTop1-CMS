@@ -85,6 +85,7 @@
 
     <script>
         const globalSearchData = [
+            { title: "Weibo Scanner Bot", url: "?page=weibo_bot", icon: "scan", keywords: "weibo bot scan quet nghe si dien vien phoi" },
             { title: "Bảng Điều Khiển (Dashboard)", url: "?page=dashboard", icon: "layout-dashboard", keywords: "tong quan dashboard" },
             { title: "Quản Lý Phim", url: "?page=movies", icon: "film", keywords: "phim movie video kho" },
             { title: "Thể Loại & Quốc Gia", url: "?page=categories", icon: "list-tree", keywords: "the loai quoc gia category tag" },
@@ -97,10 +98,16 @@
             { title: "Cấu Hình SMTP (Gửi Email)", url: "?page=settings#tab-smtp", icon: "mail", keywords: "smtp email gui mail quen mat khau" },
             { title: "Cấu Hình Database", url: "?page=settings#tab-database", icon: "database", keywords: "database db mysql firestore" },
             { title: "Giao Diện Trang Chủ", url: "?page=settings#tab-theme", icon: "monitor", keywords: "giao dien trang chu banner home" },
+            { title: "Cài Đặt Đăng Nhập (Google, Microsoft)", url: "?page=settings#tab-oauth", icon: "key", keywords: "dang nhap login google microsoft oauth" },
+            { title: "Cài Đặt URL & Đường Dẫn (Slug)", url: "?page=settings#tab-slug", icon: "link", keywords: "slug url duong dan link router" },
+            { title: "Tích Hợp AI (Gemini, OpenAI)", url: "?page=settings#tab-ai", icon: "bot", keywords: "ai gemini openai chatgpt bot" },
+            { title: "Cài Đặt Chặn Cloudflare & Analytics", url: "?page=settings#tab-security", icon: "shield", keywords: "cloudflare turnstile analytics ga4 do luong" },
+            { title: "Cài Đặt Footer & Mạng Xã Hội", url: "?page=settings#tab-footer", icon: "layout-bottom", keywords: "footer mang xa hoi social link" },
+            { title: "Cài Đặt SEO & Indexing (Google, Bing)", url: "?page=settings#tab-indexing", icon: "search", keywords: "seo indexing google bing yandex indexnow" },
+            { title: "Mã Nhúng Đầu/Thân Trang (Custom Code)", url: "?page=settings#tab-custom", icon: "code", keywords: "custom code ma nhung script head body" },
             { title: "App & API Settings", url: "?page=app_settings", icon: "smartphone", keywords: "app api mobile" },
             { title: "Cập Nhật Phiên Bản", url: "?page=update", icon: "refresh-cw", keywords: "cap nhat update ban moi version" },
             { title: "Kiểm Tra Hệ Thống", url: "?page=system_status", icon: "activity", keywords: "kiem tra he thong status ping check" },
-            { title: "Bảo Mật & Đo Lường", url: "?page=security", icon: "shield-check", keywords: "bao mat analytics do luong security" },
             { title: "Cấu Hình SEO", url: "?page=seo", icon: "search", keywords: "seo the title description" },
             { title: "Quản Lý Sitemap", url: "?page=sitemap", icon: "map", keywords: "sitemap xml" },
             { title: "Robots.txt", url: "?page=robots", icon: "file-text", keywords: "robots bot spider" }

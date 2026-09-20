@@ -14,6 +14,7 @@
                         'movies' => ['icon' => 'film', 'title' => 'Phim'],
                         'categories' => ['icon' => 'list-tree', 'title' => 'Thể Loại & Quốc Gia'],
                         'blocked_movies' => ['icon' => 'shield-alert', 'title' => 'Phim Đã Gỡ'],
+                        'weibo_bot' => ['icon' => 'scan', 'title' => 'Weibo ScannerBot'],
                     ],
                     'Người Dùng & Tương Tác' => [
                         'members' => ['icon' => 'user-check', 'title' => 'Thành Viên'],
