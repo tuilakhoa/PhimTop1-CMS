@@ -82,17 +82,27 @@ def main():
             res2 = requests.get(kw_url, headers=headers, timeout=15)
             data2 = res2.json()
             if data2.get('ok') == 1:
+                # API của Weibo có thể trả về card_type=9 (bài viết trực tiếp) 
+                # hoặc card_type=11 (chứa card_group bên trong mới có bài viết card_type=9)
+                mblogs = []
                 for card in data2.get('data', {}).get('cards', []):
                     if card.get('card_type') == 9:
-                        mblog = card.get('mblog', {})
-                        post_id = mblog.get('id')
-                        violations.append({
-                            'keyword': kw,
-                            'post_id': post_id,
-                            'link': f"https://weibo.com/{uid}/{post_id}",
-                            'text': mblog.get('text', '')[:100] + "..."
-                        })
-                        break # Chỉ cần tìm thấy 1 bài vi phạm cho từ khóa này là đủ bằng chứng
+                        mblogs.append(card.get('mblog', {}))
+                    elif card.get('card_type') == 11:
+                        for subcard in card.get('card_group', []):
+                            if subcard.get('card_type') == 9:
+                                mblogs.append(subcard.get('mblog', {}))
+                                
+                for mblog in mblogs:
+                    if not mblog: continue
+                    post_id = mblog.get('id')
+                    violations.append({
+                        'keyword': kw,
+                        'post_id': post_id,
+                        'link': f"https://weibo.com/{uid}/{post_id}",
+                        'text': mblog.get('text', '')[:100] + "..."
+                    })
+                    break # Chỉ cần tìm thấy 1 bài vi phạm cho từ khóa này là đủ bằng chứng
         except:
             continue
 
