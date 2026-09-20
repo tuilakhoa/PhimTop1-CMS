@@ -77,7 +77,7 @@ def main():
     
     for kw in keywords:
         time.sleep(2) # Tránh bị chặn
-        kw_url = f"https://m.weibo.cn/api/container/getIndex?containerid=100103type%3D401%26q%3D{urllib.parse.quote(kw)}&uid={uid}&page_type=searchall"
+        kw_url = f"https://m.weibo.cn/api/container/getIndex?containerid=100103type%3D401%26uid%3D{uid}%26q%3D{urllib.parse.quote(kw)}"
         try:
             res2 = requests.get(kw_url, headers=headers, timeout=15)
             data2 = res2.json()
