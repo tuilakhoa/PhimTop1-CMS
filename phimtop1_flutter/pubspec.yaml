@@ -51,7 +51,7 @@ dependencies:
   open_filex: any
   flutter_background: any
   flutter_local_notifications: ^22.3.0
-  home_widget: ^0.6.0
+  home_widget: ^0.10.0
   intl: any
   connectivity_plus: ^7.3.1
   day_night_switcher: ^0.2.0+1
