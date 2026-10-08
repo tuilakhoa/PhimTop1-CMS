@@ -32,7 +32,7 @@ jobs:
       run: flutter build linux -t lib/main_windows.dart --release
 
     - name: Upload Linux Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: PhimTop1-Linux-App
         path: phimtop1_flutter/build/linux/x64/release/bundle/

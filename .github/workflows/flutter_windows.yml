@@ -32,7 +32,7 @@ jobs:
         & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" installer.iss
 
     - name: Upload Setup Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: PhimTop1-Windows-Setup
         path: phimtop1_flutter/windows/Output/PhimTop1_Setup.exe
