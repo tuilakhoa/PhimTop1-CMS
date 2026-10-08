@@ -39,7 +39,7 @@ dependencies:
   go_router: ^18.0.1
   cached_network_image: ^4.0.0
   shared_preferences: ^2.5.5
-  share_plus: ^13.3.0
+  share_plus: ^13.3.1
   webview_flutter: ^4.14.1
   firebase_core: ^4.13.0
   firebase_analytics: any
